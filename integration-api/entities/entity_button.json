@@ -1,0 +1,16 @@
+{
+  "entity": "button",
+  "features": [
+    {
+      "name": "push",
+      "type": "boolean",
+      "readable": false,
+      "writeable": true,
+      "commands":[
+        {
+          "id": "push"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "entity": "button",
+  "features": [
+    {
+      "name": "on_off",
+      "type": "boolean",
+      "readable": false,
+      "writeable": true,
+      "commands": [
+        {
+          "id": "on"
+        },
+        {
+          "id": "foobar",
+          "arguments": [
+            {
+              "name": "",
+              "type": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

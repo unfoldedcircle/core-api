@@ -1,0 +1,30 @@
+{
+  "entity": "switch",
+  "features": [
+    {
+      "name": "on_off",
+      "type": "boolean",
+      "readable": true,
+      "writeable": true,
+      "commands":[
+        {
+          "id": "on"
+        },
+        {
+          "id": "off"
+        }
+      ]
+    },
+    {
+      "name": "toggle",
+      "type": "boolean",
+      "readable": false,
+      "writeable": true,
+      "commands":[
+        {
+          "id": "toggle"
+        }
+      ]
+    }
+  ]
+}

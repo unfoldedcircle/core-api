@@ -1,0 +1,129 @@
+{
+  "entity": "climate",
+  "features": [
+    {
+      "name": "on_off",
+      "type": "boolean",
+      "readable": true,
+      "writeable": true,
+      "commands": [
+        {
+          "id": "on"
+        },
+        {
+          "id": "off"
+        }
+      ]
+    },
+    {
+      "name": "heat",
+      "type": "boolean",
+      "readable": false,
+      "writeable": true,
+      "commands": [
+        {
+          "id": "hvac_mode",
+          "arguments": [
+            {
+              "name": "hvac_mode",
+              "type": "enum",
+              "values": [
+                "OFF",
+                "HEAT"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cool",
+      "type": "boolean",
+      "readable": false,
+      "writeable": true,
+      "commands": [
+        {
+          "id": "hvac_mode",
+          "arguments": [
+            {
+              "name": "hvac_mode",
+              "type": "enum",
+              "values": [
+                "OFF",
+                "COOL"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "fan",
+      "type": "boolean",
+      "readable": false,
+      "writeable": true,
+      "commands": [
+        {
+          "id": "hvac_mode",
+          "arguments": [
+            {
+              "name": "hvac_mode",
+              "type": "enum",
+              "values": [
+                "OFF",
+                "FAN"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "boolean",
+  "readable": true,
+  "writeable": true,
+  "commands": [
+    {
+      "id": "on"
+    },
+    {
+      "id": "off"
+    },
+    {
+      "id": "hvac_mode",
+      "arguments": [
+        {
+          "name": "hvac_mode",
+          "type": "enum",
+          "values": [
+            "OFF",
+            "HEAT",
+            "COOL",
+            "HEAT_COOL",
+            "FAN",
+            "AUTO"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "target_temperature",
+      "arguments": [
+        {
+          "name": "target_temperature",
+          "type": "number",
+          "decimals": 1
+        }
+      ]
+    },
+    {
+      "id": "fan_mode",
+      "arguments": [
+        {
+          "name": "fan_mode",
+          "type": "text"
+        }
+      ]
+    }
+  ]
+}
