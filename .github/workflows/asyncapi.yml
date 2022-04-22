@@ -38,14 +38,14 @@ jobs:
 #      - name: Generate core AsyncAPI HTML doc
 #        uses: docker://asyncapi/github-action-for-generator:2.0.2
 #        with:
-#          template: '@asyncapi/html-template@0.24'
+#          template: '@asyncapi/html-template@0.23'
 #          filepath: ./websocket-api/asyncapi.yaml
 #          output: ./static/api/ws
 
       - name: Generate integration AsyncAPI HTML doc
         uses: docker://asyncapi/github-action-for-generator:2.0.2
         with:
-          template: '@asyncapi/html-template@0.24'
+          template: '@asyncapi/html-template@0.23'
           filepath: ./integration-api/asyncapi.yaml
           output: ./static/api/integration
 
