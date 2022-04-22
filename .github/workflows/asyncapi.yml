@@ -1,0 +1,58 @@
+name: AsyncAPI
+
+on:
+  push:
+    paths:
+      - 'websocket-api/**'
+      - 'integration-api/**'
+      - '.github/workflows/asyncapi.yml'
+  pull_request:
+    types: [ opened, synchronize, reopened ]
+    paths:
+      - 'websocket-api/**'
+      - 'integration-api/**'
+      - '.github/workflows/asyncapi.yml'
+
+jobs:
+  validate:
+    name: Validate AsyncAPI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+#      - name: Validate websocket-api
+#        uses: WaleedAshraf/asyncapi-github-action@v0.0.6
+#        with:
+#          filepath: './websocket-api/asyncapi.yaml'
+
+      - name: Validate integration-api
+        uses: WaleedAshraf/asyncapi-github-action@v0.0.6
+        with:
+          filepath: './integration-api/asyncapi.yaml'
+
+      - name: Prepare AsyncAPI html output
+        run: |
+          mkdir -p ./static/api/ws ./static/api/integration
+
+#      - name: Generate core AsyncAPI HTML doc
+#        uses: docker://asyncapi/github-action-for-generator:2.0.2
+#        with:
+#          template: '@asyncapi/html-template@0.24'
+#          filepath: ./websocket-api/asyncapi.yaml
+#          output: ./static/api/ws
+
+      - name: Generate integration AsyncAPI HTML doc
+        uses: docker://asyncapi/github-action-for-generator:2.0.2
+        with:
+          template: '@asyncapi/html-template@0.24'
+          filepath: ./integration-api/asyncapi.yaml
+          output: ./static/api/integration
+
+# TODO publish to GitHub pages: https://pages.github.com
+      - name: Deploy GH page
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        with:
+          branch: gh-pages
+          folder: ./static/api/integration
+          target-folder: ./integration
