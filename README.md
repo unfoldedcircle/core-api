@@ -1,10 +1,14 @@
 # Unfolded Circle Core APIs
 
+This repository contains API specifications of [Unfolded Circle Remote Two](https://www.unfoldedcircle.com/) products.
+
+## Overview
+
 _TODO_
 
-- [WebSocket Integration API](./integration-api/README.md)
-- WebSocket Core API - _not yet published_
-- REST Core API - _not yet published_
+- [WebSocket Integration API](./integration-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/).
+- WebSocket Core API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
+- REST Core API defined with [OpenAPI](https://www.openapis.org/) - _not yet published_
 
 ## Integration API
 
@@ -31,12 +35,18 @@ after wakeup.
 
 ## Roadmap
 
-- [ ] Publish integration API
-- [ ] Publish core API
-- [ ] Publish Rust API models
-- [ ] Publish Open Source integration for Home Assistant written in Rust
-- [ ] Publish remote-core simulator for Linux & macOS
-- [ ] Publish Open Source remote-ui application
+In the short term we will publish the following APIs and additional repositories: 
+
+- [ ] Integration API
+- [ ] REST Core API, WebSocket Core API
+- [ ] API models in Rust
+- [ ] Open Source integration for Home Assistant written in Rust
+- [ ] remote-core simulator for Linux & macOS to start developing integrations without a Remote Two device
+- [ ] Open Source remote-ui application
+- [ ] Dock API for sending & learning IR codes
+
+More detailed information about open issues can be found and tracked in the GitHub
+[Issues](https://github.com/unfoldedcircle/core-api/issues) tab.
 
 ## API Versioning
 
@@ -47,7 +57,17 @@ implementations and developer examples.
 **Any major version zero (`0.x.y`) is for initial development and may change at any time!**  
 I.e. minor releases below version 1.0.0 may not be backwards compatible.
 
+## Recent changes
+
+The major changes found in each new release of our API specifications are listed in the [changelog](./CHANGELOG.md) and
+under the GitHub [releases](https://github.com/unfoldedcircle/core-api/releases). 
+
 ## Contributions
+
+Please read our [contribution guidelines](./CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
+We have published the API specifications and documentations under the [CC-BY-AS-4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+(Creative Commons Attribution-ShareAlike 4.0 International) license. Please see [LICENSE file](./LICENSE).  
+All code examples in this repository are licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). 
