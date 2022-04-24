@@ -26,7 +26,7 @@ The `model` key specifies the physical device:
 | Model | Description |
 |-------|-------------|
 | UCR2  | Remote Two  |
-| UCR1  | YIO Remote  |
+| YIO1  | YIO Remote  |
 
 ### Examples
 
