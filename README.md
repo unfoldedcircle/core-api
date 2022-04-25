@@ -28,9 +28,17 @@ refer to the core-API for further functionality.
 An integration driver usually doesn't need to use the core-API as well, unless it also wants to customize certain device
 behaviour or automatically add or configure its entities to the users profile.
 
-### How to write an integration
+### Develop integration drivers
 
-_TODO_
+Since we are providing an API and not an SDK for a specific programming language, one can develop integrations in any
+language which is capable running a WebSockets server.
+
+The downside of an API is that more low-level coding is required. In our case this involves running a WebSocket server,
+handling the connections from the Remote Two, and parsing the JSON payload in the WebSocket text messages. However, once
+this is done, the required API message interactions are rather simple to handle. 
+
+See [how to write an integration driver](./integration-api/write-integration-driver.md) for more information about how
+to develop an integration driver for the Remote Two.
 
 #### Examples
 
@@ -59,8 +67,8 @@ In the short term we will publish the following APIs and additional repositories
 
 - [ ] Integration API
 - [ ] REST Core API, WebSocket Core API
-- [ ] API models in Rust
-- [ ] Open Source integration for Home Assistant written in Rust
+- [ ] API models in Rust (Apache License 2.0)
+- [ ] Open Source integration for Home Assistant written in Rust (Mozilla Public License 2.0)
 - [ ] remote-core simulator for Linux & macOS to start developing integrations without a Remote Two device
 - [ ] Open Source remote-ui application
 - [ ] Dock API for sending & learning IR codes
