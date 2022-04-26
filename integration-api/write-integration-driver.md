@@ -1,14 +1,17 @@
 ## How to write an integration driver
 
-_TODO this is an inital draft only!_
+_TODO this is an initial draft only!_
+
+The integration API allows to develop integration drivers in any programming language capable of running a WebSockets
+server.
 
 ℹ️ At the moment only external integrations which run on a separate device on your network are supported.
 
 We will publish the requirements and supported runtimes at a later date. The only thing we can say right now is that
-aiming for a statically compiled binary will have a higher chance of being compatible and accepted for on-device
-publishing. This includes for example Rust and C / C++, whereas interpreted languages like Java, Python and Node.js etc
-will most likely not be suitable. Reasons are the limited ressources (memory, storage, CPU) on an embedded device. A
-good reference for testing is a [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/), which
+aiming for a statically compiled binary will have a higher chance of being compatible for on-device publishing.
+This includes for example Rust and C / C++, whereas interpreted languages like Java, Python and Node.js etc. will most
+likely not be suitable. Reasons are the limited resources (memory, storage, CPU) on an embedded device. A good
+reference for testing is a [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/), which
 is also the platform of the former YIO Remote.
 
 1. Choose your programming language.
@@ -23,7 +26,7 @@ is also the platform of the former YIO Remote.
   Binary support might be added in the future.
 - All messages are serialized in JSON format.
 - Text encoding is UTF-8.
-- The application level protocal defines two message interactions with three different message types:
+- The application level protocol defines two message interactions with three different message types:
   - Request / response messages
   - Event messages
 

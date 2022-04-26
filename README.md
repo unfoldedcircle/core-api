@@ -6,9 +6,18 @@ This repository contains API specifications of [Unfolded Circle Remote Two](http
 
 _TODO_
 
+API definitions:
+
 - [WebSocket Integration API](./integration-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/).
 - WebSocket Core API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
 - REST Core API defined with [OpenAPI](https://www.openapis.org/) - _not yet published_
+
+Documentation:
+
+- [Remote Two entities](./integration-api/entities/README.md).
+- [WebSocket Integration API](./integration-api/README.md).
+- [How to write an integration driver](./integration-api/write-integration-driver.md).
+- [WebSocket handling](./integration-api/websocket.md): authentication, keep alive, error handling.
 
 ## Integration API
 
@@ -76,7 +85,7 @@ In the short term we will publish the following APIs and additional repositories
 More detailed information about open issues can be found and tracked in the GitHub
 [Issues](https://github.com/unfoldedcircle/core-api/issues) tab.
 
-## API Versioning
+## API versioning
 
 The API is versioned according to [SemVer](https://semver.org/).  
 The initial public release will be `1.0.0` once it is considered stable enough with some initial integration
