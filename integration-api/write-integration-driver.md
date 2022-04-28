@@ -10,7 +10,7 @@ server.
 We will publish the requirements and supported runtimes at a later date. The only thing we can say right now is that
 aiming for a statically compiled binary will have a higher chance of being compatible for on-device publishing.
 This includes for example Rust and C / C++, whereas interpreted languages like Java, Python and Node.js etc. will most
-likely not be suitable. Reasons are the limited resources (memory, storage, CPU) on an embedded device. A good
+likely not be suitable. Reasons are the limited resources (memory, storage, CPU) on the embedded Remote device. A good
 reference for testing is a [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/), which
 is also the platform of the former YIO Remote.
 
@@ -19,6 +19,8 @@ is also the platform of the former YIO Remote.
 3. Choose a JSON framework for your language.
 4. Implement the required WebSockets text messages in the [WebSocket Integration API](./asyncapi.yaml).
 5. Choose which [entities and features](./entities/README.md) the driver should expose.
+
+_TODO add driver type option: single vs multi device instance_
 
 ### Authentication
 
@@ -168,9 +170,95 @@ Required event messages which must be sent by the driver:
 
 ### Common Message Flow
 
-- Whenever the state or an entity attribute in the integration driver changes, the driver sends a state event.
+The basic message flow between an integration and the remote is as follows:
+
+- The integration driver acts as server and the Remote Two initiates the connection.
+- After the WebSocket connection is established to the integration driver, the remote subscribes to events of all
+  configured entities.
+- Whenever the state of the integration driver changes, the driver sends a device state event.  
+  This is usually the device which the driver represents or connects / communicates with. E.g. a smart device, home
+  automation hub, cloud service, etc.
+- Whenever an entity attribute of a subscribed entity changes, the driver sends an entity state event.
 - The remote announces when it goes into and out of standby, so the integration driver can act accordingly.   
   Note: the WebSocket connection might get disconnected during remote standby!
+
+#### Integration Setup
+
+##### Single Device Instance Driver
+
+The integration setup process consists of requesting all available entities from the driver and subscribing to entity
+events of the chosen entities by the user.
+
+- The `subscribe_events` message is only sent for entities which are configured in the Remote. I.e. only for entities
+  which are used in a profile and placed on a page or group.
+- For simplicity reasons the driver may choose to always send events for all entities. The Remote will ignore
+  unnecessary events. However, it's recommended to limit the message exchange to entities which are actually used to
+  save network & processing resources.
+- The configured entities from the user(s) are stored in the remote-core application.  
+  Whenever the Remote (re)connects to the driver, only those entity identifiers are submitted in the `subscribe_events`
+  message.
+- The driver can use the `get_version` message to retrieve version and model information of the Remote. 
+- The driver can use the `get_localization_cfg` message to retrieve localization information from the remote if it deals
+  with localized labels, values etc.
+
+```mermaid
+sequenceDiagram
+    participant D as Device(s)
+    participant I as Integration
+    participant R as Remote
+    participant U as UI
+    participant C as configurator
+    actor User
+
+    User->>+C: setup new integration
+    C->>-R:  enable integration instance
+
+    R-)+I:  [connect] 
+    I->>I:  authentication & version check etc
+    opt
+        I-->>-D:  connect / initialize
+    end
+
+    opt
+        I-)+R:  get_version
+        R--)-I: version
+
+        I-)+R:  get_localization_cfg
+        R--)-I: localization_cfg
+    end
+    
+    R-)+I:   get_driver_version
+    I--)-R:  driver_version
+    
+    C-)+R:   get_available_entities(integration)
+    R-)-I:   get_available_entities
+    I--)+R:  available_entities 
+    R->>R:   cache entities
+    R--)-C:  available entities
+
+    loop
+        User->>+C: configure entity 
+        C-)+R:   add entity
+        R->>R:   store entity cfg
+        R-)-I:   subscribe_events
+    end
+```
+
+##### Multi Device Instance Driver
+
+⚠️ This feature is currently being specified and not yet implemented!
+
+See [Multi Device Instance Driver](multi-device-driver.md) for preliminary information.
+
+#### Normal Operation
+
+During normal operation there are only a few different message exchanged between the Remote and the integration driver:
+
+- `subscribe_events`: after the WebSocket connection is established
+- `entity_command`: instruct the driver to perform an action on an entity
+- `entity_change`: inform the Remote that an entity changed
+- `get_device_state`: request the device state from the driver
+- `get_entity_states`: request the current entity attributes and states
 
 ```mermaid
 sequenceDiagram
