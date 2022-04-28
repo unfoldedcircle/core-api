@@ -20,7 +20,39 @@ is also the platform of the former YIO Remote.
 4. Implement the required WebSockets text messages in the [WebSocket Integration API](./asyncapi.yaml).
 5. Choose which [entities and features](./entities/README.md) the driver should expose.
 
-### Message Format
+### Authentication
+
+An integration driver can choose if the Remote Two requires authentication or not to connect to the driver.  
+Supported are header based token authentication during connection setup or with an application level message after the
+connection has been established.
+
+See [WebSocket authentication](websocket.md#authentication) for more information.
+
+### Connection Handling
+
+- Support multiple Remote sessions
+  - A driver should support multiple, independent WebSocket connections at the same time. 
+- Keep alive
+  - The driver must support WebSocket [Ping Pong control frames](https://tools.ietf.org/html/rfc6455#section-5.5.2).  
+    Please check your WebSocket library, most libraries support this out of the box.
+  - The Remote Two continuously sends ping frames and automatically closes the connection if it doesn't receive a pong
+    within a certain time frame. The driver may also send ping frames to check if the connection is still alive.
+
+### Driver Registration
+
+An integration driver can optionally register itself at a remote and provide its authentication token.
+
+See [driver registration](./driver-registration.md) for more information.
+
+### Discover Remote Two Devices
+
+The Remote Two can be discovered with DNS-SD. It announces itself with service type `_uc-remote._tcp`.
+
+See [remote DNS-SD lookup](../doc/README.md#remote-dns-sd-lookup) for more information.
+
+### JSON Messages
+
+#### Message Format
 
 - Only WebSockets Text message are supported at the moment.  
   Binary support might be added in the future.
@@ -134,20 +166,59 @@ Required event messages which must be sent by the driver:
 | `device_state`   | Emitted when the device state changes.          |
 
 
-### Authentication
+### Common Message Flow
 
-An integration driver can choose if the Remote Two requires authentication or not to connect to the driver.  
-Supported are header based token authentication during connection setup or with an application level message after the
-connection has been established.
+- Whenever the state or an entity attribute in the integration driver changes, the driver sends a state event.
+- The remote announces when it goes into and out of standby, so the integration driver can act accordingly.   
+  Note: the WebSocket connection might get disconnected during remote standby!
 
-See [WebSocket authentication](websocket.md#authentication) for more information.
+```mermaid
+sequenceDiagram
+    participant D as Device(s)
+    participant I as Integration
+    participant R as Remote
+    participant U as UI
+    actor User
 
-### Driver Registration
+    R->>R:  startup: lookup enabled integration
 
-_TODO_
+    R-)+I:  [connect] 
+    I->>I:  authentication & version check etc
+    opt
+        I-->>-D:  connect / initialize
+    end
 
-### Discover Remote Two Devices
+    R-)I:   subscribe_events
 
-The Remote Two can be discovered with DNS-SD. It announces itself with service type `_uc-remote._tcp`.
+    D-->>I:  external state change
+    I--)+R:  entity_change 
+    R->>R:   store event
+    R-)+U:   entity change event
+    opt
+        U-)-R:   get entity
+        R--)-U:  entity
+    end
 
-See [remote DNS-SD lookup](../doc/README.md#remote-dns-sd-lookup) for more information.
+    User->>+U: interact with entity
+    U-)-R:     entity action
+    R-)+I:     entity_command
+    opt
+        I-->>D:  update
+    end
+    I--)-R:    result
+
+    opt
+        D-->>+I:  state change
+    end
+    I-)-R:   entity_change
+    R->>+R:  store event
+    R-)-U:   entity change event
+
+    R-)I:    enter_standby
+    R-)I:    exit_standby
+    R-)+I:   get_device_state
+    I--)-R:  device_state
+    R-)+I:   get_entity_states
+    I--)-R:  entity_states
+    R-)I:    [disconnect]
+```
