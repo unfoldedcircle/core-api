@@ -17,10 +17,48 @@ is also the platform of the former YIO Remote.
 1. Choose your programming language.
 2. Choose a WebSockets server library or framework for your language.
 3. Choose a JSON framework for your language.
-4. Implement the required WebSockets text messages in the [WebSocket Integration API](./asyncapi.yaml).
-5. Choose which [entities and features](./entities/README.md) the driver should expose.
+4. Choose which [entities and features](./entities/README.md) the driver should expose.
+5. Implement the required WebSockets text messages in the [WebSocket Integration API](./asyncapi.yaml).
 
-_TODO add driver type option: single vs multi device instance_
+### Integration Driver Types
+
+There are two different driver types one can implement: either a simple single device driver or a multi device instance
+driver.
+
+#### Single Device Instance Driver
+
+The single device instance driver is the default and easiest driver to develop:
+
+- There is no concept of different or individual devices, just entities that the driver provides. 
+- The driver offers a list of available entities to the remote. This can be a single media player entity, or a large
+  list of different entities from a home automation hub.
+- The optional `device_id` property must be omitted in all messages. 
+- The driver may still control multiple physical devices, but from the Remote's point of view, these are just different
+  entities provided from the same integration driver.
+
+This driver type is suitable for all device integrations which don't require much or any configuration by the user, or
+if the configuration shall be kept separate from the remote on purpose.
+E.g. if smart WiFi light bulbs can be discovered by the driver and then each bulb can be provided as a
+[light entity](./entities/entity_light.md) to the remote.
+
+#### Multi Device Instance Driver
+
+⚠️ This feature is currently being finalized and not yet available!
+
+The multi device instance driver is an advanced driver capable of discovering physical devices and delegating the
+setup or configuration to the Remote / web-configurator.
+
+- Each device is considered a driver instance.  
+  There is one driver process handling multiple devices. The interaction and handling with a specific device is called
+  device instance. The technical implementation is up to the developer. This could be a multi-threaded or async
+  implementation. 
+- Each instance offers a list of available entities to the remote.
+- Each instance has its own device state (connected, disconnected, error, etc.).
+- All driver communication is handled on the same WebSocket connection. I.e. the Remote only establishes one connection
+  to the integration driver, no matter how many device instances there are. 
+- The driver has the option to interact with the user during the setup process with progress and notification
+  screens. E.g. asking the user to perform an action - _press button X on device_ - or provide additional data like
+  device credentials. 
 
 ### Authentication
 
@@ -184,7 +222,7 @@ The basic message flow between an integration and the remote is as follows:
 
 #### Integration Setup
 
-##### Single Device Instance Driver
+##### Single Device Instance Driver Setup
 
 The integration setup process consists of requesting all available entities from the driver and subscribing to entity
 events of the chosen entities by the user.
@@ -244,9 +282,9 @@ sequenceDiagram
     end
 ```
 
-##### Multi Device Instance Driver
+##### Multi Device Instance Driver Setup
 
-⚠️ This feature is currently being specified and not yet implemented!
+⚠️ This feature is currently being finalized and not yet available!
 
 See [Multi Device Instance Driver](multi-device-driver.md) for preliminary information.
 

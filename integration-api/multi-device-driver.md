@@ -1,8 +1,12 @@
 ### Multi Device Instance Driver
 
+**TODO review, not yet finalized!**
+
 _TODO add introduction_
 
-**TODO review, not yet ready for implementation!**
+The multi device instance driver adds discovery and user interaction to the setup process.
+
+- The `device_id` property must be used in all messages to identify the specific device.
 
 ```mermaid
 sequenceDiagram
