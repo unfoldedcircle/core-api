@@ -1,5 +1,9 @@
 # Entities
 
+Entities represent devices by describing features and exposing controls. An integration can offer available entities for control. The user might select and configure entities, that will be available for the user interface.
+
+Based on the entity type, device class and features, a specific user interface is shown. These features and other entity characteristics are set by the integration.
+
 ---
 **TODO**
 - Write introduction, possibly with some diagrams.
