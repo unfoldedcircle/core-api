@@ -110,4 +110,5 @@ Please read our [contribution guidelines](./CONTRIBUTING.md) before opening a pu
 
 We have published the API specifications and documentations under the [CC-BY-AS-4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 (Creative Commons Attribution-ShareAlike 4.0 International) license. Please see [LICENSE file](./LICENSE).  
-All code examples in this repository are licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). 
+All code examples in this repository are licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+All graphics copyright © Unfolded Circle ApS 2022.
