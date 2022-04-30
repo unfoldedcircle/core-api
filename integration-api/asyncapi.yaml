@@ -4,7 +4,7 @@
 # This needs to be fixed first: https://github.com/asyncapi/bundler/issues/34
 # Otherwise we have to hack together something, since copying and pasting the shared definitions between the different
 # APIs makes no sense...
-asyncapi: 2.3.0
+asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
