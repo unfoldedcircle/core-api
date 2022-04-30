@@ -1,15 +1,18 @@
 # Entities
 
-Entities represent devices by describing features and exposing controls. An integration can offer available entities for control. The user might select and configure entities, that will be available for the user interface.
-
-Based on the entity type, device class and features, a specific user interface is shown. These features and other entity characteristics are set by the integration.
-
 ---
 **TODO**
-- Write introduction, possibly with some diagrams.
 - Describe setup process.
+- Add `virtual remote` concept & custom layouts.
+- Add `activities` concept.
 - Link to demo integration once published.
 ---
+
+Entities represent devices by describing features and exposing controls. An integration can offer available entities for
+control. The user might select and configure entities, that will be available for the user interface.
+
+Based on the entity type, device class and features, a specific user interface is shown. These features and other entity
+characteristics are set by the integration.
 
 An integration driver provides entity definitions to the remote which then can be used in profiles and pages for the
 user to interact with the device.
@@ -26,7 +29,6 @@ Supported entities:
 - [Cover](entity_cover.md)
 - [Light](entity_light.md)
 - [Media Player](entity_media_player.md)
-- 🚧 Remote
 - [Sensor](entity_sensor.md)
 
 The 🚧 icon within the entity descriptions indicates a planned feature and will most likely not be (fully) implemented

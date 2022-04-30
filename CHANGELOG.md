@@ -10,6 +10,11 @@
 - Refactor entity command message: simple object, instead array of objects.
 - Clean up, updated message state emojis to reflect current remote-core status.
 
+### Documentation
+
+- Refactor and enhance documentation.
+- Prepared AsyncAPI html generation with GitHub action.
+
 ## 0.5.0-alpha
 
 **2022-03-23**

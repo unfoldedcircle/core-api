@@ -2,8 +2,11 @@
 
 ---
 **TODO**
-- TODO define album art image limits
-- TODO define media types
+- Define album art image limits
+- Define media types
+- Playlist handling
+- Media browsing
+- Searching
 ---
 
 A media player entity controls playback of media on a device. This could be an online music streaming service, a TV,
