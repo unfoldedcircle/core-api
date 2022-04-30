@@ -2,12 +2,13 @@
 
 ## 0.6.0-alpha
 
-_not yet released_
+**2022-05-01** First public release.
 
 ### AsyncAPI
 
 - Rename `friendly_name` properties to `name`.
 - Refactor entity command message: simple object, instead array of objects.
+- Clean up, updated message state emojis to reflect current remote-core status.
 
 ## 0.5.0-alpha
 

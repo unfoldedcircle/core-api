@@ -94,8 +94,7 @@ The initial public release will be `1.0.0` once it is considered stable enough w
 implementations and developer examples.
 
 **Any major version zero (`0.y.z`) is for initial development and may change at any time!**  
-I.e. SemVer rules don't apply yet, backward compatibility for minor releases is not yet established, anything MAY change
-at any time!
+I.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!
 
 ## Recent changes
 

@@ -1,9 +1,13 @@
 # TODO split into multiple files and share common models!
-# Unfortunately https://github.com/asyncapi/bundler wasn't usable 2022-01. Try again or hack together something...
-asyncapi: 2.1.0
+# Unfortunately https://github.com/asyncapi/bundler wasn't usable 2022-01 and most AsyncAPI tooling can't handle
+# external references! :-(
+# This needs to be fixed first: https://github.com/asyncapi/bundler/issues/34
+# Otherwise we have to hack together something, since copying and pasting the shared definitions between the different
+# APIs makes no sense...
+asyncapi: 2.3.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
-  title: Remote Two WebSockets integration API
+  title: Remote Two WebSocket Integration API
   version: '0.6.0-alpha'
   contact:
     name: API Support
@@ -12,19 +16,17 @@ info:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: https://creativecommons.org/licenses/by-sa/4.0/
   description: |
-    **Work in progress** API definition of the remote integrations WebSocket API.
+    **Work in progress** API definition of the Remote Two integration WebSocket API.
     
     API message status legend:
     
     | Icon | Description                                                                     |
     |------|---------------------------------------------------------------------------------|
-    | 🚧   | Planned feature and most likely not (fully) implemented in the initial release. |
     | 💡   | Idea, not yet official part of API definition.                                  |
+    | 🚧   | Planned feature and most likely not (fully) implemented in the initial release. |
     | 👷   | API definition is work in progress, not ready yet for implementation.           |
-    | 🔍   | Api definition review.                                                          |
-    | 🧑‍💻   | API is currently being implemented.                                             |
-    | 🔍🧑‍💻 | Implementation review.                                                          |
-    | 🧪   | Testing.                                                                        |
+    | 🔍   | Api definition review & implementation.                                         |
+    | 🧪   | API has been implemented in the Remote Two and is currently being tested.       |
     | 🚀   | Ready to use - feedback welcomed.                                               |
   
     Simple integrations with static entities don't need to implement all messages.  
@@ -32,18 +34,18 @@ info:
     
     ## Overview
 
-    The Remote Two WebSockets integrations API allows writing device integrations for the Unfolded Circle Remote Two and
+    The Remote Two WebSocket integrations API allows writing device integrations for the Unfolded Circle Remote Two and
     former YIO remote.  
     At the moment only user integrations running on an external host are supported.
     
-    The integration driver acts as server and the remote as client. The remote connects to the integration when an
+    The integration driver acts as server and the Remote Two as client. The remote connects to the integration when an
     integration instance is configured. Whenever the remote enters standby it may choose to disconnect and connect again
     after wakeup.
     
     The goal of the integration API is to cover simple static drivers like controlling GPIOs on a Raspberry Pi, up to
     integrating existing home automation hubs like Home Assistant, Homey, ioBroker, openHAB etc.  
-    The focus of the integration API is on entity integration, not on controlling or configuring the remote. Please
-    refer to the core-API for other functionality. **TODO** _link to core API._
+    The focus of the integration API is on entity integration, not on controlling or configuring the Remote Two. Please
+    refer to the core-API for other functionality: <https://github.com/unfoldedcircle/core-api>
 
     ## API Versioning
     
@@ -51,7 +53,8 @@ info:
     The initial public release will be `1.0.0` once it is considered stable enough with some initial integration
     implementations and developer examples.
     
-    **Any major version zero (`0.x.y`) is for initial development and may change at any time!**
+    **Any major version zero (`0.y.z`) is for initial development and may change at any time!**  
+    I.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!
 
 externalDocs:
   description: Find out more about the Remote Two
@@ -73,25 +76,32 @@ servers:
       Local test server.
     security:
       - token: []
-# TODO enhance tags with `externalDocs` and url links once API is hosted in public repo
 tags:
   - name: registration
     description: Integration driver registration
   - name: device
-    description: Device handling and multi instance device discovery
+    description: Device handling
+  - name: multi-device
+    description: Required only for multi-device support and device discovery
+    externalDocs:
+      url: https://github.com/unfoldedcircle/core-api/blob/main/doc/integration-driver/multi-device-driver.md
   - name: entity
     description: Entity handling
+    externalDocs:
+      url: https://github.com/unfoldedcircle/core-api/tree/main/doc/entities
   - name: event
     description: Event initiated by the integration driver
   - name: metadata
     description: Metadata information
+  - name: required
+    description: This message needs be handled / supported by an integration driver.
 
 channels:
   /intg:
     publish:
       description: |
-        Integration API for the remote to interact with custom devices.  
-        The publish channel lists all messages that the remote sends to an integration driver server.
+        Integration API for the Remote Two to interact with custom devices.  
+        The publish channel lists all messages that the Remote Two sends to an integration driver server.
       operationId: pubIntegrationMessage
       message:
         oneOf:
@@ -119,13 +129,12 @@ channels:
           # --- metadata & configuration response
           - $ref: '#/components/messages/version'
           - $ref: '#/components/messages/supported_entity_types'
-#          - $ref: '#/components/messages/supported_entity_features'
           - $ref: '#/components/messages/configured_entities'
           - $ref: '#/components/messages/localization_cfg'
     subscribe:
       description: |
-        Integration API for the remote to receive messages from integration drivers.  
-        The subscribe channel lists all messages that the integration driver server sends to the remote.
+        Integration API for the Remote Two to receive messages from integration drivers.  
+        The subscribe channel lists all messages that the integration driver server sends to the Remote Two.
       operationId: subIntegrationMessage
       message:
         oneOf:
@@ -154,7 +163,6 @@ channels:
           # --- metadata & configuration requests
           - $ref: '#/components/messages/get_version'
           - $ref: '#/components/messages/get_supported_entity_types'
-#          - $ref: '#/components/messages/get_supported_entity_features'
           - $ref: '#/components/messages/get_configured_entities'
           - $ref: '#/components/messages/get_localization_cfg'
 
@@ -165,10 +173,10 @@ components:
         The API token is either provided in the `API-KEY` header while upgrading to a WebSocket connection, or with an
         authentication message.
         - If the integration driver doesn't support header based authentication, it must send the `auth_required`
-          message event after the WebSocket connection is established. The remote will then authenticate with the `auth`
-          request message.
+          message event after the WebSocket connection is established. The Remote Two will then authenticate with the
+          `auth` request message.
         - If the driver doesn't support or require authentication, it still needs to send the `authentication` message
-          with `code: 200` and `req_id: 0` after the WebSocket connection has been established by the remote.
+          with `code: 200` and `req_id: 0` after the WebSocket connection has been established by the Remote Two.
       type: httpApiKey
       in: header
       name: API-KEY
@@ -188,8 +196,10 @@ components:
         message.
       payload:
         $ref: '#/components/schemas/commonResp'
+      tags:
+        - name: required
     event:
-      summary: 🔍 Generic event message.
+      summary: 🚀 Generic event message.
       payload:
         $ref: '#/components/schemas/commonEvent'
     result:
@@ -213,27 +223,31 @@ components:
             msg_data:
               code: "INV_ARGUMENT"
               message: "Invalid argument. Foo must be a positive number."
+      tags:
+        - name: required
     auth_required:
-      summary: 🔍 Authentication request event after connection is established.
+      summary: 🚀 Authentication request event after connection is established.
       description: |
         This event is only sent if the integration doesn't support header based authentication during connection setup.  
-        The remote will then authenticate with the `auth` request message.
+        The Remote Two will then authenticate with the `auth` request message.
       payload:
         $ref: '#/components/schemas/authRequiredEvent'
     auth:
-      summary: 🔍 Authenticate a connection.
+      summary: 🚀 Authenticate a connection.
       description: |
-        Sent by the remote after an `auth_required` request by the integration driver.
+        Sent by the Remote Two after an `auth_required` request by the integration driver.
       payload:
         $ref: '#/components/schemas/authRequestMsg'
       x-response:
         $ref: '#/components/messages/authentication'
     authentication:
-      summary: 🔍 Authentication response.
+      summary: 🚀 Authentication response.
       description: |
         The authentication result is provided in the `code` attribute:
         - `200`: success, API can be used and message requests are accepted.
-        - `401`: authentication failed, the provided token is not valid. The remote will close the connection.
+        - `401`: authentication failed, the provided token is not valid.  
+          The Remote Two will close the connection. The driver should also close the connection after sending this
+          response.
       payload:
         $ref: '#/components/schemas/authMsg'
 
@@ -242,30 +256,34 @@ components:
     # =========================================================================
 
     get_driver_version:
-      summary: 🔍 🍕 Get version information about the integration driver.
+      summary: 🚀 🍕 Get version information about the integration driver.
       payload:
         $ref: '#/components/schemas/getDriverVersionMsg'
       x-response:
         $ref: '#/components/messages/driver_version'
+      tags:
+        - name: required
     driver_version:
-      summary: 🔍 🍕 Integration driver version information response.
+      summary: 🚀 🍕 Integration driver version information response.
       payload:
         $ref: '#/components/schemas/driverVersionMsg'
+      tags:
+        - name: required
     enter_standby:
-      summary: 👷 Remote goes into standby event.
+      summary: 🔍 Remote Two goes into standby event.
       description: |
-        Notification event that the remote goes into standby mode and won't process incoming events anymore.
+        Notification event that the Remote Two goes into standby mode and won't process incoming events anymore.
       tags:
         - name: device
         - name: entity
       payload:
         $ref: '#/components/schemas/enterStandbyEvent'
     exit_standby:
-      summary: 🔍 Remote leaves standby event.
+      summary: 🔍 Remote Two leaves standby event.
       description: |
-        Notification event that the remote is out of standby. The integration should resume operation if it suspended it
-        while receiving the `enter_standby` event.  
-        This allows the integration to submit any entity state changes. Otherwise the remote will likely request an
+        Notification event that the Remote Two is out of standby. The integration should resume operation if it
+        suspended it while receiving the `enter_standby` event.  
+        This allows the integration to submit any entity state changes. Otherwise the Remote Two will likely request an
         entity state update.
       tags:
         - name: device
@@ -276,59 +294,61 @@ components:
     # --- registration handling
     # --- device & discovery handling
     connect:
-      summary: 🔍 Event to establish connection to entities or devices.
+      summary: 🧪 Event to establish connection to entities or devices.
       description: |
         Optional: this event instructs the integration to establish the required connections to interact with the
         provided entities or devices.
         
-        The integration should send `device_state` events to inform the remote about the connection state.
+        The integration should send `device_state` events to inform the Remote Two about the connection state.
       tags:
         - name: device
       payload:
         $ref: '#/components/schemas/connectEvent'
     disconnect:
-      summary: 🔍 Event to stop the connection to entities or devices.
+      summary: 🧪 Event to stop the connection to entities or devices.
       description: |
         Optional: this event instructs the integration to stop the interactions with the provided entities or devices,
-        because the remote temporarly doesn't need the entities. It's up to the integration what to do, but it needs to
-        be prepared to react on a `connect` event.
+        because the Remote Two temporarily doesn't need the entities. It's up to the integration what to do, but it
+        needs to be prepared to react on a `connect` event.
         
-        The integration should send `device_state` events to inform the remote about the connection state.
+        The integration should send `device_state` events to inform the Remote Two about the connection state.
       tags:
         - name: device
       payload:
         $ref: '#/components/schemas/disconnectEvent'
     get_device_state:
-      summary: 🔍 🍕 Get the current integration driver or device state.
+      summary: 🧪 🍕 Get the current integration driver or device state.
       description: |        
-        Called by the remote when it needs to synchronize the device state, e.g. after waking up from standby, or if it
-        doesn't receive regular `device_state` events.
+        Called by the Remote Two when it needs to synchronize the device state, e.g. after waking up from standby, or if
+        it doesn't receive regular `device_state` events.
         
         The `device_id` property is only required if the driver supports multiple device instances.
         
         Note: this request will not be answered with a response message but with an event.
       tags:
         - name: device
+        - name: required
       payload:
         $ref: '#/components/schemas/getDeviceStateMsg'
       x-response:
         $ref: '#/components/messages/device_state'
     device_state:
-      summary: 🔍 🍕 Current integration driver or device state event.
+      summary: 🧪 🍕 Current integration driver or device state event.
       description: |
         If there's a device communication issue or other error, this state will inform the user with a UI notification
         about the issue.
         
-        This event should be triggered by the integration driver whenever the state changes. Furthermore, the remote
+        This event should be triggered by the integration driver whenever the state changes. Furthermore, the Remote Two
         can request the current state with the `get_device_state` request.
       tags:
         - name: device
+        - name: required
       payload:
         $ref: '#/components/schemas/deviceStateEventMsg'
     start_discovery:
       summary: 🔍 Start device discovery.
       description: |
-        Optional, only required if the integrtion driver supports multiple instances and device discovery through the
+        Optional, only required if the integration driver supports multiple instances and device discovery through the
         remote ui / web-configurator.
         
         The integration driver needs to send one `discovered_device` event per discovered device. If the discovery
@@ -339,20 +359,20 @@ components:
         or a continuous discovery if the devices are not always reachable.
         
         If the UI / web-configurator no longer needs the discovery process, because the user aborted the setup process,
-        the remote sends the `stop_discovery` event.
+        the Remote Two sends the `stop_discovery` event.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/startDiscoveryEvent'
     stop_discovery:
       summary: 🔍 Stop device discovery.
       description: |
-        Optional, only required if the integrtion driver supports multiple instances and device discovery through the
+        Optional, only required if the integration driver supports multiple instances and device discovery through the
         remote ui / web-configurator.
         
-        The remote requests the discovery process to abort, because it's no longer needed.
+        The Remote Two requests the discovery process to abort, because it's no longer needed.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/stopDiscoveryEvent'
     discovered_device:
@@ -360,7 +380,7 @@ components:
       description: |
         Each discovered device needs to be announced with this event. 
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/discoveredDeviceEvent'
     discovery_finished:
@@ -369,11 +389,11 @@ components:
         If the discovery process is finished, the integration needs to send this event to update the UI and give the
         user the choice to re-start the discovery process.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/discoveryFinishedEvent'
     setup_device:
-      summary: 💡 Start device setup.
+      summary: 👷 Start device setup.
       description: |
         For multi device drivers the individual devices can go through a setup process. If no setup is needed the
         integration simply has to respond with a `device_setup_complete` message.
@@ -381,53 +401,53 @@ components:
         The required `device_id` parameter is returned from the device discovery event `discovered_device`.
         
         If the setup process takes more than a few seconds, the integration should send `device_setup_progress` events
-        to the remote to show a setup progress to the user.  
+        to the Remote Two to show a setup progress to the user.  
         Devices requiring user interaction, the integration can send the `device_setup_interaction` request to the
-        remote.
+        Remote Two.
         
         Once the setup is finished, the integration needs to send the `device_setup_complete` response, referencing the
         request id of this message.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/setupDeviceMsg'
       x-response:
         $ref: '#/components/messages/device_setup_complete'
     abort_device_setup:
-      summary: 💡 Abort a device setup.
+      summary: 👷 Abort a device setup.
       description: |
-        If the user aborts the setup process, the remote sends this event. Further messages from the integration from
-        the setup process will be ignored afterwards.
+        If the user aborts the setup process, the Remote Two sends this event. Further messages from the integration
+        from the setup process will be ignored afterwards.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/abortSetupDeviceEvent'
     device_setup_progress:
-      summary: 💡 Device setup progress event.
+      summary: 👷 Device setup progress event.
       description: |
         Optional progress events to keep the user informed about the setup progress. A progress event can also be used
         to instruct the user to perform an action without manual confirmation, which is detectable by the integration
         to continue the setup process. If the process requires user confirmation or inputs, then the
-        `device_setup_interation` events must be used.
+        `device_setup_interaction` events must be used.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/deviceSetupProgressEvent'
     device_setup_interaction:
-      summary: 💡 Device setup user interaction request.
+      summary: 👷 Device setup user interaction request.
       description: |
         If the device setup process requires a user interaction, e.g. pressing a button on a hub, choosing between
         different options, providing more data or confirming terms & conditions etc, the integration can send the 
-        `device_setup_interaction` request. The remote will respond with `setup_user_action` containing the result of
-        the requested interaction.
+        `device_setup_interaction` request. The Remote Two will respond with `setup_user_action` containing the result
+        of the requested interaction.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/deviceSetupInteractionMsg'
       x-response:
         $ref: '#/components/messages/setup_user_action'
     setup_user_action:
-      summary: 💡 Device setup user action response.
+      summary: 👷 Device setup user action response.
       description: |
         Response containing the user action of a requested `device_setup_interaction` during the setup process.
         
@@ -440,21 +460,21 @@ components:
         - multiple choices: user had to select multiple options / features
         - input value: user had to provide additional data or a password / token entry
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/setupUserActionResponseMsg'
     device_setup_complete:
-      summary: 💡 Device setup completed response.
+      summary: 👷 Device setup completed response.
       description: |
         If the setup process failed, a `result` message can be sent back with an error description.
       tags:
-        - name: device
+        - name: multi-device
       payload:
         $ref: '#/components/schemas/deviceSetupCompleteMsg'
 
     # --- entity handling
     get_available_entities:
-      summary: 🔍 🍕 Retrieve the available entities from the integration driver.
+      summary: 🧪 🍕 Retrieve the available entities from the integration driver.
       description: |
         Called while configuring profiles and assigning entities to pages or groups in the web-configurator or the
         embedded editor of the remote UI.
@@ -462,41 +482,44 @@ components:
         With the optional filter, only entities of a given type can be requested.
       tags:
         - name: entity
+        - name: required
       payload:
         $ref: '#/components/schemas/getAvailableEntitiesMsg'
       x-response:
         $ref: '#/components/messages/available_entities'
     available_entities:
-      summary: 🔍 🍕 Available entities response.
+      summary: 🧪 🍕 Available entities response.
       description: |
-        This message contains the available entities from the integration driver the remote can configure.
+        This message contains the available entities from the integration driver the Remote Two can configure.
         
         If the `get_available_entities` request included a filter, it is returned in the message data with only the 
         matching entities.
       tags:
         - name: entity
+        - name: required
       payload:
         $ref: '#/components/schemas/availableEntitiesMsg'
     subscribe_events:
-      summary: 🔍 🍕 Subscribe to events.
+      summary: 🧪 🍕 Subscribe to events.
       description: |
         Subscribe to entity state change events to receive `entity_change` events from the integration driver.
         
-        If no entity IDs are specified then events for all available entities are sent to the remote.
+        If no entity IDs are specified then events for all available entities are sent to the Remote Two.
         
         TODO support different event types?
       tags:
         - name: entity
+        - name: required
       payload:
         $ref: '#/components/schemas/subscribeEventsMsg'
       x-response:
         $ref: '#/components/messages/result'
     unsubscribe_events:
-      summary: 🔍 Unsubscribe from events.
+      summary: 🧪 Unsubscribe from events.
       description: |
         If no entity IDs are specified then all events for all available entities are stopped. 
         
-        This message is sent by the remote if a previously configured entity is no longer used and therefore no
+        This message is sent by the Remote Two if a previously configured entity is no longer used and therefore no
         longer interested in entity updates. If the integration driver keeps sending events for the unsubscribed
         entities then they are simply discarded.
       tags:
@@ -506,7 +529,7 @@ components:
       x-response:
         $ref: '#/components/messages/result'
     get_version:
-      summary: 🔍 Get remote version information.
+      summary: 🚀 Get Remote Two version information.
       payload:
         $ref: '#/components/schemas/getVersionMsg'
       x-response:
@@ -516,12 +539,10 @@ components:
       payload:
         $ref: '#/components/schemas/versionMsg'
     get_supported_entity_types:
-      summary: 🔍 Get supported entities in the remote.
+      summary: 🚀 Get supported entities in the Remote Two.
       description: |
-        This is a metadata request for supported entities in the remote and allows the client to check if it's still
+        This is a metadata request for supported entities in the Remote Two and allows the client to check if it's still
         compatible. New releases can support new entities or entities might get renamed in major updates.
-        
-        TODO required or only provide in documentation? I think it might be convenient.
       tags:
         - name: entity
         - name: metadata
@@ -530,7 +551,7 @@ components:
       x-response:
         $ref: '#/components/messages/supported_entity_types'
     supported_entity_types:
-      summary: 🔍 Supported entity types response.
+      summary: 🚀 Supported entity types response.
       tags:
         - name: entity
         - name: metadata
@@ -546,33 +567,14 @@ components:
               - switch
               - light
               - cover
-#    get_supported_entity_features:
-#      summary: 💡 Get supported entity features in the remote.
-#      description: |
-#        This is a metadata request for supported entity features in the remote. Each feature describes the capabilities
-#        like if it's only readable or also updatable, plus additional feature options.
-#        New releases can support new features. Major updates might refactor existing feature definitions.
-#
-#        TODO required or only provide in documentation? Might be convenient to have in the API.
-#      tags:
-#        - name: entity
-#        - name: metadata
-#      payload:
-#        $ref: '#/components/schemas/getSupportedEntityFeaturesMsg'
-#      x-response:
-#        $ref: '#/components/messages/supported_entity_features'
-#    supported_entity_features:
-#      summary: 💡 Supported entity features in the remote.
-#      tags:
-#        - name: entity
-#        - name: metadata
-#      payload:
-#        $ref: '#/components/schemas/supportedEntityFeaturesMsg'
     get_configured_entities:
-      summary: 👷 Retrieve configured entities from this integration.
+      summary: 🔍 Retrieve configured entities from this integration.
       description: |
-        Request the configured entities in the remote originating from this integration. These are all the entities
-        which are being used in the remote and assigned in a profile.
+        Request the configured entities in the Remote Two originating from this integration. These are all the entities
+        which are being used in the Remote Two and assigned in a profile.
+        
+        This allows the driver e.g. to optimize its device communication and only consider actively used entities.  
+        Another option for the driver to be notified about used entities is through the `subscribe_events` requests.
       tags:
         - name: entity
       payload:
@@ -586,10 +588,10 @@ components:
       tags:
         - name: entity
     get_localization_cfg:
-      summary: 🔍 Retrieve the localization settings of the remote.
+      summary: 🔍 Retrieve the localization settings of the Remote Two.
       description: |
-        The active localization settings of the remote can be used if the integration driver requires localized settings
-        for texts or units of measurements. 
+        The active localization settings of the Remote Two can be used if the integration driver requires localized
+        settings for texts or units of measurements. 
         
         For language texts the driver should always provide an english option in addition to any localized texts.
       tags:
@@ -599,30 +601,32 @@ components:
       x-response:
         $ref: '#/components/messages/localization_cfg'
     localization_cfg:
-      summary: 🔍 Active localization settings of the remote.
+      summary: 🔍 Active localization settings of the Remote Two.
       tags:
         - name: metadata
       payload:
         $ref: '#/components/schemas/localizationMsg'
 
     get_entity_states:
-      summary: 🔍 🍕 Get the current state of the entities.
+      summary: 🚀 🍕 Get the current state of the entities.
       description: |
-        Called by the remote when it needs to synchronize the entity states, e.g. after waking up from standby.
+        Called by the Remote Two when it needs to synchronize the entity states, e.g. after waking up from standby.
       tags:
         - name: entity
+        - name: required
       payload:
         $ref: '#/components/schemas/getEntityStatesMsg'
       x-response:
         $ref: '#/components/messages/entity_states'
     entity_states:
-      summary: 👷 🍕 Current state of the entities.
+      summary: 🔍 🍕 Current state of the entities.
       tags:
         - name: entity
+        - name: required
       payload:
         $ref: '#/components/schemas/entityStatesMsg'
     entity_command:
-      summary: 🔍 🍕 Execute an entity command.
+      summary: 🚀 🍕 Execute an entity command.
       description: |
         Instruct the integration driver to execute a command like "turn on" or "change temperature". 
         Optional command data like temperature value or channel number can be provided in the `params` array.
@@ -631,10 +635,11 @@ components:
         The `result` response is to acknowledge the command and to return any immediate failures in case the driver
         already knows it's unable to perform the command due to invalid data, device communication issues etc.
         
-        After successfully executing a command, the remote expects an `entity_change` event with the updated feature 
+        After successfully executing a command, the Remote Two expects an `entity_change` event with the updated feature 
         value(s).
       tags:
         - name: entity
+        - name: required
       payload:
         $ref: '#/components/schemas/entityCommandMsg'
       x-response:
@@ -720,21 +725,22 @@ components:
 
     # --- events
     entity_change:
-      summary: 🔍 🍕 Entity state change event.
+      summary: 🚀 🍕 Entity state change event.
       description: |
         Emitted when an attribute of an entity changes, e.g. is switched off. Either after an `entity_command` or if the
-        entity is updated manually through a user or an external system. This keeps the remote in sync with the real
+        entity is updated manually through a user or an external system. This keeps the Remote Two in sync with the real
         state of the entity without the need of constant polling.
       tags:
         - name: entity
         - name: event
+        - name: required
       payload:
         $ref: '#/components/schemas/entityStateChangedEvent'
 
     entity_available:
       summary: 🔍 New entity available event.
       description: |
-        Optional event to notify the remote that new entities are available.
+        Optional event to notify the Remote Two that new entities are available.
       tags:
         - name: entity
         - name: event
@@ -744,7 +750,7 @@ components:
     entity_removed:
       summary: 🔍 Entity removed event.
       description: |
-        Optional event to notify the remote that entities were removed and no longer available.
+        Optional event to notify the Remote Two that entities were removed and no longer available.
       tags:
         - name: entity
         - name: event
@@ -1186,34 +1192,6 @@ components:
             - msg
             - msg_data
   
-#    getSupportedEntityFeaturesMsg:
-#      type: object
-#      allOf:
-#        - $ref: '#/components/schemas/commonReq'
-#        - properties:
-#            msg:
-#              type: string
-#              const: get_supported_entity_features
-#          required:
-#            - msg
-#
-#    supportedEntityFeaturesMsg:
-#      description: TODO define payload
-#      type: object
-#      allOf:
-#        - $ref: '#/components/schemas/commonResp'
-#        - properties:
-#            msg:
-#              type: string
-#              const: supported_entity_features
-#            msg_data:
-#              type: array
-#              items:
-#                $ref: '#/components/schemas/entityMetadata'
-#          required:
-#            - msg
-#            - msg_data
-
     getConfiguredEntitiesMsg:
       type: object
       allOf:
@@ -1303,7 +1281,7 @@ components:
                   type: string
                 params:
                   description: |
-                    TODO Define parameter objects with oneOf or just document possible objects / refer to metadata?
+                    TODO Define parameter objects with oneOf or just document possible objects?
                   type: object
               required:
                 - entity_type
@@ -1377,8 +1355,8 @@ components:
     enterStandbyEvent:
       description: |
         TODO add standby type in msg_data? E.g. "screen off" & "sleep" for the integration to be notified that the
-        remote is no longer reachable? While the screen is off, the remote API is still running, but might soon go into
-        sleep state.
+        Remote Two is no longer reachable? While the screen is off, the remote API is still running, but might soon go
+        into sleep state.
       type: object
       allOf:
         - $ref: '#/components/schemas/commonEvent'
@@ -1596,143 +1574,6 @@ components:
         entity_type:
           $ref: '#/components/schemas/entityType'
 
-#    entityMetadata:
-#      type: object
-#      description: Entity definition with supported features and commands
-#      properties:
-#        entity:
-#          $ref: '#/components/schemas/entityType'
-#        features:
-#          type: array
-#          items:
-#            $ref: '#/components/schemas/entityFeatureAttributes'
-#
-#    entityFeatureAttributes:
-#      type: object
-#      description: |
-#        TODO better name?
-#        TODO specify related events if a feature value has been updated?
-#
-#        This relates to Homey capability definitions (not the keys, but what a capability provides) and a mix of
-#        Home Assistant supported features & services.
-#
-#        Metadata definition of what a feature provides.
-#
-#        This includes if the current value is readable and writeable.
-#        Example: a "set volume" feature is writeable to be able to set the volume and readable to retrieve the current
-#        volume.
-#      allOf:
-#        - properties:
-#            name:
-#              description: Entity feature name.
-#              type: string
-#            type:
-#              description: |
-#                Datatype of the feature value: `boolean`, `enum`, `number`, `text`
-#              type: string
-#            writeable:
-#              description: |
-#                Feature value is writeable.
-#                By default sensors cannot be written, as well as status information from media players. If there are
-#                entity features which are by default writable, but can be read-only depending on device, then this is
-#                configurable by the integration driver with a feature option, setting writeable to false. See entity
-#                definition for more information.
-#              type: boolean
-#            readable:
-#              description: |
-#                Current feature value can be retrieved from the device.
-#                Features acting as actions or button commands like giving commands to a media player or a generic push
-#                button entity are not readable.
-#              type: boolean
-#            commands:
-#              description: |
-#                If the feature value is writeable, the integration receives `entity_command` messages to update the
-#                value.
-#                - A feature might have multiple, different write operations.
-#                - The operation identifier is given in the `id` property.
-#                - The operation's parameters are described in the `arguments` property.
-#                - The operation identifier and parameter information are sent in the `entity_command` message.
-#              type: array
-#              items:
-#                type: object
-#                properties:
-#                  id:
-#                    description: |
-#                      Command operation identifier. Simple commands like triggering an action only have an `id` without
-#                      `arguments`. If a command like setting the light to a specific color or brightness, then the
-#                      required parameters are specified in `arguments`.
-#                    type: string
-#                  arguments:
-#                    type: array
-#                    items:
-#                      type: object
-#                      allOf:
-#                        - properties:
-#                            name:
-#                              description: Parameter name
-#                              type: string
-#                            type:
-#                              description: |
-#                                Parameter data type: `boolean`, `enum`, `number`, `text`
-#                              type: string
-#                          required:
-#                            - name
-#                            - type
-#                        - $ref: '#/components/schemas/entityDataType'
-#                required:
-#                  - id
-#          required:
-#            - type
-#            - writeable
-#            - readable
-#        - $ref: '#/components/schemas/entityDataType'
-#
-#    entityDataType:
-#      type: object
-#      oneOf:
-#        - $ref: '#/components/schemas/entityFeatureDataTypeBoolean'
-#        - $ref: '#/components/schemas/entityFeatureDataTypeEnum'
-#        - $ref: '#/components/schemas/entityFeatureDataTypeNumber'
-#        - $ref: '#/components/schemas/entityFeatureDataTypeText'
-#
-#    entityFeatureDataTypeBoolean:
-#      type: object
-#      properties:
-#        type:
-#          type: string
-#          default: boolean
-#
-#    entityFeatureDataTypeEnum:
-#      type: object
-#      properties:
-#        type:
-#          type: string
-#          default: enum
-#        values:
-#          type: array
-#          items:
-#            type: string
-#
-#    entityFeatureDataTypeNumber:
-#      type: object
-#      properties:
-#        type:
-#          type: string
-#          default: number
-#        min:
-#          type: number
-#        max:
-#          type: number
-#        decimals:
-#          type: integer
-#
-#    entityFeatureDataTypeText:
-#      type: object
-#      properties:
-#        type:
-#          type: string
-#          default: text
-
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `light`, `media_player`,
@@ -1799,8 +1640,8 @@ components:
         A switch entity can turn something on or off and the current state should be readable by the integration driver.
         
         If the state can't be read, the `readable` option property can be set to `false`. This should be avoided
-        whenever possible, because the remote either has to assume the current state, or the UI needs to ask the user
-        for the current state.
+        whenever possible, because the Remote Two either has to assume the current state, or the UI needs to ask the
+        user for the current state.
         
         If the switch controls a light source, then the 'light' entity is usually a better choice.
       allOf:
@@ -2329,7 +2170,7 @@ components:
         regex:
           description: Optional regex validation pattern for the input value.
           type: string
-      requried:
+      required:
         - type
         - value
 
@@ -2349,7 +2190,7 @@ components:
         regex:
           description: Optional regex validation pattern for the input value.
           type: string
-      requried:
+      required:
         - type
 
     inputTypeTextArea:
@@ -2365,7 +2206,7 @@ components:
         regex:
           description: Optional regex validation pattern for the input value.
           type: string
-      requried:
+      required:
         - type
 
     inputTypePassword:
@@ -2383,7 +2224,7 @@ components:
         regex:
           description: Optional regex validation pattern for the input value.
           type: string
-      requried:
+      required:
         - type
 
     inputTypeCheckbox:
@@ -2396,12 +2237,12 @@ components:
         value:
           description: Initial setting.
           type: boolean
-      requried:
+      required:
         - type
         - value
 
     inputTypeDropdown:
-      description: Dropdon setting to pick a single value from a list. All values must be strings.
+      description: Dropdown setting to pick a single value from a list. All values must be strings.
       type: object
       properties:
         type:
@@ -2421,7 +2262,7 @@ components:
               label:
                 description: "Selection value. TODO: language specific? map<id, text>"
                 type: string
-      requried:
+      required:
         - type
         - value
         - values
