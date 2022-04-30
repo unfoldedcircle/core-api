@@ -1,3 +1,5 @@
+[![AsyncAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml)
+
 # Unfolded Circle Core APIs
 
 This repository contains API specifications of [Unfolded Circle Remote Two](https://www.unfoldedcircle.com/) products.
