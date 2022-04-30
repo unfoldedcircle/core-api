@@ -86,7 +86,7 @@ The entity `state` attribute holds the following values:
 | OFF      | The media player is switched off                           |
 | PLAYING  | The media player is playing something                      |
 
-See [common entity states](entities.md#states).
+See [common entity states](README.md#states).
 
 ### Device Classes
 

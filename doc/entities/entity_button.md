@@ -16,7 +16,7 @@ should be used.
 
 ### States
 
-The button entity only supports the `ON` state and the [common entity states](entities.md#states).
+The button entity only supports the `ON` state and the [common entity states](README.md#states).
 
 | Value     | Description              |
 |-----------|--------------------------|

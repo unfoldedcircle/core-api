@@ -49,7 +49,7 @@ The climate entity provides the following entity `state` values and represents t
 Note: the current mode may not be the active state of the device. E.g. if the mode is set to `AUTO` the climate unit 
 may be heating, cooling, idle, etc. at a specific point in time.
 
-See [common entity states](entities.md#states).
+See [common entity states](README.md#states).
 
 ### Device Classes
 

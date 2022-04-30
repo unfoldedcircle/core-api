@@ -4,8 +4,6 @@ This repository contains API specifications of [Unfolded Circle Remote Two](http
 
 ## Overview
 
-_TODO_
-
 - [Remote Two user interface](./doc/remote-ui.md)
 
 API definitions:
@@ -13,27 +11,27 @@ API definitions:
 - [WebSocket Integration API](./integration-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/).
 - WebSocket Core API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
 - REST Core API defined with [OpenAPI](https://www.openapis.org/) - _not yet published_
+- WebSocket Dock API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
 
 Integration driver documentation:
 
-- [Remote Two entities](./integration-api/entities/README.md).
-- [WebSocket Integration API](./integration-api/README.md).
-- [How to write an integration driver](./integration-api/write-integration-driver.md).
-- [WebSocket handling](./integration-api/websocket.md): authentication, keep alive, error handling.
+- [Remote Two entities](doc/entities/README.md).
+- [How to write an integration driver](doc/integration-driver/write-integration-driver.md).
+- [WebSocket handling](doc/integration-driver/websocket.md): authentication, keep alive, error handling.
 
 ## Integration API
 
 The Remote Two WebSockets integrations API allows writing device integrations for the Unfolded Circle Remote Two and
-former YIO remote.  
+former YIO remote devices.  
 At the moment only user integrations running on an external host are supported.
 
-The integration driver acts as server and the remote as client. The remote connects to the integration when an
+The integration driver acts as server and the Remote Two as client. The remote connects to the integration when an
 integration instance is configured. Whenever the remote enters standby it may choose to disconnect and automatically
 reconnect again after wakeup.
 
 The goal of the integration API is to cover not only simple static drivers, like controlling GPIOs on a Raspberry Pi,
 but also support to integrate existing home automation hubs like Home Assistant, Homey, openHAB etc.  
-The focus of the integration API is on entity integration, not on controlling or configuring the remote. Please
+The focus of the integration API is on entity integration, not on controlling or configuring the Remote Two. Please
 refer to the core-API for further functionality.
 
 An integration driver usually doesn't need to use the core-API as well, unless it also wants to customize certain device
@@ -48,15 +46,17 @@ The downside of an API is that more low-level coding is required. In our case th
 handling the connections from the Remote Two, and parsing the JSON payload in the WebSocket text messages. However, once
 this is done, the required API message interactions are rather simple to handle. 
 
-See [how to write an integration driver](./integration-api/write-integration-driver.md) for more information about how
-to develop an integration driver for the Remote Two.
+See [how to write an integration driver](doc/integration-driver/write-integration-driver.md) for more information about
+how to develop an integration driver for the Remote Two.
 
 #### Examples
 
-_TODO_
+ℹ️ _The following examples will be published shortly:_
 
 - API models in Rust
 - Open Source integration for Home Assistant written in Rust
+
+We plan to release more examples in the future.
 
 ## Core APIs
 
@@ -69,14 +69,14 @@ functionality.
   - user management and authentication handling.
 - The WebSockets API adds event subscription with asynchronous notifications. 
 
-The remote acts as server. Whenever the remote enters standby it may choose to disconnect open WebSocket sessions.
+The Remote Two acts as server. Whenever the remote enters standby it may choose to disconnect open WebSocket sessions.
 It is up to the client to reconnect again.
 
 ## Roadmap
 
 In the short term we will publish the following APIs and additional repositories: 
 
-- [ ] Integration API
+- [x] WebSocket integration API
 - [ ] REST Core API, WebSocket Core API
 - [ ] API models in Rust (Apache License 2.0)
 - [ ] Open Source integration for Home Assistant written in Rust (Mozilla Public License 2.0)

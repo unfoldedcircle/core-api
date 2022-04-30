@@ -35,7 +35,7 @@ The light entity provides the following entity `state` values:
 | ON    | The light is switched on.  |
 | OFF   | The light is switched off. |
 
-See [common entity states](entities.md#states).
+See [common entity states](README.md#states).
 
 ### Device Classes
 

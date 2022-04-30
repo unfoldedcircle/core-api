@@ -43,7 +43,7 @@ The cover entity provides the following entity `state` values:
 | CLOSING | The cover is in the process of closing. Either fully closed or to a set position. |
 | CLOSED  | The cover is in the closed state.                                                 |
 
-See [common entity states](entities.md#states).
+See [common entity states](README.md#states).
 
 ### Device classes
 

@@ -28,7 +28,7 @@ The entity `state` attribute holds the following values:
 | ON    | The ### is switched on  |
 | OFF   | The ### is switched off |
 
-See [common entity states](entities.md#states).
+See [common entity states](README.md#states).
 
 ### Device Classes
 

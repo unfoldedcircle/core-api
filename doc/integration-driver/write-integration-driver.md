@@ -17,8 +17,8 @@ is also the platform of the former YIO Remote.
 1. Choose your programming language.
 2. Choose a WebSockets server library or framework for your language.
 3. Choose a JSON framework for your language.
-4. Choose which [entities and features](./entities/README.md) the driver should expose.
-5. Implement the required WebSockets text messages in the [WebSocket Integration API](./asyncapi.yaml).
+4. Choose which [entities and features](../entities/README.md) the driver should expose.
+5. Implement the required WebSockets text messages in the [WebSocket Integration API](../../integration-api/asyncapi.yaml).
 
 ### Integration Driver Types
 
@@ -39,7 +39,7 @@ The single device instance driver is the default and easiest driver to develop:
 This driver type is suitable for all device integrations which don't require much or any configuration by the user, or
 if the configuration shall be kept separate from the remote on purpose.
 E.g. if smart WiFi light bulbs can be discovered by the driver and then each bulb can be provided as a
-[light entity](./entities/entity_light.md) to the remote.
+[light entity](../entities/entity_light.md) to the remote.
 
 #### Multi Device Instance Driver
 
@@ -82,13 +82,13 @@ See [WebSocket authentication](websocket.md#authentication) for more information
 
 An integration driver can optionally register itself at a remote and provide its authentication token.
 
-See [driver registration](./driver-registration.md) for more information.
+See [driver registration](driver-registration.md) for more information.
 
 ### Discover Remote Two Devices
 
 The Remote Two can be discovered with DNS-SD. It announces itself with service type `_uc-remote._tcp`.
 
-See [remote DNS-SD lookup](../doc/README.md#remote-dns-sd-lookup) for more information.
+See [remote DNS-SD lookup](../discovery.md) for more information.
 
 ### JSON Messages
 
@@ -185,7 +185,7 @@ Example of an event message:
 ### Required Messages
 
 For a functioning integration driver not all defined messages and optional features in the integration API have to be
-implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the [WebSocket Integration AsyncAPI definition](./asyncapi.yaml).
+implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the [WebSocket Integration AsyncAPI definition](../../integration-api/asyncapi.yaml).
 
 Required request messages which must be processed and answered by a driver:
 

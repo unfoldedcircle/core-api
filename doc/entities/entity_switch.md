@@ -35,7 +35,7 @@ The switch entity provides the following entity `state` values:
 | ON    | The switch is on.  |
 | OFF   | The switch is off. |
 
-See [common entity states](entities.md#states).
+See [common entity states](README.md#states).
 
 ### Device classes
 
