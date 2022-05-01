@@ -1,7 +1,5 @@
 ## How to write an integration driver
 
-_TODO this is an initial draft only!_
-
 The integration API allows to develop integration drivers in any programming language capable of running a WebSockets
 server.
 

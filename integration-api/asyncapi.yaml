@@ -196,8 +196,6 @@ components:
         message.
       payload:
         $ref: '#/components/schemas/commonResp'
-      tags:
-        - name: required
     event:
       summary: 🚀 Generic event message.
       payload:
@@ -241,15 +239,20 @@ components:
       x-response:
         $ref: '#/components/messages/authentication'
     authentication:
-      summary: 🚀 Authentication response.
+      summary: 🚀 🍕 Authentication response.
       description: |
         The authentication result is provided in the `code` attribute:
         - `200`: success, API can be used and message requests are accepted.
         - `401`: authentication failed, the provided token is not valid.  
           The Remote Two will close the connection. The driver should also close the connection after sending this
           response.
+        
+        If the driver doesn't support or require authentication, it still needs to send the `authentication` message
+        with `code: 200` and `req_id: 0` after the WebSocket connection has been established by the Remote Two.
       payload:
         $ref: '#/components/schemas/authMsg'
+      tags:
+        - name: required
 
     # =========================================================================
     # INTEGRATIONS API MESSAGES
