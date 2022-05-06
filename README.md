@@ -53,9 +53,10 @@ how to develop an integration driver for the Remote Two.
 
 #### Examples
 
+- [API models in Rust](https://github.com/unfoldedcircle/api-model-rs)
+
 ℹ️ _The following examples will be published shortly:_
 
-- API models in Rust
 - Open Source integration for Home Assistant written in Rust
 
 We plan to release more examples in the future.
@@ -80,7 +81,7 @@ In the short term we will publish the following APIs and additional repositories
 
 - [x] WebSocket integration API
 - [ ] REST Core API, WebSocket Core API
-- [ ] API models in Rust (Apache License 2.0)
+- [x] [API models in Rust](https://github.com/unfoldedcircle/api-model-rs) (Apache License 2.0)
 - [ ] Open Source integration for Home Assistant written in Rust (Mozilla Public License 2.0)
 - [ ] remote-core simulator for Linux & macOS to start developing integrations without a Remote Two device
 - [ ] Open Source remote-ui application
@@ -111,5 +112,5 @@ Please read our [contribution guidelines](./CONTRIBUTING.md) before opening a pu
 
 We have published the API specifications and documentations under the [CC-BY-AS-4.0](https://creativecommons.org/licenses/by-sa/4.0/)
 (Creative Commons Attribution-ShareAlike 4.0 International) license. Please see [LICENSE file](./LICENSE).  
-All code examples in this repository are licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+All code examples in this repository are licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).  
 All graphics copyright © Unfolded Circle ApS 2022.
