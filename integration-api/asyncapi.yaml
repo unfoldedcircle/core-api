@@ -1582,11 +1582,13 @@ components:
         Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `light`, `media_player`,
         `sensor`, `switch`. 
         
-        The `entity_type` value acts as discriminator for the entity type, which defines the supported features and options
-        of an entity.  
+        The `entity_type` value acts as discriminator for the entity type, which defines the supported features and
+        options of an entity.  
         E.g. a simple `button` entity supports on / off, whereas a `cover` entity can be a simple window cover with only
-        the ability to open / close, or a venetian blind with position and tilting features.
-      discriminator: type
+        the ability to open / close, or a venetian blind with position and tilting features.  
+        See [polymorphism support in AsyncAPI specification](https://www.asyncapi.com/docs/specifications/v2.2.0#schemaComposition)
+        for more information.
+      discriminator: entity_type
       type: object
       properties:
         entity_id:
