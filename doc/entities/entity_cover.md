@@ -154,7 +154,7 @@ attribute.
   "msg_data": {
     "entity_type": "cover",
     "entity_id": "blind-1",
-    "cmd_id": "open",
+    "cmd_id": "position",
     "params": {
       "position": 70
     }
@@ -172,7 +172,7 @@ attribute.
   "msg_data": {
     "entity_type": "cover",
     "entity_id": "blind-1",
-    "cmd_id": "open",
+    "cmd_id": "tilt",
     "params": {
       "tilt_position": 45
     }
