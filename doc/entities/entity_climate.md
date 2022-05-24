@@ -78,15 +78,15 @@ requests within `msg_data.cmd_id`.
 - Once the value has been set or confirmed by the physical device, an `entity_change` event message with the new
   value(s) must be sent.
 
-| cmd_id                      | Parameters       | Description                              |
-|-----------------------------|------------------|------------------------------------------|
-| on                          | -                | Switch on the climate device.            |
-| off                         | -                | Switch off the climate device.           |
-| hvac_mode                   | enum             | Set the device to heating, cooling, etc. |
-| target_temperature          | temperature      | Change the target temperature            |
-| 🚧 target_temperature_range | temperature_high |                                          |
-|                             | temperature_low  |                                          |
-| 🚧 fan_mode                 | enum             |                                          |
+| cmd_id                      | Parameters       | Description                                                    |
+|-----------------------------|------------------|----------------------------------------------------------------|
+| on                          | -                | Switch on the climate device.                                  |
+| off                         | -                | Switch off the climate device.                                 |
+| hvac_mode                   | hvac_mode        | Set the device to heating, cooling, etc. See [state](#states). |
+| target_temperature          | temperature      | Change the target temperature                                  |
+| 🚧 target_temperature_range | temperature_high |                                                                |
+|                             | temperature_low  |                                                                |
+| 🚧 fan_mode                 | enum             |                                                                |
 
 ### Events
 
@@ -171,7 +171,7 @@ Combined with target temperature
     "cmd_id": "hvac_mode",
     "attributes": {
       "hvac_mode": "COOL",
-      "target_temperature": 23
+      "temperature": 23
     }
   }
 }
@@ -189,7 +189,7 @@ Combined with target temperature
     "entity_id": "climate-1",
     "cmd_id": "target_temperature",
     "attributes": {
-      "target_temperature": 23
+      "temperature": 23
     }
   }
 }
