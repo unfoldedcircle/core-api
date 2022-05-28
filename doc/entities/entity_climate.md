@@ -151,7 +151,7 @@ attribute.
     "entity_type": "climate",
     "entity_id": "climate-1",
     "cmd_id": "hvac_mode",
-    "attributes": {
+    "params": {
       "hvac_mode": "COOL"
     }
   }
@@ -169,7 +169,7 @@ Combined with target temperature
     "entity_type": "climate",
     "entity_id": "climate-1",
     "cmd_id": "hvac_mode",
-    "attributes": {
+    "params": {
       "hvac_mode": "COOL",
       "temperature": 23
     }
@@ -188,7 +188,7 @@ Combined with target temperature
     "entity_type": "climate",
     "entity_id": "climate-1",
     "cmd_id": "target_temperature",
-    "attributes": {
+    "params": {
       "temperature": 23
     }
   }
