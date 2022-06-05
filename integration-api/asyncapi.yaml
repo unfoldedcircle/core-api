@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.6.0-alpha'
+  version: '0.6.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -613,7 +613,8 @@ components:
     get_entity_states:
       summary: 🚀 🍕 Get the current state of the entities.
       description: |
-        Called by the Remote Two when it needs to synchronize the entity states, e.g. after waking up from standby.
+        Called by the Remote Two when it needs to synchronize the dynamic entity attributes, e.g. after connection setup
+        or waking up from standby.
       tags:
         - name: entity
         - name: required
@@ -622,7 +623,9 @@ components:
       x-response:
         $ref: '#/components/messages/entity_states'
     entity_states:
-      summary: 🔍 🍕 Current state of the entities.
+      summary: 🧪 🍕 Current state of the entities.
+      description: |
+        Response message of the `get_entity_states` request. Contains the dynamic attributes of all entities.
       tags:
         - name: entity
         - name: required
@@ -1231,7 +1234,7 @@ components:
 
     getEntityStatesMsg:
       description: |
-        For simple drivers without dynamic devices the `msg_data` object with the `device_id` property can be omitted.
+        For simple drivers without dynamic devices the `msg_data.device_id` property can be omitted.
         In this case, the request is for the overall integration driver and not for a specific device.
       type: object
       allOf:
@@ -1244,12 +1247,14 @@ components:
               type: object
               properties:
                 device_id:
+                  description: Only required for multi-device integrations.
                   type: string
           required:
             - msg
 
     entityStatesMsg:
-      description: TODO refine payload
+      description: |
+        The `msg_data` payload is an array of the `entity_change` event.
       type: object
       allOf:
         - $ref: '#/components/schemas/commonResp'
@@ -1260,7 +1265,7 @@ components:
             msg_data:
               type: array
               items:
-                $ref: '#/components/schemas/entity_state'
+                $ref: '#/components/schemas/entityStateChanged'
           required:
             - msg
             - msg_data
@@ -1942,21 +1947,6 @@ components:
                   description: |
                     🚧 Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.
                   type: number
-
-    entity_state:
-      description: TODO define entity_state object, state enum?
-      type: object
-      properties:
-        device_id:
-          type: string
-        entity_type:
-          type: string
-        entity_id:
-          type: string
-        state:
-          type: string
-        attributes:
-          type: object
 
     entityType:
       description: |
