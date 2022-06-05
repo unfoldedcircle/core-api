@@ -4,7 +4,7 @@ A sensor entity provides measured values from devices or dedicated hardware sens
 The device class specifies the type of sensor and links it with a default unit of measurement to display in the user
 interface.
 
-- The `custom` device class allows arbitrary UI labels and units.
+- The `custom` device class allows arbitrary text values and unit labels.
 - The `temperature` device class performs automatic conversion between °C and °F.
 
 ## Features
@@ -13,12 +13,23 @@ The sensor entity has no features.
 
 ### Attributes
 
-| Attribute | Type            | Values            | Description                                 |
-|-----------|-----------------|-------------------|---------------------------------------------|
-| state     | enum            | [States](#states) | State of the sensor.                        |
-| value     | number / string |                   | The native measurement value of the sensor. |
+| Attribute | Type            | Values            | Description                                             |
+|-----------|-----------------|-------------------|---------------------------------------------------------|
+| state     | enum            | [States](#states) | Optional state of the sensor.                           |
+| value     | number / string |                   | The native measurement value of the sensor.             |
+| unit      | string          |                   | Optional unit of the `value` if no default unit is set. |
+
+The `unit` attribute can be specified in the `entity_change` event and takes precedence over the associated default unit
+in the `device_class` or the specified `custom_unit` in the options.
+
+If an integration driver gets the current unit from an external system together with the current value, it's recommended
+to pass it on.  
+If the integration driver is in control of the unit, and it can't change at runtime, the unit can be specified in the
+available entity definition as `options.custom_unit` and then omitted in `entity_change` events.
 
 ### States
+
+The `state` attribute is optional for a sensor.
 
 The sensor entity only supports the `ON` state and the [common entity states](README.md#states). 
 
@@ -28,11 +39,11 @@ The sensor entity only supports the `ON` state and the [common entity states](RE
 
 ### Device classes
 
-The device class specifies the type of sensor.
+The device class specifies the type of sensor. Default if not specified: `custom`.
 
 | Name        | Default unit | Description                                                                                                                                |
 |-------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| custom      |              | Generic sensor with custom label and unit                                                                                                  |
+| custom      |              | Generic sensor with custom unit                                                                                                            |
 | battery     | %            | Battery charge in %                                                                                                                        |
 | current     | A            | Electrical current in ampere                                                                                                               |
 | energy      | kWh          | Energy in kilowatt-hour                                                                                                                    |
@@ -45,7 +56,6 @@ The device class specifies the type of sensor.
 
 | Name         | Type   | Default | Description                                                                                                                     |
 |--------------|--------|---------|---------------------------------------------------------------------------------------------------------------------------------|
-| custom_label | text   |         | Label for a custom sensor if `device_class` is not specified or to override a default unit.                                     |
 | custom_unit  | text   |         | Unit label for a custom sensor if `device_class` is not specified or to override a default unit.                                |
 | native_unit  | text   |         | The sensor's native unit of measurement to perform automatic conversion. Applicable to device classes: `temperature`.           |
 | decimals     | number | 0       | Number of decimal places to show in the UI if the sensor provides the measurement as a number. Not applicable to string values. |
@@ -71,11 +81,10 @@ The following attributes are supported:
 | unit      | Optional: the unit of measurement for the given `value`. If omitted, the configured entity unit is used. |
 
 - At least one attribute must be specified in the `entity_change` message.
-  - If the entity `state` and the `value` attribute changed at the same time, they may both be included in the message.
+  - If the sensor `value` and `unit` attributes change at the same time, both must be included in the same message.
   - It's also valid to always send every attribute.
-- The `state` attribute is optional for a sensor.
-  - If the state is never sent, the sensor is considered available.
 - Only sending the `unit` attribute is not valid.
+- If the state is never sent, the sensor is considered available (`ON`).
 
 ### Event examples
 
