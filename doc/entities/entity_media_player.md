@@ -48,48 +48,51 @@ a stereo or a video player.
 
 Entity attributes are controlled by features. Multiple features can act on the same attribute.
 
-| Attribute          | Features                   | Type    | Values            | Description                                                                 |
-|--------------------|----------------------------|---------|-------------------|-----------------------------------------------------------------------------|
-| state              | on_off                     | enum    | [States](#states) | State of the media player, influenced by the play and power commands.       |
-|                    | toggle                     |         |                   |                                                                             |
-|                    | play_pause, stop           |         |                   |                                                                             |
-| volume             | volume                     | number  | 0..100            | Current volume level.                                                       |
-|                    | volume_up_down             |         |                   |                                                                             |
-| muted              | mute_toggle                | boolean |                   | Flag if the volume is muted.                                                |
-|                    | mute, unmute               |         |                   |                                                                             |
-| media_duration     | media_duration             | number  |                   | Media duration in seconds.                                                  |
-| media_position     | media_position             | number  |                   | Current media position in seconds.                                          |
-|                    | play_pause, stop           |         |                   |                                                                             |
-|                    | fast_forward, rewind, seek |         |                   |                                                                             |
-| media_type         | media_type                 | enum    | TODO              | The type of media being played.                                             |
-| media_image_url    | media_image_url            | string  |                   | URL to retrieve the album art or an image representing what's being played. |
-|                    | play_pause                 |         |                   |                                                                             |
-|                    | next, previous             |         |                   |                                                                             |
-| media_title        | media_title                | string  |                   | Currently playing media information.                                        |
-|                    | play_pause                 |         |                   |                                                                             |
-|                    | next, previous             |         |                   |                                                                             |
-| media_artist       | media_artist               | string  |                   | Currently playing media information.                                        |
-|                    | play_pause                 |         |                   |                                                                             |
-|                    | next, previous             |         |                   |                                                                             |
-| media_album        | media_album                | string  |                   | Currently playing media information.                                        |
-|                    | play_pause                 |         |                   |                                                                             |
-|                    | next, previous             |         |                   |                                                                             |
-| 🚧 source          |                            |         |                   | Currently selected media or input source.                                   |
-| 🚧 source_list     |                            |         |                   | Available media or input sources.                                           |
-| 🚧 sound_mode      |                            |         |                   | Currently selected sound mode.                                              |
-| 🚧 sound_mode_list |                            |         |                   | Available sound modes.                                                      |
+| Attribute          | Features                   | Type    | Values              | Description                                                                 |
+|--------------------|----------------------------|---------|---------------------|-----------------------------------------------------------------------------|
+| state              | on_off                     | enum    | [States](#states)   | State of the media player, influenced by the play and power commands.       |
+|                    | toggle                     |         |                     |                                                                             |
+|                    | play_pause, stop           |         |                     |                                                                             |
+| volume             | volume                     | number  | 0..100              | Current volume level.                                                       |
+|                    | volume_up_down             |         |                     |                                                                             |
+| muted              | mute_toggle                | boolean |                     | Flag if the volume is muted.                                                |
+|                    | mute, unmute               |         |                     |                                                                             |
+| media_duration     | media_duration             | number  |                     | Media duration in seconds.                                                  |
+| media_position     | media_position             | number  |                     | Current media position in seconds.                                          |
+|                    | play_pause, stop           |         |                     |                                                                             |
+|                    | fast_forward, rewind, seek |         |                     |                                                                             |
+| media_type         | media_type                 | enum    | _platform specific_ | The type of media being played.                                             |
+| media_image_url    | media_image_url            | string  |                     | URL to retrieve the album art or an image representing what's being played. |
+|                    | play_pause                 |         |                     |                                                                             |
+|                    | next, previous             |         |                     |                                                                             |
+| media_title        | media_title                | string  |                     | Currently playing media information.                                        |
+|                    | play_pause                 |         |                     |                                                                             |
+|                    | next, previous             |         |                     |                                                                             |
+| media_artist       | media_artist               | string  |                     | Currently playing media information.                                        |
+|                    | play_pause                 |         |                     |                                                                             |
+|                    | next, previous             |         |                     |                                                                             |
+| media_album        | media_album                | string  |                     | Currently playing media information.                                        |
+|                    | play_pause                 |         |                     |                                                                             |
+|                    | next, previous             |         |                     |                                                                             |
+| repeat             | repeat                     | enum    | `OFF`, `ALL`, `ONE` | Current repeat mode.                                                        |
+| shuffle            | shuffle                    | boolean |                     | Shuffle mode on or off.                                                     |
+| 🚧 source          |                            |         |                     | Currently selected media or input source.                                   |
+| 🚧 source_list     |                            |         |                     | Available media or input sources.                                           |
+| 🚧 sound_mode      |                            |         |                     | Currently selected sound mode.                                              |
+| 🚧 sound_mode_list |                            |         |                     | Available sound modes.                                                      |
 
 ### States
 
 The entity `state` attribute holds the following values:
 
-| Value    | Description                                                |
-|----------|------------------------------------------------------------|
-| ON       | The media player is switched on                            |
-| OFF      | The media player is switched off                           |
-| PLAYING  | The media player is playing something                      |
+| Value   | Description                           |
+|---------|---------------------------------------|
+| ON      | The media player is switched on       |
+| OFF     | The media player is switched off      |
+| PLAYING | The media player is playing something |
+| PAUSED  | The media player is paused            |
 
-See [common entity states](README.md#states).
+See also [common entity states](README.md#states).
 
 ### Device Classes
 
@@ -132,8 +135,8 @@ requests in `msg_data.cmd_id`.
 | mute_toggle   | -              | Toggle mute state.                                                       |
 | mute          | -              | Mute volume.                                                             |
 | unmute        | -              | Unmute volume.                                                           |
-| repeat        | -              | Repeat track or playlist.                                                |
-| shuffle       | -              | Shuffle playlist or start random playback.                               |
+| repeat        | repeat         | Repeat track or playlist.                                                |
+| shuffle       | shuffle        | Shuffle playlist or start random playback.                               |
 | 🚧 source     |                |                                                                          |
 | 🚧 sound_mode |                |                                                                          |
 | 🚧 search     |                |                                                                          |
@@ -168,6 +171,18 @@ The following attributes are supported:
 At least one attribute must be specified in the `entity_change` message. If the entity `state` and another attribute
 changed at the same time, for example if a new track starts playing, they may both be included in the same message.
 It's also valid to always send every attribute.
+
+#### Media types
+
+The `media_type` attribute specifies the media being played:
+
+- `MUSIC`
+- `RADIO`
+- `TVSHOW`
+- `MOVIE`
+- `VIDEO`
+
+The integration may return other values, but the UI will most likely handle them as an "unknown media". 
 
 #### Media images
 
@@ -249,6 +264,41 @@ It's also valid to always send every attribute.
 }
 ```
 
+#### repeat
+
+```json
+{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "repeat",
+    "params": {
+      "repeat": "ALL"
+    }
+  }
+}
+```
+
+#### shuffle
+
+```json
+{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "shuffle",
+    "params": {
+      "shuffle": true
+    }
+  }
+}
+```
 
 ### Event examples
 
