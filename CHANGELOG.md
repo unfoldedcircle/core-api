@@ -1,58 +1,64 @@
-# Core API Changelog
+# Core-API Changelog
+All notable changes to this project will be documented in this file.
 
-## 0.6.0-alpha
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-**2022-05-01** First public release.
+## Unreleased
 
-### AsyncAPI
+## 0.6.1-alpha - 2022-06-12
+### Added
+- Media player entity has a new state `PAUSED`, new attributes `repeat` & `shuffle` and initial `media_type` definitions.
+- Link published [API models in Rust](https://github.com/unfoldedcircle/api-model-rs).
+- Clarify sensor state, unit and label.
 
+### Changed
+- Switching to [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) format for this changelog.
+
+### Fixed
+- Integration API: entity discriminator property is `entity_type`
+- Fix entity command examples for climate and cover.
+
+## 0.6.0-alpha - 2022-05-01
+
+First public release.
+
+### Added
+- Refactor and enhance documentation.
+- Prepare AsyncAPI html generation with GitHub action.
+
+### Changed
 - Rename `friendly_name` properties to `name`.
 - Refactor entity command message: simple object, instead array of objects.
 - Clean up, updated message state emojis to reflect current remote-core status.
 
-### Documentation
-
-- Refactor and enhance documentation.
-- Prepared AsyncAPI html generation with GitHub action.
-
-## 0.5.0-alpha
-
-**2022-03-23**
-
-### AsyncAPI
-
+## 0.5.0-alpha - 2022-03-23
+### Added
 - Add authentication messages: `auth_required`, `auth`, `authentication`.
-- Refactor `driver_version`.
 - Add `device_id` property in `device_state` event.
-
-### Documentation
-
-- Refactor documentation structure.
 - Add WebSockets specific information.
 
-## 0.4.0-alpha
+### Changed
+- Refactor `driver_version`.
+- Refactor documentation structure.
 
-**2022-02-27**
-
-### AsyncAPI
-
+## 0.4.0-alpha - 2022-02-27
+### Added
 - Add `entity_type` property to messages: `entity_command`, `entity_change`, `entity_state`, `entity_removed`.
+
+### Changed
 - Rename `entity_change` property `driver_id` to `device_id`.
 - Change `device_state` response message to an event message.
 - Change `entity` message:
   - Property `features` is now optional.
   - Cover entity: split `open_close` feature into `open` and `close` features for covers which can only be opened
-    programmatically but must be closed manually. 
+    programmatically but must be closed manually.
 - Change `discovered_device` message property `friendly_name` to multi-language text object.
+- Improve entity change message descriptions and reflect changes in AsyncAPI
+
+### Fixed
 - Fix request message example in description.
 
-### Documentation
-
-- Reflect changes in AsyncAPI.
-- Improve entity change message descriptions.
-
-## 0.0.1 - 0.3.0-alpha
-
-**2021 - 2022-02-18**
+## 0.0.1 - 0.3.0-alpha - 2022-02-18
 
 Internal releases.
