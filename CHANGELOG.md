@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Replace `localization.unit_system_metric` & `.temperature_celsius` with `measurement_unit` enum (METRIC, US, UK). 
+- Change `localization.languageCode` separator from dash to underscore. New: `en_UK`, `en_US` etc.
 
 ## 0.6.1-alpha - 2022-06-12
 ### Added

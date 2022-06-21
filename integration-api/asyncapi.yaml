@@ -2293,11 +2293,11 @@ components:
     languageText: # untyped Map<string,string>
       type: object
       patternProperties:
-        ^[a-z]{2}(-\w+)?$: # TODO make culture code pattern more strict or more open?
+        ^[a-z]{2}(_\w+)?$: # TODO make culture code pattern more strict or more open?
           type: string
           description: |
             Key value pairs of language texts. Key: ISO 639-1 code with optional country suffix to represent a `culture
-            code`. Examples: `en`, `en-UK`, `en-US`, `de`, `de-CH`.   
+            code`. Examples: `en`, `en_UK`, `en_US`, `de`, `de_CH`.   
             If we need to support more regional differences within a country, then the
             [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) might be a solution. This would even
             support the various Swiss German dialects!
@@ -2335,25 +2335,27 @@ components:
         time_format_24h:
           type: boolean
           default: true
-        unit_system_metric:
-          description: |
-            Yes we are aware of the measurement unit differences between the UK and US. For our purpose - we don't do
-            unit conversions - this should be "good enough". Otherwise we gonna change it...
-          type: boolean
-          default: true
-        temperature_celsius:
-          type: boolean
-          default: true
+        measurement_unit:
+          $ref: '#/components/schemas/measurementUnit'
     languageCode:
       type: string
+      pattern: '^[a-z]{2}(_\w+)?$'
       description: |
         Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
-        code, followed by the ISO-3166 country code. Examples: `en-UK`, `en-US`, `de-DE`, `de-CH` etc.
+        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
+        separated by an underscore.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
     countryCode:
       type: string
       format: iso-3166
       description: |
         Two-letter country codes defined in [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
+    measurementUnit:
+      type: string
+      enum:
+        - METRIC
+        - US
+        - UK
 
     # =========================================================================
     # from OpenAPI
