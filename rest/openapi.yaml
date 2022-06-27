@@ -1,0 +1,4966 @@
+openapi: 3.0.3
+info:
+  title: Remote Two REST API
+  version: 0.7.0
+  contact:
+    name: API Support
+    url: 'https://github.com/unfoldedcircle/core-api/issues'
+  license:
+    name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+    url: 'https://creativecommons.org/licenses/by-sa/4.0/'
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, access tokens for the WebSocket API can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n- Infrared code management\n- Activity management    \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
+externalDocs:
+  description: Find out more about the Remote Two
+  url: 'https://www.unfoldedcircle.com/'
+servers:
+  - url: 'http://localhost:8080/api'
+  - url: 'https://localhost:8443/api'
+  - url: 'http://unfolded-simulator.local:8080/api'
+  - url: 'https://unfolded-simulator.local:8443/api'
+security:
+  - basicAuth: []
+tags:
+  - name: info
+    description: Public status information and health checks
+  - name: auth
+    description: Authentication
+  - name: ws-token
+    description: Access token handling for the UC WebSocket API.
+  - name: external-token
+    description: Access token handling for external systems.
+  - name: resources
+    description: 'Media files handling, e.g. manage background images, icons or sound effects.'
+  - name: integrations
+    description: Integration handling
+  - name: entities
+    description: Entity handling
+  - name: profiles
+    description: 'User profile configuration with profiles, groups, pages'
+  - name: cfg
+    description: Configuration settings
+  - name: dock
+    description: "\U0001F477 Dock infrared handling - **work in progress**"
+  - name: system
+    description: "\U0001F477 System information and commands - **work in progress**"
+  - name: mdns
+    description: "\U0001F477 Service Discovery - **work in progress**"
+paths:
+  /pub/version:
+    get:
+      tags:
+        - info
+      summary: Get version information about installed components.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VersionInfo'
+      security: []
+  /pub/status:
+    get:
+      tags:
+        - info
+      summary: Get status information about the system.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  memory:
+                    type: object
+                    description: Memory status
+                    properties:
+                      total_memory:
+                        type: integer
+                        description: Amount of available RAM in KB
+                      available_memory:
+                        type: integer
+                        description: Amount of available RAM in KB for (re)use
+                      used_memory:
+                        type: integer
+                        description: Amount of used RAM in KB
+                      total_swap:
+                        type: integer
+                        description: SWAP size in KB
+                      used_swap:
+                        type: integer
+                        description: Free SWAP in KB
+                  load_avg:
+                    type: object
+                    description: System load average
+                    properties:
+                      one:
+                        type: number
+                        description: Average load within one minute
+                      five:
+                        type: number
+                        description: Average load within five minutes
+                      fifteen:
+                        type: number
+                        description: Average load within fifteen minutes
+                  filesystem:
+                    type: object
+                    description: Filesystem status
+                    properties:
+                      user_data:
+                        type: object
+                        properties:
+                          available:
+                            type: integer
+                            description: Amount of available disk space in KB
+                          used:
+                            type: integer
+                            description: Amount of used disk space in KB
+      security: []
+  /pub/health_check:
+    get:
+      tags:
+        - info
+      summary: Retrieve health check information about the system and running services.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  db:
+                    type: string
+                    enum:
+                      - Healthy
+                      - Degraded
+                      - Unhealthy
+                  ui:
+                    $ref: '#/paths/~1pub~1health_check/get/responses/200/content/application~1json/schema/properties/db'
+                  storage:
+                    $ref: '#/paths/~1pub~1health_check/get/responses/200/content/application~1json/schema/properties/db'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+      security: []
+  /auth/scopes:
+    get:
+      tags:
+        - auth
+      summary: Get available access scopes.
+      description: |
+        Access scopes are used to create tokens for the WebSocket API.
+      operationId: getAccessScopes
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scopes'
+  /auth/external:
+    get:
+      tags:
+        - external-token
+      summary: Get registered external systems.
+      description: |
+        External systems are handled with the R2 integrations. Before an access token for such a system can be provided,
+        the corresponding system needs to be registered.
+
+        _TODO: reference to WebSocket API for integration registration._
+
+        If the expected system name is not returned by this call, any operations on that system name will fail:
+        `/auth/external/{system}`.
+        Therefore, it's advisable to either call this method first or react on the 404 error while providing or updating an
+        external system token, to inform the client user, that the integration is not available on the remote.
+      operationId: getExternalSystems
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalSystems'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - external-token
+      summary: Remove all external access tokens.
+      description: |
+        Management operation to delete all external access tokens. Attention: this cannot be reverted!
+      operationId: deleteAllExternalAccessTokens
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - basicAuth: []
+  '/auth/external/{system}':
+    post:
+      tags:
+        - external-token
+      summary: Provide an access token of an external system.
+      description: |
+        An access token is usually required to connect to external systems like Home Assistant.
+        This method allows the external system to automatically provide the access token for the corresponding R2
+        integration instead of forcing the user to type it in. If the token name already exists for the given system,
+        error `422` is returned.
+        Use the put method to update an existing token.
+
+        The format of the access token depends on the external system and the involved R2 integration.
+        It could be a UUID, a JWT or any other representation required for the integration to communicate with the
+        external system.
+
+        The `system` parameter is determined by the registered R2 integration. Only registered system name identifiers are
+        valid, otherwise error `404` will be returned.
+        E.g. a "FooBar" integration might register the system identifier name "foobar".
+        Use the `GET /auth/external` method the retrieve the registered systems.
+      operationId: addExternalAccessToken
+      parameters:
+        - $ref: '#/components/parameters/system'
+      requestBody:
+        description: Access token that needs to be added to the remote
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalAccessTokenRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the token identifier in the response.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token_id:
+                    type: string
+                    format: '^[a-zA-Z0-9\-_]+$'
+                    minLength: 1
+                    maxLength: 36
+                    description: |
+                      Unique token identifier, used for later token management through the external system or management ui.
+                      If the token identifier has been provided in the request, then then same identifier is returned, otherwise a
+                      UUID is generated.
+                required:
+                  - token_it
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+      x-codegen-request-body-name: body
+    head:
+      tags:
+        - external-token
+      summary: Get total number of available tokens for an external system.
+      operationId: getExternalAccessTokenCount
+      parameters:
+        - $ref: '#/components/parameters/system'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - external-token
+      summary: List available tokens for an external system.
+      operationId: getExternalAccessTokens
+      parameters:
+        - $ref: '#/components/parameters/system'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalAccessTokens'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - external-token
+      summary: Remove all access tokens of an external system.
+      operationId: deleteExternalAccessTokensBySystem
+      parameters:
+        - $ref: '#/components/parameters/system'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/auth/external/{system}/{tokenId}':
+    get:
+      tags:
+        - external-token
+      summary: Get external access token.
+      operationId: getExternalAccessToken
+      parameters:
+        - $ref: '#/components/parameters/system'
+        - $ref: '#/components/parameters/token_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalAccessToken'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    put:
+      tags:
+        - external-token
+      summary: Replace an existing access token of an external system.
+      description: |
+        This methods allows an already provided token of an external system to be updated. The token is identified by
+        the system name and the token identification.
+      operationId: replaceExternalAccessToken
+      parameters:
+        - $ref: '#/components/parameters/system'
+        - $ref: '#/components/parameters/token_id'
+      requestBody:
+        description: Access token to update
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalAccessTokenRequest'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - external-token
+      summary: Remove an external access token.
+      description: |
+        No error is returned if the `tokenId` doesn't exist. `404` is only returned it the `system` is not found.
+      operationId: deleteExternalAccessToken
+      parameters:
+        - $ref: '#/components/parameters/system'
+        - $ref: '#/components/parameters/token_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /auth/ws:
+    head:
+      tags:
+        - ws-token
+      summary: Get total number of available access tokens.
+      operationId: getAccessTokenCount
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active flag
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - ws-token
+      summary: List WebSocket access tokens.
+      operationId: getAccessTokens
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active flag
+          required: false
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessTokens'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - ws-token
+      summary: Create an access token for the Remote Two WebSocket API.
+      description: |
+        The returned token is usually not yet enabled for use and must first be approved by the user on the remote.
+
+        The required scopes must be provided. They let you specify what exactly a client needs to access.
+        When the access token request is displayed to the remote user for approval, the requested scopes will be
+        displayed to them.
+
+        An error is returned if a token already exists for the provided `token_id`. To issue a new token for the same
+        identifier, the old token needs to be revoked first.
+      operationId: createAccessToken
+      requestBody:
+        description: Client information requesting access
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessTokenRequest'
+            example:
+              token_id: 1-2-3
+              name: Web Configurator
+              scopes:
+                - admin
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - ws-token
+      summary: Delete all WebSocket access tokens.
+      operationId: deleteAllAccessTokens
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  '/auth/ws/{tokenId}':
+    get:
+      tags:
+        - ws-token
+      summary: Get existing WebSocket access token.
+      operationId: getAccessToken
+      parameters:
+        - $ref: '#/components/parameters/token_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - ws-token
+      summary: Update properties of a WebSocket access token.
+      operationId: updateAccessToken
+      description: |
+        Activate token, rename friendly name or set validity periods of an existing token.
+
+        Note: access scopes cannot be changed. This requires to revoke the token and request a new one.
+      parameters:
+        - $ref: '#/components/parameters/token_id'
+      requestBody:
+        description: Properties to update in the existing token.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccessTokenUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessToken'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - ws-token
+      summary: Delete a WebSocket access token.
+      description: |
+        No error is returned if the `tokenId` doesn't exist.
+      operationId: deleteAccessToken
+      parameters:
+        - $ref: '#/components/parameters/token_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /resources:
+    get:
+      tags:
+        - resources
+      summary: Get supported media resource types.
+      operationId: getResourceTypes
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceType'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - resources
+      summary: Delete all resources.
+      operationId: deleteAllResources
+      parameters:
+        - $ref: '#/components/parameters/resource_type_query'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+      security:
+        - basicAuth: []
+  '/resources/{type}':
+    head:
+      tags:
+        - resources
+      summary: Get total number of available resources of a given type.
+      operationId: getResourceTypeItemsCount
+      parameters:
+        - $ref: '#/components/parameters/resource_type'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - resources
+      summary: List available media resources of a given type.
+      operationId: getResourceTypeItems
+      parameters:
+        - $ref: '#/components/parameters/resource_type'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceItems'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - resources
+      summary: Upload media resource files.
+      operationId: uploadFile
+      parameters:
+        - $ref: '#/components/parameters/resource_type'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceItems'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - resources
+      summary: Delete all resources of a given type.
+      operationId: deleteResources
+      parameters:
+        - $ref: '#/components/parameters/resource_type'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/resources/{type}/{id}':
+    get:
+      tags:
+        - resources
+      summary: Download a media resource.
+      operationId: getResource
+      parameters:
+        - $ref: '#/components/parameters/resource_type'
+        - $ref: '#/components/parameters/resource_id'
+      responses:
+        '200':
+          description: A resource file
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpg:
+              schema:
+                type: string
+                format: binary
+            audio/vorbis:
+              schema:
+                type: string
+                format: binary
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - resources
+      summary: Delete a media resource.
+      operationId: deleteResource
+      parameters:
+        - $ref: '#/components/parameters/resource_type'
+        - $ref: '#/components/parameters/resource_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /intg:
+    get:
+      tags:
+        - integrations
+      summary: Get integration status.
+      description: |
+        Retrieve an overview of the integration instances and their current connection state.
+      operationId: getIntegrationStatus
+      parameters:
+        - $ref: '#/components/parameters/enabled'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/IntegrationStatus'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    put:
+      tags:
+        - integrations
+      summary: Connect or disconnect all integration instances.
+      description: |
+        Exectue a command on all active integration instances:
+
+        - `connect`: requests all enabled integrations to establish a session to the integration driver and start processing
+          events.  
+          Use `GET /intg` or `GET /intg/instances/{intgId}` to check on the connection status.
+        - `disconnect`: disconnects all active integration driver sessions.
+      operationId: executeCommandOnAllIntegrations
+      parameters:
+        - name: cmd
+          in: query
+          description: Command to execute.
+          required: true
+          schema:
+            type: string
+            enum:
+              - connect
+              - disconnect
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /intg/drivers:
+    head:
+      tags:
+        - integrations
+      summary: Get total number of registered integration drivers.
+      operationId: getIntegrationDriversCount
+      parameters:
+        - $ref: '#/components/parameters/enabled'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - integrations
+      summary: Get all registered integration drivers.
+      description: |
+        Returns an overview of all registered drivers. To retrieve all driver data use `/intg/drivers/{driverId}`.
+      operationId: getIntegrationDrivers
+      parameters:
+        - $ref: '#/components/parameters/enabled'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationDrivers'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - integrations
+      summary: Register a new integration driver.
+      description: |
+        A driver provides the connection parameters and optional setup configuration for an integration driver.
+
+        Depending on the driver capabilities it either provides a single access point to the provided entities, or exposes
+        multiple devices, each with its own unique set of entities. The former could for example be used to provide GPIO
+        access of a Raspberry Pi or gather all supported devices it is able to interact with (e.g. network sensors, light
+        switches etc.). The more cabable multi-device mode is suited to bridge home automation hubs where multiple
+        instances should be supported.
+
+        Once a driver is registered, one or more integration instances must be configured to interact with the driver.  
+        For simple integration drivers there's a 1:1 relationship between an instance and driver. For multi-device drivers, 
+        each device corresponds to an integration instance.
+
+        It is recommended to manually set a unique and human-readable driver identifier in `driver_id`. Otherwise a UUID
+        will be assigned. The `driver_id` is required for all further interactions with the driver, like creating a runtime
+        instance to connect to the driver and fetch available entities.
+      operationId: registerIntegrationDriver
+      requestBody:
+        description: Integration driver data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegrationDriverRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the created integration driver in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationDriver'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/intg/drivers/{driverId}':
+    get:
+      tags:
+        - integrations
+      summary: Get an integration driver.
+      description: |
+        Returns the full data of an integration driver, except the authentication token for external clients.
+      operationId: getIntegrationDriver
+      parameters:
+        - $ref: '#/components/parameters/driver_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationDriver'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - integrations
+      summary: Modify a configured integration driver.
+      description: |
+        Update one or several properties of an integration driver.  
+        See request description on how to update or delete an existing property.
+      operationId: updateIntegrationDriver
+      parameters:
+        - $ref: '#/components/parameters/driver_id'
+      requestBody:
+        description: Entity data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegrationDriverRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the updated integration driver in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationDriver'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - integrations
+      summary: Remove an integration driver.
+      description: |
+        Unloads and deletes an integration driver with all instances and provided entities.
+
+        **Attention: all references to the integration driver will be removed! This includes all driver instances,
+        provided entities and their references in profile pages and groups.**
+      operationId: deleteIntegrationDriver
+      parameters:
+        - $ref: '#/components/parameters/driver_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    put:
+      tags:
+        - integrations
+      summary: Start or stop an integration driver
+      description: |
+        Manually start an integration driver to be ready for the integration instances, or stop a driver to disable all
+        integration instances processing.
+
+        If a driver is enabled it will start automatically. Manually starting and stopping a driver is for testing purposes
+        and setting up new drivers in the web-configurator.
+      operationId: integrationDriverCommand
+      parameters:
+        - $ref: '#/components/parameters/driver_id'
+        - name: cmd
+          in: query
+          description: Execute a command on the driver.
+          required: true
+          schema:
+            type: string
+            enum:
+              - start
+              - stop
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - integrations
+      summary: Create a new integration instance from driver.
+      description: |
+        Create an integration driver instance and associate it with the driver.  
+        For simple integration drivers there's a 1:1 relationship only between an instance and driver.
+        For multi-device drivers, each device corresponds to an integration instance.
+
+        - the `integration_id` is automatically created by the system to make it unique over all integrations.
+        - for multi-device drivers the `device_id` must be specified and may not already exist in another instance of the
+          same driver.
+        - the driver's name is used by default if `name` isn't specified.
+        - the instance is active by default if `enabled` isn't specified.
+      operationId: createIntegration
+      parameters:
+        - $ref: '#/components/parameters/driver_id'
+      requestBody:
+        description: Integration intance data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegrationRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the created integration instance in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integration'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /intg/instances:
+    head:
+      tags:
+        - integrations
+      summary: Get total number of integration instances.
+      operationId: getIntegrationsCount
+      parameters:
+        - $ref: '#/components/parameters/enabled'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - integrations
+      summary: Get all integration instances.
+      operationId: getIntegrations
+      parameters:
+        - $ref: '#/components/parameters/enabled'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integrations'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/intg/instances/{intgId}':
+    get:
+      tags:
+        - integrations
+      summary: Get an integration instance.
+      operationId: getIntegration
+      parameters:
+        - $ref: '#/components/parameters/intg_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integration'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - integrations
+      summary: Modify a configured integration instance.
+      description: |
+        Modify one or several properties of an integration instance.  
+        See update model description on how to update or delete an existing property.
+
+        The integration driver of an instance cannot be changed and will be ignored if provided in the request.
+      operationId: updateIntegration
+      parameters:
+        - $ref: '#/components/parameters/intg_id'
+      requestBody:
+        description: Integration instance data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegrationRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the updated integration instance in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Integration'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - integrations
+      summary: Remove an integration instance.
+      description: |
+        Unloads and deletes an integration instance.
+
+        **Attention: all references to the integration instance will be removed! This includes configured entities and 
+        their references in profile pages and groups.**
+      operationId: deleteIntegration
+      parameters:
+        - $ref: '#/components/parameters/intg_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    put:
+      tags:
+        - integrations
+      summary: Connect or disconnect an integration instance.
+      description: |
+        Exectue a command on the integration instance:
+
+        - `connect`: establish a session to the integration driver and start processing events.  
+          Use `GET /intg` or `GET /intg/instances/{intgId}` to check on the connection status.
+        - `disconnect`: disconnect from the driver and stop processing events.
+      operationId: executeIntegrationCommand
+      parameters:
+        - $ref: '#/components/parameters/intg_id'
+        - name: cmd
+          in: query
+          description: Command to execute.
+          required: true
+          schema:
+            type: string
+            enum:
+              - connect
+              - disconnect
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/intg/instances/{intgId}/entities':
+    get:
+      tags:
+        - integrations
+      summary: Get available entities from integration instance.
+      description: |
+        Retrieve the available entities provided by the integration instance.
+
+        By default only the entities are returned which are not yet configured. Use the `filter` query to include all or
+        only the already configured entities.
+      operationId: getAvailableEntitiesFromInstance
+      parameters:
+        - $ref: '#/components/parameters/intg_id'
+        - name: reload
+          in: query
+          description: Force reload available entities from driver.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: filter
+          in: query
+          description: Filter available entities.
+          required: false
+          schema:
+            type: string
+            default: NEW
+            enum:
+              - NEW
+              - CONFIGURED
+              - ALL
+        - $ref: '#/components/parameters/entity_type'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AvailableEntity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/intg/instances/{intgId}/entities/{entityId}':
+    post:
+      tags:
+        - integrations
+      summary: Configure an available entity.
+      description: |
+        Configure a new Remote Two entity from an available integration entity. Once configured, the entity will no longer
+        show up as available entity (unless the `all` filter is set).
+
+        The entity `name`, `icon` and `description` fields may be changed. If not specified in the request the values from
+        the available entity are used.
+      operationId: configureEntityFromIntegration
+      parameters:
+        - $ref: '#/components/parameters/intg_id'
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Entity data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the configured entity in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+  /entities:
+    head:
+      tags:
+        - entities
+      summary: Get total number of configured entities.
+      operationId: getEntityCount
+      parameters:
+        - $ref: '#/components/parameters/entity_type'
+        - $ref: '#/paths/~1entities/get/parameters/1'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - entities
+      summary: Get configured entities.
+      description: |
+        Returns all configured and loaded entities.  
+        Entities can be filtered by type and integration.
+      operationId: getEntities
+      parameters:
+        - $ref: '#/components/parameters/entity_type'
+        - name: intg_id
+          in: query
+          description: Filter by integration.
+          required: false
+          schema:
+            $ref: '#/components/schemas/IntegrationId'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entities'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  '/entities/{entityId}':
+    get:
+      tags:
+        - entities
+      summary: Get a configured entity.
+      operationId: getEntity
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - entities
+      summary: Modify a configured entity.
+      operationId: updateEntity
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Entity data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the configured entity in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - entities
+      summary: Remove a configured entity.
+      description: |
+        Unloads and deletes a configured entity. If the entity is still provided from an integration it can be reused and
+        will show up again in the available entity group.
+
+        All references to the configured entity will be removed from profile pages and groups.
+      operationId: deleteEntity
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/entities/{entityId}/command':
+    put:
+      tags:
+        - entities
+      summary: Execute an entity command.
+      operationId: executeEntityCommand
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Command data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityCommand'
+        required: true
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+  /profiles/:
+    post:
+      tags:
+        - profiles
+      summary: Create a new profile.
+      description: |
+        The `profile_id` property is optional and auto-generated if not specified. Otherwise it needs to be a unique profile
+        identifier.  
+        If a `pin` is specified the profile will be protected. A protected profile can only be accessed with the profile specific pin code.
+      operationId: createProfile
+      requestBody:
+        description: Profile data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the profile identifier in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - profiles
+      summary: Get all profiles.
+      operationId: getProfiles
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profiles'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - profiles
+      summary: Delete all profiles.
+      operationId: deleteAllProfiles
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  '/profiles/{profileId}':
+    get:
+      tags:
+        - profiles
+      summary: Get profile.
+      operationId: getProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - profiles
+      summary: Update properties of a profile.
+      description: |
+        Update one or multiple properties of a profile. A missing property will not update its current value.  
+        - `profile_id` is mandatory and can't be changed.
+        - an empty `icon` value removes an existing icon identifier.
+        - an empty `pin` value removes an existing pin code.
+        - a missing `pages` property will not change the page order.
+        - ⚠️ an empty `pages` array removes all pages and groups in the profile!
+        - ⚠️ missing page identifiers in the `pages` array will remove the page configuration!
+      operationId: updateProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      requestBody:
+        description: Properties to update in the existing profile.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProfileUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - profiles
+      summary: Delete profile.
+      operationId: deleteProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/profiles/{profileId}/pages':
+    post:
+      tags:
+        - profiles
+      summary: Create a new page in the profile.
+      operationId: createPage
+      parameters:
+        - $ref: '#/components/parameters/profile_pin'
+      requestBody:
+        description: Profile data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Page'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the page identifier in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - profiles
+      summary: Get all pages of the profile.
+      operationId: getPagesInProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - profiles
+      summary: Delete all pages of the profile.
+      operationId: deleteAllPagesInProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/profiles/{profileId}/pages/{pageId}':
+    get:
+      tags:
+        - profiles
+      summary: Get a page of the profile
+      operationId: getPage
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/page_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - profiles
+      summary: Update properties of a page.
+      operationId: updatePage
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/page_id'
+        - $ref: '#/components/parameters/profile_pin'
+      requestBody:
+        description: Properties to update in the existing page.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PageUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Page'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - profiles
+      summary: Delete a page of the profile.
+      operationId: deletePage
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/page_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/profiles/{profileId}/groups':
+    post:
+      tags:
+        - profiles
+      summary: Create a new group in the profile.
+      operationId: createGroup
+      parameters:
+        - $ref: '#/components/parameters/profile_pin'
+      requestBody:
+        description: Profile data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Group'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the page identifier in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    get:
+      tags:
+        - profiles
+      summary: Get all groups of the profile.
+      operationId: getGroupsInProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Groups'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - profiles
+      summary: Delete all groups of the profile.
+      operationId: deleteAllGroupsInProfile
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/profiles/{profileId}/groups/{groupId}':
+    get:
+      tags:
+        - profiles
+      summary: Get a group in the profile.
+      operationId: getGroup
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/group_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - profiles
+      summary: Update properties of a group.
+      operationId: updateGroup
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/group_id'
+        - $ref: '#/components/parameters/profile_pin'
+      requestBody:
+        description: Properties to update in the existing group.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GroupUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Group'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - profiles
+      summary: Delete a group of the profile.
+      operationId: deleteGroup
+      parameters:
+        - $ref: '#/components/parameters/profile_id'
+        - $ref: '#/components/parameters/group_id'
+        - $ref: '#/components/parameters/profile_pin'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /cfg:
+    get:
+      tags:
+        - cfg
+      summary: Get all configuration settings.
+      description: |
+        Retrieve all system configuration settings at once. Updating a configuration setting must be performed with the
+        corresponding endpoint.
+      operationId: getAllSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgAll'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - cfg
+      summary: Reset all settings to default values.
+      description: |
+        This resets all system configuration settings to factory defaults. Integration & profile settings are not affected.
+      operationId: resetAllSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgAll'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/button:
+    get:
+      tags:
+        - cfg
+      summary: Get button settings.
+      description: |
+        Button backlight configuration.
+      operationId: getButtonSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgButtons'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify button settings.
+      description: |
+        Change one or multiple button backlight settings.
+      operationId: updateButtonSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgButtons'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgButtons'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/display:
+    get:
+      tags:
+        - cfg
+      summary: Get display settings.
+      description: |
+        Display brightness and auto brightness configuration.
+      operationId: getDisplaySettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgDisplay'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify display settings.
+      description: |
+        Change one or multiple display settings.
+      operationId: updateDisplaySettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgDisplay'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgDisplay'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/haptic:
+    get:
+      tags:
+        - cfg
+      summary: Get haptic settings.
+      description: |
+        Haptic configuration.
+      operationId: getHapticSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgHaptic'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify haptic settings.
+      description: |
+        Change one or multiple haptic settings.
+      operationId: updateHapticSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgHaptic'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgHaptic'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/localization:
+    get:
+      tags:
+        - cfg
+      summary: Get localization settings.
+      description: |
+        Retrieve the language and region configuration.
+      operationId: getLocalizationSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgLocalization'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify localization settings.
+      description: |
+        Change one or multiple localization settings.
+      operationId: updateLocalizationSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgLocalization'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgLocalization'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/localization/tz_names:
+    get:
+      tags:
+        - cfg
+      summary: Get all available time zone names.
+      operationId: getTimezoneNames
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/network:
+    get:
+      tags:
+        - cfg
+      summary: Get network settings.
+      description: |
+        Language and region configuration.
+      operationId: getNetworkSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgNetwork'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify network settings.
+      description: |
+        Change one or multiple network settings.
+      operationId: updateNetworkSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgNetwork'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgNetwork'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/power_saving:
+    get:
+      tags:
+        - cfg
+      summary: Get power settings.
+      description: |
+        Sleep timeout and wakeup sensitivity configuration.
+      operationId: getPowerSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgPowerSaving'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify power settings.
+      description: |
+        Change one or multiple power saving settings.
+      operationId: updatePowerSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgPowerSaving'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgPowerSaving'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/software_udpate:
+    get:
+      tags:
+        - cfg
+      summary: Get software update settings.
+      description: |
+        Software update configuration.
+      operationId: getSoftwareUpdateSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgSoftwareUpdate'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify software update settings.
+      description: |
+        Change one or multiple software update settings.
+      operationId: updateSoftwareUpdateSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgSoftwareUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgSoftwareUpdate'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/sound:
+    get:
+      tags:
+        - cfg
+      summary: Get sound settings.
+      description: |
+        Sound configuration.
+      operationId: getSoundSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgSound'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify sound settings.
+      description: |
+        Change one or multiple sound settings.
+      operationId: updateSoundSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgSound'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgSound'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/voice_control:
+    get:
+      tags:
+        - cfg
+      summary: Get voice control settings.
+      description: |
+        Voice control configuration.
+      operationId: getVoiceControlSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgVoiceControl'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - cfg
+      summary: Modify voice control settings.
+      description: |
+        Change one or multiple voice control settings.
+      operationId: updateVoiceControlSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgVoiceControl'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgVoiceControl'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /cfg/voice_control/voice_assistants:
+    get:
+      tags:
+        - cfg
+      summary: Get available voice assistants.
+      operationId: getVoiceAssistants
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /docks:
+    get:
+      tags:
+        - dock
+      summary: List configured docks and their connection state.
+      description: |
+        Returns all dock configuration enriched with current connection information.
+      operationId: getDocks
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active flag
+          required: false
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockConfigurations'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - dock
+      summary: Create a new dock configuration.
+      description: |
+        Create and persist a new dock configuration. To establish a session to the dock, a connect operation must be called
+        afterwards.  
+        - Error `422` is returned if the given `service_name` already exists.
+        - If `custom_ws_url` is not specified, the dock address is resolved with a mDNS lookup based on `service_name`.   
+        - The `active` flag specifies if the dock will participate to connection requests.
+        - Non-active docks will not auto-connect and must be enabled first to be used.
+      operationId: createDock
+      requestBody:
+        description: Client information requesting access
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DockConfigurationRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockConfiguration'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - dock
+      summary: Delete all dock configurations.
+      description: |
+        This clears all dock configuration: active dock sessions are disconnected and the persisted dock configuration will
+        be removed. If `/docks/connect` is called afterwards, there are no more dock connections to be established.
+      operationId: deleteAllDocks
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /docks/connect:
+    post:
+      tags:
+        - dock
+      summary: Start all active dock connections
+      description: |
+        Requests all active docks to establish a session to the dock.  
+        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
+      operationId: connectAllDocks
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /docks/disconnect:
+    post:
+      tags:
+        - dock
+      summary: Stop all dock connections
+      description: |
+        Disconnects all active dock sessions.
+      operationId: disconnectAllDocks
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/docks/{dockId}':
+    get:
+      tags:
+        - dock
+      summary: Get dock configuration.
+      operationId: getDock
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockConfiguration'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    patch:
+      tags:
+        - dock
+      summary: Change dock configuration like auto-connect or access token.
+      description: |
+        Update one or more dock fields
+      operationId: updateDock
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      requestBody:
+        description: 'Fields to update, ommit the ones without change.'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  maxLength: 64
+                  description: User assignable friendly name to use instead of service_name
+                custom_ws_url:
+                  type: string
+                  minLength: 6
+                  maxLength: 256
+                  description: Dock WebSocket URL to override auto-discovery from service_name
+                token:
+                  type: string
+                  description: |
+                    Access token to connect to the dock.
+                    This does not change the token in the dock! Use the `command` resource to change the token.
+                active:
+                  type: boolean
+                  description: Auto connect to dock when network is available
+                description:
+                  type: string
+                  description: Optional description
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockConfiguration'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - dock
+      summary: Delete dock configuration.
+      operationId: deleteDock
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/docks/{dockId}/command':
+    post:
+      tags:
+        - dock
+      summary: Send a dock command.
+      operationId: dockCommand
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      requestBody:
+        description: Dock command
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                command:
+                  type: string
+                  enum:
+                    - LED_BRIGHTNESS_START
+                    - LED_BRIGHTNESS_STOP
+                    - REMOTE_LOW_BATTERY
+                    - REMOTE_CHARGED
+                    - SET_FRIENDLY_NAME
+                    - REBOOT
+                    - RESET
+                value:
+                  description: Required for brightness start and friendly name
+                  type: string
+                token:
+                  description: Required for reset
+                  type: string
+              required:
+                - command
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/docks/{dockId}/connect':
+    post:
+      tags:
+        - dock
+      summary: Start dock connection
+      description: |
+        Establish a session to the dock.  
+        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
+      operationId: connectDock
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/docks/{dockId}/disconnect':
+    post:
+      tags:
+        - dock
+      summary: Stop dock connection
+      description: |
+        Disconnects the dock session.
+      operationId: disconnectDock
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/docks/{dockId}/ir/send':
+    get:
+      tags:
+        - dock
+      summary: Test IR command.
+      description: |
+        Test function for sending IR commands. The IR code can either be in Pronto format or Hex.
+        If no output is specified, the code will only be emitted from the dock.
+      operationId: sendIrTest
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - name: int1
+          in: query
+          description: Main internal ir blaster
+          schema:
+            type: boolean
+        - name: int2
+          in: query
+          description: 'Second internal ir blaster. V2 dock: top'
+          schema:
+            type: boolean
+        - name: ext1
+          in: query
+          description: External IR blaster 1
+          schema:
+            type: boolean
+        - name: ext2
+          in: query
+          description: External IR blaster 2
+          schema:
+            type: boolean
+        - name: pronto
+          in: query
+          description: 'Pronto IR code, values separated by comma'
+          required: false
+          schema:
+            type: string
+            pattern: '^[a-fA-F0-9]{4}(,[a-fA-F0-9]{4}){3,}$'
+        - name: hex
+          in: query
+          description: Hex IR code
+          required: false
+          schema:
+            type: string
+            pattern: '^[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}$'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - dock
+      summary: Send IR command.
+      description: |
+        Send an IR command, either in Pronto or [IRremoteESP8266 Hex](https://github.com/crankyoldgit/IRremoteESP8266) format.
+
+        Hex format: `<protocol>,<hex-ir-code>,<bits>,<repeat-count>`
+        - protocol: numeric value from supported and enabled protocols. See: [decode_type_t](https://github.com/crankyoldgit/IRremoteESP8266/blob/v2.8.0/src/IRremoteESP8266.h#L866)
+        - hex-ir-code: HEX value prefixed with `0x`
+        - bits: number of bits in hex value
+      operationId: sendIr
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      requestBody:
+        description: IR command
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                int1:
+                  description: Main internal ir blaster
+                  type: boolean
+                int2:
+                  description: 'Second internal ir blaster. V2 dock: top'
+                  type: boolean
+                ext1:
+                  description: External IR blaster 1
+                  type: boolean
+                ext2:
+                  description: External IR blaster 2
+                  type: boolean
+                pronto:
+                  description: 'Pronto IR code, values separated by space or comma'
+                  type: string
+                  pattern: '^[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,}$'
+                hex:
+                  description: Hex IR code
+                  type: string
+                  pattern: '^[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}$'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  '/docks/{dockId}/ir/learn':
+    get:
+      tags:
+        - dock
+      summary: Get IR learning status and results.
+      description: |
+        The current status and if the dock is in IR learning mode, any learned codes will be returned.
+      operationId: irLearningStatus
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: IR learning status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IrStatus'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - dock
+      summary: Start IR learning.
+      description: |
+        Puts the dock into IR learning mode. Use the GET status request to check on learned codes or DELETE to stop learning.
+      operationId: startIrLearning
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - name: timeout
+          in: query
+          description: 'Timeout in seconds to switch off learning mode. Default: 30'
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 255
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+    delete:
+      tags:
+        - dock
+      summary: Stop IR learning and clear results.
+      description: |
+        The current status and any learned codes will be returned. After this call any learned codes are no longer accessible
+        through the GET status call.
+      operationId: stopIrLearning
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: IR learning status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IrStatus'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+      security:
+        - basicAuth: []
+  /system:
+    get:
+      tags:
+        - system
+      summary: Get system information.
+      description: 'Get hardware information about the device like serial number, model number and hardware revision.'
+      operationId: getSystemInfo
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemInfo'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - system
+      summary: Perform a system command like reboot or power-off.
+      description: |
+        The following system commands can be executed:
+
+        - `STANDBY`: Put the device into standby mode.
+        - `REBOOT`: Reboot the device.
+        - `POWER_OFF`: Switch off the device
+        - `RESTART`: Restart the application.
+      operationId: systemCommand
+      parameters:
+        - name: cmd
+          in: query
+          description: System command
+          required: true
+          schema:
+            type: string
+            enum:
+              - STANDBY
+              - REBOOT
+              - POWER_OFF
+              - RESTART
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /system/factory_reset:
+    get:
+      tags:
+        - system
+      summary: Get factory reset token.
+      description: |
+        Get a factory reset token to perform a complete factory reset of the remote.
+
+        The token will be valid for 60 seconds. Afterwards, a new token must be requested.  
+        Whenever a new token is requested, any old tokens will be invalidated.
+      operationId: getFactoryResetToken
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+    post:
+      tags:
+        - system
+      summary: Perform a factory reset.
+      description: |
+        A factory reset removes all configuration data and puts the device into a clean state.  
+
+        ⚠️ **Warning:** All user data will be erased and won't be recoverable!
+
+        A reset token must be requested first and provided to perform a factory reset.
+      operationId: performFactoryReset
+      parameters:
+        - name: token
+          in: query
+          description: Reset token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+      security:
+        - basicAuth: []
+  /test/mdns/discover:
+    get:
+      tags:
+        - mdns
+      summary: Browse and resolve for service instances.
+      operationId: discoverAllServices
+      parameters:
+        - name: timeout_browse
+          in: query
+          description: Service browse timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+        - name: timeout_browse1
+          in: query
+          description: Single service browse timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 15
+        - name: timeout_resolve
+          in: query
+          description: Resolve timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+        - name: timeout_address
+          in: query
+          description: Address resolve timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstances'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+      security:
+        - basicAuth: []
+  '/test/mdns/discover/{query}':
+    get:
+      tags:
+        - mdns
+      summary: Resolve service instances of a given type.
+      operationId: discoverService
+      parameters:
+        - in: path
+          name: query
+          description: 'Service type, e.g. `_uc-remote._tcp`'
+          required: true
+          schema:
+            type: string
+        - name: timeout_browse
+          in: query
+          description: Service browse timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 30
+        - name: timeout_browse1
+          in: query
+          description: Single service browse timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 15
+        - name: timeout_resolve
+          in: query
+          description: Resolve timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+        - name: timeout_address
+          in: query
+          description: Address resolve timeout in seconds
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceInstances'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+      security:
+        - basicAuth: []
+  /test/mdns/publish:
+    post:
+      tags:
+        - mdns
+      summary: Publish a service.
+      operationId: publishService
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reg_type:
+                    type: string
+                  port:
+                    type: integer
+                    minimum: 1
+                    maximum: 65535
+                  txt:
+                    type: object
+                    additionalProperties:
+                      type: string
+                required:
+                  - reg_type
+                  - port
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+      security:
+        - basicAuth: []
+  '/test/mdns/publish/{name}':
+    delete:
+      tags:
+        - mdns
+      summary: Unpublish a previously published service.
+      operationId: unpublishService
+      parameters:
+        - in: path
+          name: name
+          description: Service name
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+      security:
+        - basicAuth: []
+components:
+  parameters:
+    dock_id:
+      name: dockId
+      in: path
+      description: Dock identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/DockId'
+    driver_id:
+      name: driverId
+      in: path
+      description: Integration driver identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/DriverId'
+    entity_id:
+      name: entityId
+      in: path
+      description: Entity identification.
+      required: true
+      schema:
+        $ref: '#/components/schemas/EntityId'
+    group_id:
+      name: groupId
+      in: path
+      description: Group identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/SimpleId'
+    integration_id:
+      $ref: '#/components/parameters/intg_id'
+    page_id:
+      name: pageId
+      in: path
+      description: Page identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/SimpleId'
+    profile_id:
+      name: profileId
+      in: path
+      description: Profile identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/SimpleId'
+    resource_id:
+      name: id
+      in: path
+      description: Resource identifier
+      required: true
+      schema:
+        type: string
+    resource_type:
+      name: type
+      in: path
+      description: Resource type
+      required: true
+      schema:
+        $ref: '#/components/schemas/ResourceType'
+    system:
+      name: system
+      in: path
+      description: Identification of the external system. E.g. _homeassistant_.
+      required: true
+      schema:
+        $ref: '#/components/schemas/ExternalSystemId'
+    token_id:
+      name: tokenId
+      in: path
+      description: Access token identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/AccessTokenId'
+    enabled:
+      name: enabled
+      in: query
+      description: Filter by enabled flag.
+      required: false
+      schema:
+        type: boolean
+    entity_type:
+      name: entity_type
+      in: query
+      description: Filter by entity type.
+      required: false
+      schema:
+        $ref: '#/components/schemas/EntityType'
+    intg_id:
+      name: intgId
+      in: path
+      description: Integration identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/IntegrationId'
+    resource_type_query:
+      name: type
+      in: query
+      description: Resource type.
+      required: false
+      schema:
+        $ref: '#/components/schemas/ResourceType'
+    page:
+      name: page
+      in: query
+      description: Current page number. 1-based.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 1
+        minimum: 1
+    limit:
+      name: limit
+      in: query
+      description: Limits the number of returned items.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        default: 10
+        minimum: 10
+        maximum: 100
+        multipleOf: 10
+    profile_pin:
+      name: pin
+      in: query
+      description: Optional profile pin to access a protected profile with a non-admin account.
+      required: false
+      schema:
+        $ref: '#/components/schemas/ProfilePin'
+  schemas:
+    AvailableEntity:
+      description: Provided entity from an integration which can be configured to be used in the remote.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/AvailableEntityId'
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+        integration_id:
+          $ref: '#/components/schemas/IntegrationId'
+        device_id:
+          $ref: '#/components/schemas/DeviceId'
+        device_class:
+          description: |
+            Optional device type. This can be used by the UI to represent the entity with a different
+            icon, behaviour etc. See entity documentation for available device classes.
+          type: string
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        features:
+          description: |
+            Supported features of the entity. See entity documentation for available features.
+          type: array
+          items:
+            type: string
+        options:
+          description: |
+            Feature options. See entity documentation for available options.
+          type: object
+        area:
+          description: Optional area if supported by the integration. E.g. `Living room`.
+          type: string
+      required:
+        - entity_id
+        - entity_type
+        - integration_id
+        - name
+        - features
+    AvailableEntityId:
+      type: string
+      format: '^[a-zA-Z0-9-_\.]+$'
+      minLength: 1
+      maxLength: 36
+      description: |
+        Entity identifier used in an integration driver (= available entities).  
+    ResourceType:
+      type: string
+      format: '^[a-zA-Z]+$'
+      minLength: 1
+      maxLength: 32
+    ResourceItems:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResourceItem'
+    ResourceItem:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        id:
+          type: string
+          description: Resource identifier (normalized filename)
+        size:
+          type: integer
+          format: int32
+          description: Size in bytes
+    ExternalSystems:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExternalSystem'
+    ExternalSystem:
+      type: object
+      properties:
+        system:
+          $ref: '#/components/schemas/ExternalSystemId'
+        name:
+          $ref: '#/components/schemas/ExternalSystemName'
+    ExternalSystemId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 50
+      description: Unique external system identifier registered by an R2 integration to interact with the API.
+    ExternalSystemName:
+      type: string
+      minLength: 1
+      maxLength: 50
+      description: |
+        Friendly name of the external system to display to the user within the app. This name must be unique for an external
+        system and should be as short and concise as possible.
+        Use the description field for more information.
+    ExternalAccessTokens:
+      type: array
+      items:
+        type: object
+        properties:
+          system:
+            $ref: '#/components/schemas/ExternalSystemName'
+          token_id:
+            type: string
+          name:
+            type: string
+          description:
+            type: string
+            maxLength: 2048
+            description: Optional description of the external access token.
+          url:
+            type: string
+            maxLength: 2048
+            description: Optional URL of the external system.
+          data:
+            type: string
+            maxLength: 2048
+            description: Optional data from the external system for the R2 integration.
+          creation_date:
+            type: string
+            format: date-time
+    ExternalAccessToken:
+      type: object
+      properties:
+        system:
+          $ref: '#/components/schemas/ExternalSystemName'
+        token_id:
+          type: string
+        name:
+          type: string
+        token:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: |
+            The token to access the external system with the corresponding R2 integration.
+            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
+            system.
+        description:
+          type: string
+          maxLength: 2048
+          description: Optional description of the external access token.
+        url:
+          type: string
+          maxLength: 2048
+          description: Optional URL of the external system.
+        data:
+          type: string
+          maxLength: 2048
+          description: Optional data from the external system for the R2 integration.
+        creation_date:
+          type: string
+          format: date-time
+    ExternalAccessTokenRequest:
+      type: object
+      properties:
+        token_id:
+          type: string
+          format: '^[a-zA-Z0-9\-_]+$'
+          minLength: 1
+          maxLength: 36
+          description: |
+            Unique token identifier, used for later token management through the external system or management ui.
+            This identifier can be provided by the external system. If omitted, an UUID is generated and returned in the
+            ExternalAccessToken response.
+        name:
+          $ref: '#/components/schemas/ExternalSystemName'
+        token:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: |
+            The token to access the external system with the corresponding R2 integration.
+            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
+            system.
+        description:
+          type: string
+          maxLength: 2048
+          description: Optional description of the external access token.
+        url:
+          type: string
+          maxLength: 2048
+          description: Optional URL of the external system.
+        data:
+          type: string
+          maxLength: 2048
+          description: Optional data from the external system for the R2 integration.
+      required:
+        - name
+        - token
+      example:
+        token_id: 1-2-3
+        name: My smart home
+        token: secret-sauce-42!
+        description: Any other informative message about the external system
+        url: 'ws://smart.home'
+        data: 'optional: true, foo: bar, free: text'
+    AccessTokenRequest:
+      type: object
+      properties:
+        token_id:
+          type: string
+          format: '^[a-zA-Z0-9\-_]+$'
+          minLength: 1
+          maxLength: 36
+          description: |
+            Unique client identifier, used for later token management through the client and returned in the AccessToken
+            response. Using a UUID is recommended.
+        name:
+          $ref: '#/components/schemas/AccessTokenName'
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Requested access scopes for the token.
+      required:
+        - token_id
+        - name
+        - scopes
+    AccessTokens:
+      type: array
+      items:
+        $ref: '#/components/schemas/AccessToken'
+    AccessToken:
+      type: object
+      properties:
+        token_id:
+          $ref: '#/components/schemas/AccessTokenId'
+        name:
+          $ref: '#/components/schemas/AccessTokenName'
+        token:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: Access token for WebSocket
+        active:
+          type: boolean
+          description: Only activated tokens are valid for WebSocket access
+        valid_from:
+          type: string
+          format: date-time
+          description: 'Optional validity start timestamp. If not set, the token is valid as soon as the `active` flag is set (this is usually done by the remote device user within the UI).'
+        valid_to:
+          type: string
+          format: date-time
+          description: 'Optional validity end timestamp. If not set, the token is valid until revoked.'
+        creation_date:
+          type: string
+          format: date-time
+        last_login:
+          type: string
+          format: date-time
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeName'
+    AccessTokenUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/AccessTokenName'
+        active:
+          type: boolean
+          description: Only activated tokens are valid for WebSocket access
+        valid_from:
+          type: string
+          format: date-time
+          description: 'Optional validity start timestamp. If not set, the token is valid as soon as the `active` flag is set (this is usually done by the remote device user within the UI).'
+        valid_to:
+          type: string
+          format: date-time
+          description: 'Optional validity end timestamp. If not set, the token is valid until revoked.'
+    AccessTokenId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: Unique token identifier. Usually a UUID.
+    AccessTokenName:
+      type: string
+      minLength: 1
+      maxLength: 50
+      description: Friendly token name to show in the app
+    Description:
+      type: string
+      maxLength: 255
+      description: Optional description
+    DeviceId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: Device identifier for multi-device integrations only.
+    DriverId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: 'Unique integration driver identifier, e.g. `homeassistant`, `homey`, etc.'
+    FriendlyName:
+      type: string
+      maxLength: 64
+    IconIdentifier:
+      type: string
+      format: '^[a-zA-Z0-9-_\.:]+$'
+      maxLength: 255
+      description: |
+        Optional icon identifier. If specified the icon will be set. An empty identifier, while updating the object,
+        removes the existing icon.
+    ImageIdentifier:
+      type: string
+      format: '^[a-zA-Z0-9-_\.:]+$'
+      maxLength: 255
+      description: |
+        Optional image identifier. If specified the image will be set. An empty identifier, while updating the object,
+        removes the existing image.
+    LanguageText:
+      type: object
+      description: |
+        Key value pairs of language texts. Key: ISO 639-1 code with optional country suffix to represent a `culture code`.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_CH`.
+
+        If we need to support more regional differences within a country, then the
+        [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) might be a solution. This would even
+        support the various Swiss German dialects!
+      additionalProperties:
+        type: string
+    Name:
+      type: string
+      minLength: 1
+      maxLength: 50
+    Scopes:
+      type: array
+      items:
+        $ref: '#/components/schemas/Scope'
+    Scope:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ScopeName'
+        description:
+          type: string
+          description: Permission scope description
+      required:
+        - name
+    ScopeName:
+      type: string
+      format: '^[a-zA-Z\-:]+$'
+      minLength: 1
+      maxLength: 36
+      description: Permission scope name
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Status code
+        message:
+          type: string
+          description: Status message describing the result or error. This message is intended for error analysis and should not directly shown to the end user.
+    ServiceInstances:
+      type: array
+      items:
+        $ref: '#/components/schemas/ServiceInstance'
+    ServiceInstance:
+      type: object
+      properties:
+        service_type:
+          type: string
+        name:
+          type: string
+          description: Instance name
+        hostname:
+          type: string
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        addr_v4:
+          type: array
+          items:
+            type: string
+        addr_v6:
+          type: array
+          items:
+            type: string
+        txt:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - service_type
+        - name
+        - hostname
+        - port
+    DeviceState:
+      type: string
+      enum:
+        - UNKNOWN
+        - CONNECTING
+        - CONNECTED
+        - DISCONNECTED
+        - ERROR
+    DriverState:
+      type: string
+      enum:
+        - IDLE
+        - CONNECTING
+        - ACTIVE
+        - RECONNECTING
+        - ERROR
+    DockId:
+      type: string
+      format: '^[a-zA-Z0-9-_\.]+$'
+      minLength: 1
+      maxLength: 64
+      description: Dock identifier
+    DockConfiguration:
+      type: object
+      properties:
+        service_name:
+          $ref: '#/components/schemas/DockId'
+        name:
+          $ref: '#/components/schemas/FriendlyName'
+          description: User assignable friendly name to use instead of service_name
+        custom_ws_url:
+          type: string
+          minLength: 6
+          maxLength: 256
+          description: Dock WebSocket URL to override auto-discovery from service_name
+        resolved_ws_url:
+          type: string
+          maxLength: 256
+          description: Resolved WebSocket URL from service_name if no custom_ws_url is used
+        active:
+          type: boolean
+          description: Auto connect to dock when network is available
+        state:
+          $ref: '#/components/schemas/DockState'
+        learning:
+          type: boolean
+          description: Dock is in IR learning mode
+        description:
+          $ref: '#/components/schemas/Description'
+    DockConfigurations:
+      type: array
+      items:
+        $ref: '#/components/schemas/DockConfiguration'
+    DockConfigurationRequest:
+      type: object
+      properties:
+        service_name:
+          $ref: '#/components/schemas/DockId'
+        name:
+          $ref: '#/components/schemas/FriendlyName'
+          description: Optional friendly name to use instead of service_name
+        custom_ws_url:
+          type: string
+          minLength: 6
+          maxLength: 256
+          description: Custom WebSocket URL to override service_name lookup
+        token:
+          type: string
+          description: Access token
+        active:
+          type: boolean
+          description: Auto connect to dock when network is available
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - service_name
+        - token
+        - active
+    DockState:
+      type: string
+      description: Connection state
+      enum:
+        - Idle
+        - Connecting
+        - Connected
+        - Authenticated
+        - Disconnected
+        - Closing
+    DriverDeveloper:
+      type: object
+      description: Optional information about the integration developer.
+      properties:
+        name:
+          description: Optional developer information to display in UI / web-configurator.
+          type: string
+          maxLength: 100
+        url:
+          description: Optional developer home page.
+          type: string
+          format: uri
+          maxLength: 255
+        email:
+          description: Optional developer contact email.
+          type: string
+          format: email
+          maxLength: 100
+    Entities:
+      type: array
+      items:
+        $ref: '#/components/schemas/Entity'
+    Entity:
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+        integration_id:
+          $ref: '#/components/schemas/IntegrationId'
+        device_class:
+          description: |
+            Optional device type. This can be used by the UI to represent the entity with a different
+            icon, behaviour etc. See entity documentation for available device classes.
+          type: string
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        features:
+          description: |
+            Supported features of the entity. See entity documentation for available features.
+          type: array
+          items:
+            type: string
+        options:
+          description: |
+            Feature options. See entity documentation for available options.
+          type: object
+        description:
+          $ref: '#/components/schemas/LanguageText'
+      required:
+        - entity_id
+        - entity_type
+        - integration_id
+        - name
+    EntityId:
+      type: string
+      format: '^[a-zA-Z0-9-_\.]+$'
+      minLength: 5
+      maxLength: 110
+      description: Unique UC remote identifier over all entities and integrations.
+    EntityCommand:
+      type: object
+      properties:
+        cmd_id:
+          description: Entity specific command.
+          type: string
+        params:
+          description: |
+            Optional command parameters as key / value pairs. See entity documentation for available parmeters.
+          type: object
+      required:
+        - cmd_id
+    EntityRequest:
+      type: object
+      description: |
+        Update model for an entity.
+
+        - Specified properties will update the current values.
+        - An empty value will delete the currently set property.
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+    EntityType:
+      type: string
+      description: Entity type
+      enum:
+        - button
+        - climate
+        - cover
+        - light
+        - media_player
+        - sensor
+        - switch
+    IntgAuthMethod:
+      type: string
+      description: |
+        Integration driver authentication method if a token is required.
+
+        The JSON `auth` message is used if a token is configured but no authentication method is set.
+      enum:
+        - HEADER
+        - MESSAGE
+    IntegrationDriver:
+      type: object
+      description: |
+        Integration driver model.
+
+        A driver represents the communication aspect of an integration. E.g. how one can connect to it
+        and which API version it supports.
+
+        One driver can provide multiple `Integration` instances. In the integration API they are
+        referred to as `multi-device integrations` and use the optional `device_id` property where
+        required. If a driver only provides a single instance, which is usually the default use case,
+        then the `device_id` is not used (or set to the default value `main`).
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/DriverId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        driver_url:
+          description: WebSocket URL of the driver.
+          type: string
+          format: uri
+          maxLength: 2048
+        token:
+          description: |
+            Optional driver authentication token.
+
+            Note: the token will not be returned to external clients!
+          type: string
+          maxLength: 2048
+        auth_method:
+          $ref: '#/components/schemas/IntgAuthMethod'
+        version:
+          description: 'Driver version, [SemVer](https://semver.org/) preferred.'
+          type: string
+          maxLength: 20
+        min_core_api:
+          description: |
+            Optional version check: minimum required core API version in the remote.
+          type: string
+          maxLength: 20
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        enabled:
+          description: |
+            Enables or disables driver communication.  
+            If disabled, all integration instances won't be activated, even if the instance is enabled.
+          type: boolean
+        description:
+          description: Optional description of the integration.
+          $ref: '#/components/schemas/LanguageText'
+        developer:
+          $ref: '#/components/schemas/DriverDeveloper'
+        home_page:
+          description: Optional home page url for more information.
+          type: string
+          format: uri
+          maxLength: 255
+        device_discovery:
+          description: Driver supports multi-device discovery. **Not yet supported**.
+          type: boolean
+        setup_data_schema:
+          description: |
+            Driver configuration metadata describing configuration parameters for the web-configurator.
+
+            **Not yet finalized**.
+          type: object
+        release_date:
+          description: Release date of the driver.
+          type: string
+          format: date
+      required:
+        - driver_id
+        - name
+        - driver_url
+        - version
+    IntegrationDriverInfo:
+      type: object
+      description: |
+        Summary data of an integration driver intended for overview screens.
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/DriverId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        driver_url:
+          description: WebSocket URL of the driver
+          type: string
+          format: uri
+          maxLength: 255
+        version:
+          type: string
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        enabled:
+          type: boolean
+      required:
+        - driver_id
+        - name
+        - driver_url
+        - version
+        - enabled
+    IntegrationDrivers:
+      type: array
+      items:
+        $ref: '#/components/schemas/IntegrationDriverInfo'
+    IntegrationDriverRequest:
+      type: object
+      description: |
+        Integration driver update model. This model corresponds to the `IntegrationDriver` model except there are no required
+        properties to allow patch updates. 
+
+        - Specified properties will update the current values.
+        - An empty value will delete the currently set property.
+        - For the create operation, the `driver_id` identifier can be specified by the client, but it needs to be unique among
+          all drivers. If omitted, a UUID will be assigned.  
+          A manually assigned, short, human-readable identifier is recommended for better recognizability.
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/DriverId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        driver_url:
+          description: WebSocket URL of the driver
+          type: string
+          format: uri
+          maxLength: 2048
+        token:
+          description: Optional driver authentication token.
+          type: string
+          maxLength: 2048
+        auth_method:
+          $ref: '#/components/schemas/IntgAuthMethod'
+        version:
+          type: string
+          maxLength: 20
+        min_core_api:
+          description: |
+            Optional version check: minimum required core API version in the remote.
+          type: string
+          maxLength: 20
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        enabled:
+          description: |
+            Enables or disables driver communication.  
+            If disabled, all integration instances won't be activated, even if the instance is enabled.
+          type: boolean
+        description:
+          $ref: '#/components/schemas/LanguageText'
+          description: Optional description of the integration
+        developer:
+          $ref: '#/components/schemas/DriverDeveloper'
+        home_page:
+          description: Optional home page url for more information
+          type: string
+          format: uri
+          maxLength: 255
+        device_discovery:
+          description: Driver supports multi device discovery
+          type: boolean
+        setup_data_schema:
+          description: |
+            Driver configuration metadata describing configuration parameters for the web-configurator.
+
+            **Not yet finalized**.
+          type: object
+        release_date:
+          description: Release date of the driver
+          type: string
+          format: date
+    Integration:
+      type: object
+      description: |
+        Integration instance model.
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/IntegrationId'
+        driver_id:
+          $ref: '#/components/schemas/DriverId'
+        device_id:
+          $ref: '#/components/schemas/DeviceId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        enabled:
+          description: Enable / disable flag
+          type: boolean
+        setup_data:
+          description: Instance configuration object
+          type: object
+      required:
+        - integration_id
+        - driver_id
+        - name
+        - enabled
+    IntegrationId:
+      type: string
+      format: '^[a-zA-Z0-9-_\.]+$'
+      minLength: 1
+      maxLength: 73
+      description: |
+        Unique integration instance identifier. Automatically created by the system when creating a new instance from a driver.
+    Integrations:
+      type: array
+      items:
+        $ref: '#/components/schemas/Integration'
+    IntegrationRequest:
+      type: object
+      description: |
+        Integration instance update model. This model corresponds to the `Integration` model except there are no required
+        properties to allow patch updates. 
+
+        - Specified properties will update the current values.
+        - An empty value will delete a set property.
+        - `device_id` is only required for multi-device integrations.
+      properties:
+        device_id:
+          $ref: '#/components/schemas/DeviceId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        enabled:
+          description: Enable / disable flag.
+          type: boolean
+        setup_data:
+          description: Instance configuration object.
+          type: object
+    IntegrationStatus:
+      type: object
+      description: |
+        Integration instance status information. Intended to be used in a general overview of the integration drivers.
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/IntegrationId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        device_state:
+          $ref: '#/components/schemas/DeviceState'
+        driver_state:
+          $ref: '#/components/schemas/DriverState'
+        enabled:
+          type: boolean
+    IrStatus:
+      type: object
+      properties:
+        dock_id:
+          $ref: '#/components/schemas/DockId'
+        learning_active:
+          description: Dock is in IR learning mode
+          type: boolean
+        state:
+          $ref: '#/components/schemas/DockState'
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnedIrCode'
+    LearnedIrCode:
+      type: object
+      properties:
+        code:
+          type: string
+        format:
+          type: string
+          enum:
+            - HEX
+            - PRONTO
+        timestamp:
+          type: integer
+    Profile:
+      type: object
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Profile name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        protected:
+          type: boolean
+          description: A protected profile can only be accessed with the profile specific pin code
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - profile_id
+        - name
+        - protected
+    ProfilePin:
+      type: string
+      maxLength: 20
+      description: Optional profile pin
+    ProfileRequest:
+      type: object
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Profile name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        pin:
+          $ref: '#/components/schemas/ProfilePin'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - name
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Profile name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        update_pin:
+          type: boolean
+          description: |
+            true: Update or remove the pin if the `pin` property is set
+            false: Don't change existing pin
+        pin:
+          type: string
+          description: |
+            Optional pin code for a protected profile. Only relevant if `update_pin: true`.
+        description:
+          $ref: '#/components/schemas/Description'
+        pages:
+          description: |
+            Used for update only: modify page order or delete pages in profile.
+            - An empty `pages` array will delete all pages and containing groups!
+            - If the property is missing, the existing page configuration will not be changed.
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleId'
+      required:
+        - update_pin
+    Profiles:
+      type: array
+      items:
+        $ref: '#/components/schemas/Profile'
+    Group:
+      type: object
+      description: |
+        The shown group switch in the UI is automatically determined by the capabilities of the group's entities.
+      properties:
+        group_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name. Must be unique within the profile.
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entities:
+          type: array
+          description: Entity identifiers belonging to the group
+          items:
+            $ref: '#/components/schemas/EntityId'
+      required:
+        - group_id
+        - profile_id
+        - name
+        - entities
+    GroupUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entities:
+          type: array
+          description: |
+            Changed or re-ordered group entities.
+            An empty array remove all entities.
+            If the property is not specified the defined entities will not be changed.
+          items:
+            $ref: '#/components/schemas/EntityId'
+    Groups:
+      type: array
+      items:
+        $ref: '#/components/schemas/Group'
+    Page:
+      type: object
+      properties:
+        page_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name. Must be unique within the profile.
+        image:
+          type: string
+          description: Optional image identifier
+        items:
+          type: array
+          description: Page items
+          items:
+            $ref: '#/components/schemas/PageItem'
+        pos:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Position of the page within the profile
+      required:
+        - page_id
+        - profile_id
+        - name
+        - items
+        - pos
+    PageItem:
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        group_id:
+          $ref: '#/components/schemas/SimpleId'
+        pos:
+          type: integer
+          format: int32
+          minimum: 0
+          description: |
+            Position of the item within the page. Returned on retrieval, ignored for page updates where the position is taken
+            from the page array position.
+      oneOf:
+        - required:
+            - entity_id
+        - required:
+            - group_id
+    PageUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name
+        image:
+          $ref: '#/components/schemas/ImageIdentifier'
+        items:
+          type: array
+          description: |
+            Changed or re-ordered page items.
+            An empty array removes all items.
+            If the property is not specified the defined items will not be changed.
+          items:
+            $ref: '#/components/schemas/PageItem'
+    Pages:
+      type: array
+      items:
+        $ref: '#/components/schemas/Page'
+    SimpleId:
+      type: string
+      format: '^[a-zA-Z0-9-_\.]+$'
+      minLength: 1
+      maxLength: 36
+      description: 'Simple string identifier, also usable as URL parameter or file identifier'
+    CfgAll:
+      type: object
+      properties:
+        button:
+          $ref: '#/components/schemas/CfgButtons'
+        display:
+          $ref: '#/components/schemas/CfgDisplay'
+        haptic:
+          $ref: '#/components/schemas/CfgHaptic'
+        localization:
+          $ref: '#/components/schemas/CfgLocalization'
+        network:
+          $ref: '#/components/schemas/CfgNetwork'
+        power_saving:
+          $ref: '#/components/schemas/CfgPowerSaving'
+        software_update:
+          $ref: '#/components/schemas/CfgSoftwareUpdate'
+        sound:
+          $ref: '#/components/schemas/CfgSound'
+        voice_control:
+          $ref: '#/components/schemas/CfgVoiceControl'
+    CfgButtons:
+      type: object
+      properties:
+        brightness:
+          description: 'Button backlight brightness. 0 = off, 100 = max.'
+          type: integer
+          minimum: 0
+          maximum: 100
+        auto_brightness:
+          description: 'When enabled, button backlight will automatically turn on in a dark room.'
+          type: boolean
+      required:
+        - brightness
+        - auto_brightness
+    CfgDisplay:
+      type: object
+      properties:
+        brightness:
+          description: Display brightness.
+          type: integer
+          minimum: 0
+          maximum: 100
+        auto_brightness:
+          description: Automatically adjust the display brightness based on ambient lighting conditions.
+          type: boolean
+      required:
+        - brightness
+        - auto_brightness
+    CfgHaptic:
+      type: object
+      properties:
+        enabled:
+          description: Haptic feedback enabled.
+          type: boolean
+      required:
+        - enabled
+    CfgLocalization:
+      type: object
+      properties:
+        language_code:
+          $ref: '#/components/schemas/LanguageCode'
+        country_code:
+          $ref: '#/components/schemas/CountryCode'
+        time_zone:
+          description: 'Time zone name according to IANA <https://www.iana.org/time-zones>, e.g. `Europe/Copenhagen`.'
+          type: string
+        time_format_24h:
+          type: boolean
+        measurement_unit:
+          $ref: '#/components/schemas/MeasurementUnit'
+      required:
+        - language_code
+        - country_code
+        - time_zone
+        - time_format_24h
+        - measurement_unit
+    CfgNetwork:
+      type: object
+      properties:
+        bt_enabled:
+          description: Enable Bluetooth.
+          type: boolean
+        wifi_enabled:
+          description: Enable WiFi.
+          type: boolean
+      required:
+        - bt_enabled
+        - wifi_enabled
+    CfgPowerSaving:
+      type: object
+      properties:
+        wakeup_sensitivity:
+          description: Amount of movement needed to wake up the remote. 0 = disabled.
+          type: integer
+          minimum: 0
+          maximum: 3
+        display_off_sec:
+          type: integer
+          minimum: 0
+          maximum: 60
+          description: Turn off display after given seconds.
+        standby_sec:
+          type: integer
+          minimum: 0
+          maximum: 10800
+          description: Activate standby after given seconds. 0 disables standby mode.
+      required:
+        - wakeup_sensitivity
+        - display_off_sec
+        - standby_sec
+    CfgSoftwareUpdate:
+      type: object
+      properties:
+        check_for_updates:
+          description: |
+            Automatically check for updates. If `auto_update` is enabled, the updates are automatically installed,
+            otherwise the user is only notified about the updates.
+          type: boolean
+        auto_update:
+          description: |
+            Automatically update the remote when new software is available. Requires `check_for_updates` to be enabled.
+          type: boolean
+      required:
+        - check_for_updates
+        - auto_update
+    CfgSound:
+      type: object
+      properties:
+        enabled:
+          description: Sound effects enabled.
+          type: boolean
+        volume:
+          description: Sound effects volume.
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+        - enabled
+        - volume
+    CfgVoiceControl:
+      type: object
+      properties:
+        microphone:
+          description: |
+            Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
+            with the remote or integrations.
+          type: boolean
+        enabled:
+          description: |
+            Enable voice control. Disabling voice control will still let you use voice dictation with integrations. 
+            Disable the microphone to completely switch off any microphone related functionality.
+          type: boolean
+        voice_assistant:
+          description: |
+            TODO
+          type: string
+          default: None
+      required:
+        - microphone
+        - enabled
+        - voice_assistant
+    CountryCode:
+      description: 'Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).'
+      type: string
+      format: iso-3166
+    LanguageCode:
+      description: |
+        Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
+        separated by an underscore.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
+      type: string
+      pattern: '^[a-z]{2}(_\w+)?$'
+    MeasurementUnit:
+      type: string
+      enum:
+        - METRIC
+        - US
+        - UK
+    SystemInfo:
+      type: object
+      properties:
+        model_name:
+          type: string
+        model_number:
+          type: string
+        serial_number:
+          type: string
+        hw_revision:
+          type: string
+    VersionInfo:
+      type: object
+      properties:
+        api:
+          type: string
+        core:
+          type: string
+        app:
+          type: string
+        os:
+          type: string
+        integrations:
+          type: object
+          additionalProperties:
+            type: string
+  responses:
+    SuccessMessage:
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err400BadRequest:
+      description: The server could not understand the request due to invalid syntax or missing data.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err401Unauthorized:
+      description: Authentication credentials were missing or incorrect. The client must authenticate itself to get the requested response.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err403Forbidden:
+      description: 'The request is understood, but the client does not have access rights to the content.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err404NotFound:
+      description: The resource does not exist or the URI is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err413PayloadTooLarge:
+      description: Request entity is too large and not supported.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err415UnsupportedMediaType:
+      description: The media format of the requested data is not supported.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err422UnprocessableEntity:
+      description: The request was well-formed but cannot be processed. Used for already existing data which cannot be re-created.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err429TooManyRequests:
+      description: The client has sent too many requests in a given amount of time.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err500InternalServerError:
+      description: The server has encountered a situation it does not know how to handle. Retrying the same request will most likely result in the same error.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err503ServiceUnavailable:
+      description: The server is not ready to handle the request. Try again later.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic

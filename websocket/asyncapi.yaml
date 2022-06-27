@@ -1,0 +1,4530 @@
+# TODO split into multiple files and share common models!
+# Unfortunately https://github.com/asyncapi/bundler wasn't usable 2022-01 and most AsyncAPI tooling can't handle
+# external references! :-(
+# This needs to be fixed first: https://github.com/asyncapi/bundler/issues/34
+# Otherwise we have to hack together something, since copying and pasting the shared definitions between the different
+# APIs makes no sense...
+asyncapi: 2.2.0
+id: 'urn:com:unfoldedcircle:core'
+info:
+  title: Remote Two WebSocket Core-API
+  version: '0.7.0-alpha'
+  contact:
+    name: API Support
+    url: https://github.com/unfoldedcircle/core-api/issues
+  license:
+    name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+    url: https://creativecommons.org/licenses/by-sa/4.0/
+  description: |
+    **Work in progress** API definition of the Remote Two Core WebSocket API.
+    
+    API message status legend:
+    
+    | Icon | Description                                                                     |
+    |------|---------------------------------------------------------------------------------|
+    | 💡   | Idea, not yet official part of API definition.                                  |
+    | 🚧   | Planned feature and most likely not (fully) implemented in the initial release. |
+    | 👷   | API definition is work in progress, not ready yet for implementation.           |
+    | 🔍   | API definition review & implementation.                                         |
+    | 🧪   | API has been implemented in the Remote Two and is currently being tested.       |
+    | 🚀   | Ready to use - feedback welcomed.                                               |
+    
+    ## Overview
+
+    The Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take
+    full control of its features.
+    
+    The remote-core application acts as server. Whenever the remote enters standby it may choose to disconnect client
+    connections.
+    
+    The focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  
+    It may also be used by other external systems and integration drivers, if specific configuration or interaction
+    features are required, which are not present in the Integration API.
+
+    ## 🚧 Missing Features
+    
+    **This API is a preview version and does not yet contain all functionality.**
+    
+    The following features will be continuously added:
+    
+    - Software update checks, download & installation
+    - Integration setup flow
+    - Docking station integration
+    - Infrared code management
+    - Activity management    
+    
+    ## API Versioning
+    
+    The API is versioned according to [SemVer](https://semver.org/).  
+    The initial public release will be `1.0.0` once it is considered stable enough with some initial integration
+    implementations and developer examples.
+    
+    **Any major version zero (`0.y.z`) is for initial development and may change at any time!**  
+    I.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!
+
+    ## WebSocket Connection
+    
+    ### Authentication
+
+    Interaction with the API requires an API key.
+
+    **TODO** _describe token handling with REST API / web-configurator_
+    
+    ### Connection Setup
+
+    The preferred way to establish an authenticated connection is to provide the token in the header of the WebSocket
+    connection.  
+
+    If the client cannot provide the token in the connection setup (e.g. a web browser), the server will send the
+    `auth_required` message right after the connection is established.
+
+    - The client must reply with the `auth` message containing the token.
+
+      - All other messages will be ignored, until the client successfully authenticates itself.
+      - The server will close the connection after a timeout.
+
+    - The server replies with the `authentication` event including the result code of the authentication.
+
+      - `200`: authentication succeeded, API can be used.
+      - `401`: invalid token and the connection will be closed.
+
+externalDocs:
+  description: Find out more about the Remote Two
+  url: 'https://www.unfoldedcircle.com/'
+defaultContentType: application/json
+
+servers:
+  test:
+    url: localhost:9001
+    protocol: ws
+    description: |
+      Local test server.
+    security:
+      - token: []
+  test-wss:
+    url: localhost:9443
+    protocol: wss
+    description: |
+      Local test server.
+    security:
+      - token: []
+# TODO enhance tags with `externalDocs` and url links once API is hosted in public repo
+tags:
+  - name: integration
+    description: Device adapter providing entities
+  - name: entity
+    description: Representation of a controllable device or thing
+  - name: profile
+    description: User profile handling to group and organize entities in the UI
+
+channels:
+  /ws:
+    publish:
+      description: |
+        Core-API for clients to interact with the remote.
+        
+      operationId: pubRemoteMessage
+      tags:
+        - name: core
+      message:
+        oneOf:
+          # --- common
+          - $ref: '#/components/messages/auth'
+          - $ref: '#/components/messages/ping'
+          # --- system commands
+          - $ref: '#/components/messages/version'
+          - $ref: '#/components/messages/system'
+          - $ref: '#/components/messages/system_cmd'
+          - $ref: '#/components/messages/get_factory_reset_token'
+          - $ref: '#/components/messages/factory_reset'
+#          - $ref: '#/components/messages/service_cmd'
+#          - $ref: '#/components/messages/get_service_status'
+#          - $ref: '#/components/messages/check_updates'
+#          - $ref: '#/components/messages/update'
+          # --- configuration handling
+          - $ref: '#/components/messages/reset_configuration'
+          - $ref: '#/components/messages/get_configuration'
+          - $ref: '#/components/messages/get_button_cfg'
+          - $ref: '#/components/messages/set_button_cfg'
+          - $ref: '#/components/messages/get_display_cfg'
+          - $ref: '#/components/messages/set_display_cfg'
+          - $ref: '#/components/messages/get_haptic_cfg'
+          - $ref: '#/components/messages/set_haptic_cfg'
+          - $ref: '#/components/messages/get_localization_cfg'
+          - $ref: '#/components/messages/set_localization_cfg'
+          - $ref: '#/components/messages/get_timezone_names'
+          - $ref: '#/components/messages/get_network_cfg'
+          - $ref: '#/components/messages/set_network_cfg'
+          - $ref: '#/components/messages/get_software_update_cfg'
+          - $ref: '#/components/messages/set_software_update_cfg'
+          - $ref: '#/components/messages/get_power_saving_cfg'
+          - $ref: '#/components/messages/set_power_saving_cfg'
+          - $ref: '#/components/messages/get_sound_cfg'
+          - $ref: '#/components/messages/set_sound_cfg'
+          - $ref: '#/components/messages/get_voice_control_cfg'
+          - $ref: '#/components/messages/set_voice_control_cfg'
+          - $ref: '#/components/messages/get_voice_assistants'
+
+#          - $ref: '#/components/messages/get_locales'   # TODO required? ISO code should be enough
+#          - $ref: '#/components/messages/get_languages' # TODO required? ISO code should be enough
+
+#          - $ref: '#/components/messages/get_log_cfg'
+#          - $ref: '#/components/messages/set_log_cfg'
+          # --- entity handling
+          - $ref: '#/components/messages/get_entity_types'
+          - $ref: '#/components/messages/get_entity'
+          - $ref: '#/components/messages/get_entities'
+          - $ref: '#/components/messages/get_available_entities'
+          - $ref: '#/components/messages/get_entity_commands'
+          - $ref: '#/components/messages/execute_entity_command'
+          - $ref: '#/components/messages/update_entity'
+          - $ref: '#/components/messages/delete_entity'
+          - $ref: '#/components/messages/delete_all_entities'
+
+          # --- IR / dock handling
+#          - $ref: '#/components/messages/ir_send'
+#          - $ref: '#/components/messages/ir_learn'
+#          - $ref: '#/components/messages/ir_get_commands'
+#          - $ref: '#/components/messages/ir_add_cmd'
+#          - $ref: '#/components/messages/ir_update_cmd'
+#          - $ref: '#/components/messages/ir_remove_cmd'
+
+    subscribe:
+      description: Core-API for clients to receive messages from the remote.
+      operationId: subRemoteMessage
+      tags:
+        - name: core
+      message:
+        oneOf:
+          # --- common
+          - $ref: '#/components/messages/auth_required'
+          - $ref: '#/components/messages/authentication'
+          - $ref: '#/components/messages/pong'
+          - $ref: '#/components/messages/result'
+          # --- system commands
+          - $ref: '#/components/messages/version_info'
+          - $ref: '#/components/messages/system_info'
+          - $ref: '#/components/messages/factory_reset_token'
+#          - $ref: '#/components/messages/service_status'
+#          - $ref: '#/components/messages/available_updates'
+#          # --- configuration handling
+          - $ref: '#/components/messages/configuration'
+          - $ref: '#/components/messages/button_cfg'
+          - $ref: '#/components/messages/display_cfg'
+          - $ref: '#/components/messages/haptic_cfg'
+          - $ref: '#/components/messages/localization_cfg'
+          - $ref: '#/components/messages/timezone_names'
+          - $ref: '#/components/messages/network_cfg'
+          - $ref: '#/components/messages/software_update_cfg'
+          - $ref: '#/components/messages/power_saving_cfg'
+          - $ref: '#/components/messages/sound_cfg'
+          - $ref: '#/components/messages/voice_control_cfg'
+          - $ref: '#/components/messages/voice_assistants'
+
+#          - $ref: '#/components/messages/languages' # TODO see request msg about ISO code
+#          - $ref: '#/components/messages/locales'   # TODO see request msg about ISO code
+#          - $ref: '#/components/messages/log_cfg'
+          # --- entity handling
+          - $ref: '#/components/messages/entity_types'
+          - $ref: '#/components/messages/entities'
+          - $ref: '#/components/messages/available_entities'
+          - $ref: '#/components/messages/entity_commands'
+          - $ref: '#/components/messages/entity'
+
+          # --- IR / dock handling
+#          - $ref: '#/components/messages/ir_learned_code'
+#          - $ref: '#/components/messages/ir_commands'
+
+  /intg:
+    publish:
+      description: |
+        Integration driver and instance management.
+        
+        ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of all
+        integration driver and instance related messages in the documentation!
+        These messages are all available in the core `/ws` endpoint.
+      operationId: pubIntegrationMessage
+      tags:
+        - name: integrations
+      message:
+        oneOf:
+          # --- integration handling
+          - $ref: '#/components/messages/get_integration_status'
+          - $ref: '#/components/messages/integration_cmd'
+          - $ref: '#/components/messages/integration_driver_cmd'
+
+          - $ref: '#/components/messages/get_integration_driver_count'
+          - $ref: '#/components/messages/get_integration_drivers'
+          - $ref: '#/components/messages/register_integration_driver'
+          - $ref: '#/components/messages/get_integration_driver'
+          - $ref: '#/components/messages/update_integration_driver'
+          - $ref: '#/components/messages/delete_integration_driver'
+
+          - $ref: '#/components/messages/get_integration_count'
+          - $ref: '#/components/messages/get_integrations'
+          - $ref: '#/components/messages/create_integration'
+          - $ref: '#/components/messages/get_integration'
+          - $ref: '#/components/messages/update_integration'
+          - $ref: '#/components/messages/delete_integration'
+
+          - $ref: '#/components/messages/configure_entity_from_integration'
+
+    subscribe:
+      description: |
+        ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of all
+        integration driver and instance related messages in the documentation!
+        These messages are all available in the core `/ws` endpoint.
+      operationId: subIntegrationMessage
+      tags:
+        - name: integrations
+      message:
+        oneOf:
+          # --- integration handling
+          - $ref: '#/components/messages/integration_status'
+          - $ref: '#/components/messages/integration_driver_count'
+          - $ref: '#/components/messages/integration_drivers'
+          - $ref: '#/components/messages/integration_driver'
+          - $ref: '#/components/messages/integration_count'
+          - $ref: '#/components/messages/integrations'
+          - $ref: '#/components/messages/integration'
+
+  /profiles:
+    publish:
+      description: |
+        Profile management.
+        
+        ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of all profile
+        related messages in the documentation! These messages are all available in the core `/ws` endpoint.
+      operationId: pubProfileMessage
+      tags:
+        - name: profiles
+      message:
+        oneOf:
+          # --- profile handling
+          - $ref: '#/components/messages/get_profiles'
+          - $ref: '#/components/messages/get_profile'
+          - $ref: '#/components/messages/switch_profile'
+          - $ref: '#/components/messages/add_profile'
+          - $ref: '#/components/messages/update_profile'
+          - $ref: '#/components/messages/delete_profile'
+          - $ref: '#/components/messages/delete_all_profiles'
+          # --- page handling
+          - $ref: '#/components/messages/get_pages'
+          - $ref: '#/components/messages/get_page'
+          - $ref: '#/components/messages/add_page'
+          - $ref: '#/components/messages/update_page'
+          - $ref: '#/components/messages/delete_page'
+          - $ref: '#/components/messages/delete_pages_in_profile'
+          # --- group handling
+          - $ref: '#/components/messages/get_groups'
+          - $ref: '#/components/messages/get_group'
+          - $ref: '#/components/messages/add_group'
+          - $ref: '#/components/messages/update_group'
+          - $ref: '#/components/messages/delete_group'
+          - $ref: '#/components/messages/delete_groups_in_profile'
+
+    subscribe:
+      description: |
+        ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of all profile
+        related messages in the documentation! These messages are all available in the core `/ws` endpoint.
+      operationId: subProfileMessage
+      tags:
+        - name: profiles
+      message:
+        oneOf:
+          # --- profile handling
+          - $ref: '#/components/messages/profile'
+          - $ref: '#/components/messages/profiles'
+          # --- page handling
+          - $ref: '#/components/messages/page'
+          - $ref: '#/components/messages/pages'
+          # --- group handling
+          - $ref: '#/components/messages/group'
+          - $ref: '#/components/messages/groups'
+
+  /events:
+    publish:
+      description: |
+        Notification signup for the client to receive event messages.
+        
+        ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of event
+        messages in the documentation! These messages are all available in the core `/ws` endpoint.
+      operationId: pubEventMessage
+      tags:
+        - name: events
+      message:
+        oneOf:
+          # --- event channels
+          - $ref: '#/components/messages/get_event_channels'
+          - $ref: '#/components/messages/subscribe_events'
+          - $ref: '#/components/messages/get_event_subscriptions'
+          - $ref: '#/components/messages/unsubscribe_events'
+          # TODO any more request messages?
+
+    subscribe:
+      description: |
+        Event messages for signed up channels.
+        
+        ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of event
+        messages in the documentation! These messages are all available in the core `/ws` endpoint.
+      operationId: subEventMessage
+      tags:
+        - name: events
+      message:
+        oneOf:
+# Only required if we decide to use multiple WS endpoints:
+#          - $ref: '#/components/messages/auth_required'
+#          - $ref: '#/components/messages/authentication'
+#          - $ref: '#/components/messages/response'
+
+          # --- event channels
+          - $ref: '#/components/messages/event_channels'
+          - $ref: '#/components/messages/event_subscriptions'
+          # --- event notifications
+          - $ref: '#/components/messages/entity_change'
+          - $ref: '#/components/messages/integration_driver_change'
+          - $ref: '#/components/messages/integration_change'
+          - $ref: '#/components/messages/integration_state'
+          - $ref: '#/components/messages/configuration_change'
+
+          # TODO define all events and response messages
+#          - $ref: '#/components/messages/battery_status'
+#          - $ref: '#/components/messages/log_event'
+#          - $ref: '#/components/messages/ui_notification'
+#          - $ref: '#/components/messages/log_cfg_change'
+#          - $ref: '#/components/messages/ui_cfg_change'
+#          # - $ref: '#/components/messages/ui_event'
+#          - $ref: '#/components/messages/sw_upd_available'
+#          - $ref: '#/components/messages/sw_upd_started'
+#          - $ref: '#/components/messages/sw_upd_progress'
+#          - $ref: '#/components/messages/sw_upd_finished'
+
+components:
+  securitySchemes:
+    token:
+      description: |
+        The API token can be provided in header key `API-KEY`.
+        - If this header is not provided, the server will send the `auth_required` event after connection and the client
+        must authenticate with the `auth` message.
+      type: httpApiKey
+      in: header
+      name: API-KEY
+
+  # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  messages:
+    request:
+      summary: 🚀 Generic request message.
+      payload:
+        $ref: '#/components/schemas/commonReq'
+    response:
+      summary: 🚀 Generic response message.
+      payload:
+        $ref: '#/components/schemas/commonResp'
+    event:
+      summary: 🧪 Generic event message of a subscribed channel.
+      payload:
+        $ref: '#/components/schemas/commonEvent'
+    auth_required:
+      summary: 🔍 Authentication request event after connection is established.
+      description: |
+        This event is only sent if the client didn't provide authentication during connection setup.  
+        The client must then authenticate with the `auth` request message.
+      payload:
+        $ref: '#/components/schemas/authRequiredEvent'
+    auth:
+      summary: 🔍 Authenticate a connection.
+      description: |
+        Sent by the client right after establishing a connection if header authentication cannot be used, or after an 
+        `auth_required` request by the server.
+      payload:
+        $ref: '#/components/schemas/authRequestMsg'
+      x-response:
+        $ref: '#/components/messages/authentication'
+    authentication:
+      summary: 🔍 Authentication response.
+      description: |
+        The authentication result is provided in the `code` attribute:
+        - `200`: success, API can be used and message requests are accepted.
+        - `401`: authentication failed, the provided token is not valid. The server will close the connection.
+      payload:
+        $ref: '#/components/schemas/authMsg'
+    ping:
+      summary: 🚀 Application level based ping to determine whether connection is alive.
+      description: |
+        Client can ping the server to determine whether connection is alive. Server responds with pong.
+        
+        This is an application level ping as opposed to the standard WebSocket ping frames. This is only required if a
+        client framework doesn't support WebSocket ping frames!  
+        Additional payload data may be included in `msg_data` which will be echoed by the server.
+        E.g. a client timestamp to calculate round trip times.
+      payload:
+        $ref: '#/components/schemas/ping'
+      x-response:
+        $ref: '#/components/messages/pong'
+    pong:
+      summary: 🚀 Pong is a response to ping message
+      description: |
+        Server pong response to a ping to determine whether connection is alive.
+        This is an application level pong as opposed to default pong in websockets standard which is sent by client in
+        response to a ping.
+      payload:
+        $ref: '#/components/schemas/pong'
+    result:
+      summary: 🚀 Command result message
+      payload:
+        $ref: '#/components/schemas/commonResp'
+      examples:
+        - payload:
+            kind: resp
+            req_id: 123
+            msg: result
+            code: 200
+            msg_data: {}
+        - payload:
+            kind: resp
+            req_id: 124
+            msg: result
+            code: 400
+            msg_data:
+              code: "INV_ARGUMENT"
+              message: "Invalid argument. Foo must be a positive number."
+
+    # =========================================================================
+    # CORE-API MESSAGES
+    # =========================================================================
+
+    version:
+      summary: 🔍 Get version information.
+      payload:
+        $ref: '#/components/schemas/versionMsg'
+      x-response:
+        $ref: '#/components/messages/version_info'
+    version_info:
+      summary: 🔍 Version information.
+      payload:
+        $ref: '#/components/schemas/versionInfoMsg'
+
+    system:
+      summary: 👷 Get system information.
+      description: Get hardware information about the device like serial number, model number and hardware revision.
+      payload:
+        $ref: '#/components/schemas/getSystemInfoMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    system_info:
+      summary: 👷 System information.
+      payload:
+        $ref: '#/components/schemas/systemInfoMsg'
+    system_cmd:
+      summary: 👷 Perform a system command like reboot or power-off.
+      description: |
+        The following system commands can be executed:
+        
+        - `STANDBY`: Put the device into standby mode.
+        - `REBOOT`: Reboot the device.
+        - `POWER_OFF`: Switch off the device
+        - `RESTART`: Restart the application.  
+        
+        The server will respond with a `result` message and a status code of the request.  
+        For status code 200 the WebSocket connection will be closed and the command executed.
+      payload:
+        $ref: '#/components/schemas/systemCmdMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_factory_reset_token:
+      summary: Get factory reset token.
+      description: |
+        Get a factory reset token to perform a complete factory reset of the remote.
+
+        The token will be valid for 60 seconds. Afterwards, a new token must be requested.  
+        Whenever a new token is requested, any old tokens will be invalidated.
+      payload:
+        $ref: '#/components/schemas/getFactoryResetTokenMsg'
+      x-response:
+        $ref: '#/components/messages/factory_reset_token'
+    factory_reset_token:
+      summary: Factory reset token.
+      payload:
+        $ref: '#/components/schemas/factoryResetTokenMsg'
+    factory_reset:
+      summary: Perform a factory reset.
+      description: |
+        A factory reset removes all configuration data and puts the device into a clean state.  
+
+        ⚠️ **Warning:** All user data will be erased and won't be recoverable!
+
+        A reset token must be requested first and provided to perform a factory reset.
+      payload:
+        $ref: '#/components/schemas/factoryResetMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    reset_configuration:
+      summary: 👷 Reset all settings to default values.
+      payload:
+        $ref: '#/components/schemas/resetConfigurationMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_configuration:
+      summary: 🔍 Get all system settings.
+      payload:
+        $ref: '#/components/schemas/getConfigurationMsg'
+      x-response:
+        $ref: '#/components/messages/configuration'
+    configuration:
+      summary: 🔍 All system settings.
+      payload:
+        $ref: '#/components/schemas/configurationMsg'
+
+    get_button_cfg:
+      summary: 🔍 Get button settings.
+      payload:
+        $ref: '#/components/schemas/getButtonCfgMsg'
+      x-response:
+        $ref: '#/components/messages/button_cfg'
+    set_button_cfg:
+      summary: 🔍 Modify button settings.
+      payload:
+        $ref: '#/components/schemas/setButtonCfgMsg'
+      x-response:
+        $ref: '#/components/messages/button_cfg'
+    button_cfg:
+      summary: 🔍 Button settings.
+      payload:
+        $ref: '#/components/schemas/buttonCfgMsg'
+
+    get_display_cfg:
+      summary: 🔍 Get display settings.
+      payload:
+        $ref: '#/components/schemas/getDisplayCfgMsg'
+      x-response:
+        $ref: '#/components/messages/display_cfg'
+    set_display_cfg:
+      summary: 🔍 Modify display settings.
+      payload:
+        $ref: '#/components/schemas/setDisplayCfgMsg'
+      x-response:
+        $ref: '#/components/messages/display_cfg'
+    display_cfg:
+      summary: 🔍 Display settings.
+      payload:
+        $ref: '#/components/schemas/displayCfgMsg'
+
+    get_haptic_cfg:
+      summary: 🔍 Get haptic settings.
+      payload:
+        $ref: '#/components/schemas/getHapticCfgMsg'
+      x-response:
+        $ref: '#/components/messages/haptic_cfg'
+    set_haptic_cfg:
+      summary: 🔍 Modify haptic settings.
+      payload:
+        $ref: '#/components/schemas/setHapticCfgMsg'
+      x-response:
+        $ref: '#/components/messages/haptic_cfg'
+    haptic_cfg:
+      summary: 🔍 Haptic settings.
+      payload:
+        $ref: '#/components/schemas/hapticCfgMsg'
+
+    get_localization_cfg:
+      summary: 🔍 Get localization settings.
+      payload:
+        $ref: '#/components/schemas/getLocalizationCfgMsg'
+      x-response:
+        $ref: '#/components/messages/localization_cfg'
+    set_localization_cfg:
+      summary: 🔍 Modify localization settings.
+      payload:
+        $ref: '#/components/schemas/setLocalizationCfgMsg'
+      x-response:
+        $ref: '#/components/messages/localization_cfg'
+    localization_cfg:
+      summary: 🔍 Localization settings.
+      payload:
+        $ref: '#/components/schemas/localizationCfgMsg'
+    get_timezone_names:
+      summary: 🔍 Get all available time zone names.
+      payload:
+        $ref: '#/components/schemas/getTimezoneNamesMsg'
+      x-response:
+        $ref: '#/components/messages/timezone_names'
+    timezone_names:
+      summary: 🔍 Available time zone names.
+      payload:
+        $ref: '#/components/schemas/timezoneNamesMsg'
+
+    get_network_cfg:
+      summary: 🔍 Get network settings.
+      payload:
+        $ref: '#/components/schemas/getNetworkCfgMsg'
+      x-response:
+        $ref: '#/components/messages/network_cfg'
+    set_network_cfg:
+      summary: 🔍 Modify network settings.
+      payload:
+        $ref: '#/components/schemas/setNetworkCfgMsg'
+      x-response:
+        $ref: '#/components/messages/network_cfg'
+    network_cfg:
+      summary: 🔍 Network settings.
+      payload:
+        $ref: '#/components/schemas/networkCfgMsg'
+
+    get_software_update_cfg:
+      summary: 🔍 Get software update settings.
+      payload:
+        $ref: '#/components/schemas/getSoftwareUpdateCfgMsg'
+      x-response:
+        $ref: '#/components/messages/software_update_cfg'
+    set_software_update_cfg:
+      summary: 🔍 Modify software update settings.
+      payload:
+        $ref: '#/components/schemas/setSoftwareUpdateCfgMsg'
+      x-response:
+        $ref: '#/components/messages/software_update_cfg'
+    software_update_cfg:
+      summary: 🔍 Software update settings.
+      payload:
+        $ref: '#/components/schemas/softwareUpdateCfgMsg'
+
+    get_power_saving_cfg:
+      summary: 🔍 Get power saving settings.
+      payload:
+        $ref: '#/components/schemas/getPowerSavingCfgMsg'
+      x-response:
+        $ref: '#/components/messages/power_saving_cfg'
+    set_power_saving_cfg:
+      summary: 🔍 Modify power saving settings.
+      payload:
+        $ref: '#/components/schemas/setPowerSavingCfgMsg'
+      x-response:
+        $ref: '#/components/messages/power_saving_cfg'
+    power_saving_cfg:
+      summary: 🔍 Power saving settings.
+      payload:
+        $ref: '#/components/schemas/powerSavingCfgMsg'
+
+    get_sound_cfg:
+      summary: 🔍 Get sound settings.
+      payload:
+        $ref: '#/components/schemas/getSoundCfgMsg'
+      x-response:
+        $ref: '#/components/messages/sound_cfg'
+    set_sound_cfg:
+      summary: 🔍 Modify sound settings.
+      payload:
+        $ref: '#/components/schemas/setSoundCfgMsg'
+      x-response:
+        $ref: '#/components/messages/sound_cfg'
+    sound_cfg:
+      summary: 🔍 Sound settings.
+      payload:
+        $ref: '#/components/schemas/soundCfgMsg'
+
+    get_voice_control_cfg:
+      summary: 🔍 Get voice control settings.
+      payload:
+        $ref: '#/components/schemas/getVoiceControlCfgMsg'
+      x-response:
+        $ref: '#/components/messages/voice_control_cfg'
+    set_voice_control_cfg:
+      summary: 🔍 Modify voice control settings.
+      payload:
+        $ref: '#/components/schemas/setVoiceControlCfgMsg'
+      x-response:
+        $ref: '#/components/messages/voice_control_cfg'
+    voice_control_cfg:
+      summary: 🔍 Voice control settings.
+      payload:
+        $ref: '#/components/schemas/voiceControlCfgMsg'
+    get_voice_assistants:
+      summary: 🚧 Get available voice assistants.
+      payload:
+        $ref: '#/components/schemas/getVoiceAssistantsMsg'
+      x-response:
+        $ref: '#/components/messages/voice_assistants'
+    voice_assistants:
+      summary: 🚧 Voice assistants.
+      payload:
+        $ref: '#/components/schemas/voiceAssistantsMsg'
+
+    # --- Entity handling
+
+    get_entity_types:
+      summary: 🧪 Retrieve supported entity types.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/getEntityTypesMsg'
+      x-response:
+        $ref: '#/components/messages/entity_types'
+    entity_types:
+      summary: 🧪 List of supported entity types.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/entityTypesMsg'
+    get_entity:
+      summary: 🧪 Retrieve a configured entity.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/getEntityMsg'
+      x-response:
+        $ref: '#/components/messages/entity'
+    get_entities:
+      summary: 🧪 Retrieve configured entities.
+      description: |
+        Returns all configured entities, optionally filtered by entity type or integration.
+        
+        Attention: pagination is active and can be parameterized to return more items per page if required.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/getEntitiesMsg'
+      x-response:
+        $ref: '#/components/messages/entities'
+    entities:
+      summary: 🧪 List of configured entities.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/entitiesMsg'
+    get_available_entities:
+      summary: 🧪 Retrieve the available entities provided by integrations.
+      description: |
+        TODO core implementation: retrieve available entities from all integrations.
+        --> **`filter.integration_id` must be specified at the moment!**
+        
+        Attention: pagination is active and can be parameterized to return more items per page if required.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/getAvailableEntitiesMsg'
+      x-response:
+        $ref: '#/components/messages/available_entities'
+    available_entities:
+      summary: 🧪 List of available entities.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/availableEntitiesMsg'
+    get_entity_commands:
+      summary: 🧪 Retrieve the available commands of an entity or entity type.
+      description: |
+        The commands can either be retrieved from a specific entity or from an entity type:
+        - `entity_id`: only available commands for the given entity are returned. This depends on the entity's features.
+        - `entity_type`: all commands for the given entity type are returned.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/getEntityCommandsMsg'
+      x-response:
+        $ref: '#/components/messages/entity_commands'
+    entity_commands:
+      summary: 🧪 Available commands of an entity.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/entityCommandsMsg'
+    execute_entity_command:
+      summary: 🧪 Execute an entity command.
+      description: |
+        Optional command data can be provided in attribute `parameter`.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/executeEntityCommandMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    entity:
+      summary: 🧪 Entity information
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/entityMsg'
+    entity_change:
+      summary: 🔍 Entity change event.
+      description: |
+        Emitted if an entity has changed, a new entity has been added or a configured entity has been deleted.
+        
+        If an entity state or dynamic attribute has changed (through notification of an integration driver), then only
+        the `attributes` object is included within `new_state`. This happens after an `entity_command` or if the entity
+        is updated manually through a user or an external system, e.g. if it has been switched off.
+        
+        If the entity definition has changed, e.g. the name, description or icon has been modified with the web
+        configurator, the full entity data is included within `new_state`.
+        
+        If a complete integration is removed then only an `integration_change` event is sent, i.e. there won't be
+        individual `entity_change` events for every removed entity!
+      tags:
+        - name: entity
+        - name: event
+      payload:
+        $ref: '#/components/schemas/entityChangeEventMsg'
+    update_entity:
+      summary: 🧪 Update an entity.
+      description: |
+        Update one or multiple properties of an entity.  
+
+        The updated entity object is returned if the entity could be updated.  
+        In case of an error the default `result` message is returned with an error code.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/updateEntityMsg'
+      x-response:
+        $ref: '#/components/messages/entity'
+    delete_entity:
+      summary: 🧪 Delete an entity.
+      description: |
+        Delete the configured entity and remove it from all profile pages and groups.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/deleteEntityMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    delete_all_entities:
+      summary: 🧪 Delete all entities.
+      description: |
+        Warning: all configured entities in all profiles are deleted. All profile pages and groups will be empty afterwards! 
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/deleteAllEntitiesMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    # --- Profile handling
+
+    get_profiles:
+      summary: 🧪 Retrieve all profiles.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getProfilesMsg'
+      x-response:
+        $ref: '#/components/messages/profiles'
+    profiles:
+      summary: 🧪 List of available profiles.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/profilesMsg'
+    get_profile:
+      summary: 🧪 Retrieve the specified profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getProfileMsg'
+      x-response:
+        $ref: '#/components/messages/profile'
+    profile:
+      summary: 🧪 Profile data.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/profileMsg'
+    switch_profile:
+      summary: 👷 Switch active profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/switchProfileMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    add_profile:
+      summary: 🧪 Add a new profile.
+      description: |
+        - `profile_id` is optional and auto-generated if not specified. Otherwise it needs to be a unique profile identifier.
+        - `name` is mandatory and must be unique.
+        - `pin` is an optional numeric pin code to lock the profile. A protected profile can only be accessed with the profile specific pin code.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/addProfileMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    update_profile:
+      summary: 🧪 Update a profile.
+      description: |
+        Update one or multiple properties of a profile. A missing property will not update its current value.  
+        - `profile_id` is mandatory and can't be changed.
+        - an empty `icon` value removes an existing icon identifier.
+        - an empty `pin` value removes an existing pin code.
+        - a missing `pages` property will not change the page order.
+        - ⚠️ an empty `pages` array removes all pages and groups in the profile!
+        - ⚠️ missing page identifiers in the `pages` array will remove the page configuration!
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/updateProfileMsg'
+      x-response:
+        $ref: '#/components/messages/profile'
+    delete_profile:
+      summary: 🧪 Delete the specified profile.
+      description: All profile related pages and groups are also deleted.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/deleteProfileMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    delete_all_profiles:
+      summary: 🧪 Delete all profiles.
+      description: This also deletes all pages and groups.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/deleteAllProfilesMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    # --- page handling
+
+    get_pages:
+      summary: 🧪 Retrieve all UI pages of a profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getPagesMsg'
+      x-response:
+        $ref: '#/components/messages/pages'
+    pages:
+      summary: 🧪 List of defined UI pages.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/pagesMsg'
+    get_page:
+      summary: 🧪 Retrieve the specified UI page.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getPageMsg'
+      x-response:
+        $ref: '#/components/messages/page'
+    page:
+      summary: 🧪 UI page data.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/pageMsg'
+    add_page:
+      summary: 🧪 Create a new UI page and add to profile.
+      tags:
+        - name: profile
+      description: |
+        - `profile_id` is mandatory.
+        - `page_id` is not required and is created automatically.
+        - `name` is mandatory and must be unique within the profile.
+      payload:
+        $ref: '#/components/schemas/addPageMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    update_page:
+      summary: 🧪 Update a UI page.
+      tags:
+        - name: profile
+      description: |
+        - `profile_id` and `page_id` are mandatory.
+      payload:
+        $ref: '#/components/schemas/updatePageMsg'
+      x-response:
+        $ref: '#/components/messages/page'
+    delete_page:
+      summary: 🧪 Delete a UI page.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/deletePageMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    delete_pages_in_profile:
+      summary: 🧪 Delete all pages of a profile
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/deletePagesInProfileMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    # --- group handling
+
+    get_groups:
+      summary: 🧪 Retrieve all UI groups of a profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getGroupsMsg'
+      x-response:
+        $ref: '#/components/messages/groups'
+    groups:
+      summary: 🧪 List of defined UI groups.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/groupsMsg'
+    get_group:
+      summary: 🧪 Retrieve the specified UI group.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getGroupMsg'
+      x-response:
+        $ref: '#/components/messages/group'
+    group:
+      summary: 🧪 UI group data.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/groupMsg'
+    add_group:
+      summary: 🧪 Create a new UI group and add to profile.
+      description: |
+        - `profile_id` is mandatory.
+        - `group_id` is not required and is created automatically.
+        - `name` is mandatory and must be unique within the profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/addGroupMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    update_group:
+      summary: 🧪 Update a UI group.
+      description: |
+        - `profile_id` and `group_id` are mandatory.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/updateGroupMsg'
+      x-response:
+        $ref: '#/components/messages/group'
+    delete_group:
+      summary: 🧪 Delete a UI group.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/deleteGroupMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    delete_groups_in_profile:
+      summary: 🧪 Delete all groups in a profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/deleteGroupsInProfileMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    # --- integration handling
+
+    get_integration_status:
+      summary: 🧪 Retrieve an overview of the integration instances and their current connection state.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationStatusMsg'
+      x-response:
+        $ref: '#/components/messages/integration_status'
+    integration_status:
+      summary: 🧪 Summary information of the integration instances.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationStatusMsg'
+
+    integration_cmd:
+      summary: 🧪 Execute an integration command.
+      description: |
+        Connect or disconnect integration instances.
+        
+        If `integration_id` is specified, then the command only applies to the given integration, otherwise to all
+        integration instances.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationCmdMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    integration_driver_cmd:
+      summary: 🧪 Execute an integration driver command.
+      description: |
+        Start or stop integration drivers.
+        
+        If `driver_id` is specified, then the command only applies to the given driver, otherwise to all
+        integration drivers.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationDriverCmdMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_integration_driver_count:
+      summary: 🧪 Get total number of registered integration drivers.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationDriverCountMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver_count'
+    integration_driver_count:
+      summary: 🧪 Total number of registered integration drivers.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationDriverCountMsg'
+
+    get_integration_drivers:
+      summary: 🧪 Retrieve all registered integration drivers.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationDriversMsg'
+      x-response:
+        $ref: '#/components/messages/integration_drivers'
+    integration_drivers:
+      summary: 🧪 List of registered integration drivers.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationDriversMsg'
+
+    register_integration_driver:
+      summary: 🧪 Register a new integration driver.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/registerIntegrationDriverMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver'
+
+    get_integration_driver:
+      summary: 🧪 Retrieve detail information of an integration driver.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationDriverMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver'
+    integration_driver:
+      summary: 🧪 Detail information of an integration driver.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationDriverMsg'
+
+    update_integration_driver:
+      summary: 🧪 Modify a configured integration driver.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/updateIntegrationDriverMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver'
+
+    delete_integration_driver:
+      summary: 🧪 Remove an integration driver.
+      description: |
+        Unloads and deletes an integration driver with all instances and provided entities.
+        
+        **Attention: all references to the integration driver will be removed! This includes all driver instances,
+        provided entities and their references in profile pages and groups.**
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/deleteIntegrationDriverMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_integration_count:
+      summary: 🧪 Get total number of integration instances.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationCountMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver_count'
+    integration_count:
+      summary: 🧪 Total number of integration instances.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationCountMsg'
+
+    get_integrations:
+      summary: 🧪 Retrieve all loaded integrations.
+      description: |
+        Returns all integration instances, optionally filtered by `type` or `enabled` state.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationsMsg'
+      x-response:
+        $ref: '#/components/messages/integrations'
+    integrations:
+      summary: 🧪 List of loaded integrations.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationsMsg'
+
+    create_integration:
+      summary: 🧪 Create a new integration instance from driver.
+      description: |
+        Create an integration driver instance and associate it with the driver.
+        For simple integration drivers there's a 1:1 relationship only between an instance and driver.
+        For multi-device drivers, each device corresponds to an integration instance.
+    
+        - the `integration_id` is automatically created by the system to make it unique over all integrations.
+        - for multi-device drivers the `device_id` must be specified and may not already exist in another instance of the
+          same driver.
+        - the driver's name is used by default if `name` isn't specified.
+        - the instance is active by default if `enabled` isn't specified.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/createIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/integration'
+    integration:
+      summary: 🧪 Integration instance information.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationMsg'
+
+    get_integration:
+      summary: 🧪 Get an integration instance.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/integration'
+
+    update_integration:
+      summary: 🧪 Modify a configured integration instance.
+      description: |
+        Modify one or several properties of an integration instance.  
+        See update model description on how to update or delete an existing property.
+        
+        The integration driver of an instance cannot be changed and will be ignored if provided in the request.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/updateIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/integration'
+
+    delete_integration:
+      summary: 🧪 Remove an integration instance.
+      description: |
+        Unloads and deletes an integration instance.
+        
+        **Attention: all references to the integration instance will be removed! This includes configured entities and 
+        their references in profile pages and groups.**
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/deleteIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    configure_entity_from_integration:
+      summary: 🧪 Configure an available entity.
+      description: |
+        Configure a new Remote Two entity from an available integration entity. Once configured, the entity will no
+        longer show up as available entity (unless the `all` filter is set).
+        
+        The entity `name`, `icon` and `description` fields may be changed. If not specified in the request the values from
+        the available entity are used.
+        
+        In case of an error the default `result` message is returned with an error code.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/configureEntityFromIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/entity'
+
+    # =========================================================================
+    # NOTIFICATIONS API MESSAGES
+    # =========================================================================
+
+    get_event_channels:
+      summary: 🧪 Retrieve available event channels for the current session.
+      description: |
+        Depending on the security role not all event subscriptions may be available.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/getEventChannelsMsg'
+      x-response:
+        $ref: '#/components/messages/event_channels'
+    event_channels:
+      summary: 🧪 Available subscriptions for the current session.
+      description: |
+        Returns all subscribed event channels.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/eventChannelsMsg'
+    subscribe_events:
+      summary: 🧪 Subscribe to event channels.
+      description: |
+        Subscribe to one or multiple event channels.
+        
+        - The special `All` channel will deliver all available events and clear all other subscriptions for the session.
+        - If the session is already subscribed to the `All` channel, any other channels are ignored.
+        - Depending on the security role not all event subscriptions may be available.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/subscribeEventsMsg'
+      x-response:
+        $ref: '#/components/messages/event_subscriptions'
+    get_event_subscriptions:
+      summary: 🧪 Retrieve the active event channel subscriptions.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/getEventSubscriptionsMsg'
+      x-response:
+        $ref: '#/components/messages/event_subscriptions'
+    unsubscribe_events:
+      summary: 🧪 Unsubscribe from event channels.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/unsubscribeEventsMsg'
+      x-response:
+        $ref: '#/components/messages/event_subscriptions'
+    event_subscriptions:
+      summary: 🧪 Event channel subscription status.
+      description: |
+        Response to `subscribe_events`, `unsubscribe_events` and `get_event_subscriptions`.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/eventSubscriptionsMsg'
+
+    integration_driver_change:
+      summary: 🔍 Integration driver change event.
+      description: |
+        Emitted if an integration driver has changed, a new driver has been added or a configured driver has been
+        deleted.
+      tags:
+        - name: integration
+        - name: event
+      payload:
+        $ref: '#/components/schemas/integrationDriverChangeEventMsg'
+    integration_change:
+      summary: 🔍 Integration change event.
+      description: |
+        Emitted if an integration instance has changed, a new instance has been added or a configured instance has been
+        deleted.
+      tags:
+        - name: integration
+        - name: event
+      payload:
+        $ref: '#/components/schemas/integrationChangeEventMsg'
+    integration_state:
+      summary: 🔍 Integration state event.
+      description: |
+        Emitted if the connection state of an integration driver or instance has changed.
+      tags:
+        - name: integration
+        - name: event
+      payload:
+        $ref: '#/components/schemas/integrationStateEventMsg'
+
+    configuration_change:
+      summary: 🔍 System configuration change event.
+      description: |
+        Emitted if a system setting has changed.
+        
+        The `msg_data.new_state` object only contains the configuration object of the setting that has changed and not
+        the full system configuration.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/configurationChangeEventMsg'
+
+  # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  schemas:
+    # =========================================================================
+    # Common message schemas
+    # =========================================================================
+    commonReq:
+      description: Common request message properties.
+      type: object
+      properties:
+        kind:
+          description: Request message identifier.
+          type: string
+          const: req
+        id:
+          description: Request ID which must be increased for every new request. This ID will be returned in the response message.
+          type: integer
+          minimum: 0
+          default: 0
+        msg:
+          description: One of the defined API request message types.
+          type: string
+          minLength: 1
+          maxLength: 32
+      required:
+        - id
+        - msg
+    commonResp:
+      description: Common response message properties.
+      type: object
+      properties:
+        kind:
+          description: Response message identifier.
+          type: string
+          const: resp
+        req_id:
+          $ref: '#/components/schemas/msgId'
+        msg:
+          description: One of the defined API response message types.
+          type: string
+          minLength: 1
+          maxLength: 32
+        code:
+          description: Response code of the operation according to HTTP status codes.
+          type: integer
+          default: 200
+        msg_data:
+          description: Wrapper for response data object.
+          type: object
+      required:
+        - kind
+        - req_id
+        - msg
+        - code
+        - msg_data
+    commonEvent:
+      description: Common event message properties.
+      type: object
+      properties:
+        kind:
+          description: Event message identifier.
+          type: string
+          const: event
+        msg:
+          description: One of the defined API event message types.
+          type: string
+          minLength: 1
+          maxLength: 32
+        cat:
+          description: Event category.
+          type: string
+        ts:
+          type: string
+          format: date-time
+          description: Optional timestamp when the event was generated.
+        msg_data:
+          description: Wrapper for event data object.
+          type: object
+      required:
+        - kind
+        - msg
+        - msg_data
+    authRequiredEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: auth_required
+            msg_data:
+              type: object
+              properties:
+                api:
+                  type: object
+                  properties:
+                    name:
+                      description: API name
+                      type: string
+                    version:
+                      description: API version
+                      type: string
+          required:
+            - msg
+    authRequestMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: auth
+            msg_data:
+              type: object
+              properties:
+                token:
+                  type: string
+          required:
+            - msg
+            - msg_data
+    authMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: authentication
+          required:
+            - msg
+
+    # =========================================================================
+    # Core message schemas
+    # =========================================================================
+    versionMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: version
+          required:
+            - msg
+    versionInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: version_info
+            msg_data:
+              $ref: '#/components/schemas/versionInfo'
+          required:
+            - msg
+            - msg_data
+
+    systemCmdMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: service_cmd
+            msg_data:
+              properties:
+                command:
+                  type: string
+                  enum:
+                    - STANDBY
+                    - REBOOT
+                    - POWER_OFF
+                    - RESTART
+              required:
+                - command
+          required:
+            - msg
+            - msg_data
+    getSystemInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: system
+          required:
+            - msg
+    systemInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: system_info
+            msg_data:
+              $ref: '#/components/schemas/systemInfo'
+          required:
+            - msg
+            - msg_data
+
+    getFactoryResetTokenMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_factory_reset_token
+          required:
+            - msg
+    factoryResetTokenMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: factory_reset_token
+            msg_data:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+          required:
+            - msg
+            - msg_data
+    factoryResetMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: factory_reset
+            msg_data:
+              type: object
+              properties:
+                token:
+                  type: string
+              required:
+                - token
+          required:
+            - msg
+            - msg_data
+    resetConfigurationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: reset_configuration
+          required:
+            - msg
+
+    getConfigurationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_configuration
+          required:
+            - msg
+    configurationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: configuration
+            msg_data:
+              $ref: '#/components/schemas/configuration'
+          required:
+            - msg
+            - msg_data
+
+    getButtonCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_button_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setButtonCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_button_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgButton'
+          required:
+            - msg
+            - msg_data
+    buttonCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: button_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgButton'
+          required:
+            - msg
+            - msg_data
+
+    getDisplayCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_display_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setDisplayCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_display_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgDisplay'
+          required:
+            - msg
+            - msg_data
+    displayCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: display_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgDisplay'
+          required:
+            - msg
+            - msg_data
+
+    getHapticCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_haptic_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setHapticCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_haptic_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgHaptic'
+          required:
+            - msg
+            - msg_data
+    hapticCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: haptic_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgHaptic'
+          required:
+            - msg
+            - msg_data
+
+    getLocalizationCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_localization_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setLocalizationCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_localization_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgLocalization'
+          required:
+            - msg
+            - msg_data
+    localizationCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: localization_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgLocalization'
+          required:
+            - msg
+            - msg_data
+    getTimezoneNamesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_timezone_names
+          required:
+            - msg
+    timezoneNamesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: timezone_names
+            msg_data:
+              type: array
+              items:
+                type: string
+          required:
+            - msg
+            - msg_data
+
+    getNetworkCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_network_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setNetworkCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_network_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgNetwork'
+          required:
+            - msg
+            - msg_data
+    networkCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: network_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgNetwork'
+          required:
+            - msg
+            - msg_data
+
+    getSoftwareUpdateCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_software_update_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setSoftwareUpdateCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_software_update_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgSoftwareUpdate'
+          required:
+            - msg
+            - msg_data
+    softwareUpdateCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: software_update_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgSoftwareUpdate'
+          required:
+            - msg
+            - msg_data
+
+    getPowerSavingCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_power_saving_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setPowerSavingCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_power_saving_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgPowerSaving'
+          required:
+            - msg
+            - msg_data
+    powerSavingCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: power_saving_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgPowerSaving'
+          required:
+            - msg
+            - msg_data
+
+    getSoundCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_sound_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setSoundCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_sound_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgSound'
+          required:
+            - msg
+            - msg_data
+    soundCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: sound_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgSound'
+          required:
+            - msg
+            - msg_data
+
+    getVoiceControlCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_voice_control_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setVoiceControlCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_voice_control_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgVoiceControl'
+          required:
+            - msg
+            - msg_data
+    voiceControlCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: voice_control_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgVoiceControl'
+          required:
+            - msg
+            - msg_data
+    getVoiceAssistantsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_voice_assistants
+          required:
+            - msg
+    voiceAssistantsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: voice_assistants
+            msg_data:
+              type: array
+              items:
+                type: string
+          required:
+            - msg
+            - msg_data
+
+    # --- Entity handling
+
+    getEntityTypesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_entity_types
+          required:
+            - msg
+    entityTypesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: entity_types
+            msg_data:
+              type: array
+              items:
+                type: string
+          required:
+            - msg
+            - msg_data
+    getEntityMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_entity
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  $ref: '#/components/schemas/entityId'
+              required:
+                - entity_id
+          required:
+            - msg
+            - msg_data
+    getEntitiesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_entities
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/entityFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+          required:
+            - msg
+    entitiesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: entities
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/entityFilter'
+                paging:
+                  $ref: '#/components/schemas/pagination'
+                entities:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/entity'
+              required:
+                - entities
+          required:
+            - msg
+            - msg_data
+    getAvailableEntitiesMsg:
+      description: |
+        Retrieve the available entities provided by the integration instance.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_available_entities
+            msg_data:
+              type: object
+              properties:
+                force_reload:
+                  description: Don't use cached entities and re-request available entities from integrations
+                  type: boolean
+                filter:
+                  $ref: '#/components/schemas/availableEntityFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+          required:
+            - msg
+    availableEntitiesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: available_entities
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/availableEntityFilter'
+                paging:
+                  $ref: '#/components/schemas/pagination'
+                available_entities:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/available_entity'
+              required:
+                - available_entities
+          required:
+            - msg
+            - msg_data
+    getEntityCommandsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_entity_commands
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  type: string
+                entity_type:
+                  type: string
+          required:
+            - msg
+            - msg_data
+    entityCommandsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: entity_commands
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  type: string
+                entity_type:
+                  type: string
+                commands:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/entityCommand'
+              required:
+                - commands
+          required:
+            - msg
+            - msg_data
+    executeEntityCommandMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: execute_entity_command
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  $ref: '#/components/schemas/entityId'
+                cmd_id:
+                  $ref: '#/components/schemas/entityCommand'
+                params:
+                  description: |
+                    Optional key/value command parameters if required. See entity documentation for more information.
+                  type: object
+              required:
+                - entity_id
+                - cmd_id
+          required:
+            - msg
+            - msg_data
+    entityMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: entity
+            msg_data:
+              $ref: '#/components/schemas/entity'
+          required:
+            - msg
+            - msg_data
+    entityChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: entity_change
+            msg_data:
+              $ref: '#/components/schemas/entityChange'
+          required:
+            - msg
+            - msg_data
+    updateEntityMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_entity
+            msg_data:
+              $ref: '#/components/schemas/entityUpdate'
+          required:
+            - msg
+            - msg_data
+    deleteEntityMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_entity
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  $ref: '#/components/schemas/entityId'
+              required:
+                - entity_id
+          required:
+            - msg
+            - msg_data
+    deleteAllEntitiesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_all_entities
+          required:
+            - msg
+
+    # --- Profile handling
+
+    getProfilesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_profiles
+          required:
+            - msg
+    profilesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: profiles
+            msg_data:
+              $ref: '#/components/schemas/profiles'
+          required:
+            - msg
+            - msg_data
+    getProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_profile
+            msg_data:
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+    profileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: profile
+            msg_data:
+              $ref: '#/components/schemas/profile'
+          required:
+            - msg
+            - msg_data
+    switchProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: switch_profile
+            msg_data:
+              type: object
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+    addProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: add_profile
+            msg_data:
+              $ref: '#/components/schemas/profileData'
+          required:
+            - msg
+            - msg_data
+    updateProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_profile
+            msg_data:
+              $ref: '#/components/schemas/profileData'
+          required:
+            - msg
+            - msg_data
+    deleteProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_profile
+            msg_data:
+              type: object
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+    deleteAllProfilesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_all_profiles
+          required:
+            - msg
+
+    # --- page handling
+
+    getPagesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_pages
+            msg_data:
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+    pagesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: pages
+            msg_data:
+              $ref: '#/components/schemas/pages'
+          required:
+            - msg
+            - msg_data
+    getPageMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_page
+            msg_data:
+              properties:
+                page_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - page_id
+          required:
+            - msg
+            - msg_data
+    pageMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: page
+            msg_data:
+              $ref: '#/components/schemas/page'
+          required:
+            - msg
+            - msg_data
+    addPageMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: add_page
+            msg_data:
+              $ref: '#/components/schemas/pageData'
+          required:
+            - msg
+            - msg_data
+    updatePageMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_page
+            msg_data:
+              $ref: '#/components/schemas/pageData'
+          required:
+            - msg
+            - msg_data
+    deletePageMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_page
+            msg_data:
+              type: object
+              properties:
+                page_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - page_id
+          required:
+            - msg
+            - msg_data
+    deletePagesInProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_pages_in_profile
+            msg_data:
+              type: object
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+
+    # --- group handling
+
+    getGroupsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_groups
+            msg_data:
+              type: object
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+    groupsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: groups
+            msg_data:
+              $ref: '#/components/schemas/groups'
+          required:
+            - msg
+            - msg_data
+    getGroupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_group
+            msg_data:
+              type: object
+              properties:
+                group_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - group_id
+          required:
+            - msg
+            - msg_data
+    groupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: group
+            msg_data:
+              $ref: '#/components/schemas/group'
+          required:
+            - msg
+            - msg_data
+    addGroupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: add_group
+            msg_data:
+              $ref: '#/components/schemas/groupData'
+          required:
+            - msg
+            - msg_data
+    updateGroupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_group
+            msg_data:
+              $ref: '#/components/schemas/groupData'
+          required:
+            - msg
+            - msg_data
+    deleteGroupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_group
+            msg_data:
+              type: object
+              properties:
+                group_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - group_id
+          required:
+            - msg
+            - msg_data
+    deleteGroupsInProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_group
+            msg_data:
+              type: object
+              properties:
+                profile_id:
+                  $ref: '#/components/schemas/simpleId'
+                pin:
+                  type: string
+                  description: Optional pin to access locked pages with a non-admin account.
+              required:
+                - profile_id
+          required:
+            - msg
+            - msg_data
+
+    # --- integration handling
+
+    getIntegrationStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_status
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+          required:
+            - msg
+    integrationStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_status
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+                paging:
+                  $ref: '#/components/schemas/pagination'
+                status:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/integrationStatus'
+              required:
+                - drivers
+          required:
+            - msg
+            - msg_data
+
+    integrationCmdMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: integration_cmd
+            msg_data:
+              type: object
+              properties:
+                cmd_id:
+                  type: string
+                  enum:
+                    - CONNECT
+                    - DISCONNECT
+                integration_id:
+                  $ref: '#/components/schemas/integrationId'
+              required:
+                - cmd_id
+          required:
+            - msg
+            - msg_data
+
+    integrationDriverCmdMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: integration_driver_cmd
+            msg_data:
+              type: object
+              properties:
+                cmd_id:
+                  type: string
+                  enum:
+                    - START
+                    - STOP
+                driver_id:
+                  $ref: '#/components/schemas/driverId'
+              required:
+                - cmd_id
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationDriverCountMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_driver_count
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+          required:
+            - msg
+    integrationDriverCountMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_driver_count
+            msg_data:
+              type: object
+              properties:
+                # TODO return request filter in response?
+                count:
+                  type: integer
+              required:
+                - count
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationDriversMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_drivers
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+          required:
+            - msg
+    integrationDriversMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_drivers
+            msg_data:
+              type: object
+              properties:
+                paging:
+                  $ref: '#/components/schemas/pagination'
+                drivers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/integrationDriverInfo'
+              required:
+                - drivers
+          required:
+            - msg
+            - msg_data
+
+    registerIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: register_integration_driver
+            msg_data:
+              $ref: '#/components/schemas/integrationDriverUpdate'
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_driver
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  $ref: '#/components/schemas/driverId'
+              required:
+                - driver_id
+          required:
+            - msg
+            - msg_data
+    integrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_drivers
+            msg_data:
+              $ref: '#/components/schemas/integrationDriver'
+          required:
+            - msg
+            - msg_data
+
+    updateIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_integration_driver
+            msg_data:
+              $ref: '#/components/schemas/integrationDriverUpdate'
+          required:
+            - msg
+            - msg_data
+
+    deleteIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_integration_driver
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  $ref: '#/components/schemas/driverId'
+              required:
+                - driver_id
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationCountMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_count
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+          required:
+            - msg
+    integrationCountMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_count
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+                count:
+                  type: integer
+              required:
+                - count
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integrations
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+          required:
+            - msg
+    integrationsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integrations
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/enabledFilter'
+                paging:
+                  $ref: '#/components/schemas/pagination'
+                integrations:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/integration'
+              required:
+                - integrations
+          required:
+            - msg
+            - msg_data
+
+    createIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: create_integration
+            msg_data:
+              $ref: '#/components/schemas/integrationUpdate'
+          required:
+            - msg
+            - msg_data
+    integrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: create_integration
+            msg_data:
+              $ref: '#/components/schemas/integration'
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration
+            msg_data:
+              type: object
+              properties:
+                integration_id:
+                  $ref: '#/components/schemas/integrationId'
+              required:
+                - integration_id
+          required:
+            - msg
+            - msg_data
+
+    updateIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_integration
+            msg_data:
+              $ref: '#/components/schemas/integrationUpdate'
+          required:
+            - msg
+            - msg_data
+
+    deleteIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_integration
+            msg_data:
+              type: object
+              properties:
+                integration_id:
+                  $ref: '#/components/schemas/integrationId'
+              required:
+                - integration_id
+          required:
+            - msg
+            - msg_data
+
+    configureEntityFromIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: configure_entity_from_integration
+            msg_data:
+              type: object
+              properties:
+                integration_id:
+                  type: string
+                entity_id:
+                  description: Entity identifier from integration.
+                  type: string
+                name:
+                  $ref: '#/components/schemas/languageText'
+                icon:
+                  $ref: '#/components/schemas/iconIdentifier'
+                description:
+                  $ref: '#/components/schemas/languageText'
+              required:
+                - integration_id
+                - entity_id
+          required:
+            - msg
+            - msg_data
+
+    getEventChannelsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_event_channels
+          required:
+            - msg
+    eventChannelsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: event_channels
+            msg_data:
+              type: object
+              properties:
+                channels:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/eventChannel'
+              required:
+                - events
+          required:
+            - msg
+            - msg_data
+    subscribeEventsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: subscribe_events
+            msg_data:
+              type: object
+              properties:
+                channels:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/eventChannel'
+              required:
+                - events
+          required:
+            - msg
+            - msg_data
+    getEventSubscriptionsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_event_subscriptions
+          required:
+            - msg
+    unsubscribeEventsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: unsubscribe_events
+            msg_data:
+              type: object
+              properties:
+                channels:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/eventChannel'
+              required:
+                - events
+          required:
+            - msg
+            - msg_data
+    eventSubscriptionsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: event_subscriptions
+            msg_data:
+              type: object
+              properties:
+                channels:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/eventChannel'
+              required:
+                - events
+          required:
+            - msg
+            - msg_data
+    eventChannel:
+      type: string
+      description: The name of the event channel.
+      anyOf:
+        - enum:
+            - all
+            - configuration
+            - entities
+            - integrations
+            # TODO define all event channels. Suggestions:
+#            - cfg_log
+#            - cfg_ui
+#            - battery_status
+#            - log
+#            - notification
+#            - sw_upd_available
+#            - sw_upd_progress
+#            - gui
+#            - wifi
+        - {}  # extensible enum: there might be more event channels than defined above
+
+    integrationDriverChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: integration_driver_change
+            msg_data:
+              $ref: '#/components/schemas/integrationDriverChange'
+          required:
+            - msg
+            - msg_data
+    integrationChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: integration_change
+            msg_data:
+              $ref: '#/components/schemas/integrationChange'
+          required:
+            - msg
+            - msg_data
+    integrationStateEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: integration_state
+            msg_data:
+              $ref: '#/components/schemas/integrationState'
+          required:
+            - msg
+            - msg_data
+
+    configurationChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: configuration_change
+            msg_data:
+              $ref: '#/components/schemas/configurationChange'
+          required:
+            - msg
+            - msg_data
+
+    # =========================================================================
+    # Event message schemas
+    # =========================================================================
+
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ping:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: ping
+            msg_data:
+              type: object
+          required:
+            - msg
+    pong:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: pong
+            msg_data:
+              type: object
+          required:
+            - msg
+
+
+    # =========================================================================
+    # Common schemas
+    # =========================================================================
+
+    msgId:
+      description: Request message ID which is reflected in response message.
+      type: integer
+      minimum: 0
+      default: 0
+
+    paging:
+      description: Paging information for returned items.
+      type: object
+      properties:
+        limit:
+          description: Number of returned items per page.
+          type: integer
+          format: int32
+          default: 10
+          minimum: 10
+        page:
+          description: Current page number. 1-based.
+          type: integer
+          format: int32
+          default: 1
+          minimum: 1
+
+    pagination:
+      description: Returned pagination information.
+      type: object
+      properties:
+        count:
+          description: Total number of items.
+          type: integer
+          format: int32
+          minimum: 0
+        limit:
+          description: Number of returned items.
+          type: integer
+          format: int32
+          minimum: 0
+        page:
+          description: Current page number. 1-based.
+          type: integer
+          format: int32
+          minimum: 1
+
+    versionInfo:
+      type: object
+      properties:
+        api:
+          type: string
+        core:
+          type: string
+        ui:
+          type: string
+        os:
+          type: string
+        integrations: # untyped Map<string,string>
+          type: object
+          additionalProperties:
+            type: string
+
+    systemInfo:
+      type: object
+      properties:
+        model_name:
+          type: string
+        model_number:
+          type: string
+        serial_number:
+          type: string
+        hw_revision:
+          type: string
+
+    enabledFilter:
+      description: Simple filter by enabled flag.
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+
+    availableEntityFilter:
+      description: Optional filters
+      type: object
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        entity_type:
+          $ref: '#/components/schemas/entityType'
+        entities:
+          $ref: '#/components/schemas/availEntitiesFilter'
+
+    availEntitiesFilter:
+      description: Filter available entities
+      type: string
+      enum:
+        - NEW
+        - CONFIGURED
+        - ALL
+    entityFilter:
+      description: Optional filters
+      type: object
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        entity_type:
+          $ref: '#/components/schemas/entityType'
+
+    entity: # YIO v1: loaded_entity
+      description: |
+        Configured entity in the remote to be used in one or more profiles.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/entityId'
+        entity_type:
+          $ref: '#/components/schemas/entityType'
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        device_class:
+          description: |
+            Optional device type. This can be used by the UI to represent the entity with a different
+            icon, behaviour etc. See entity documentation for available device classes.
+          type: string
+        name:
+          description: |
+            Display name of the entity in the UI. An english text should always be provided as fallback option.
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        features:
+          $ref: '#/components/schemas/entityFeatures'
+        options:
+          description: |
+            Feature options. See entity documentation for available options.
+          type: object
+        description:
+          $ref: '#/components/schemas/languageText'
+        attributes:
+          description: |
+            Dynamic entity attributes set by the integration driver. These are key/value pairs, see [integration entity
+            documentation](https://github.com/unfoldedcircle/core-api/tree/main/doc/entities) for detailed information.
+          type: object
+      required:
+        - entity_id
+        - entity_type
+        - integration_id
+        - name
+
+    entityUpdate:
+      description: |
+        Entity update data.
+        
+        If used in an update operation:
+        - Omitted properties will not change the configured value.
+        - An empty `icon` value will remove the icon identifier.
+        - `entity_id`, `entity_type` and `integration_id` cannot be changed.
+        
+        If returned in an `entity_change` event:
+        - Additional properties from the regular `entity` object might be included as well.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/entityId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+# we had this in v1, but it's probably a risky feature allowing to change / disable features
+#        features:
+#          $ref: '#/components/schemas/entityFeatures'
+        description:
+          $ref: '#/components/schemas/languageText'
+      required:
+        - entity_id
+
+    available_entity:
+      description: Provided entity from an integration which can be configured to be used in the remote.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/entityId'
+        entity_type:
+          $ref: '#/components/schemas/entityType'
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        features:
+          $ref: '#/components/schemas/entityFeatures'
+        area:
+          description: Optional area if supported by the integration. E.g. `Living room`
+          type: string
+      required:
+        - entity_id
+        - entity_type
+        - integration_id
+        - name
+
+    entityFeatures:
+      type: array
+      items:
+        $ref: '#/components/schemas/entityFeature'
+    entityFeature:
+      type: string
+    entityCommand:
+      type: string
+    entityType:
+      description: Entity type.
+      type: string
+      enum:
+        - button
+        - climate
+        - cover
+        - light
+        - media_player
+        - sensor
+        - switch
+
+    languageCode:
+      description: |
+        Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
+        separated by an underscore.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
+      type: string
+      pattern: '^[a-z]{2}(_\w+)?$'
+
+    countryCode:
+      description: Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
+      type: string
+      format: iso-3166
+
+    languageText: # untyped Map<string,string>
+      type: object
+      description: Display text in the UI. An english text should always be provided as fallback option.
+      patternProperties:
+        ^[a-z]{2}(_\w+)?$: # TODO make culture code pattern more strict or more open?
+          type: string
+          description: |
+            Key value pairs of language texts. Key: ISO 639-1 code with optional country suffix to represent a `culture
+            code`. Examples: `en`, `en_UK`, `en_US`, `de`, `de_CH`.   
+            If we need to support more regional differences within a country, then the
+            [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) might be a solution. This would even
+            support the various Swiss German dialects!
+      additionalProperties: false
+
+    getConfigurationOptions:
+      description: Optional request parameters.
+      type: object
+      properties:
+        default:
+          description: |
+            Get default values instead of configured values. Intended for a "default settings" function in the UI.
+          type: boolean
+          default: false
+
+    # =========================================================================
+    # from OpenAPI
+    # TODO use shared json schema! -> check if supported by new releases of the bundle & doc generation tools
+    # =========================================================================
+
+    configuration:
+      type: object
+      properties:
+        button:
+          $ref: '#/components/schemas/cfgButton'
+        display:
+          $ref: '#/components/schemas/cfgDisplay'
+        haptic:
+          $ref: '#/components/schemas/cfgHaptic'
+        localization:
+          $ref: '#/components/schemas/cfgLocalization'
+        network:
+          $ref: '#/components/schemas/cfgNetwork'
+        power_saving:
+          $ref: '#/components/schemas/cfgPowerSaving'
+        software_update:
+          $ref: '#/components/schemas/cfgSoftwareUpdate'
+        sound:
+          $ref: '#/components/schemas/cfgSound'
+        voice_control:
+          $ref: '#/components/schemas/cfgVoiceControl'
+
+    cfgButton:
+      type: object
+      properties:
+        brightness:
+          description: Button backlight brightness. 0 = off, 100 = max.
+          type: integer
+          minimum: 0
+          maximum: 100
+        auto_brightness:
+          description: When enabled, button backlight will automatically turn on in a dark room.
+          type: boolean
+      required:
+        - brightness
+        - auto_brightness
+
+    cfgDisplay:
+      type: object
+      properties:
+        brightness:
+          description: Display brightness.
+          type: integer
+          minimum: 0
+          maximum: 100
+        auto_brightness:
+          description: Automatically adjust the display brightness based on ambient lighting conditions.
+          type: boolean
+      required:
+        - brightness
+        - auto_brightness
+
+    cfgHaptic:
+      type: object
+      properties:
+        enabled:
+          description: Haptic feedback enabled.
+          type: boolean
+      required:
+        - enabled
+
+    cfgLocalization:
+      type: object
+      properties:
+        language_code:
+          $ref: '#/components/schemas/languageCode'
+        country_code:
+          $ref: '#/components/schemas/countryCode'
+        time_zone:
+          description: Time zone name according to IANA <https://www.iana.org/time-zones>, e.g. `Europe/Copenhagen`.
+          type: string
+        time_format_24h:
+          type: boolean
+        measurement_unit:
+          $ref: '#/components/schemas/measurementUnit'
+      required:
+        - language_code
+        - country_code
+        - time_zone
+        - time_format_24h
+        - measurement_unit
+
+    measurementUnit:
+      type: string
+      enum:
+        - METRIC
+        - US
+        - UK
+
+    cfgNetwork:
+      type: object
+      properties:
+        bt_enabled:
+          description: Enable Bluetooth.
+          type: boolean
+        wifi_enabled:
+          description: Enable WiFi.
+          type: boolean
+      required:
+        - bt_enabled
+        - wifi_enabled
+
+    cfgPowerSaving:
+      type: object
+      properties:
+        wakeup_sensitivity:
+          description: Amount of movement needed to wake up the remote. 0 = disabled.
+          type: integer
+          minimum: 0
+          maximum: 3
+        display_off_sec:
+          type: integer
+          minimum: 0
+          maximum: 60
+          description: Turn off display after given seconds.
+        standby_sec:
+          type: integer
+          minimum: 0
+          maximum: 10800
+          description: Activate standby after given seconds. 0 disables standby mode.
+      required:
+        - wakeup_sensitivity
+        - display_off_sec
+        - standby_sec
+
+    cfgSoftwareUpdate:
+      type: object
+      properties:
+        check_for_updates:
+          description: |
+            Automatically check for updates. If `auto_update` is enabled, the updates are automatically installed,
+            otherwise the user is only notified about the updates.
+          type: boolean
+        auto_update:
+          description: |
+            Automatically update the remote when new software is available. Requires `check_for_updates` to be enabled.
+          type: boolean
+      required:
+        - check_for_updates
+        - auto_update
+
+    cfgSound:
+      type: object
+      properties:
+        enabled:
+          description: Sound effects enabled.
+          type: boolean
+        volume:
+          description: Sound effects volume.
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+        - enabled
+        - volume
+
+    cfgVoiceControl:
+      type: object
+      properties:
+        microphone:
+          description: |
+            Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
+            with the remote or integrations.
+          type: boolean
+        enabled:
+          description: |
+            Enable voice control. Disabling voice control will still let you use voice dictation with integrations. 
+            Disable the microphone to completely switch off any microphone related functionality.
+          type: boolean
+        voice_assistant:
+          $ref: '#/components/schemas/voiceAssistant'
+      required:
+        - microphone
+        - enabled
+        - voice_assistant
+
+    voiceAssistant:
+      description: 🚧 Supported voice assistants. TODO not yet implemented.
+      type: string
+      enum:
+        - None
+
+    integrationStatus:
+      type: object
+      description: |
+        Integration instance status information. Intended to be used in a general overview of the integration drivers.
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        device_state:
+          $ref: '#/components/schemas/deviceState'
+        driver_state:
+          $ref: '#/components/schemas/driverState'
+        enabled:
+          type: boolean
+
+    deviceState:
+      type: string
+      enum:
+        - UNKNOWN
+        - CONNECTING
+        - CONNECTED
+        - DISCONNECTED
+        - ERROR
+
+    driverState:
+      type: string
+      enum:
+        - IDLE
+        - CONNECTING
+        - ACTIVE
+        - RECONNECTING
+        - ERROR
+
+    integrationDriverInfo:
+      description: |
+        Summary data of an integration driver intended for overview screens.
+      type: object
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        driver_url:
+          description: WebSocket URL of the driver
+          type: string
+          format: uri
+          maxLength: 2048
+        version:
+          type: string
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        enabled:
+          type: boolean
+      required:
+        - driver_id
+        - name
+        - driver_url
+        - version
+        - enabled
+
+    integrationDriver: # YIO v1: supported_integration
+      description: |
+        Integration driver model.
+        
+        A driver represents the communication aspect of an integration. E.g. how one can connect to it
+        and which API version it supports.
+        
+        One driver can provide multiple `Integration` instances. In the integration API they are
+        referred to as `multi-device integrations` and use the optional `device_id` property where
+        required. If a driver only provides a single instance, which is usually the default use case,
+        then the `device_id` is not used (or set to the default value `main`).
+      type: object
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        driver_url:
+          description: WebSocket URL of the driver
+          type: string
+          format: uri
+          maxLength: 2048
+        token:
+          description: |
+            Optional driver authentication token.
+            
+            Note: the token will not be returned to external clients!
+          type: string
+          maxLength: 2048
+        auth_method:
+          $ref: '#/components/schemas/intgAuthMethod'
+        version:
+          description: Driver version, [SemVer](https://semver.org/) preferred.
+          type: string
+          maxLength: 20
+        min_core_api:
+          description: |
+            Optional version check: minimum required Core-API version in the remote.
+          type: string
+          maxLength: 20
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        enabled:
+          description: |
+            Enables or disables driver communication.  
+            If disabled, all integration instances won't be activated, even if the instance is enabled.
+          type: boolean
+        description:
+          $ref: '#/components/schemas/languageText'
+        developer:
+          $ref: '#/components/schemas/driverDeveloper'
+        home_page:
+          description: Optional home page url for more information.
+          type: string
+          format: uri
+          maxLength: 255
+        device_discovery:
+          description: Driver supports multi-device discovery. **Not yet supported**.
+          type: boolean
+        setup_data_schema:
+          description: |
+            Driver configuration metadata describing configuration parameters for the web-configurator.
+            
+            **Not yet finalized**.
+          type: object
+        release_date:
+          description: Release date of the driver.
+          type: string
+          format: date
+      required:
+        - driver_id
+        - name
+        - driver_url
+        - version
+
+    driverDeveloper:
+      type: object
+      description: Optional information about the integration developer.
+      properties:
+        name:
+          description: Optional developer information to display in UI / web-configurator.
+          type: string
+          maxLength: 50
+        url:
+          description: Optional developer home page.
+          type: string
+          format: uri
+          maxLength: 255
+        email:
+          description: Optional developer contact email.
+          type: string
+          format: email
+          maxLength: 100
+
+    integrationDriverUpdate:
+      type: object
+      description: |
+        Integration driver update model. This model corresponds to the `IntegrationDriver` model except there are no required
+        properties to allow patch updates. 
+
+        - Specified properties will update the current values.
+        - An empty value will delete the currently set property.
+        - For the create operation, the `driver_id` identifier can be specified by the client, but it needs to be unique among
+          all drivers. If omitted, a UUID will be assigned.  
+          A manually assigned, short, human-readable identifier is recommended for better recognizability.
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        driver_url:
+          description: WebSocket URL of the driver
+          type: string
+          format: uri
+          maxLength: 2048
+        token:
+          description: |
+            Optional driver authentication token.
+            
+            Note: the token will not be returned to external clients!
+          type: string
+          maxLength: 2048
+        auth_method:
+          $ref: '#/components/schemas/intgAuthMethod'
+        version:
+          description: Driver version, [SemVer](https://semver.org/) preferred.
+          type: string
+          maxLength: 20
+        min_core_api:
+          description: |
+            Optional version check: minimum required Core-API version in the remote.
+          type: string
+          maxLength: 20
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        enabled:
+          description: |
+            Enables or disables driver communication.  
+            If disabled, all integration instances won't be activated, even if the instance is enabled.
+          type: boolean
+        description:
+          $ref: '#/components/schemas/languageText'
+        developer:
+          $ref: '#/components/schemas/driverDeveloper'
+        home_page:
+          description: Optional home page url for more information.
+          type: string
+          format: uri
+          maxLength: 255
+        device_discovery:
+          description: Driver supports multi-device discovery. **Not yet supported**.
+          type: boolean
+        setup_data_schema:
+          description: |
+            Driver configuration metadata describing configuration parameters for the web-configurator.
+            
+            **TODO Not yet finalized**.
+          type: object
+        release_date:
+          description: Release date of the driver.
+          type: string
+          format: date
+      required:
+        - driver_id
+
+    integration: # YIO v1: loaded_integration
+      description: |
+        An integration instance represents a configured integration driver.
+        
+        TODO add connection state?
+      type: object
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        device_id:
+          $ref: '#/components/schemas/deviceId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        enabled:
+          type: boolean
+        setup_data:
+          description: Optional configuration data if supported or required by the driver.
+          type: object
+      required:
+        - integration_id
+        - driver_id
+        - name
+        - enabled
+
+    integrationUpdate:
+      type: object
+      description: |
+        Integration instance update model. This model corresponds to the `Integration` model except there are no required
+        properties to allow patch updates. 
+
+        - Specified properties will update the current values.
+        - An empty value will delete a set property.
+        - `device_id` is only required for multi-device integrations.
+      properties:
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        device_id:
+          $ref: '#/components/schemas/deviceId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        enabled:
+          description: Enable / disable flag.
+          type: boolean
+        setup_data:
+          description: Instance configuration object.
+          type: object
+      required:
+        - integration_id
+
+    entityChange:
+      type: object
+      description: |
+        The `new_state` property is omitted for `event_type` = `delete`.
+      properties:
+        event_type:
+          $ref: '#/components/schemas/defaultChangeEventType'
+        entity_id:
+          $ref: '#/components/schemas/entityId'
+        new_state:
+          $ref: '#/components/schemas/entityUpdate'
+      required:
+        - event_type
+        - entity_id
+        - integration_id
+
+    integrationDriverChange:
+      type: object
+      description: |
+        The `new_state` property is omitted for `event_type` = `delete`.
+      properties:
+        event_type:
+          $ref: '#/components/schemas/defaultChangeEventType'
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        new_state:
+          $ref: '#/components/schemas/integrationDriverUpdate'
+      required:
+        - event_type
+        - driver_id
+
+    integrationChange:
+      type: object
+      description: |
+        The `new_state` property is omitted for `event_type` = `delete`.
+      properties:
+        event_type:
+          $ref: '#/components/schemas/defaultChangeEventType'
+        integration_id:
+          $ref: '#/components/schemas/integrationId'
+        new_state:
+          $ref: '#/components/schemas/integrationUpdate'
+      required:
+        - event_type
+        - integration_id
+
+    integrationState:
+      type: object
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        device_state:
+          $ref: '#/components/schemas/deviceState'
+        driver_state:
+          $ref: '#/components/schemas/driverState'
+      required:
+        - driver_id
+
+    defaultChangeEventType:
+      type: string
+      enum:
+        - change
+        - new
+        - delete
+
+    configurationChange:
+      type: object
+      properties:
+        new_state:
+          $ref: '#/components/schemas/configuration'
+      required:
+        - new_state
+
+    description:
+      type: string
+      maxLength: 255
+      description: Optional description
+
+    groups:
+      type: array
+      items:
+        $ref: '#/components/schemas/group'
+
+    group:
+      type: object
+      description: |
+        The shown group switch in the UI is automatically determined by the capabilities of the group's entities.
+      properties:
+        group_id:
+          $ref: '#/components/schemas/simpleId'
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        name:
+          $ref: '#/components/schemas/name'
+          description: Group name. Must be unique within the profile.
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        entities:
+          type: array
+          description: Entity identifiers belonging to the group
+          items:
+            $ref: '#/components/schemas/simpleId'
+      required:
+        - group_id
+        - profile_id
+        - name
+        - entities
+
+    groupData:
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/simpleId'
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        pin:
+          type: string
+          description: Optional pin to access locked pages with a non-admin account.
+        name:
+          $ref: '#/components/schemas/name'
+          description: Group name
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        entities:
+          type: array
+          description: |
+            Changed or re-ordered group entities.
+            An empty array remove all entities.
+            If the property is not specified the defined entities will not be changed.
+          items:
+            $ref: '#/components/schemas/simpleId'
+
+    iconIdentifier:
+      type: string
+      maxLength: 255
+      description: |
+        Optional icon identifier. If specified the icon will be set. An empty identifier while updating the object removes the existing icon.
+
+    imageIdentifier:
+      type: string
+      maxLength: 255
+      description: |
+        Optional image identifier. If specified the image will be set. An empty identifier while updating the object removes the existing image.
+
+    name:
+      type: string
+      minLength: 1
+      maxLength: 50
+
+    pages:
+      type: array
+      items:
+        $ref: '#/components/schemas/page'
+
+    page:
+      type: object
+      properties:
+        page_id:
+          $ref: '#/components/schemas/simpleId'
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        name:
+          $ref: '#/components/schemas/name'
+          description: Group name. Must be unique within the profile.
+        image:
+          type: string
+          description: Optional image identifier
+        items:
+          type: array
+          description: Page items
+          items:
+            $ref: '#/components/schemas/pageItem'
+        pos:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Position of the page within the profile
+      required:
+        - page_id
+        - profile_id
+        - name
+        - items
+        - pos
+
+    pageItem:
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/entityId'
+        group_id:
+          $ref: '#/components/schemas/simpleId'
+        pos:
+          type: integer
+          format: int32
+          minimum: 0
+          description: |
+            Position of the item within the page. Returned on retrieval, ignored for page updates where the position is
+            taken from the page array position.
+      oneOf:
+        - required: [ entity_id ]
+        - required: [ group_id ]
+
+    pageData:
+      description: Profile page data to create or update an existing page.
+      type: object
+      properties:
+        page_id:
+          $ref: '#/components/schemas/simpleId'
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        pin:
+          type: string
+          description: Optional pin to access locked pages with a non-admin account.
+        name:
+          $ref: '#/components/schemas/name'
+          description: Page name
+        image:
+          $ref: '#/components/schemas/imageIdentifier'
+        items:
+          type: array
+          description: |
+            Changed or re-ordered page items.
+            - An empty array removes all items.
+            - If the property is not specified the defined items will not be changed.
+          items:
+            $ref: '#/components/schemas/pageItem'
+
+    profiles:
+      type: array
+      items:
+        $ref: '#/components/schemas/profile'
+
+    profile:
+      type: object
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        name:
+          $ref: '#/components/schemas/name'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        protected:
+          type: boolean
+          description: A protected profile can only be accessed with the profile specific pin code
+        description:
+          $ref: '#/components/schemas/description'
+      required:
+        - profile_id
+        - name
+        - protected
+
+    profileData:
+      description: Profile data to create or modify an existing profile.
+      type: object
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        name:
+          $ref: '#/components/schemas/name'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        pin:
+          $ref: '#/components/schemas/profilePin'
+        new_pin:
+          $ref: '#/components/schemas/profilePin'
+        description:
+          $ref: '#/components/schemas/description'
+        pages:
+          description: |
+            Used for update only: modify page order or delete pages in profile.
+            - An empty `pages` array will delete all pages and containing groups!
+            - If the property is missing, the existing page configuration will not be changed.
+          type: array
+          items:
+            $ref: '#/components/schemas/simpleId'
+
+    profilePin:
+      type: string
+      maxLength: 20
+      description: Optional profile pin.
+
+    simpleId:
+      type: string
+      format: "^[a-zA-Z0-9-_\\.]+$"
+      minLength: 1
+      maxLength: 36
+      description: Simple string identifier, also usable as URL parameter or file identifier.
+
+    driverId:
+      type: string
+      format: "^[a-zA-Z0-9-_]+$"
+      minLength: 1
+      maxLength: 36
+      description: Unique integration driver identifier, e.g. `hass`, `homey`, etc.
+
+    integrationId:
+      type: string
+      format: "^[a-zA-Z0-9-_\\.]+$"
+      minLength: 1
+      maxLength: 73
+      description: |
+        Unique integration instance identifier. Automatically created by the system when creating a new instance from a driver.
+
+    deviceId:
+      type: string
+      format: "^[a-zA-Z0-9-_]+$"
+      minLength: 1
+      maxLength: 36
+      description: Device identifier for multi-device integrations only.
+
+    entityId:
+      type: string
+      format: "^[a-zA-Z0-9-_\\.]+$"
+      minLength: 1
+      maxLength: 110
+      description: UC remote entity identifier.
+
+    intgAuthMethod:
+      type: string
+      description: |
+        Integration driver authentication method if a token is required.
+
+        The JSON `auth` message is used if a token is configured but no authentication method is set.
+      enum:
+        - HEADER
+        - MESSAGE

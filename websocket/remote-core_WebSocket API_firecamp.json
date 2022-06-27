@@ -1,0 +1,966 @@
+{
+    "meta": {
+        "__export_time": 1655995137704,
+        "__export_app": "firecamp_v2.6.1 ",
+        "__export_version": 1
+    },
+    "project": {
+        "name": "remote-core WS API",
+        "description": "",
+        "auth": {},
+        "scripts": {
+            "pre": "",
+            "post": "",
+            "test": ""
+        },
+        "meta": {
+            "active_auth": "no_auth"
+        }
+    },
+    "modules": [],
+    "requests": [
+        {
+            "meta": {
+                "name": "core v2",
+                "description": "",
+                "type": "websocket",
+                "version": "2.0"
+            },
+            "url": {
+                "slashes": true,
+                "protocol": "ws:",
+                "hash": "",
+                "pathname": "/ws",
+                "auth": "",
+                "host": "{{server}}",
+                "port": "",
+                "hostname": "{{server}}",
+                "password": "",
+                "username": "",
+                "origin": "ws://{{server}}",
+                "href": "ws://{{server}}/ws",
+                "query_params": []
+            },
+            "config": {
+                "protocols": [],
+                "reconnect": false,
+                "reconnectAttempts": 0,
+                "reconnectTimeout": 3000,
+                "rejectUnauthorized": false,
+                "followRedirects": true,
+                "handshakeTimeout": 3000,
+                "maxRedirects": 10,
+                "protocolVersion": 13,
+                "origin": "",
+                "maxPayload": -1
+            },
+            "connections": [
+                {
+                    "name": "Default",
+                    "headers": [
+                        {
+                            "key": "Auth-Token",
+                            "value": "1-2-3",
+                            "disable": false,
+                            "type": "text"
+                        }
+                    ],
+                    "query_params": [],
+                    "config": {
+                        "ping": false,
+                        "ping_interval": 3000
+                    },
+                    "is_default": true
+                },
+                {
+                    "name": "public",
+                    "headers": [
+                        {
+                            "key": "Auth-Token",
+                            "value": "1-2-3",
+                            "disable": false,
+                            "type": "text"
+                        }
+                    ],
+                    "query_params": [],
+                    "config": {
+                        "ping": false,
+                        "ping_interval": 3000
+                    }
+                }
+            ],
+            "message_collection": [
+                {
+                    "name": "Integrations",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_integration_status",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integration_status\",\n  \"msg_data\": {\n    \"filter\": {\n      \"Xenabled\": true\n    },\n    \"paging\": {\n      \"limit\": 10,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_integrations",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integrations\",\n  \"msg_data\": {\n    \"filter\": {\n      \"Xdriver_id\": \"hass\",\n      \"Xenabled\": true\n    },\n    \"paging\": {\n      \"limit\": 10,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_integration_driver",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integration_driver\",\n  \"msg_data\": {\n    \"driver_id\": \"hass\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "integration_cmd",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"integration_cmd\",\n  \"msg_data\": {\n    \"cmd_id\": \"CONNECT\",\n    \"integration_id\": \"hass.main\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_integration_driver_count",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integration_driver_count\",\n  \"msg_data\": {\n    \"filter\": {\n      \"enabled\": true\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_integration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integration\",\n  \"msg_data\": {\n    \"integration_id\": \"hass.main\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_integration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"update_integration\",\n  \"msg_data\": {\n    \"integration_id\": \"hass.main\",\n    \"Xdevice_id\": \"string\",\n    \"name\": { \"en\": \"FooBar\"},\n    \"icon\": \"dev:foo\",\n    \"enabled\": true,\n    \"setup_data\": {}\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "create_integration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"create_integration\",\n  \"msg_data\": {\n    \"driver_id\": \"hass\",\n    \"Xdevice_id\": \"none\",\n    \"name\": { \"en\": \"Kusi's Home Assistant\"},\n    \"icon\": \"dev:test\",\n    \"enabled\": false,\n    \"setup_data\": { \"todo\": true }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_integration_count",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integration_count\",\n  \"msg_data\": {\n    \"filter\": {\n      \"driver_id\": \"test\",\n      \"enabled\": true\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_integration_drivers",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_integration_drivers\",\n  \"msg_data\": {\n    \"filter\": {\n      \"enabled\": true\n    },\n    \"paging\": {\n      \"limit\": 10,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "integration_driver_cmd",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"integration_driver_cmd\",\n  \"msg_data\": {\n    \"cmd_id\": \"START\",\n    \"driver_id\": \"hass\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "delete_integration_driver",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"delete_integration_driver\",\n  \"msg_data\": {\n    \"driver_id\": \"hass\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "delete_integration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"delete_integration\",\n  \"msg_data\": {\n    \"integration_id\": \"test.main\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "register_integration_driver",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"register_integration_driver\",\n  \"msg_data\": {\n    \"driver_id\": \"hass\",\n    \"name\": {\n      \"en\": \"Home Assistant\"\n    },\n    \"driver_url\": \"http://localhost:8000/ws\",\n    \"token\": \"1-2-3\",\n    \"auth_method\": \"HEADER\",\n    \"version\": \"0.0.1\",\n    \"min_core_api\": \"0.6.0\",\n    \"icon\": \"uc:hass\",\n    \"enabled\": true,\n    \"description\": {\n      \"en\": \"Official Home Assistant integration for Remote Two\"\n    },\n    \"developer\": {\n      \"name\": \"Kusi\",\n      \"url\": \"http://unfoldedcircle.com\",\n      \"email\": \"markus.z@unfoldedcircle.com\"\n    },\n    \"home_page\": \"http://unfoldedcircle.com\",\n    \"device_discovery\": false,\n    \"setup_data_schema\": {},\n    \"release_date\": \"2022-04-24\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_integration_driver",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"update_integration_driver\",\n  \"msg_data\": {\n    \"driver_id\": \"hass\",\n    \"name\": {\n      \"en\": \"Home Assistant\",\n      \"de\": \"Home Assistant\"\n    },\n    \"driver_url\": \"http://localhost:8000/ws\",\n    \"token\": \"1-2-3\",\n    \"auth_method\": \"HEADER\",\n    \"version\": \"0.0.2\",\n    \"min_core_api\": \"0.6.0\",\n    \"icon\": \"uc:hass\",\n    \"enabled\": true,\n    \"description\": {\n      \"en\": \"Official Home Assistant integration for Remote Two\",\n      \"de\": \"Home Assistant Integration für Remote Two\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Entities - hass.main",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_entities by type",
+                            "meta": {},
+                            "children": [
+                                {
+                                    "name": "get_entities - button",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"button\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_entities - switch",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"switch\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_entities - climate",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"climate\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_entities - cover",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"cover\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_entities - light",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"light\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_entities - media_player",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"media_player\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_entities - sensor",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"entity_type\": \"sensor\",\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "get_available_entities by type",
+                            "meta": {},
+                            "children": [
+                                {
+                                    "name": "get_available_entities - button",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"button\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_available_entities - switch",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"switch\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_available_entities - climate",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"climate\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_available_entities - cover",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"cover\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_available_entities - light",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"light\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_available_entities - media_player",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"media_player\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                },
+                                {
+                                    "name": "get_available_entities - sensor",
+                                    "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entity_type\": \"sensor\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                                    "meta": {
+                                        "type": "json",
+                                        "envelope": ""
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name": "get_entity_types",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entity_types\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_entities",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entities\",\n  \"msg_data\": {\n    \"filter\": {\n      \"integration_id\": \"hass.main\"\n    },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_available_entities - ALL cached",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_available_entities - force reload ALL",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": true,\n    \"filter\": {\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_available_entities - NEW cached",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entities\": \"NEW\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_available_entities - CONFIGURED cached",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_available_entities\",\n  \"msg_data\": {\n    \"force_reload\": false,\n    \"filter\": {\n      \"entities\": \"CONFIGURED\",\n      \"integration_id\": \"hass.main\"\n      },\n    \"paging\": {\n      \"limit\": 100,\n      \"page\": 1\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_entity_commands cover",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entity_commands\",\n  \"msg_data\": {\n    \"entity_type\": \"cover\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_entity_commands by entity_id",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entity_commands\",\n  \"msg_data\": {\n    \"entity_id\": \"hass.main.light.esstisch\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command - light",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"hass.main.light.esstisch\",\n    \"cmd_id\":  \"off\",\n    \"params\": {}\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "delete_entity",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"delete_entity\",\n  \"msg_data\": {\n    \"entity_id\": \"light_test\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_entity",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"update_entity\",\n  \"msg_data\": {\n    \"entity_id\": \"light1\",\n    \"name\": { \"en\": \"Foo Bar Entity\" },\n    \"icon\": \"uc:test\",\n    \"description\": { \"en\": \"Testing rename\" }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "delete_all_entities",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"delete_all_entities\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_entity",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entity\",\n  \"msg_data\": {\n    \"entity_id\": \"light1\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "configure_entity_from_integration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"configure_entity_from_integration\",\n  \"msg_data\": {\n    \"entity_id\": \"media_player.esstisch\",\n    \"integration_id\": \"hass.main\",\n    \"name\": { \"en\": \"Test entity\" },\n    \"icon\": \"uc:test\",\n    \"description\": { \"en\": \"Entity configuration test\" }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Groups",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "delete_group",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"delete_group\",\n  \"msg_data\": {\n    \"group_id\": \"group_d7f28f80-6ac3-11eb-9439-0242ac130002\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_group",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_group\",\n  \"msg_data\": {\n      \"group_id\": \"def:g2\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_group",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"update_group\",\n  \"msg_data\": {\n    \"group_id\": \"group_d7f28f80-6ac3-11eb-9439-0242ac130002\",\n    \"name\": \"Lights 2\",\n    \"entities\": [\n      \"foo\",\n         \"light_121211-8e6e-11eb-9dcd-0242ac130003\",\n         \"light_f059987e-c270-4102-9c78-1ee19d1465db\",\n         \"light.desk_lamp\",\n      \"bar\"\n    ]\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "add_group",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"add_group\",\n  \"msg_data\": {\n    \"group_id\": \"group_d7f28f80-6ac3-11eb-9439-0242ac130002\",\n    \"name\": \"Just testing\",\n    \"entities\": [\n      \"foo\",\n      \"bar\"\n    ]\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_groups",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_groups\",\n  \"msg_data\": {\n      \"profile_id\": \"default\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Profiles",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_profiles",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_profiles\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_profile",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"update_profile\",\n  \"msg_data\": {\n    \"profile_id\": \"test\",\n     \"name\":  \"Dummy Profile\",\n     \"icon\": \"yio:bear\",\n     \"description\": \"Update test\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "add_profile",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"add_profile\",\n  \"msg_data\": {\n     \"name\":  \"Super Profile\",\n     \"icon\": \"yio:test\",\n     \"description\": \"WS test\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_profile",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_profile\",\n  \"msg_data\": {\n     \"profile_id\":  \"default\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "delete_profile",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"delete_profile\",\n  \"msg_data\": {\n     \"profile_id\":  \"test\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Pages",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_pages",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_pages\",\n  \"msg_data\": {\n      \"profile_id\": \"default\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Events",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_event_channels",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_event_channels\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_event_subscriptions",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_event_subscriptions\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "subscribe_events - All",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"subscribe_events\",\n  \"msg_data\": {\n      \"channels\": [\"all\"]\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "unsubscribe_events - All",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"unsubscribe_events\",\n  \"msg_data\": {\n    \"channels\": [\n      \"all\"\n    ]\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Configuration",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_configuration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_configuration\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_voice_control_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_voice_control_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_network_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_network_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_button_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_button_cfg\",\n  \"msg_data\": {\n        \"auto_brightness\": false,\n        \"brightness\": 42\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_voice_assistants",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_voice_assistants\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_software_update_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_software_update_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "reset_configuration",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"reset_configuration\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_voice_control_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_voice_control_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_power_saving_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_power_saving_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_voice_control_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_voice_control_cfg\",\n  \"msg_data\": {\n        \"enabled\": true,\n        \"microphone\": true,\n        \"voice_assistant\": \"None\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_localization_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_localization_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_power_saving_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_power_saving_cfg\",\n  \"msg_data\": {\n        \"display_off_sec\": 5,\n        \"standby_sec\": 100,\n        \"wakeup_sensitivity\": 2\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_sound_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_sound_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_button_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_button_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_sound_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_sound_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_software_update_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_software_update_cfg\",\n  \"msg_data\": {\n        \"auto_update\": true,\n        \"check_for_updates\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_button_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_button_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_sound_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_sound_cfg\",\n  \"msg_data\": {\n        \"enabled\": false,\n        \"volume\": 20\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_display_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_display_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_network_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_network_cfg\",\n  \"msg_data\": {\n        \"bt_enabled\": true,\n        \"wifi_enabled\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_haptic_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_haptic_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_localization_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_localization_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_software_update_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_software_update_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_display_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_display_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_haptic_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_haptic_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_display_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_display_cfg\",\n  \"msg_data\": {\n        \"auto_brightness\": false,\n        \"brightness\": 39\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_power_saving_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_power_saving_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_timezone_names",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_timezone_names\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_network_cfg - Default settings",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_network_cfg\",\n  \"msg_data\": {\n    \"default\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_localization_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_localization_cfg\",\n  \"msg_data\": {\n        \"country_code\": \"CH\",\n        \"language_code\": \"de_CH\",\n        \"measurement_unit\": \"METRIC\",\n        \"time_format_24h\": true,\n        \"time_zone\": \"Europe/Zurich\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_haptic_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_haptic_cfg\",\n  \"msg_data\": {\n        \"enabled\": false\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "System",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "system_cmd - RESTART",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"system_cmd\",\n  \"msg_data\": {\n    \"command\": \"RESTART\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_factory_reset_token",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_factory_reset_token\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "system_cmd - POWER_OFF",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"system_cmd\",\n  \"msg_data\": {\n    \"command\": \"POWER_OFF\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "system_cmd - RESTART",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"system_cmd\",\n  \"msg_data\": {\n    \"command\": \"RESTART\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "factory_reset",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"factory_reset\",\n    \"msg_data\": {\n        \"token\": \"1-2-3\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "system_cmd - REBOOT",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"system_cmd\",\n  \"msg_data\": {\n    \"command\": \"REBOOT\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "version",
+                    "body": "{\n    \"kind\": \"req\",\n    \"id\": 110,\n    \"msg\": \"version\"\n}",
+                    "meta": {
+                        "type": "json",
+                        "envelope": ""
+                    }
+                },
+                {
+                    "name": "system",
+                    "body": "{\n    \"kind\": \"req\",\n    \"id\": 111,\n    \"msg\": \"system\"\n}",
+                    "meta": {
+                        "type": "json",
+                        "envelope": ""
+                    }
+                },
+                {
+                    "name": "auth",
+                    "body": "{\n    \"kind\": \"req\",\n    \"id\": 0,\n    \"msg\": \"auth\",\n    \"access_token\": \"1-2-3\"\n}",
+                    "meta": {
+                        "type": "json",
+                        "envelope": ""
+                    }
+                },
+                {
+                    "name": "ping",
+                    "body": "{\n    \"kind\": \"req\",\n    \"id\": 333,\n    \"msg\": \"ping\",\n    \"msg_data\": {\n        \"hello\": \"core\"\n    }\n}",
+                    "meta": {
+                        "type": "json",
+                        "envelope": ""
+                    }
+                }
+            ]
+        }
+    ],
+    "environments": [
+        {
+            "name": "Development",
+            "variables": {
+                "server": "localhost:8080"
+            }
+        },
+        {
+            "name": "Production",
+            "variables": {
+                "server": "remote-two:9001"
+            }
+        },
+        {
+            "name": "Staging",
+            "variables": {}
+        }
+    ]
+}
