@@ -1,0 +1,4698 @@
+{
+	"info": {
+		"_postman_id": "67fe9789-d645-4a16-9336-2f90e9294fa7",
+		"name": "Remote Two Core-API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "9323728"
+	},
+	"item": [
+		{
+			"name": "public",
+			"item": [
+				{
+					"name": "version",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/pub/version",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"pub",
+								"version"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/pub/status",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"pub",
+								"status"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "health check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/pub/health_check",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"pub",
+								"health_check"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"{{apiPassword}}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/pub/login",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"pub",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/pub/logout",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"pub",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "noauth"
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "auth/external - external tokens",
+			"item": [
+				{
+					"name": "getExternalSystems",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external"
+							],
+							"query": [
+								{
+									"key": "api_key",
+									"value": "foobar",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllExternalAccessTokens",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"my-home5\",\n    \"token\": \"foobar\",\n    \"description\": \"Kusi's HomeAssistant Server\",\n    \"url\": \"http://foobar.local\",\n    \"data\": \"{\\\"whatever\\\": true}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getExternalAccessTokenCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getExternalAccessTokens",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}?page=1",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "3",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addExternalAccessToken Validation Error",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"test-ha_12\",\n    \"token\": \"\",\n    \"description\": \"Kusi's HomeAssistant Server\",\n    \"url\": \"ws://foobar.local\",\n    \"data\": \"{\\\"whatever\\\": true}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addExternalAccessToken: auto-generate token_id",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"my-home\",\n    \"token\": \"foobar\",\n    \"description\": \"Kusi's HomeAssistant Server\",\n    \"url\": \"http://foobar.local\",\n    \"data\": \"{\\\"whatever\\\": true}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "addExternalAccessToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"token_id\": \"{{extTokenID}}\",\n    \"name\": \"my-home\",\n    \"token\": \"foobar\",\n    \"description\": \"My HomeAssistant Server\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "replaceExternalAccessToken",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"my-new-home\",\n    \"token\": \"foobar-2\",\n    \"description\": \"Kusi's new HomeAssistant Server\",\n    \"url\": \"http://foobar2.local\",\n    \"data\": \"{\\\"whatever\\\": false}\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}/{{extTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}",
+								"{{extTokenID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteExternalAccessTokensBySystem",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getExternalAccessToken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}/{{extTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}",
+								"{{extTokenID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteExternalAccessToken",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/external/{{externalSystem}}/{{extTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"external",
+								"{{externalSystem}}",
+								"{{extTokenID}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "auth/ws - WebSocket tokens",
+			"item": [
+				{
+					"name": "createAccessToken: invalid scopes",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token_id\": \"{{wsTokenID}}\",\n  \"name\": \"Web Configurator\",\n  \"scopes\": [\n    \"admin\", \"admin2\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createAccessToken",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"token_id\": \"{{wsTokenID}}\",\n  \"name\": \"Web Configurator\",\n  \"scopes\": [\n    \"admin\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateToken: name",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Familiy administrator\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws",
+								"{{wsTokenID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateToken: set active",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws",
+								"{{wsTokenID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getToken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws",
+								"{{wsTokenID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAccessToken: non existing",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws/-",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws",
+								"-"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAccessToken",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws",
+								"{{wsTokenID}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAccessTokens",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws?page=1&limit=10&active=true",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "active",
+									"value": "true"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllAccessTokens",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAccessTokenCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/ws",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"ws"
+							],
+							"query": [
+								{
+									"key": "active",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "authentication",
+			"item": [
+				{
+					"name": "auth/scopes",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/scopes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"scopes"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "resources",
+			"item": [
+				{
+					"name": "getResourceTypes",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "uploadFile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "foobar",
+									"value": "icon",
+									"contentType": "",
+									"description": "1 2 3 foobar",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "type",
+									"value": "TvChannelIcon",
+									"contentType": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/mzehnder/Pictures/beaglebone-beagleboard-org-logo-clipart.png"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/mzehnder/Pictures/ambilight.jpeg"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/Users/mzehnder/Pictures/Shelly.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								"TvChannelIcon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllResources",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteResources: TvChannelIcon",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								"TvChannelIcon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getResourceTypeItems: TvChannelIcon",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								"TvChannelIcon"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "2",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getResourceTypeItemsCount: TvChannelIcon",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								"TvChannelIcon"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getResource",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources/TvChannelIcon/eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								"TvChannelIcon",
+								"eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteResource: 0.png",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/resources/TvChannelIcon/0.png",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"resources",
+								"TvChannelIcon",
+								"0.png"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "mdns",
+			"item": [
+				{
+					"name": "mdns browse all",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/test/mdns/discover",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"mdns",
+								"discover"
+							],
+							"query": [
+								{
+									"key": "timeout_browse",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "timeout_browse1",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "timeout_resolve",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "timeout_address",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mdns browse yio-dock-api",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/test/mdns/discover/:query",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"mdns",
+								"discover",
+								":query"
+							],
+							"variable": [
+								{
+									"key": "query",
+									"value": "_yio-dock-api._tcp"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mdns browse sonos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/test/mdns/discover/:query?timeout_browse=1",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"mdns",
+								"discover",
+								":query"
+							],
+							"query": [
+								{
+									"key": "timeout_browse",
+									"value": "1"
+								},
+								{
+									"key": "timeout_browse1",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "timeout_resolve",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "timeout_address",
+									"value": "1",
+									"disabled": true
+								}
+							],
+							"variable": [
+								{
+									"key": "query",
+									"value": "_sonos._tcp"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mdns browse yio-remote",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/test/mdns/discover/:query?timeout_browse=1&timeout_browse1=1&timeout_resolve=1&timeout_address=1",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"mdns",
+								"discover",
+								":query"
+							],
+							"query": [
+								{
+									"key": "timeout_browse",
+									"value": "1"
+								},
+								{
+									"key": "timeout_browse1",
+									"value": "1"
+								},
+								{
+									"key": "timeout_resolve",
+									"value": "1"
+								},
+								{
+									"key": "timeout_address",
+									"value": "1"
+								}
+							],
+							"variable": [
+								{
+									"key": "query",
+									"value": "_yio-remote._tcp"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mdns publish",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"reg_type\": \"_yio-test._tcp\",\n    \"port\": 1234,\n    \"txt\": {\n        \"foo\": \"bar\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/test/mdns/publish",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"mdns",
+								"publish"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "mdns unpublish",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/test/mdns/publish/:name",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"test",
+								"mdns",
+								"publish",
+								":name"
+							],
+							"variable": [
+								{
+									"key": "name",
+									"value": "_yio-test._tcp:1234"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "docks",
+			"item": [
+				{
+					"name": "configuration",
+					"item": [
+						{
+							"name": "getDocks",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks?page=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "2",
+											"disabled": true
+										},
+										{
+											"key": "active",
+											"value": "false",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createDock",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"service_name\": \"YIO-Dock-246F283FCDCC\",\n    \"custom_ws_url\": \"ws://172.16.16.176:946\",\n    \"token\": \"0\",\n    \"active\": false,\n    \"description\": \"testing\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteAllDocks",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getDock",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-246F283FCDCC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateDock",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"friendly_name\": \"YIO-Dock-246F283FCDCC\",\n    \"custom_ws_url\": \"ws://172.16.16.176:946\",\n    \"active\": true,\n    \"description\": \"testing3\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-246F283FCDCC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteDock",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-246F283FE578"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "command",
+					"item": [
+						{
+							"name": "LedBrightnessStart",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"LED_BRIGHTNESS_START\",\n    \"value\": \"100\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-246F283FCDCC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "LedBrightnessStop",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"LED_BRIGHTNESS_STOP\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "RemoteLowBattery",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"REMOTE_LOW_BATTERY\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "RemoteCharged",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"REMOTE_CHARGED\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "SetFriendlyName",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"v2-pcb\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reboot",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"REBOOT\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "v2-pcb"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reset",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"command\": \"RESET\",\n    \"value\": \"0123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"command"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "infrared",
+					"item": [
+						{
+							"name": "learn",
+							"item": [
+								{
+									"name": "irLearningStatus",
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/:dock_id/ir/learn",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												":dock_id",
+												"ir",
+												"learn"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "YIO-Dock-3"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "startIrLearning",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/:dock_id/ir/learn?timeout=10",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												":dock_id",
+												"ir",
+												"learn"
+											],
+											"query": [
+												{
+													"key": "timeout",
+													"value": "10"
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "YIO-Dock-3"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopIrLearning",
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/:dock_id/ir/learn",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												":dock_id",
+												"ir",
+												"learn"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "YIO-Dock-3"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "sendIrTest",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&hex=17;0x221C;14;0",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"ir",
+										"send"
+									],
+									"query": [
+										{
+											"key": "base",
+											"value": "true"
+										},
+										{
+											"key": "ext1",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "hex",
+											"value": "17;0x221C;14;0"
+										}
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "v2-pcb"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendIrTest Copy 2",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&ext1=true&format=PRONTO&code=0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"ir",
+										"send"
+									],
+									"query": [
+										{
+											"key": "base",
+											"value": "true"
+										},
+										{
+											"key": "ext1",
+											"value": "true"
+										},
+										{
+											"key": "format",
+											"value": "PRONTO"
+										},
+										{
+											"key": "code",
+											"value": "0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace"
+										}
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "v2-pcb"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendIrTest hex",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&ext1=true&hex=3;0x20F0B54A;32;0",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"ir",
+										"send"
+									],
+									"query": [
+										{
+											"key": "base",
+											"value": "true"
+										},
+										{
+											"key": "ext1",
+											"value": "true"
+										},
+										{
+											"key": "hex",
+											"value": "3;0x20F0B54A;32;0"
+										}
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendIrTest pronto",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&ext1=true&pronto=0001,0002,0002,affe,cafe,beef,dead",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"ir",
+										"send"
+									],
+									"query": [
+										{
+											"key": "base",
+											"value": "true"
+										},
+										{
+											"key": "ext1",
+											"value": "true"
+										},
+										{
+											"key": "pronto",
+											"value": "0001,0002,0002,affe,cafe,beef,dead"
+										},
+										{
+											"key": "hex",
+											"value": "3;0x20F0B54A;32;0",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-3"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendIr pronto",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"int1\": true,\n    \"int2\": false,\n    \"ext1\": true,\n    \"ext2\": false,\n    \"pronto\":\"0001,0002,0002,affe,cafe,beef,dead\",\n    \"hex2\": \"3;0x20F0B54A;32;0\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"ir",
+										"send"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-3"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "connection",
+					"item": [
+						{
+							"name": "connectAllDocks",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/connect",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"connect"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "disconnectAllDocks",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/disconnect",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"disconnect"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "connectDock",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/connect",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"connect"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-246F283FCDCC"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "disconnectDock",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id/disconnect",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id",
+										"disconnect"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "YIO-Dock-246F283FCDCC"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "integrations",
+			"item": [
+				{
+					"name": "getIntegrationStatus",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg?enabled=true&page=1&limit=100",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegrationDriversCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers?enabled=true&page=1&limit=10",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegrationDrivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers?enabled=true&page=1&limit=100",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegrationDriver",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers",
+								":driverId"
+							],
+							"variable": [
+								{
+									"key": "driverId",
+									"value": "hass"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "registerIntegrationDriver",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"driver_id2\": \"test\",\n    \"name\": {\n        \"de\": \"Testtreiber\",\n        \"en\": \"Test driver\"\n    },\n    \"driver_url\": \"ws://none\",\n    \"version\": \"0.0.1\",\n    \"icon\": \"yio:test\",\n    \"enabled\": true,\n    \"description\": {\n        \"en\": \"Only for testing\",\n        \"de\": \"Nur zum testen\"\n    },\n    \"device_discovery\": false,\n    \"setup_data_schema\": {},\n    \"release_date\": \"2022-04-02\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteIntegrationDriver",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers",
+								":driverId"
+							],
+							"variable": [
+								{
+									"key": "driverId",
+									"value": "8f7e16af-4092-496f-b90e-2676866aeb09"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "startIntegrationDriver",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers/:driverId?cmd=start",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers",
+								":driverId"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "start"
+								}
+							],
+							"variable": [
+								{
+									"key": "driverId",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "stopIntegrationDriver",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers/:driverId?cmd=stop",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers",
+								":driverId"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "stop"
+								}
+							],
+							"variable": [
+								{
+									"key": "driverId",
+									"value": null
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateIntegrationDriver",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"driver_id\": \"test\",\n    \"name\": {\n        \"en\": \"Test Driver\"\n    },\n    \"driver_url\": \"ws://localhost:8000/ws\",\n    \"version\": \"0.0.1\",\n    \"description\": {\n        \"en\": \"Only for testing\"\n    },\n    \"device_discovery\": false,\n    \"setup_data_schema\": {\n        \"foobar\": \"bar3\",\n        \"foo\": \"bar\",\n        \"bar\": true\n    },\n    \"developer\": {\n        \"name\": \"kusi\"\n    },\n    \"release_date\": \"2022-01-01\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers",
+								":driverId"
+							],
+							"variable": [
+								{
+									"key": "driverId",
+									"value": "test"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createIntegrationInstance",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"device_id\": \"ä\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers",
+								":driverId"
+							],
+							"variable": [
+								{
+									"key": "driverId",
+									"value": "simple"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegrationsCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances?enabled=true&page=1&limit=1",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegrations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances?enabled=true&page=1",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances/:intgId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances",
+								":intgId"
+							],
+							"variable": [
+								{
+									"key": "intgId",
+									"value": "hass.main"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteIntegration",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances/:intgId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances",
+								":intgId"
+							],
+							"variable": [
+								{
+									"key": "intgId",
+									"value": "test.2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAvailableEntitiesFromIntegration",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances/:intgId/entities?page=1&limit=100&reload=true",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances",
+								":intgId",
+								"entities"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "reload",
+									"value": "true"
+								}
+							],
+							"variable": [
+								{
+									"key": "intgId",
+									"value": "hass.main"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "configureEntityFromIntegration",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances/:intgId/entities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances",
+								":intgId",
+								"entities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "intgId",
+									"value": "hass.main"
+								},
+								{
+									"key": "entityId",
+									"value": "light.esstisch"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "connect",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances/:intgId?cmd=connect",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances",
+								":intgId"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "connect"
+								}
+							],
+							"variable": [
+								{
+									"key": "intgId",
+									"value": "test.integration:1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disconnect",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg/instances/:intgId?cmd=disconnect",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"instances",
+								":intgId"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "disconnect"
+								}
+							],
+							"variable": [
+								{
+									"key": "intgId",
+									"value": "test.integration:1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "connectAll",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg?cmd=CONNECT",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "CONNECT"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "disconnectAll",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg?cmd=disconnect",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "disconnect"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "entities",
+			"item": [
+				{
+					"name": "getEntities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/entities?page=1&limit=100&entity_type=light",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								},
+								{
+									"key": "entity_type",
+									"value": "light"
+								},
+								{
+									"key": "intg_id",
+									"value": "hass.main",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEntityCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/entities?entity_type=light&intg_id=hass.main",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities"
+							],
+							"query": [
+								{
+									"key": "entity_type",
+									"value": "light"
+								},
+								{
+									"key": "intg_id",
+									"value": "hass.main"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEntity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/entities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getEntity Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/entities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "hass.main.media_player.esstisch"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateEntity",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/entities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteEntity",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/entities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "media_player.wohnzimmer.main.test.integration:1"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "profiles",
+			"item": [
+				{
+					"name": "groups - default profile",
+					"item": [
+						{
+							"name": "getGroupsInProfile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups?pin=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1"
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createGroup",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"group_id\", responseJson.group_id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Test\",\n    \"icon\": \"yio:test\",\n    \"entities\": [\n        \"light40\",\n        \"light41\",\n        \"light42\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createGroup duplicate entity_id",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Unique entity_id test\",\n    \"icon\": \"yio:test\",\n    \"entities\": [\n        \"light40\",\n        \"light40\",\n        \"light42\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateGroup",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Test 4\",\n    \"icon\": \"yio:owl\",\n   \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light41\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups/:group_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups",
+										":group_id"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										},
+										{
+											"key": "group_id",
+											"value": "{{group_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateGroup with Entities",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"icon\": \"yio:owl\",\n    \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light42\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups/:group_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups",
+										":group_id"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										},
+										{
+											"key": "group_id",
+											"value": "{{group_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "pages - default profile",
+					"item": [
+						{
+							"name": "getPagesInProfile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages?pin=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1"
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createPage",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"page_id\", responseJson.page_id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{$$randomCity}}\",\n    \"items\": [\n        {\n            \"entity_id\": \"switch1\"\n        },\n        {\n            \"entity_id\": \"mediaplayer1\"\n        },\n        {\n            \"entity_id\": \"blind1\"\n        },\n        {\n            \"entity_id\": \"light10\"\n        },\n        {\n            \"group_id\": \"def:g3\"\n        },\n        {\n            \"group_id\": \"def:g2\"\n        },\n        {\n            \"group_id\": \"def:g1\"\n        }\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getPage",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages/:pageId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages",
+										":pageId"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										},
+										{
+											"key": "pageId",
+											"value": "{{page_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updatePage",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{$randomBsBuzz}}\",\n    \"image\": \"img:bedroom\",\n    \"items\": [\n        {\n            \"entity_id\": \"switch1\"\n        },\n        {\n            \"group_id\": \"def:g3\"\n        },\n        {\n            \"entity_id\": \"blind1\"\n        },\n        {\n            \"entity_id\": \"light10\"\n        },\n        {\n            \"group_id\": \"def:g2\"\n        },\n        {\n            \"entity_id\": \"mediaplayer1\"\n        },\n        {\n            \"group_id\": \"def:g1\"\n        }\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages/:pageId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages",
+										":pageId"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										},
+										{
+											"key": "pageId",
+											"value": "{{page_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletePage",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages/:pageId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages",
+										":pageId"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "default"
+										},
+										{
+											"key": "pageId",
+											"value": "{{page_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "groups",
+					"item": [
+						{
+							"name": "getGroupsInProfile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups?pin=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1"
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createGroup",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"group_id\", responseJson.group_id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Test\",\n    \"icon\": \"yio:test\",\n    \"entities\": [\n        \"light40\",\n        \"light41\",\n        \"light42\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createGroup duplicate entity_id",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"Unique entity_id test\",\n    \"icon\": \"yio:test\",\n    \"entities\": [\n        \"light40\",\n        \"light40\",\n        \"light42\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateGroup",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{$randomBsBuzz}}\",\n    \"icon\": \"yio:owl\",\n   \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light41\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups/:group_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups",
+										":group_id"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										},
+										{
+											"key": "group_id",
+											"value": "{{group_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateGroup with duplicate entities",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"icon\": \"yio:owl\",\n    \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light42\"\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/groups/:group_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"groups",
+										":group_id"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										},
+										{
+											"key": "group_id",
+											"value": "{{group_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "pages",
+					"item": [
+						{
+							"name": "getPagesInProfile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages?pin=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1"
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createPage",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"page_id\", responseJson.page_id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{$randomProductName}}\",\n    \"items\": [\n        {\n            \"entity_id\": \"switch1\"\n        },\n        {\n            \"entity_id\": \"mediaplayer1\"\n        },\n        {\n            \"group_id\": \"{{group_id}}\"\n        },\n        {\n            \"entity_id\": \"blind1\"\n        },\n        {\n            \"entity_id\": \"{{light_entity_id}}\"\n        }\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getPage",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages/:pageId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages",
+										":pageId"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										},
+										{
+											"key": "pageId",
+											"value": "{{page_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updatePage",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"{{$randomBsBuzz}}\",\n    \"items\": [\n        {\n            \"entity_id\": \"switch1\"\n        },\n        {\n            \"entity_id\": \"mediaplayer1\"\n        },\n        {\n            \"entity_id\": \"blind1\"\n        },\n        {\n            \"entity_id\": \"{{light_entity_id}}\"\n        },\n        {\n            \"group_id\": \"{{group_id}}\"\n        }\n    ]\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages/:pageId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages",
+										":pageId"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										},
+										{
+											"key": "pageId",
+											"value": "{{page_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deletePage",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/profiles/:profile/pages/:pageId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"profiles",
+										":profile",
+										"pages",
+										":pageId"
+									],
+									"query": [
+										{
+											"key": "pin",
+											"value": "1",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "profile",
+											"value": "{{profile_id}}"
+										},
+										{
+											"key": "pageId",
+											"value": "{{page_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "getProfiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/profiles",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createProfile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"profile_id\", responseJson.profile_id);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFirstName}}\",\n    \"icon\": \"yio:{{$randomColor}}\",\n    \"description\": \"{{$randomCatchPhrase}}\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/profiles",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getProfile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\",\n    \"icon\": \"yio:rocket\",\n    \"description\": \"just testing\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/profiles/:profile",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profile"
+							],
+							"variable": [
+								{
+									"key": "profile",
+									"value": "{{profile_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateProfile",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"{{$randomFirstName}}\",\n    \"icon\": \"yio:panda\",\n    \"update_pin\": false,\n    \"description\": \"update test\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/profiles/:profileId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profileId"
+							],
+							"variable": [
+								{
+									"key": "profileId",
+									"value": "{{profile_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteProfile",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Test\",\n    \"icon\": \"yio:rocket\",\n    \"description\": \"just testing\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/profiles/:profile",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profile"
+							],
+							"variable": [
+								{
+									"key": "profile",
+									"value": "{{profile_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllProfiles !!! WARNING !!!",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/profiles",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "cfg",
+			"item": [
+				{
+					"name": "button",
+					"item": [
+						{
+							"name": "getButtonSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"button"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateButtonSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"brightness\": 33,\n    \"auto_brightness\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"button"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "display",
+					"item": [
+						{
+							"name": "getDisplaySettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/display",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"display"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateDisplaySettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"brightness\": 30,\n    \"auto_brightness\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/display",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"display"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "haptic",
+					"item": [
+						{
+							"name": "getHapticSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/haptic",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"haptic"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateHapticSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"enabled\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/haptic",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"haptic"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "localization",
+					"item": [
+						{
+							"name": "getLocalizationSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/localization",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"localization"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getTimeZoneNames",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/localization/timezones",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"localization",
+										"timezones"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateLocalizationSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"language_code\": \"de_CH\",\n    \"country_code\": \"CH\",\n    \"time_zone\": \"Europe/Zurich\",\n    \"time_format_24h\": true,\n    \"measurement_unit\": \"METRIC\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/localization",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"localization"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "network",
+					"item": [
+						{
+							"name": "getNetworkSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/network",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"network"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateNetworkSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"bt_enabled\": true,\n    \"wifi_enabled\": true\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/network",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"network"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "power_saving",
+					"item": [
+						{
+							"name": "getPowerSavingSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/power_saving",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"power_saving"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updatePowerSavingSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"wakeup_sensitivity\": 2,\n    \"display_off_sec\": 5,\n    \"standby_sec\": 100\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/power_saving",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"power_saving"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "software_update",
+					"item": [
+						{
+							"name": "getSoftwareUpdateSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/software_update",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"software_update"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateSoftwareUpdateSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"check_for_updates\": false,\n    \"auto_update\": false\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/software_update",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"software_update"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "sound",
+					"item": [
+						{
+							"name": "getSoundSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/sound",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"sound"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateSoundSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"enabled\": false,\n    \"volume\": 30\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/sound",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"sound"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "voice_control",
+					"item": [
+						{
+							"name": "getVoiceControlSettings",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/voice_control",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"voice_control"
+									],
+									"query": [
+										{
+											"key": "default",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getVoiceAssistants",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/voice_control/voice_assistants",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"voice_control",
+										"voice_assistants"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateVoiceControlSettings",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"microphone\": true,\n    \"enabled\": true,\n    \"voice_assistant\": \"None\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/voice_control",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"voice_control"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "getAllSettings",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/cfg",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"cfg"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "resetAllSettings",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/cfg",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"cfg"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "system",
+			"item": [
+				{
+					"name": "getSystemInformation",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/system",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"system"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "executeSystemCommand",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/system?cmd=RESTART",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"system"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "RESTART"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getFactoryResetToken",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/system/factory_reset",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"system",
+								"factory_reset"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "performFactoryReset",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/system/factory_reset?token=1.2.3",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"system",
+								"factory_reset"
+							],
+							"query": [
+								{
+									"key": "token",
+									"value": "1.2.3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "SERVER",
+			"value": "http://localhost:{{http_port}}"
+		},
+		{
+			"key": "externalSystem",
+			"value": "homeassistant"
+		},
+		{
+			"key": "apiPassword",
+			"value": "SET_PWD_IN_CURRENT_VALUE"
+		},
+		{
+			"key": "extTokenID",
+			"value": "test-1"
+		},
+		{
+			"key": "wsTokenID",
+			"value": "SET_PWD_IN_CURRENT_VALUE"
+		},
+		{
+			"key": "http_port",
+			"value": "8080"
+		},
+		{
+			"key": "https_port",
+			"value": "8443"
+		}
+	]
+}
