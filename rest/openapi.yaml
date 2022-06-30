@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.7.0
+  version: 0.8.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, access tokens for the WebSocket API can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n- Infrared code management\n- Activity management    \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, access tokens for the WebSocket API can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- WebSocket token refactoring: integrate with login, use a session token for shared authentication\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n- Infrared code management\n- Activity management    \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -19,13 +19,17 @@ servers:
   - url: 'https://unfolded-simulator.local:8443/api'
 security:
   - basicAuth: []
+  - cookieAuth: []
 tags:
   - name: info
     description: Public status information and health checks
   - name: auth
-    description: Authentication
+    description: Session authentication
   - name: ws-token
-    description: Access token handling for the UC WebSocket API.
+    description: |
+      Access token handling for the UC WebSocket API.  
+      ⚠️ This could be refactored with the new session login!  
+      ⚠️ Do not yet implement client functionality!
   - name: external-token
     description: Access token handling for external systems.
   - name: resources
@@ -143,10 +147,67 @@ paths:
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
       security: []
+  /pub/login:
+    post:
+      tags:
+        - auth
+      summary: Log in and create session.
+      description: |
+        A successful login returns a session authentication cookie which need to be submitted in subsequent requests.  
+        The session ID is returned in a cookie named `id`.
+      operationId: login
+      requestBody:
+        required: true
+        description: A JSON object containing the username and password.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      security: []
+      responses:
+        '200':
+          description: Successfully authenticated.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: id=abcde12345; Path=/; HttpOnly
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+  /pub/logout:
+    post:
+      tags:
+        - auth
+      summary: Log out from session.
+      description: |
+        The session is removed and the session cookie named `id` is cleared.
+      operationId: logout
+      parameters:
+        - name: id
+          in: cookie
+          description: Session cookie
+          schema:
+            type: string
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Successfully logged out.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: 'id=; HttpOnly; Path=/; Max-Age=0; Expires=Sat, 26 Jun 2021 12:05:09 GMT'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
   /auth/scopes:
     get:
       tags:
-        - auth
+        - external-token
       summary: Get available access scopes.
       description: |
         Access scopes are used to create tokens for the WebSocket API.
@@ -181,8 +242,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExternalSystems'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - external-token
@@ -197,8 +256,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-      security:
-        - basicAuth: []
   '/auth/external/{system}':
     post:
       tags:
@@ -258,8 +315,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
       x-codegen-request-body-name: body
     head:
       tags:
@@ -282,8 +337,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     get:
       tags:
         - external-token
@@ -321,8 +374,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - external-token
@@ -339,8 +390,6 @@ paths:
                 $ref: '#/components/schemas/ApiResponse'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/auth/external/{system}/{tokenId}':
     get:
       tags:
@@ -365,8 +414,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     put:
       tags:
         - external-token
@@ -396,8 +443,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - external-token
@@ -417,8 +462,6 @@ paths:
                 $ref: '#/components/schemas/ApiResponse'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /auth/ws:
     head:
       tags:
@@ -444,8 +487,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     get:
       tags:
         - ws-token
@@ -486,8 +527,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - ws-token
@@ -529,8 +568,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - ws-token
@@ -543,8 +580,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   '/auth/ws/{tokenId}':
     get:
       tags:
@@ -568,8 +603,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - ws-token
@@ -601,8 +634,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - ws-token
@@ -619,8 +650,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /resources:
     get:
       tags:
@@ -636,8 +665,6 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ResourceType'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - resources
@@ -652,8 +679,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-      security:
-        - basicAuth: []
   '/resources/{type}':
     head:
       tags:
@@ -676,8 +701,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     get:
       tags:
         - resources
@@ -713,8 +736,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - resources
@@ -748,8 +769,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - resources
@@ -770,8 +789,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/resources/{type}/{id}':
     get:
       tags:
@@ -803,8 +820,6 @@ paths:
                 format: binary
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - resources
@@ -822,8 +837,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /intg:
     get:
       tags:
@@ -866,8 +879,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     put:
       tags:
         - integrations
@@ -899,8 +910,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /intg/drivers:
     head:
       tags:
@@ -923,8 +932,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     get:
       tags:
         - integrations
@@ -964,8 +971,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - integrations
@@ -1009,8 +1014,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/intg/drivers/{driverId}':
     get:
       tags:
@@ -1036,8 +1039,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - integrations
@@ -1072,8 +1073,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - integrations
@@ -1099,8 +1098,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     put:
       tags:
         - integrations
@@ -1132,8 +1129,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - integrations
@@ -1173,8 +1168,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /intg/instances:
     head:
       tags:
@@ -1197,8 +1190,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     get:
       tags:
         - integrations
@@ -1236,8 +1227,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/intg/instances/{intgId}':
     get:
       tags:
@@ -1261,8 +1250,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - integrations
@@ -1299,8 +1286,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - integrations
@@ -1326,8 +1311,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     put:
       tags:
         - integrations
@@ -1359,8 +1342,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/intg/instances/{intgId}/entities':
     get:
       tags:
@@ -1425,8 +1406,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/intg/instances/{intgId}/entities/{entityId}':
     post:
       tags:
@@ -1466,8 +1445,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
   /entities:
     head:
       tags:
@@ -1491,8 +1468,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     get:
       tags:
         - entities
@@ -1535,8 +1510,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   '/entities/{entityId}':
     get:
       tags:
@@ -1560,8 +1533,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - entities
@@ -1593,8 +1564,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - entities
@@ -1620,8 +1589,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/entities/{entityId}/command':
     put:
       tags:
@@ -1654,8 +1621,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
   /profiles/:
     post:
       tags:
@@ -1688,8 +1653,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     get:
       tags:
         - profiles
@@ -1706,8 +1669,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - profiles
@@ -1724,8 +1685,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   '/profiles/{profileId}':
     get:
       tags:
@@ -1750,8 +1709,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - profiles
@@ -1790,8 +1747,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - profiles
@@ -1813,8 +1768,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/profiles/{profileId}/pages':
     post:
       tags:
@@ -1847,8 +1800,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     get:
       tags:
         - profiles
@@ -1872,8 +1823,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - profiles
@@ -1895,8 +1844,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/profiles/{profileId}/pages/{pageId}':
     get:
       tags:
@@ -1922,8 +1869,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - profiles
@@ -1955,8 +1900,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - profiles
@@ -1979,8 +1922,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/profiles/{profileId}/groups':
     post:
       tags:
@@ -2013,8 +1954,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     get:
       tags:
         - profiles
@@ -2038,8 +1977,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - profiles
@@ -2061,8 +1998,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/profiles/{profileId}/groups/{groupId}':
     get:
       tags:
@@ -2088,8 +2023,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - profiles
@@ -2121,8 +2054,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - profiles
@@ -2145,8 +2076,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /cfg:
     get:
       tags:
@@ -2167,8 +2096,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - cfg
@@ -2187,8 +2114,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/button:
     get:
       tags:
@@ -2214,8 +2139,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2242,8 +2165,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/display:
     get:
       tags:
@@ -2269,8 +2190,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2297,8 +2216,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/haptic:
     get:
       tags:
@@ -2324,8 +2241,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2352,8 +2267,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/localization:
     get:
       tags:
@@ -2379,8 +2292,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2407,8 +2318,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/localization/tz_names:
     get:
       tags:
@@ -2428,8 +2337,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/network:
     get:
       tags:
@@ -2455,8 +2362,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2483,8 +2388,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/power_saving:
     get:
       tags:
@@ -2510,8 +2413,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2538,8 +2439,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/software_udpate:
     get:
       tags:
@@ -2565,8 +2464,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2593,8 +2490,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/sound:
     get:
       tags:
@@ -2620,8 +2515,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2648,8 +2541,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/voice_control:
     get:
       tags:
@@ -2675,8 +2566,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - cfg
@@ -2703,8 +2592,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /cfg/voice_control/voice_assistants:
     get:
       tags:
@@ -2724,8 +2611,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /docks:
     get:
       tags:
@@ -2769,8 +2654,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - dock
@@ -2805,8 +2688,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - dock
@@ -2822,8 +2703,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /docks/connect:
     post:
       tags:
@@ -2842,8 +2721,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /docks/disconnect:
     post:
       tags:
@@ -2861,8 +2738,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/docks/{dockId}':
     get:
       tags:
@@ -2884,8 +2759,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     patch:
       tags:
         - dock
@@ -2937,8 +2810,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - dock
@@ -2955,8 +2826,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/docks/{dockId}/command':
     post:
       tags:
@@ -3001,8 +2870,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/docks/{dockId}/connect':
     post:
       tags:
@@ -3023,8 +2890,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/docks/{dockId}/disconnect':
     post:
       tags:
@@ -3044,8 +2909,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/docks/{dockId}/ir/send':
     get:
       tags:
@@ -3102,8 +2965,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - dock
@@ -3156,8 +3017,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   '/docks/{dockId}/ir/learn':
     get:
       tags:
@@ -3181,8 +3040,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     post:
       tags:
         - dock
@@ -3208,8 +3065,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
     delete:
       tags:
         - dock
@@ -3233,8 +3088,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-      security:
-        - basicAuth: []
   /system:
     get:
       tags:
@@ -3253,8 +3106,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     post:
       tags:
         - system
@@ -3288,8 +3139,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /system/factory_reset:
     get:
       tags:
@@ -3315,8 +3164,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
     post:
       tags:
         - system
@@ -3344,8 +3191,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-      security:
-        - basicAuth: []
   /test/mdns/discover:
     get:
       tags:
@@ -3394,8 +3239,6 @@ paths:
                 $ref: '#/components/schemas/ServiceInstances'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
-      security:
-        - basicAuth: []
   '/test/mdns/discover/{query}':
     get:
       tags:
@@ -3450,8 +3293,6 @@ paths:
                 $ref: '#/components/schemas/ServiceInstances'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
-      security:
-        - basicAuth: []
   /test/mdns/publish:
     post:
       tags:
@@ -3481,8 +3322,6 @@ paths:
                   - port
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
-      security:
-        - basicAuth: []
   '/test/mdns/publish/{name}':
     delete:
       tags:
@@ -3503,8 +3342,6 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
-      security:
-        - basicAuth: []
 components:
   parameters:
     dock_id:
@@ -3681,7 +3518,7 @@ components:
       minLength: 1
       maxLength: 36
       description: |
-        Entity identifier used in an integration driver (= available entities).  
+        Entity identifier used in an integration driver (= available entities).
     ResourceType:
       type: string
       format: '^[a-zA-Z]+$'
@@ -4497,6 +4334,19 @@ components:
             - PRONTO
         timestamp:
           type: integer
+    LoginRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - password
+      example:
+        username: admin
+        password: '1234'
     Profile:
       type: object
       properties:
@@ -4963,4 +4813,10 @@ components:
   securitySchemes:
     basicAuth:
       type: http
+      description: Basic authentication. Please only use for single requests and testing with Swagger / OpenAPI.
       scheme: basic
+    cookieAuth:
+      type: apiKey
+      description: Cookie based session authentication. Does not work with Swagger / OpenAPI testing.
+      in: cookie
+      name: id
