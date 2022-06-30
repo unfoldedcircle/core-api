@@ -3765,13 +3765,54 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/profiles",
+							"raw": "{{SERVER}}/api/profiles?active=false",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"profiles"
+							],
+							"query": [
+								{
+									"key": "active",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "switchProfiles",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/profiles?active_profile_id=default",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles"
+							],
+							"query": [
+								{
+									"key": "active_profile_id",
+									"value": "default"
+								}
 							]
 						}
 					},

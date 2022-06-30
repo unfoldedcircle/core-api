@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.8.0
+  version: 0.8.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -13,6 +13,7 @@ externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
 servers:
+  - url: /api
   - url: 'http://localhost:8080/api'
   - url: 'https://localhost:8443/api'
   - url: 'http://unfolded-simulator.local:8080/api'
@@ -1621,7 +1622,7 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-  /profiles/:
+  /profiles:
     post:
       tags:
         - profiles
@@ -1653,11 +1654,45 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+    put:
+      tags:
+        - profiles
+      summary: Switch active profile.
+      operationId: switchProfile
+      parameters:
+        - name: active_profile_id
+          in: query
+          description: Active profile identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
     get:
       tags:
         - profiles
-      summary: Get all profiles.
+      summary: Get all profiles or the active profile.
       operationId: getProfiles
+      parameters:
+        - name: active
+          in: query
+          description: Only retrieve the active profile
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           description: Successful operation.
@@ -3518,7 +3553,7 @@ components:
       minLength: 1
       maxLength: 36
       description: |
-        Entity identifier used in an integration driver (= available entities).
+        Entity identifier used in an integration driver (= available entities).  
     ResourceType:
       type: string
       format: '^[a-zA-Z]+$'

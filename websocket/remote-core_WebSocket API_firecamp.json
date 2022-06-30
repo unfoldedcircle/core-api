@@ -1,6 +1,6 @@
 {
     "meta": {
-        "__export_time": 1655995137704,
+        "__export_time": 1656615654690,
         "__export_app": "firecamp_v2.6.1 ",
         "__export_version": 1
     },
@@ -547,6 +547,22 @@
                                 "type": "json",
                                 "envelope": ""
                             }
+                        },
+                        {
+                            "name": "switch_profile",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"switch_profile\",\n  \"msg_data\": {\n    \"profile_id\": \"default\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_active_profile",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_active_profile\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
                         }
                     ]
                 },
@@ -947,12 +963,6 @@
     ],
     "environments": [
         {
-            "name": "Development",
-            "variables": {
-                "server": "localhost:8080"
-            }
-        },
-        {
             "name": "Production",
             "variables": {
                 "server": "remote-two:9001"
@@ -961,6 +971,12 @@
         {
             "name": "Staging",
             "variables": {}
+        },
+        {
+            "name": "Development",
+            "variables": {
+                "server": "localhost:8080"
+            }
         }
     ]
 }

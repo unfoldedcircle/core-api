@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.7.0-alpha'
+  version: '0.8.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -303,6 +303,7 @@ channels:
           # --- profile handling
           - $ref: '#/components/messages/get_profiles'
           - $ref: '#/components/messages/get_profile'
+          - $ref: '#/components/messages/get_active_profile'
           - $ref: '#/components/messages/switch_profile'
           - $ref: '#/components/messages/add_profile'
           - $ref: '#/components/messages/update_profile'
@@ -929,8 +930,16 @@ components:
         - name: profile
       payload:
         $ref: '#/components/schemas/profileMsg'
+    get_active_profile:
+      summary: 🧪 Retrieve the active profile.
+      tags:
+        - name: profile
+      payload:
+        $ref: '#/components/schemas/getActiveProfileMsg'
+      x-response:
+        $ref: '#/components/messages/profile'
     switch_profile:
-      summary: 👷 Switch active profile.
+      summary: 🧪 Switch active profile.
       tags:
         - name: profile
       payload:
@@ -2465,6 +2474,16 @@ components:
           required:
             - msg
             - msg_data
+    getActiveProfileMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_active_profile
+          required:
+            - msg
     switchProfileMsg:
       type: object
       allOf:
