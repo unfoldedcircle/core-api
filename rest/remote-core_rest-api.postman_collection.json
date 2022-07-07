@@ -4197,7 +4197,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/cfg/localization/timezones",
+									"raw": "{{SERVER}}/api/cfg/localization/tz_names",
 									"host": [
 										"{{SERVER}}"
 									],
@@ -4205,7 +4205,7 @@
 										"api",
 										"cfg",
 										"localization",
-										"timezones"
+										"tz_names"
 									]
 								}
 							},
