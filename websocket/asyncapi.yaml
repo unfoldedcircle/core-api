@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.8.1-alpha'
+  version: '0.8.3-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -153,6 +153,8 @@ channels:
           - $ref: '#/components/messages/get_localization_cfg'
           - $ref: '#/components/messages/set_localization_cfg'
           - $ref: '#/components/messages/get_timezone_names'
+          - $ref: '#/components/messages/get_localization_countries'
+          - $ref: '#/components/messages/get_localization_languages'
           - $ref: '#/components/messages/get_network_cfg'
           - $ref: '#/components/messages/set_network_cfg'
           - $ref: '#/components/messages/get_software_update_cfg'
@@ -214,6 +216,8 @@ channels:
           - $ref: '#/components/messages/haptic_cfg'
           - $ref: '#/components/messages/localization_cfg'
           - $ref: '#/components/messages/timezone_names'
+          - $ref: '#/components/messages/localization_countries'
+          - $ref: '#/components/messages/localization_languages'
           - $ref: '#/components/messages/network_cfg'
           - $ref: '#/components/messages/software_update_cfg'
           - $ref: '#/components/messages/power_saving_cfg'
@@ -569,93 +573,113 @@ components:
         $ref: '#/components/messages/result'
 
     get_configuration:
-      summary: 🔍 Get all system settings.
+      summary: 🧪 Get all system settings.
       payload:
         $ref: '#/components/schemas/getConfigurationMsg'
       x-response:
         $ref: '#/components/messages/configuration'
     configuration:
-      summary: 🔍 All system settings.
+      summary: 🧪 All system settings.
       payload:
         $ref: '#/components/schemas/configurationMsg'
 
     get_button_cfg:
-      summary: 🔍 Get button settings.
+      summary: 🧪 Get button settings.
       payload:
         $ref: '#/components/schemas/getButtonCfgMsg'
       x-response:
         $ref: '#/components/messages/button_cfg'
     set_button_cfg:
-      summary: 🔍 Modify button settings.
+      summary: 🧪 Modify button settings.
       payload:
         $ref: '#/components/schemas/setButtonCfgMsg'
       x-response:
         $ref: '#/components/messages/button_cfg'
     button_cfg:
-      summary: 🔍 Button settings.
+      summary: 🧪 Button settings.
       payload:
         $ref: '#/components/schemas/buttonCfgMsg'
 
     get_display_cfg:
-      summary: 🔍 Get display settings.
+      summary: 🧪 Get display settings.
       payload:
         $ref: '#/components/schemas/getDisplayCfgMsg'
       x-response:
         $ref: '#/components/messages/display_cfg'
     set_display_cfg:
-      summary: 🔍 Modify display settings.
+      summary: 🧪 Modify display settings.
       payload:
         $ref: '#/components/schemas/setDisplayCfgMsg'
       x-response:
         $ref: '#/components/messages/display_cfg'
     display_cfg:
-      summary: 🔍 Display settings.
+      summary: 🧪 Display settings.
       payload:
         $ref: '#/components/schemas/displayCfgMsg'
 
     get_haptic_cfg:
-      summary: 🔍 Get haptic settings.
+      summary: 🧪 Get haptic settings.
       payload:
         $ref: '#/components/schemas/getHapticCfgMsg'
       x-response:
         $ref: '#/components/messages/haptic_cfg'
     set_haptic_cfg:
-      summary: 🔍 Modify haptic settings.
+      summary: 🧪 Modify haptic settings.
       payload:
         $ref: '#/components/schemas/setHapticCfgMsg'
       x-response:
         $ref: '#/components/messages/haptic_cfg'
     haptic_cfg:
-      summary: 🔍 Haptic settings.
+      summary: 🧪 Haptic settings.
       payload:
         $ref: '#/components/schemas/hapticCfgMsg'
 
     get_localization_cfg:
-      summary: 🔍 Get localization settings.
+      summary: 🧪 Get localization settings.
       payload:
         $ref: '#/components/schemas/getLocalizationCfgMsg'
       x-response:
         $ref: '#/components/messages/localization_cfg'
     set_localization_cfg:
-      summary: 🔍 Modify localization settings.
+      summary: 🧪 Modify localization settings.
       payload:
         $ref: '#/components/schemas/setLocalizationCfgMsg'
       x-response:
         $ref: '#/components/messages/localization_cfg'
     localization_cfg:
-      summary: 🔍 Localization settings.
+      summary: 🧪 Localization settings.
       payload:
         $ref: '#/components/schemas/localizationCfgMsg'
     get_timezone_names:
-      summary: 🔍 Get all available time zone names.
+      summary: 🧪 Get all available time zone names.
       payload:
         $ref: '#/components/schemas/getTimezoneNamesMsg'
       x-response:
         $ref: '#/components/messages/timezone_names'
     timezone_names:
-      summary: 🔍 Available time zone names.
+      summary: 🧪 Available time zone names.
       payload:
         $ref: '#/components/schemas/timezoneNamesMsg'
+    get_localization_countries:
+      summary: 🔍 Get available countries for the localization configuration.
+      payload:
+        $ref: '#/components/schemas/getLocalizationCountriesMsg'
+      x-response:
+        $ref: '#/components/messages/localization_countries'
+    localization_countries:
+      summary: 🔍 Available localization countries.
+      payload:
+        $ref: '#/components/schemas/localizationCountriesMsg'
+    get_localization_languages:
+      summary: 🔍 Get available languages for the localization configuration.
+      payload:
+        $ref: '#/components/schemas/getLocalizationLanguagesMsg'
+      x-response:
+        $ref: '#/components/messages/localization_languages'
+    localization_languages:
+      summary: 🔍 Available localization languages.
+      payload:
+        $ref: '#/components/schemas/localizationLanguagesMsg'
 
     get_network_cfg:
       summary: 🔍 Get network settings.
@@ -675,53 +699,53 @@ components:
         $ref: '#/components/schemas/networkCfgMsg'
 
     get_software_update_cfg:
-      summary: 🔍 Get software update settings.
+      summary: 🧪 Get software update settings.
       payload:
         $ref: '#/components/schemas/getSoftwareUpdateCfgMsg'
       x-response:
         $ref: '#/components/messages/software_update_cfg'
     set_software_update_cfg:
-      summary: 🔍 Modify software update settings.
+      summary: 🧪 Modify software update settings.
       payload:
         $ref: '#/components/schemas/setSoftwareUpdateCfgMsg'
       x-response:
         $ref: '#/components/messages/software_update_cfg'
     software_update_cfg:
-      summary: 🔍 Software update settings.
+      summary: 🧪 Software update settings.
       payload:
         $ref: '#/components/schemas/softwareUpdateCfgMsg'
 
     get_power_saving_cfg:
-      summary: 🔍 Get power saving settings.
+      summary: 🧪 Get power saving settings.
       payload:
         $ref: '#/components/schemas/getPowerSavingCfgMsg'
       x-response:
         $ref: '#/components/messages/power_saving_cfg'
     set_power_saving_cfg:
-      summary: 🔍 Modify power saving settings.
+      summary: 🧪 Modify power saving settings.
       payload:
         $ref: '#/components/schemas/setPowerSavingCfgMsg'
       x-response:
         $ref: '#/components/messages/power_saving_cfg'
     power_saving_cfg:
-      summary: 🔍 Power saving settings.
+      summary: 🧪 Power saving settings.
       payload:
         $ref: '#/components/schemas/powerSavingCfgMsg'
 
     get_sound_cfg:
-      summary: 🔍 Get sound settings.
+      summary: 🧪 Get sound settings.
       payload:
         $ref: '#/components/schemas/getSoundCfgMsg'
       x-response:
         $ref: '#/components/messages/sound_cfg'
     set_sound_cfg:
-      summary: 🔍 Modify sound settings.
+      summary: 🧪 Modify sound settings.
       payload:
         $ref: '#/components/schemas/setSoundCfgMsg'
       x-response:
         $ref: '#/components/messages/sound_cfg'
     sound_cfg:
-      summary: 🔍 Sound settings.
+      summary: 🧪 Sound settings.
       payload:
         $ref: '#/components/schemas/soundCfgMsg'
 
@@ -1931,7 +1955,74 @@ components:
           required:
             - msg
             - msg_data
-
+    getLocalizationCountriesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_localization_countries
+          required:
+            - msg
+    localizationCountriesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg_data:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    $ref: '#/components/schemas/countryCode'
+                  name:
+                    description: |
+                      Country name in native language. For multi-lingual countries a default will be used for `name` and
+                      the additional names be provided in additional `name_<language_code>` properties.
+                    type: string
+                  name_en:
+                    description: Country name in english.
+                    type: string
+                additionalProperties: true
+                required:
+                  - code
+                  - name
+                  - name_en
+          required:
+            - msg
+            - msg_data
+    getLocalizationLanguagesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_localization_languages
+          required:
+            - msg
+    localizationLanguagesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg_data:
+              type: array
+              items:
+                type: object
+                properties:
+                  code:
+                    $ref: '#/components/schemas/languageCode'
+                  name:
+                    type: string
+                required:
+                  - code
+                  - name
+          required:
+            - msg
+            - msg_data
     getNetworkCfgMsg:
       type: object
       allOf:

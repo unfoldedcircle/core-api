@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.8.2
+  version: 0.8.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2368,6 +2368,102 @@ paths:
                 type: array
                 items:
                   type: string
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/localization/countries:
+    get:
+      tags:
+        - cfg
+      summary: Get all available countries.
+      operationId: getCountries
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    code:
+                      $ref: '#/components/schemas/CountryCode'
+                    name:
+                      description: |
+                        Country name in native language. For multi-lingual countries a default will be used for `name` and
+                        the additional names be provided in additional `name_<language_code>` properties.
+                      type: string
+                    name_en:
+                      description: Country name in english.
+                      type: string
+                  additionalProperties: true
+                  required:
+                    - code
+                    - name
+                    - name_en
+              example:
+                - code: CH
+                  name: Schweiz
+                  name_de: Schweiz
+                  name_en: Switzerland
+                  name_fr: Suisse
+                  name_it: Svizzera
+                - code: DE
+                  name: Deutschland
+                  name_en: Germany
+                - code: DK
+                  name: Danmark
+                  name_en: Denmark
+                - code: HU
+                  name: Magyarország
+                  name_en: Hungary
+                - code: NL
+                  name: Nederland
+                  name_en: Netherlands
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/localization/languages:
+    get:
+      tags:
+        - cfg
+      summary: Get all available languages.
+      operationId: getCountries
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    code:
+                      $ref: '#/components/schemas/LanguageCode'
+                    name:
+                      type: string
+                  required:
+                    - code
+                    - name
+              example:
+                - code: de_CH
+                  name: Schwiizertüütsch
+                - code: fr_CH
+                  name: Français (Suisse)
+                - code: it_CH
+                  name: Italiano (Svizzera)
+                - code: de
+                  name: Deutsch
+                - code: dk
+                  name: Dansk
+                - code: hu
+                  name: Magyar
+                - code: nl
+                  name: Nederlands
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
