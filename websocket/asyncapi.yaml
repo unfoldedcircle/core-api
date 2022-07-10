@@ -155,6 +155,7 @@ channels:
           - $ref: '#/components/messages/get_timezone_names'
           - $ref: '#/components/messages/get_localization_countries'
           - $ref: '#/components/messages/get_localization_languages'
+          - $ref: '#/components/messages/localization_languages'
           - $ref: '#/components/messages/get_network_cfg'
           - $ref: '#/components/messages/set_network_cfg'
           - $ref: '#/components/messages/get_software_update_cfg'
@@ -217,6 +218,7 @@ channels:
           - $ref: '#/components/messages/localization_cfg'
           - $ref: '#/components/messages/timezone_names'
           - $ref: '#/components/messages/localization_countries'
+          - $ref: '#/components/messages/get_localization_languages'
           - $ref: '#/components/messages/localization_languages'
           - $ref: '#/components/messages/network_cfg'
           - $ref: '#/components/messages/software_update_cfg'
@@ -505,7 +507,7 @@ components:
       x-response:
         $ref: '#/components/messages/version_info'
     version_info:
-      summary: 🔍 Version information.
+      summary: 🔍 Version information response.
       payload:
         $ref: '#/components/schemas/versionInfoMsg'
 
@@ -517,7 +519,7 @@ components:
       x-response:
         $ref: '#/components/messages/result'
     system_info:
-      summary: 👷 System information.
+      summary: 👷 System information response.
       payload:
         $ref: '#/components/schemas/systemInfoMsg'
     system_cmd:
@@ -549,7 +551,7 @@ components:
       x-response:
         $ref: '#/components/messages/factory_reset_token'
     factory_reset_token:
-      summary: Factory reset token.
+      summary: Factory reset token response.
       payload:
         $ref: '#/components/schemas/factoryResetTokenMsg'
     factory_reset:
@@ -579,7 +581,7 @@ components:
       x-response:
         $ref: '#/components/messages/configuration'
     configuration:
-      summary: 🧪 All system settings.
+      summary: 🧪 All system settings response.
       payload:
         $ref: '#/components/schemas/configurationMsg'
 
@@ -596,7 +598,7 @@ components:
       x-response:
         $ref: '#/components/messages/button_cfg'
     button_cfg:
-      summary: 🧪 Button settings.
+      summary: 🧪 Button settings response.
       payload:
         $ref: '#/components/schemas/buttonCfgMsg'
 
@@ -613,7 +615,7 @@ components:
       x-response:
         $ref: '#/components/messages/display_cfg'
     display_cfg:
-      summary: 🧪 Display settings.
+      summary: 🧪 Display settings response.
       payload:
         $ref: '#/components/schemas/displayCfgMsg'
 
@@ -630,7 +632,7 @@ components:
       x-response:
         $ref: '#/components/messages/haptic_cfg'
     haptic_cfg:
-      summary: 🧪 Haptic settings.
+      summary: 🧪 Haptic settings response.
       payload:
         $ref: '#/components/schemas/hapticCfgMsg'
 
@@ -647,7 +649,7 @@ components:
       x-response:
         $ref: '#/components/messages/localization_cfg'
     localization_cfg:
-      summary: 🧪 Localization settings.
+      summary: 🧪 Localization settings response.
       payload:
         $ref: '#/components/schemas/localizationCfgMsg'
     get_timezone_names:
@@ -657,7 +659,7 @@ components:
       x-response:
         $ref: '#/components/messages/timezone_names'
     timezone_names:
-      summary: 🧪 Available time zone names.
+      summary: 🧪 Available time zone names response.
       payload:
         $ref: '#/components/schemas/timezoneNamesMsg'
     get_localization_countries:
@@ -667,17 +669,26 @@ components:
       x-response:
         $ref: '#/components/messages/localization_countries'
     localization_countries:
-      summary: 🔍 Available localization countries.
+      summary: 🔍 Available localization countries response.
       payload:
         $ref: '#/components/schemas/localizationCountriesMsg'
     get_localization_languages:
-      summary: 🔍 Get available languages for the localization configuration.
+      summary: 🔍 Get stored translations or request available translations from the UI.
+      description: |
+        The available translations are provided from the UI application.  
+        Future UI versions might provide new or updated translations.
+
+        If this request is sent to the UI application, the response is stored in the remote-core until new information
+        is available from the UI.
+        
+        If this request is received, the stored configuration from the UI application is returned. E.g. the
+        web-configurator requires the available translations.
       payload:
         $ref: '#/components/schemas/getLocalizationLanguagesMsg'
       x-response:
         $ref: '#/components/messages/localization_languages'
     localization_languages:
-      summary: 🔍 Available localization languages.
+      summary: 🔍 Available translations response.
       payload:
         $ref: '#/components/schemas/localizationLanguagesMsg'
 
@@ -694,7 +705,7 @@ components:
       x-response:
         $ref: '#/components/messages/network_cfg'
     network_cfg:
-      summary: 🔍 Network settings.
+      summary: 🔍 Network settings response.
       payload:
         $ref: '#/components/schemas/networkCfgMsg'
 
@@ -711,7 +722,7 @@ components:
       x-response:
         $ref: '#/components/messages/software_update_cfg'
     software_update_cfg:
-      summary: 🧪 Software update settings.
+      summary: 🧪 Software update settings response.
       payload:
         $ref: '#/components/schemas/softwareUpdateCfgMsg'
 
@@ -728,7 +739,7 @@ components:
       x-response:
         $ref: '#/components/messages/power_saving_cfg'
     power_saving_cfg:
-      summary: 🧪 Power saving settings.
+      summary: 🧪 Power saving settings response.
       payload:
         $ref: '#/components/schemas/powerSavingCfgMsg'
 
@@ -745,7 +756,7 @@ components:
       x-response:
         $ref: '#/components/messages/sound_cfg'
     sound_cfg:
-      summary: 🧪 Sound settings.
+      summary: 🧪 Sound settings response.
       payload:
         $ref: '#/components/schemas/soundCfgMsg'
 
@@ -762,7 +773,7 @@ components:
       x-response:
         $ref: '#/components/messages/voice_control_cfg'
     voice_control_cfg:
-      summary: 🔍 Voice control settings.
+      summary: 🔍 Voice control settings response.
       payload:
         $ref: '#/components/schemas/voiceControlCfgMsg'
     get_voice_assistants:
@@ -772,7 +783,7 @@ components:
       x-response:
         $ref: '#/components/messages/voice_assistants'
     voice_assistants:
-      summary: 🚧 Voice assistants.
+      summary: 🚧 Voice assistants response.
       payload:
         $ref: '#/components/schemas/voiceAssistantsMsg'
 
@@ -787,7 +798,7 @@ components:
       x-response:
         $ref: '#/components/messages/entity_types'
     entity_types:
-      summary: 🧪 List of supported entity types.
+      summary: 🧪 List of supported entity types response.
       tags:
         - name: entity
       payload:
@@ -813,7 +824,7 @@ components:
       x-response:
         $ref: '#/components/messages/entities'
     entities:
-      summary: 🧪 List of configured entities.
+      summary: 🧪 List of configured entities response.
       tags:
         - name: entity
       payload:
@@ -832,7 +843,7 @@ components:
       x-response:
         $ref: '#/components/messages/available_entities'
     available_entities:
-      summary: 🧪 List of available entities.
+      summary: 🧪 List of available entities response.
       tags:
         - name: entity
       payload:
@@ -850,7 +861,7 @@ components:
       x-response:
         $ref: '#/components/messages/entity_commands'
     entity_commands:
-      summary: 🧪 Available commands of an entity.
+      summary: 🧪 Available commands of an entity response.
       tags:
         - name: entity
       payload:
@@ -866,7 +877,7 @@ components:
       x-response:
         $ref: '#/components/messages/result'
     entity:
-      summary: 🧪 Entity information
+      summary: 🧪 Entity information response.
       tags:
         - name: entity
       payload:
@@ -935,7 +946,7 @@ components:
       x-response:
         $ref: '#/components/messages/profiles'
     profiles:
-      summary: 🧪 List of available profiles.
+      summary: 🧪 List of available profiles response.
       tags:
         - name: profile
       payload:
@@ -949,7 +960,7 @@ components:
       x-response:
         $ref: '#/components/messages/profile'
     profile:
-      summary: 🧪 Profile data.
+      summary: 🧪 Profile data response.
       tags:
         - name: profile
       payload:
@@ -1028,7 +1039,7 @@ components:
       x-response:
         $ref: '#/components/messages/pages'
     pages:
-      summary: 🧪 List of defined UI pages.
+      summary: 🧪 List of defined UI pages response.
       tags:
         - name: profile
       payload:
@@ -1042,7 +1053,7 @@ components:
       x-response:
         $ref: '#/components/messages/page'
     page:
-      summary: 🧪 UI page data.
+      summary: 🧪 UI page data response.
       tags:
         - name: profile
       payload:
@@ -1097,7 +1108,7 @@ components:
       x-response:
         $ref: '#/components/messages/groups'
     groups:
-      summary: 🧪 List of defined UI groups.
+      summary: 🧪 List of defined UI groups response.
       tags:
         - name: profile
       payload:
@@ -1111,7 +1122,7 @@ components:
       x-response:
         $ref: '#/components/messages/group'
     group:
-      summary: 🧪 UI group data.
+      summary: 🧪 UI group data response.
       tags:
         - name: profile
       payload:
@@ -1209,7 +1220,7 @@ components:
       x-response:
         $ref: '#/components/messages/integration_driver_count'
     integration_driver_count:
-      summary: 🧪 Total number of registered integration drivers.
+      summary: 🧪 Total number of registered integration drivers response.
       tags:
         - name: integration
       payload:
@@ -1224,7 +1235,7 @@ components:
       x-response:
         $ref: '#/components/messages/integration_drivers'
     integration_drivers:
-      summary: 🧪 List of registered integration drivers.
+      summary: 🧪 List of registered integration drivers response.
       tags:
         - name: integration
       payload:
@@ -1248,7 +1259,7 @@ components:
       x-response:
         $ref: '#/components/messages/integration_driver'
     integration_driver:
-      summary: 🧪 Detail information of an integration driver.
+      summary: 🧪 Detail information of an integration driver response.
       tags:
         - name: integration
       payload:
@@ -1286,7 +1297,7 @@ components:
       x-response:
         $ref: '#/components/messages/integration_driver_count'
     integration_count:
-      summary: 🧪 Total number of integration instances.
+      summary: 🧪 Total number of integration instances response.
       tags:
         - name: integration
       payload:
@@ -1303,7 +1314,7 @@ components:
       x-response:
         $ref: '#/components/messages/integrations'
     integrations:
-      summary: 🧪 List of loaded integrations.
+      summary: 🧪 List of loaded integrations response.
       tags:
         - name: integration
       payload:
@@ -1328,7 +1339,7 @@ components:
       x-response:
         $ref: '#/components/messages/integration'
     integration:
-      summary: 🧪 Integration instance information.
+      summary: 🧪 Integration instance information response.
       tags:
         - name: integration
       payload:
@@ -1707,7 +1718,7 @@ components:
     factoryResetTokenMsg:
       type: object
       allOf:
-        - $ref: '#/components/schemas/commonReq'
+        - $ref: '#/components/schemas/commonResp'
         - properties:
             msg:
               type: string
@@ -1977,18 +1988,14 @@ components:
                 properties:
                   code:
                     $ref: '#/components/schemas/countryCode'
-                  name:
-                    description: |
-                      Country name in native language. For multi-lingual countries a default will be used for `name` and
-                      the additional names be provided in additional `name_<language_code>` properties.
-                    type: string
                   name_en:
-                    description: Country name in english.
+                    description: |
+                      Country name in english. Native country names will be provided in additional `name_<language_code>`
+                      properties.
                     type: string
                 additionalProperties: true
                 required:
                   - code
-                  - name
                   - name_en
           required:
             - msg
@@ -2009,17 +2016,25 @@ components:
         - $ref: '#/components/schemas/commonResp'
         - properties:
             msg_data:
-              type: array
-              items:
-                type: object
-                properties:
-                  code:
-                    $ref: '#/components/schemas/languageCode'
-                  name:
-                    type: string
-                required:
-                  - code
-                  - name
+              type: object
+              properties:
+                version:
+                  type: string
+                translations:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      code:
+                        $ref: '#/components/schemas/languageCode'
+                      name:
+                        type: string
+                    required:
+                      - code
+                      - name
+              required:
+                - version
+                - translations
           required:
             - msg
             - msg_data

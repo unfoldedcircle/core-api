@@ -1,6 +1,6 @@
 {
     "meta": {
-        "__export_time": 1656615654690,
+        "__export_time": 1657452491278,
         "__export_app": "firecamp_v2.6.1 ",
         "__export_version": 1
     },
@@ -61,7 +61,7 @@
                         {
                             "key": "Auth-Token",
                             "value": "1-2-3",
-                            "disable": false,
+                            "disable": true,
                             "type": "text"
                         }
                     ],
@@ -865,6 +865,30 @@
                         {
                             "name": "set_haptic_cfg",
                             "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_haptic_cfg\",\n  \"msg_data\": {\n        \"enabled\": false\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_localization_languages",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_localization_languages\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_localization_countries",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_localization_countries\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_localization_languages",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"localization_languages\",\n    \"msg_data\": {\n        \"translations\": [\n            {\n                \"code\": \"da_DK\",\n                \"name\": \"Dansk\"\n            },\n            {\n                \"code\": \"de_DE\",\n                \"name\": \"Deutsch\"\n            },\n            {\n                \"code\": \"de_CH\",\n                \"name\": \"Schwiizerdütsch 2\"\n            },\n            {\n                \"code\": \"en_US\",\n                \"name\": \"English (US)\"\n            },\n            {\n                \"code\": \"hu_HU\",\n                \"name\": \"Magyar\"\n            },\n            {\n                \"code\": \"nl_NL\",\n                \"name\": \"Nederlands\"\n            }\n        ],\n        \"version\": \"default\"\n    }\n}",
                             "meta": {
                                 "type": "json",
                                 "envelope": ""

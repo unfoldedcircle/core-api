@@ -2377,7 +2377,7 @@ paths:
       tags:
         - cfg
       summary: Get all available countries.
-      operationId: getCountries
+      operationId: getLocalizationCountries
       responses:
         '200':
           description: Successful operation
@@ -2390,80 +2390,88 @@ paths:
                   properties:
                     code:
                       $ref: '#/components/schemas/CountryCode'
-                    name:
-                      description: |
-                        Country name in native language. For multi-lingual countries a default will be used for `name` and
-                        the additional names be provided in additional `name_<language_code>` properties.
-                      type: string
                     name_en:
-                      description: Country name in english.
+                      description: |
+                        Country name in english. Native country names will be provided in additional `name_<language_code>`
+                        properties.
                       type: string
                   additionalProperties: true
                   required:
                     - code
-                    - name
                     - name_en
               example:
                 - code: CH
-                  name: Schweiz
                   name_de: Schweiz
                   name_en: Switzerland
                   name_fr: Suisse
                   name_it: Svizzera
                 - code: DE
-                  name: Deutschland
+                  name_de: Deutschland
                   name_en: Germany
                 - code: DK
-                  name: Danmark
+                  name_dk: Danmark
                   name_en: Denmark
                 - code: HU
-                  name: Magyarország
                   name_en: Hungary
+                  name_hu: Magyarország
                 - code: NL
-                  name: Nederland
                   name_en: Netherlands
+                  name_nl: Nederland
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-  /cfg/localization/languages:
+  /cfg/localization/translations:
     get:
       tags:
         - cfg
-      summary: Get all available languages.
-      operationId: getCountries
+      summary: Get all available translations.
+      description: |
+        The available translations are provided from the UI application.  
+        Future UI versions might provide new or updated translations.
+      operationId: getTranslations
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    code:
-                      $ref: '#/components/schemas/LanguageCode'
-                    name:
-                      type: string
-                  required:
-                    - code
-                    - name
+                type: object
+                properties:
+                  version:
+                    type: string
+                  translations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          $ref: '#/components/schemas/LanguageCode'
+                        name:
+                          type: string
+                      required:
+                        - code
+                        - name
+                required:
+                  - version
+                  - translations
               example:
-                - code: de_CH
-                  name: Schwiizertüütsch
-                - code: fr_CH
-                  name: Français (Suisse)
-                - code: it_CH
-                  name: Italiano (Svizzera)
-                - code: de
-                  name: Deutsch
-                - code: dk
-                  name: Dansk
-                - code: hu
-                  name: Magyar
-                - code: nl
-                  name: Nederlands
+                version: default
+                translations:
+                  - code: da_DK
+                    name: Dansk
+                  - code: de_DE
+                    name: Deutsch
+                  - code: de_CH
+                    name: Schwiizertüütsch
+                  - code: fr_CH
+                    name: Français (Suisse)
+                  - code: it_CH
+                    name: Italiano (Svizzera)
+                  - code: hu_HU
+                    name: Magyar
+                  - code: nl_NL
+                    name: Nederlands
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':

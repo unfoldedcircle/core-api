@@ -4212,6 +4212,46 @@
 							"response": []
 						},
 						{
+							"name": "getLocalizationCountries",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/localization/countries",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"localization",
+										"countries"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getTranslations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/localization/translations",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"localization",
+										"translations"
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "updateLocalizationSettings",
 							"request": {
 								"method": "PATCH",
