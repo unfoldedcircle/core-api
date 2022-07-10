@@ -8,7 +8,7 @@ info:
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, access tokens for the WebSocket API can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- WebSocket token refactoring: integrate with login, use a session token for shared authentication\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n- Infrared code management\n- Activity management    \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n- Infrared code management\n- Activity management    \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -26,11 +26,9 @@ tags:
     description: Public status information and health checks
   - name: auth
     description: Session authentication
-  - name: ws-token
+  - name: api-keys
     description: |
-      Access token handling for the UC WebSocket API.  
-      ⚠️ This could be refactored with the new session login!  
-      ⚠️ Do not yet implement client functionality!
+      API keys for authentication.
   - name: external-token
     description: Access token handling for external systems.
   - name: resources
@@ -205,10 +203,221 @@ paths:
                 example: 'id=; HttpOnly; Path=/; Max-Age=0; Expires=Sat, 26 Jun 2021 12:05:09 GMT'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
+  /auth/api_keys:
+    head:
+      tags:
+        - api-keys
+      summary: Get total number of available API keys.
+      operationId: getApiKeyCount
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active flag
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    get:
+      tags:
+        - api-keys
+      summary: List available API keys.
+      description: |
+        This endpoint is only intended for a management UI and not for client access. The response contains a key
+        identifier in `key_id` which is required for further operations on the API key, like disabling or revoking it or
+        adding a description.
+      operationId: getApiKeys
+      parameters:
+        - name: active
+          in: query
+          description: Filter by active flag
+          required: false
+          schema:
+            type: boolean
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeys'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - api-keys
+      summary: Create an API key for the Remote Two APIs.
+      description: |
+        The returned API key in `api_key` is only visible in this response. Afterwards it cannot be retrieved anymore!
+
+        The newly created API key is usually not yet enabled for use and must first be approved by the user on the remote.
+
+        The required scopes must be provided. They let you specify what exactly a client needs to access.
+        When the access token request is displayed to the remote user for approval, the requested scopes will be
+        displayed to them.
+
+        An error is returned if an API key already exists for the provided `name`. To issue a new API key for the same
+        name, the old token needs to be revoked first.
+      operationId: createApiKey
+      requestBody:
+        description: Client information requesting access
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyRequest'
+            example:
+              name: My integration
+              scopes:
+                - admin
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKeyResponse'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - api-keys
+      summary: Delete all API keys.
+      description: |
+        This endpoint is only intended for a management UI and not for client access. The required `key_id` parameter is
+        returned in the `GET /auth/api_keys` response.
+      operationId: deleteAllApiKeys
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/auth/api_keys/{apiKeyId}':
+    get:
+      tags:
+        - api-keys
+      summary: Get information about an API key.
+      description: |
+        The API key itself is non-retrievable. This function provides the access rights and validity of a defined API key.
+
+        This endpoint is only intended for a management UI and not for client access. The required `key_id` parameter is
+        returned in the `GET /auth/api_keys` response.
+      operationId: getApiKey
+      parameters:
+        - $ref: '#/components/parameters/api_key_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - api-keys
+      summary: Update properties of an API key.
+      operationId: updateApiKey
+      description: |
+        Activate, deactivate, rename or set validity periods of an existing API key.
+
+        Note: access scopes cannot be changed. This requires to revoke the API key and request a new one.
+
+        This endpoint is only intended for a management UI and not for client access. The required `key_id` parameter is
+        returned in the `GET /auth/api_keys` response.
+      parameters:
+        - $ref: '#/components/parameters/api_key_id'
+      requestBody:
+        description: Properties to update in the existing token.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApiKeyUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - api-keys
+      summary: Revoke an API key.
+      description: |
+        The API key will be deleted, no further access is possible.
+
+        This endpoint is only intended for a management UI and not for client access. The required `key_id` parameter is
+        returned in the `GET /auth/api_keys` response.
+      operationId: deleteApiKey
+      parameters:
+        - $ref: '#/components/parameters/api_key_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /auth/scopes:
     get:
       tags:
-        - external-token
+        - api-keys
       summary: Get available access scopes.
       description: |
         Access scopes are used to create tokens for the WebSocket API.
@@ -463,194 +672,6 @@ paths:
                 $ref: '#/components/schemas/ApiResponse'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  /auth/ws:
-    head:
-      tags:
-        - ws-token
-      summary: Get total number of available access tokens.
-      operationId: getAccessTokenCount
-      parameters:
-        - name: active
-          in: query
-          description: Filter by active flag
-          required: false
-          schema:
-            type: boolean
-      responses:
-        '200':
-          description: Successful operation
-          headers:
-            Pagination-Count:
-              description: Total number of items.
-              schema:
-                type: integer
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-    get:
-      tags:
-        - ws-token
-      summary: List WebSocket access tokens.
-      operationId: getAccessTokens
-      parameters:
-        - name: active
-          in: query
-          description: Filter by active flag
-          required: false
-          schema:
-            type: boolean
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200':
-          description: Successful operation
-          headers:
-            Pagination-Count:
-              description: Total number of items.
-              schema:
-                type: integer
-            Pagination-Limit:
-              description: Number of returned items.
-              schema:
-                type: integer
-            Pagination-Page:
-              description: Current page number. 1-based.
-              schema:
-                type: integer
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessTokens'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-    post:
-      tags:
-        - ws-token
-      summary: Create an access token for the Remote Two WebSocket API.
-      description: |
-        The returned token is usually not yet enabled for use and must first be approved by the user on the remote.
-
-        The required scopes must be provided. They let you specify what exactly a client needs to access.
-        When the access token request is displayed to the remote user for approval, the requested scopes will be
-        displayed to them.
-
-        An error is returned if a token already exists for the provided `token_id`. To issue a new token for the same
-        identifier, the old token needs to be revoked first.
-      operationId: createAccessToken
-      requestBody:
-        description: Client information requesting access
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AccessTokenRequest'
-            example:
-              token_id: 1-2-3
-              name: Web Configurator
-              scopes:
-                - admin
-        required: true
-      responses:
-        '201':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessToken'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '422':
-          $ref: '#/components/responses/Err422UnprocessableEntity'
-    delete:
-      tags:
-        - ws-token
-      summary: Delete all WebSocket access tokens.
-      operationId: deleteAllAccessTokens
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-  '/auth/ws/{tokenId}':
-    get:
-      tags:
-        - ws-token
-      summary: Get existing WebSocket access token.
-      operationId: getAccessToken
-      parameters:
-        - $ref: '#/components/parameters/token_id'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessToken'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-    patch:
-      tags:
-        - ws-token
-      summary: Update properties of a WebSocket access token.
-      operationId: updateAccessToken
-      description: |
-        Activate token, rename friendly name or set validity periods of an existing token.
-
-        Note: access scopes cannot be changed. This requires to revoke the token and request a new one.
-      parameters:
-        - $ref: '#/components/parameters/token_id'
-      requestBody:
-        description: Properties to update in the existing token.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AccessTokenUpdate'
-        required: true
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AccessToken'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-    delete:
-      tags:
-        - ws-token
-      summary: Delete a WebSocket access token.
-      description: |
-        No error is returned if the `tokenId` doesn't exist.
-      operationId: deleteAccessToken
-      parameters:
-        - $ref: '#/components/parameters/token_id'
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
   /resources:
     get:
       tags:
@@ -3483,6 +3504,13 @@ paths:
           $ref: '#/components/responses/Err500InternalServerError'
 components:
   parameters:
+    api_key_id:
+      name: apiKeyId
+      in: path
+      description: API key identification
+      required: true
+      schema:
+        $ref: '#/components/schemas/ApiKeyId'
     dock_id:
       name: dockId
       in: path
@@ -3613,6 +3641,118 @@ components:
       schema:
         $ref: '#/components/schemas/ProfilePin'
   schemas:
+    AccessTokenId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: Unique token identifier. Usually a UUID.
+    ApiKey:
+      type: object
+      properties:
+        key_id:
+          $ref: '#/components/schemas/ApiKeyId'
+        name:
+          $ref: '#/components/schemas/ApiKeyName'
+        prefix:
+          description: Prefix of the API key for identification purposes.
+          type: string
+        active:
+          type: boolean
+          description: Only activated keys are valid for API access.
+        valid_to:
+          type: string
+          format: date-time
+          description: 'Optional expiration timestamp. If not set, the API key is valid until revoked.'
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeName'
+        description:
+          $ref: '#/components/schemas/Description'
+        creation_date:
+          type: string
+          format: date-time
+    ApiKeyId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: Unique key identifier. Usually a UUID.
+    ApiKeyName:
+      type: string
+      minLength: 1
+      maxLength: 50
+      description: Friendly API key name to show in the app
+    ApiKeyRequest:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ApiKeyName'
+        scopes:
+          type: array
+          items:
+            type: string
+          description: Requested access scopes for the API key.
+        active:
+          type: boolean
+          default: false
+          description: |
+            Only activated keys are valid for API access.  
+            This might be overridden if the requestor doesn't have sufficient rights. In this case the key will not be active
+            until a user with appropriate rights will set it active. The assigned `active` state will be returned in the
+            response.
+        valid_to:
+          type: string
+          format: date-time
+          description: 'Optional expiration timestamp. If not set, the API key is valid until revoked.'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - name
+        - scopes
+    ApiKeyResponse:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ApiKeyName'
+        api_key:
+          type: string
+          description: API key.
+        active:
+          type: boolean
+          description: Only activated keys are valid for API access.
+        valid_to:
+          type: string
+          format: date-time
+          description: 'Optional expiration timestamp. If not set, the API key is valid until revoked.'
+        scopes:
+          type: array
+          items:
+            $ref: '#/components/schemas/ScopeName'
+      required:
+        - name
+        - api_key
+        - active
+        - scopes
+    ApiKeys:
+      type: array
+      items:
+        $ref: '#/components/schemas/ApiKey'
+    ApiKeyUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ApiKeyName'
+        active:
+          type: boolean
+          description: Only activated keys are valid for API access.
+        valid_to:
+          type: string
+          format: date-time
+          description: 'Optional expiration timestamp. If not set, the API key is valid until revoked.'
+        description:
+          $ref: '#/components/schemas/Description'
     AvailableEntity:
       description: Provided entity from an integration which can be configured to be used in the remote.
       type: object
@@ -3806,92 +3946,6 @@ components:
         description: Any other informative message about the external system
         url: 'ws://smart.home'
         data: 'optional: true, foo: bar, free: text'
-    AccessTokenRequest:
-      type: object
-      properties:
-        token_id:
-          type: string
-          format: '^[a-zA-Z0-9\-_]+$'
-          minLength: 1
-          maxLength: 36
-          description: |
-            Unique client identifier, used for later token management through the client and returned in the AccessToken
-            response. Using a UUID is recommended.
-        name:
-          $ref: '#/components/schemas/AccessTokenName'
-        scopes:
-          type: array
-          items:
-            type: string
-          description: Requested access scopes for the token.
-      required:
-        - token_id
-        - name
-        - scopes
-    AccessTokens:
-      type: array
-      items:
-        $ref: '#/components/schemas/AccessToken'
-    AccessToken:
-      type: object
-      properties:
-        token_id:
-          $ref: '#/components/schemas/AccessTokenId'
-        name:
-          $ref: '#/components/schemas/AccessTokenName'
-        token:
-          type: string
-          minLength: 1
-          maxLength: 256
-          description: Access token for WebSocket
-        active:
-          type: boolean
-          description: Only activated tokens are valid for WebSocket access
-        valid_from:
-          type: string
-          format: date-time
-          description: 'Optional validity start timestamp. If not set, the token is valid as soon as the `active` flag is set (this is usually done by the remote device user within the UI).'
-        valid_to:
-          type: string
-          format: date-time
-          description: 'Optional validity end timestamp. If not set, the token is valid until revoked.'
-        creation_date:
-          type: string
-          format: date-time
-        last_login:
-          type: string
-          format: date-time
-        scopes:
-          type: array
-          items:
-            $ref: '#/components/schemas/ScopeName'
-    AccessTokenUpdate:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/AccessTokenName'
-        active:
-          type: boolean
-          description: Only activated tokens are valid for WebSocket access
-        valid_from:
-          type: string
-          format: date-time
-          description: 'Optional validity start timestamp. If not set, the token is valid as soon as the `active` flag is set (this is usually done by the remote device user within the UI).'
-        valid_to:
-          type: string
-          format: date-time
-          description: 'Optional validity end timestamp. If not set, the token is valid until revoked.'
-    AccessTokenId:
-      type: string
-      format: '^[a-zA-Z0-9-_]+$'
-      minLength: 1
-      maxLength: 36
-      description: Unique token identifier. Usually a UUID.
-    AccessTokenName:
-      type: string
-      minLength: 1
-      maxLength: 50
-      description: Friendly token name to show in the app
     Description:
       type: string
       maxLength: 255

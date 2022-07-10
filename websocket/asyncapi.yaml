@@ -66,19 +66,19 @@ info:
     
     ### Authentication
 
-    Interaction with the API requires an API key.
-
-    **TODO** _describe token handling with REST API / web-configurator_
+    Interaction with the API requires an API-key or a session cookie (see login operation in REST Core-API).
     
+    Header name: `API-KEY`.
+
     ### Connection Setup
 
-    The preferred way to establish an authenticated connection is to provide the token in the header of the WebSocket
+    The preferred way to establish an authenticated connection is to provide the API-key in the header of the WebSocket
     connection.  
 
-    If the client cannot provide the token in the connection setup (e.g. a web browser), the server will send the
+    If the client cannot provide the API-key in the connection setup (e.g. a web browser), the server will send the
     `auth_required` message right after the connection is established.
 
-    - The client must reply with the `auth` message containing the token.
+    - The client must reply with the `auth` message containing the API-key.
 
       - All other messages will be ignored, until the client successfully authenticates itself.
       - The server will close the connection after a timeout.
@@ -86,7 +86,7 @@ info:
     - The server replies with the `authentication` event including the result code of the authentication.
 
       - `200`: authentication succeeded, API can be used.
-      - `401`: invalid token and the connection will be closed.
+      - `401`: invalid authentication and the connection will be closed.
 
 externalDocs:
   description: Find out more about the Remote Two
@@ -410,7 +410,7 @@ components:
   securitySchemes:
     token:
       description: |
-        The API token can be provided in header key `API-KEY`.
+        The API-key can be provided in header key `API-KEY`.
         - If this header is not provided, the server will send the `auth_required` event after connection and the client
         must authenticate with the `auth` message.
       type: httpApiKey
@@ -452,7 +452,7 @@ components:
       description: |
         The authentication result is provided in the `code` attribute:
         - `200`: success, API can be used and message requests are accepted.
-        - `401`: authentication failed, the provided token is not valid. The server will close the connection.
+        - `401`: authentication failed, the provided API-key is not valid. The server will close the connection.
       payload:
         $ref: '#/components/schemas/authMsg'
     ping:

@@ -59,9 +59,9 @@
                     "name": "Default",
                     "headers": [
                         {
-                            "key": "Auth-Token",
-                            "value": "1-2-3",
-                            "disable": true,
+                            "key": "API-KEY",
+                            "value": "BtlCEne.OWU2YzBhZjMyNmI2NDQ5YWI3N2NmMGExYWU5ZTNlNDEuZmIzOTNkM2FhOGY2NDA1N2FjNzQzNDdlOWE1YTU0OTc",
+                            "disable": false,
                             "type": "text"
                         }
                     ],
@@ -76,8 +76,8 @@
                     "name": "public",
                     "headers": [
                         {
-                            "key": "Auth-Token",
-                            "value": "1-2-3",
+                            "key": "API-KEY",
+                            "value": "BtlCEne.OWU2YzBhZjMyNmI2NDQ5YWI3N2NmMGExYWU5ZTNlNDEuZmIzOTNkM2FhOGY2NDA1N2FjNzQzNDdlOWE1YTU0OTc",
                             "disable": false,
                             "type": "text"
                         }

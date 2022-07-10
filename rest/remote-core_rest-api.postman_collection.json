@@ -96,6 +96,25 @@
 			"item": [
 				{
 					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Session cookie is returned\", function () {",
+									"    pm.expect(pm.cookies.has('id')).to.be.true;",
+									"});",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"auth": {
 							"type": "noauth"
@@ -104,7 +123,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"admin\",\n    \"password\": \"{{apiPassword}}\"\n}",
+							"raw": "{\n    \"username\": \"web-configurator\",\n    \"password\": \"{{apiPassword}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -146,6 +165,37 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "auth/scopes",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/scopes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"scopes"
+							]
+						}
+					},
+					"response": []
 				}
 			],
 			"auth": {
@@ -169,6 +219,423 @@
 							""
 						]
 					}
+				}
+			]
+		},
+		{
+			"name": "auth/api_keys",
+			"item": [
+				{
+					"name": "createApiKey: invalid scopes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Integration test\",\n  \"scopes\": [\n    \"admin\", \"admin2\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createApiKey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"pm.test(\"Response body data\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.name).to.eql(\"Me myself and I\");",
+									"    pm.expect(jsonData.active).to.eql(true);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Me myself and I\",\n  \"scopes\": [\n    \"admin\"\n  ]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getApiKeyCount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Pagination headers are present\", function () {",
+									"    pm.response.to.have.header(\"pagination-count\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys"
+							],
+							"query": [
+								{
+									"key": "active",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getApiKeys",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const jsonData = pm.response.json();",
+									"",
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Check if response is a json array\", () => {",
+									"    pm.expect(jsonData).to.be.an(\"array\");",
+									"});",
+									"",
+									"pm.test(\"Check if response array size is at least 1\", () => {",
+									"    pm.expect(Object.keys(pm.response.json()).length).to.be.above(0);",
+									"",
+									"    pm.collectionVariables.set(\"apiKeyId\", jsonData[0].key_id);",
+									"});",
+									"",
+									"pm.test(\"Pagination headers are present\", function () {",
+									"    pm.response.to.have.header(\"pagination-limit\");",
+									"    pm.response.to.have.header(\"pagination-page\");",
+									"    pm.response.to.have.header(\"pagination-count\");",
+									"});",
+									"",
+									"pm.test(\"Content-Type is present\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys?page=1&limit=10",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "active",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getApiKey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys/{{apiKeyId}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys",
+								"{{apiKeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateToken: name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Familiy administrator\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys/{{apiKeyId}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys",
+								"{{apiKeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateToken: set active",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"active\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys/{{apiKeyId}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys",
+								"{{apiKeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteApiKey: non existing",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {",
+									"    pm.response.to.have.status(404);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys/-",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys",
+								"-"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteApiKey",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys/{{apiKeyId}}",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys",
+								"{{apiKeyId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllApiKeys",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/auth/api_keys",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"api_keys"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -454,299 +921,6 @@
 								"external",
 								"{{externalSystem}}",
 								"{{extTokenID}}"
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "auth/ws - WebSocket tokens",
-			"item": [
-				{
-					"name": "createAccessToken: invalid scopes",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"token_id\": \"{{wsTokenID}}\",\n  \"name\": \"Web Configurator\",\n  \"scopes\": [\n    \"admin\", \"admin2\"\n  ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "createAccessToken",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"token_id\": \"{{wsTokenID}}\",\n  \"name\": \"Web Configurator\",\n  \"scopes\": [\n    \"admin\"\n  ]\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "updateToken: name",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"name\": \"Familiy administrator\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws",
-								"{{wsTokenID}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "updateToken: set active",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n  \"active\": true\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws",
-								"{{wsTokenID}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getToken",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws",
-								"{{wsTokenID}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteAccessToken: non existing",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws/-",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws",
-								"-"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteAccessToken",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws/{{wsTokenID}}",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws",
-								"{{wsTokenID}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getAccessTokens",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws?page=1&limit=10&active=true",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "10"
-								},
-								{
-									"key": "active",
-									"value": "true"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteAllAccessTokens",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getAccessTokenCount",
-					"request": {
-						"method": "HEAD",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/auth/ws",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"ws"
-							],
-							"query": [
-								{
-									"key": "active",
-									"value": "true",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				}
-			]
-		},
-		{
-			"name": "authentication",
-			"item": [
-				{
-					"name": "auth/scopes",
-					"protocolProfileBehavior": {
-						"disableBodyPruning": true
-					},
-					"request": {
-						"method": "GET",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/auth/scopes",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"auth",
-								"scopes"
 							]
 						}
 					},
@@ -3765,7 +3939,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/profiles?active=false",
+							"raw": "{{SERVER}}/api/profiles",
 							"host": [
 								"{{SERVER}}"
 							],
@@ -3776,7 +3950,8 @@
 							"query": [
 								{
 									"key": "active",
-									"value": "false"
+									"value": "false",
+									"disabled": true
 								}
 							]
 						}
@@ -4724,6 +4899,23 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "WebSocket",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{SERVER}}/ws",
+					"host": [
+						"{{SERVER}}"
+					],
+					"path": [
+						"ws"
+					]
+				}
+			},
+			"response": []
 		}
 	],
 	"event": [
@@ -4764,16 +4956,17 @@
 			"value": "test-1"
 		},
 		{
-			"key": "wsTokenID",
-			"value": "SET_PWD_IN_CURRENT_VALUE"
-		},
-		{
 			"key": "http_port",
 			"value": "8080"
 		},
 		{
 			"key": "https_port",
 			"value": "8443"
+		},
+		{
+			"key": "apiKeyId",
+			"value": "SET_KEY_IN_CURRENT_VALUE",
+			"type": "string"
 		}
 	]
 }

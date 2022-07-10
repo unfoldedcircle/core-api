@@ -16,5 +16,5 @@ The admin user account password needs to be configured in the Postman collection
 
 1. Open the `Remote Two Core-API` collection
 2. Select the `Variables` tab.
-3. Set the `apiPassword` and `wsTokenID` in the **CURRENT VALUE** column.  
+3. Set the `apiPassword` and `apiKeyId` in the **CURRENT VALUE** column.  
    This will keep the passwords local and won't save them in the collection or Postman cloud.
