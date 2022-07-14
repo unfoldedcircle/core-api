@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.8.3-alpha'
+  version: '0.9.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -68,12 +68,17 @@ info:
 
     Interaction with the API requires an API-key or a session cookie (see login operation in REST Core-API).
     
+    If the session cookie is sent with the WebSocket upgrade request, the connection is automatically authenticated.
+
+    #### API-key authentication
+
+    If the session based login is not possible or the client needs to use an API-key, then the preferred way to
+    establish an authenticated WebSocket connection is to provide the API-key in the header of the WebSocket
+    connection.
+
     Header name: `API-KEY`.
 
-    ### Connection Setup
-
-    The preferred way to establish an authenticated connection is to provide the API-key in the header of the WebSocket
-    connection.  
+    #### Message based authentication 
 
     If the client cannot provide the API-key in the connection setup (e.g. a web browser), the server will send the
     `auth_required` message right after the connection is established.
@@ -1629,6 +1634,12 @@ components:
             msg:
               type: string
               const: authentication
+            msg_data:
+              type: object
+              properties:
+                core:
+                  description: Core version
+                  type: string
           required:
             - msg
 

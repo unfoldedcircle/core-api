@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.8.3
+  version: 0.9.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -171,6 +171,10 @@ paths:
               schema:
                 type: string
                 example: id=abcde12345; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
