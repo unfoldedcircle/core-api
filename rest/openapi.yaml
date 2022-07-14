@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.9.1
+  version: 0.9.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2219,6 +2219,57 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CfgButtons'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/device:
+    get:
+      tags:
+        - cfg
+      summary: Get remote device settings.
+      description: |
+        The remote device settings contain the custom name of the remote.
+      operationId: getRemoteDeviceSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgRemoteDevice'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: Modify remote device settings.
+      description: |
+        Change one or multiple remote device settings.
+      operationId: updateRemoteDeviceSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgRemoteDevice'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgRemoteDevice'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -4739,6 +4790,8 @@ components:
       properties:
         button:
           $ref: '#/components/schemas/CfgButtons'
+        device:
+          $ref: '#/components/schemas/CfgRemoteDevice'
         display:
           $ref: '#/components/schemas/CfgDisplay'
         haptic:
@@ -4845,6 +4898,16 @@ components:
         - wakeup_sensitivity
         - display_off_sec
         - standby_sec
+    CfgRemoteDevice:
+      type: object
+      properties:
+        name:
+          description: Custom name of the remote
+          type: string
+          minimum: 1
+          maximum: 50
+      required:
+        - name
     CfgSoftwareUpdate:
       type: object
       properties:

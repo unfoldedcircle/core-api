@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.9.1-alpha'
+  version: '0.9.2-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -151,6 +151,8 @@ channels:
           - $ref: '#/components/messages/get_configuration'
           - $ref: '#/components/messages/get_button_cfg'
           - $ref: '#/components/messages/set_button_cfg'
+          - $ref: '#/components/messages/get_device_cfg'
+          - $ref: '#/components/messages/set_device_cfg'
           - $ref: '#/components/messages/get_display_cfg'
           - $ref: '#/components/messages/set_display_cfg'
           - $ref: '#/components/messages/get_haptic_cfg'
@@ -218,6 +220,7 @@ channels:
 #          # --- configuration handling
           - $ref: '#/components/messages/configuration'
           - $ref: '#/components/messages/button_cfg'
+          - $ref: '#/components/messages/device_cfg'
           - $ref: '#/components/messages/display_cfg'
           - $ref: '#/components/messages/haptic_cfg'
           - $ref: '#/components/messages/localization_cfg'
@@ -607,6 +610,23 @@ components:
       payload:
         $ref: '#/components/schemas/buttonCfgMsg'
 
+    get_device_cfg:
+      summary: 🔍 Get remote device settings.
+      payload:
+        $ref: '#/components/schemas/getDeviceCfgMsg'
+      x-response:
+        $ref: '#/components/messages/device_cfg'
+    set_device_cfg:
+      summary: 🔍 Modify remote device settings.
+      payload:
+        $ref: '#/components/schemas/setDeviceCfgMsg'
+      x-response:
+        $ref: '#/components/messages/device_cfg'
+    device_cfg:
+      summary: 🔍 Remote device settings response.
+      payload:
+        $ref: '#/components/schemas/deviceCfgMsg'
+
     get_display_cfg:
       summary: 🧪 Get display settings.
       payload:
@@ -668,17 +688,17 @@ components:
       payload:
         $ref: '#/components/schemas/timezoneNamesMsg'
     get_localization_countries:
-      summary: 🔍 Get available countries for the localization configuration.
+      summary: 🧪 Get available countries for the localization configuration.
       payload:
         $ref: '#/components/schemas/getLocalizationCountriesMsg'
       x-response:
         $ref: '#/components/messages/localization_countries'
     localization_countries:
-      summary: 🔍 Available localization countries response.
+      summary: 🧪 Available localization countries response.
       payload:
         $ref: '#/components/schemas/localizationCountriesMsg'
     get_localization_languages:
-      summary: 🔍 Get stored translations or request available translations from the UI.
+      summary: 🧪 Get stored translations or request available translations from the UI.
       description: |
         The available translations are provided from the UI application.  
         Future UI versions might provide new or updated translations.
@@ -693,7 +713,7 @@ components:
       x-response:
         $ref: '#/components/messages/localization_languages'
     localization_languages:
-      summary: 🔍 Available translations response.
+      summary: 🧪 Available translations response.
       payload:
         $ref: '#/components/schemas/localizationLanguagesMsg'
 
@@ -1832,6 +1852,45 @@ components:
               const: button_cfg
             msg_data:
               $ref: '#/components/schemas/cfgButton'
+          required:
+            - msg
+            - msg_data
+
+    getDeviceCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_device_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setDeviceCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_device_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgDevice'
+          required:
+            - msg
+            - msg_data
+    deviceCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: device_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgDevice'
           required:
             - msg
             - msg_data
@@ -3876,6 +3935,8 @@ components:
       properties:
         button:
           $ref: '#/components/schemas/cfgButton'
+        device:
+          $ref: '#/components/schemas/cfgDevice'
         display:
           $ref: '#/components/schemas/cfgDisplay'
         haptic:
@@ -3907,6 +3968,17 @@ components:
       required:
         - brightness
         - auto_brightness
+
+    cfgDevice:
+      type: object
+      properties:
+        name:
+          description: Custom name of the remote
+          type: string
+          minimum: 1
+          maximum: 50
+      required:
+        - name
 
     cfgDisplay:
       type: object
