@@ -871,6 +871,22 @@
                             }
                         },
                         {
+                            "name": "get_device_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_device_cfg\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "set_device_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_device_cfg\",\n  \"msg_data\": {\n        \"name\": \"Test device\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
                             "name": "get_localization_languages",
                             "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_localization_languages\"\n}",
                             "meta": {
