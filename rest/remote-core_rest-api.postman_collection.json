@@ -990,14 +990,20 @@
 							]
 						},
 						"url": {
-							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"raw": "{{SERVER}}/api/resources/:type",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"resources",
-								"TvChannelIcon"
+								":type"
+							],
+							"variable": [
+								{
+									"key": "type",
+									"value": "TvChannelIcon"
+								}
 							]
 						}
 					},
@@ -1027,14 +1033,20 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"raw": "{{SERVER}}/api/resources/:type",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"resources",
-								"TvChannelIcon"
+								":type"
+							],
+							"variable": [
+								{
+									"key": "type",
+									"value": "TvChannelIcon"
+								}
 							]
 						}
 					},
@@ -1046,14 +1058,14 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"raw": "{{SERVER}}/api/resources/:type",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"resources",
-								"TvChannelIcon"
+								":type"
 							],
 							"query": [
 								{
@@ -1066,6 +1078,12 @@
 									"value": "2",
 									"disabled": true
 								}
+							],
+							"variable": [
+								{
+									"key": "type",
+									"value": "TvChannelIcon"
+								}
 							]
 						}
 					},
@@ -1077,14 +1095,20 @@
 						"method": "HEAD",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/resources/TvChannelIcon",
+							"raw": "{{SERVER}}/api/resources/:type",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"resources",
-								"TvChannelIcon"
+								":type"
+							],
+							"variable": [
+								{
+									"key": "type",
+									"value": "TvChannelIcon"
+								}
 							]
 						}
 					},
@@ -1096,15 +1120,21 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/resources/TvChannelIcon/eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf",
+							"raw": "{{SERVER}}/api/resources/:type/eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"resources",
-								"TvChannelIcon",
+								":type",
 								"eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf"
+							],
+							"variable": [
+								{
+									"key": "type",
+									"value": "TvChannelIcon"
+								}
 							]
 						}
 					},
@@ -1116,15 +1146,21 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/resources/TvChannelIcon/0.png",
+							"raw": "{{SERVER}}/api/resources/:type/0.png",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"resources",
-								"TvChannelIcon",
+								":type",
 								"0.png"
+							],
+							"variable": [
+								{
+									"key": "type",
+									"value": "TvChannelIcon"
+								}
 							]
 						}
 					},
@@ -4325,6 +4361,72 @@
 										"api",
 										"cfg",
 										"device"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getDeviceButtonLayout",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/device/button_layout",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"device",
+										"button_layout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getDeviceIconMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/device/icon_mapping",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"device",
+										"icon_mapping"
 									]
 								}
 							},

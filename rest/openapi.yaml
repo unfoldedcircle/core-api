@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.9.2
+  version: 0.10.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n- Infrared code management\n- Activity management    \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Remote- / infrared entity & code management\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -27,8 +27,7 @@ tags:
   - name: auth
     description: Session authentication
   - name: api-keys
-    description: |
-      API keys for authentication.
+    description: API keys for authentication.
   - name: external-token
     description: Access token handling for external systems.
   - name: resources
@@ -37,6 +36,12 @@ tags:
     description: Integration handling
   - name: entities
     description: Entity handling
+  - name: activities
+    description: "\U0001F477 **work in progress**, not yet implemented! Combine multiple entities into an activity with optional on- & off-sequences, physical button mappings and a\ncustom user interface.\n"
+  - name: macros
+    description: "\U0001F477 **work in progress**, not yet implemented! Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user\ninterface.\n"
+  - name: remotes
+    description: "\U0001F477 **work in progress**, not yet implemented! Virtual remote user interface for single IR- and the like devices which can be\noperated by buttons and UI soft buttons.\n"
   - name: profiles
     description: 'User profile configuration with profiles, groups, pages'
   - name: cfg
@@ -1647,6 +1652,555 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+  /activities:
+    head:
+      tags:
+        - activities
+      summary: Get total number of activities.
+      operationId: getActivityCount
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    get:
+      tags:
+        - activities
+      summary: Get all activities.
+      description: |
+        Returns all defined activities with the given paging parameters. Use the `HEAD` operation to retrieve the total
+        number of defined activities.
+      operationId: getApiKeys
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activities'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - activities
+      summary: Create a new activity.
+      description: |
+        Create a new entity of type `activity`. An activity entity is a special internal entity without association to an
+        integration driver.
+
+        To create a new activity at least a name must be provided. The `icon`, `description` and `options.included_entities`
+        are optional and can be set later with the update command.
+
+        When setting a text in a multilingual field, like name or description, the default `en` identifier should always be
+        included.
+
+        An activity can be cloned from another activity, macro or remote-interface identifier in `clone_from`. 
+        All applicable configuration will be copied except a new activity name must be specified. The `icon` and
+        `description` fields can still be specified and will override the copied data. The `options.included_entities` is
+        ignored, additional entities can be added later with the update command.
+      operationId: createActivity
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - activities
+      summary: Delete all activities.
+      description: |
+        ⚠️ All defined activities will be irrevocably deleted!
+      operationId: deleteAllActivities
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/activities/{entityId}':
+    get:
+      tags:
+        - activities
+      summary: Get an activity.
+      description: |
+        Returns all the information required to manage an existing activity. The included entities are enriched with `name`,
+        `icon` and active state (if the entity is still available or has been removed since the activity was defined).
+      operationId: getActivity
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Update an activity.
+      operationId: updateActivity
+      description: |
+        Update one or multiple properties of an activity. The omitted properties are ignored and not deleted. To clear an
+        array simply provide an empty array.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Properties to update in the existing activity.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Delete an activity.
+      description: |
+        The given activity is irrevocably deleted.
+      operationId: deleteActivity
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /macros:
+    head:
+      tags:
+        - macros
+      summary: Get total number of macros.
+      operationId: getMacroCount
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    get:
+      tags:
+        - macros
+      summary: Get all macros.
+      description: |
+        Returns all defined macros with the given paging parameters. Use the `HEAD` operation to retrieve the total
+        number of defined macros.
+      operationId: getMacros
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Macros'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - macros
+      summary: Create a new macro.
+      description: |
+        Create a new entity of type `macro`. An macro entity is a special internal entity without association to an
+        integration driver.
+
+        To create a new macro at least a name must be provided. The `icon`, `description` and `options.included_entities`
+        are optional and can be set later with the update command.
+
+        The new macro can be cloned from another macro-entity identifier in `clone_from`. All applicable configuration will
+        be copied except a new macro name must be specified. The `icon` and `description` fields can be overridden. The 
+        `options.included_entities` is ignored, additional entities can be added later with the update command.
+
+        The `included_entities` may be omitted when creating a new macro and specified later when updating the macro.
+      operationId: createMacro
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MacroCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Macro'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - macros
+      summary: Delete all macros.
+      description: |
+        ⚠️ All defined macros will be irrevocably deleted!
+      operationId: deleteAllMacros
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/macros/{entityId}':
+    get:
+      tags:
+        - macros
+      summary: Get a macro.
+      description: |
+        Returns all the information required to manage an existing macro. The included entities are enriched with `name`,
+        `icon` and active state (if the entity is still available or has been removed since the macro was defined).
+      operationId: getMacro
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Macro'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - macros
+      summary: Update properties of a macro.
+      operationId: updateMacro
+      description: |
+        Update one or multiple properties of a macro. The omitted properties are ignored and not deleted. To clear an
+        array simply provide an empty array.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Properties to update in the existing macro.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MacroUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiKey'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - macros
+      summary: Delete a macro.
+      description: |
+        The given macro is irrevocably deleted.
+      operationId: deleteMacro
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /ui/remotes:
+    head:
+      tags:
+        - remotes
+      summary: Get total number of remote user interfaces.
+      operationId: getRemoteUiCount
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    get:
+      tags:
+        - remotes
+      summary: Get all remote user interfaces.
+      description: |
+        Returns all defined remote user interfaces with the given paging parameters. Use the `HEAD` operation to retrieve
+        the total number of defined remote user interfaces.
+      operationId: getRemoteUserInterfaces
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteInterfaces'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - remotes
+      summary: Create a new remote user interface.
+      description: |
+        A remote user interface represents a frontend for an IR (or similar) device that can be operated by buttons and UI
+        soft buttons.
+
+        To create a new remote user interface at least a name and the linked remote-entity must be provided. The `icon` and
+        `description` fields are optional and can be set later with the update command.
+
+        When setting a text in a multilingual field, like name or description, the default `en` identifier should always be
+        included.
+      operationId: createRemoteUi
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoteInterfaceCreate'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - remotes
+      summary: Delete all remote user interfaces.
+      description: |
+        ⚠️ All defined remote user interfaces will be irrevocably deleted!
+      operationId: deleteAllRemoteUi
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/ui/remotes/{uiId}':
+    get:
+      tags:
+        - remotes
+      summary: Get a remote user interface.
+      description: |
+        Returns all the information required to manage an existing remote user interface. The included entities are enriched
+        with `name`, `icon` and active state (if the entity is still available or has been removed since the remote user
+        interface was defined).
+      operationId: getRemoteUi
+      parameters:
+        - $ref: '#/components/parameters/ui_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - remotes
+      summary: Update a remote user interface.
+      operationId: updateRemoteUi
+      description: |
+        Update one or multiple properties of a remote user interface. The omitted properties are ignored and not deleted.
+        To clear an array simply provide an empty array.
+      parameters:
+        - $ref: '#/components/parameters/ui_id'
+      requestBody:
+        description: Properties to update in the existing remote user interface.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemoteInterfaceUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Delete a remote user interface.
+      description: |
+        The given remote user interface is irrevocably deleted.
+      operationId: deleteRemoteUi
+      parameters:
+        - $ref: '#/components/parameters/ui_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /profiles:
     post:
       tags:
@@ -2272,6 +2826,56 @@ paths:
                 $ref: '#/components/schemas/CfgRemoteDevice'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/device/button_layout:
+    get:
+      tags:
+        - cfg
+      summary: Get the button layouts of the device.
+      description: |
+        Meta-information about the button groups and button layouts.
+      operationId: getRemoteDeviceButtonLayoutSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceButtonLayout'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/device/icon_mapping:
+    get:
+      tags:
+        - cfg
+      summary: Get the native icon mapping of the device.
+      description: |
+        Meta-information about the native icon mappings. These are the icon identifiers prefixed with `uc:`, e.g. `uc:cool`.
+        The remaining label is mapped to a unicode number in the icon font. For `uc:cool` the mapping will be: (`cool`, `\uE91E`)
+
+        Note: the example response omits the leading backslash to avoid character substitution in the browser!
+      operationId: getRemoteDeviceIconMapping
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Label -> Unicode map
+                type: object
+                additionalProperties:
+                  type: string
+              example:
+                cool: uE91E
+                heat: uE91F
+                home: uE900
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -3638,6 +4242,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/AccessTokenId'
+    ui_id:
+      name: uiId
+      in: path
+      description: User interface identification.
+      required: true
+      schema:
+        $ref: '#/components/schemas/EntityId'
     enabled:
       name: enabled
       in: query
@@ -3702,6 +4313,229 @@ components:
       minLength: 1
       maxLength: 36
       description: Unique token identifier. Usually a UUID.
+    Activities:
+      type: array
+      items:
+        $ref: '#/components/schemas/Activity'
+    Activity:
+      description: |
+        The activity entity executes a sequence of commands and at the end displays a user interface (similar to remote entity)
+        to the user. If the entity has an off sequence, it can be turned off.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - activity
+            features:
+              description: |
+                Supported features of the activity. If the activity has an `off` sequence, it supports the common `on_off`
+                feature, otherwise only `start`.
+              type: array
+              items:
+                type: string
+                enum:
+                  - on_off
+                  - start
+            options:
+              type: object
+              properties:
+                included_entities:
+                  description: |
+                    Included entities in the activity. This object is writable from the client and persisted when saving an
+                    activity.
+
+                    Notes:
+                    - Entities can be included without being used in a sequence.  
+                      This allows to edit the activity in multiple sessions without having to reselect the desired entities.
+                    - Every used entity in a sequence must be included, otherwise the activity cannot be saved.
+                    - If the client removes an entity which is included in an activity, it must make sure to also remove all
+                      references in the activities.
+                  type: array
+                  items:
+                    description: |
+                      When saving an activity only the `entity_id` is persisted. When retrieving an activity all other fields
+                      will be retrieved from the real entities to make sure they are up to date. I.e. the entity name or icon
+                      might change between saving an activity and retrieving it again!
+                    type: object
+                    properties:
+                      entity_id:
+                        $ref: '#/components/schemas/EntityId'
+                      name:
+                        $ref: '#/components/schemas/LanguageText'
+                      icon:
+                        $ref: '#/components/schemas/IconIdentifier'
+                      available:
+                        description: |
+                          State of the entity: True = entity is available as configured entity and can be used. False = entity
+                          has been removed and must be corrected by the user.
+
+                          If an entity is no longer available then all usages in the sequences are still present in case the
+                          entity is re-configured. The execution of the on- or off-sequence will then simply skip the actions
+                          of the no longer available entity.
+                        type: boolean
+                    required:
+                      - entity_id
+                available_commands:
+                  description: |
+                    All available commands from the `included_entities` plus the special delay command. Using this list avoids
+                    retrieving the commands from each entity separately. This is a read only object and not persisted when
+                    saving an activity.
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      entity_id:
+                        $ref: '#/components/schemas/EntityId'
+                      command:
+                        type: string
+                      metadata:
+                        description: |
+                          TODO Metadata describing the available parameters of the command. Simple "button like" commands
+                          don't have any parameters, whereas e.g. a light entity can also dim the light, change color or color
+                          temperature.
+                        type: object
+                sequences:
+                  $ref: '#/components/schemas/ActivitySequences'
+                button_mapping:
+                  $ref: '#/components/schemas/DeviceButtonMappings'
+                user_interface:
+                  $ref: '#/components/schemas/ActivityUserInterface'
+              required:
+                - included_entities
+                - available_commands
+                - sequences
+                - button_mapping
+                - user_interface
+          required:
+            - options
+    ActivityId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: Activity identifier
+    ActivityRequest:
+      description: |
+        Dedicated request object to create a new activity.  
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        clone_from:
+          oneOf:
+            - type: object
+              properties:
+                activity:
+                  $ref: '#/components/schemas/EntityId'
+              required:
+                - activity
+            - type: object
+              properties:
+                macro:
+                  $ref: '#/components/schemas/EntityId'
+              required:
+                - macro
+            - type: object
+              properties:
+                remote_ui:
+                  $ref: '#/components/schemas/UiId'
+              required:
+                - remote_ui
+        options:
+          type: object
+          properties:
+            included_entities:
+              type: array
+              items:
+                type: object
+                properties:
+                  entity_id:
+                    $ref: '#/components/schemas/EntityId'
+                required:
+                  - entity_id
+          required:
+            - included_entities
+      required:
+        - name
+    ActivitySequences:
+      type: object
+      properties:
+        'on':
+          $ref: '#/components/schemas/CommandSequence'
+        'off':
+          $ref: '#/components/schemas/CommandSequence'
+    ActivityUpdate:
+      description: |
+        Dedicated request object to update an existing activity.  
+        All root properties are optional and only the provided objects are updated in the activity. Omitted objects are
+        ignored and not deleted from the activity.
+
+        The `included_entities` object must be managed by the client and is persisted when updating an activity.
+
+        Notes:
+        - Entities can be included in `included_entities` without being used in `sequences`.  
+          This allows to edit the activity in multiple sessions without having to reselect the desired entities.
+        - Every referenced entity in `sequences` must be included in `included_entities`, otherwise the activity cannot be saved.
+        - If the client removes a configured entity from the system which is included in an activity, it must make sure to
+          also remove all references in the activity. See `available` property in the included entities object when retrieving
+          a macro.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          type: object
+          properties:
+            included_entities:
+              type: array
+              items:
+                type: object
+                properties:
+                  entity_id:
+                    $ref: '#/components/schemas/EntityId'
+                required:
+                  - entity_id
+            sequences:
+              $ref: '#/components/schemas/ActivitySequences'
+            button_mapping:
+              $ref: '#/components/schemas/DeviceButtonMappings'
+            user_interface:
+              $ref: '#/components/schemas/ActivityUserInterface'
+    ActivityUserInterface:
+      type: object
+      properties:
+        pages:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                enum:
+                  - icon
+                  - text
+                  - numpad
+              icon:
+                $ref: '#/components/schemas/IconIdentifier'
+              text:
+                type: string
+              command:
+                $ref: '#/components/schemas/EntityCommand'
+              location:
+                $ref: '#/components/schemas/GridLocation'
+              size:
+                $ref: '#/components/schemas/GridItemSize'
     ApiKey:
       type: object
       properties:
@@ -3853,6 +4687,127 @@ components:
       maxLength: 36
       description: |
         Entity identifier used in an integration driver (= available entities).  
+    CommandSequence:
+      description: Sequence of commands to execute.
+      type: array
+      items:
+        oneOf:
+          - $ref: '#/components/schemas/CommandSequenceEntity'
+          - $ref: '#/components/schemas/CommandSequenceDelay'
+        discriminator:
+          propertyName: type
+          mapping:
+            command: '#/components/schemas/CommandSequenceEntity'
+            delay: '#/components/schemas/CommandSequenceDelay'
+    CommandSequenceEntity:
+      description: Entity command step in a command sequence.
+      type: object
+      properties:
+        type:
+          type: string
+        command:
+          $ref: '#/components/schemas/EntityCommand'
+      required:
+        - type
+        - command
+      example:
+        type: command
+        command:
+          entity_id: hass.main.light.living-room
+          cmd_id: 'on'
+          params:
+            brightness: 140
+    CommandSequenceDelay:
+      description: Delay step in a command sequence.
+      type: object
+      properties:
+        type:
+          type: string
+        delay:
+          type: integer
+          minimum: 1
+      required:
+        - type
+        - delay
+      example:
+        type: delay
+        delay: 100
+    DeviceButtonGroup:
+      description: Button group type.
+      type: string
+      enum:
+        - keypad
+    DeviceButtonLayout:
+      description: 'Button group definitions with layout placement, size, icon and language specific names.'
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DeviceButtonGroup'
+        grid:
+          description: Grid layout size.
+          type: object
+          properties:
+            width:
+              type: integer
+              minimum: 1
+            height:
+              type: integer
+              minimum: 1
+          required:
+            - width
+            - height
+        buttons:
+          type: array
+          items:
+            type: object
+            properties:
+              button:
+                description: Unique button identifier over all button groups.
+                type: string
+              icon:
+                $ref: '#/components/schemas/IconIdentifier'
+              name:
+                $ref: '#/components/schemas/LanguageText'
+              location:
+                $ref: '#/components/schemas/GridLocation'
+              size:
+                $ref: '#/components/schemas/GridItemSize'
+            required:
+              - button
+              - icon
+              - name
+              - location
+      required:
+        - type
+        - grid
+        - buttons
+    DeviceButtonMapping:
+      type: object
+      properties:
+        button:
+          description: Button identifier.
+          type: string
+        short_press:
+          $ref: '#/components/schemas/EntityCommand'
+        long_press:
+          $ref: '#/components/schemas/EntityCommand'
+      required:
+        - button
+    DeviceButtonMappings:
+      description: |
+        Physical button mapping to entity commands. The `entity_id` in the EntityCommand object is a required
+        property.
+      type: array
+      items:
+        $ref: '#/components/schemas/DeviceButtonMapping'
+    DeviceState:
+      type: string
+      enum:
+        - UNKNOWN
+        - CONNECTING
+        - CONNECTED
+        - DISCONNECTED
+        - ERROR
     ResourceType:
       type: string
       format: '^[a-zA-Z]+$'
@@ -4045,10 +5000,248 @@ components:
         support the various Swiss German dialects!
       additionalProperties:
         type: string
+    Macro:
+      description: |
+        The macro entity executes a sequence of commands.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - macro
+            features:
+              description: |
+                Supported features of the macro.
+              type: array
+              items:
+                type: string
+                enum:
+                  - start
+            options:
+              type: object
+              properties:
+                included_entities:
+                  description: |
+                    Included entities in the macro. This object is writable from the client and persisted when saving an
+                    macro.
+
+                    Notes:
+                    - Entities can be included without being used in a sequence.  
+                      This allows to edit the macro in multiple sessions without having to reselect the desired entities.
+                    - Every used entity in a sequence must be included, otherwise the macro cannot be saved.
+                    - If the client removes an entity which is included in an macro, it must make sure to also remove all
+                      references in the activities.
+                  type: array
+                  items:
+                    description: |
+                      When saving an macro only the `entity_id` is persisted. When retrieving an macro all other fields
+                      will be retrieved from the real entities to make sure they are up to date. I.e. the entity name or icon
+                      might change between saving an macro and retrieving it again!
+                    type: object
+                    properties:
+                      entity_id:
+                        $ref: '#/components/schemas/EntityId'
+                      name:
+                        $ref: '#/components/schemas/LanguageText'
+                      icon:
+                        $ref: '#/components/schemas/IconIdentifier'
+                      available:
+                        description: |
+                          State of the entity: True = entity is available as configured entity and can be used. False = entity
+                          has been removed and must be corrected by the user.
+
+                          If an entity is no longer available then all usages in the sequences are still present in case the
+                          entity is re-configured. The execution of the on- or off-sequence will then simply skip the actions
+                          of the no longer available entity.
+                        type: boolean
+                    required:
+                      - entity_id
+                available_commands:
+                  description: |
+                    All available commands from the `included_entities` plus the special delay command. Using this list avoids
+                    retrieving the commands from each entity separately. This is a read only object and not persisted when
+                    saving an macro.
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      entity_id:
+                        $ref: '#/components/schemas/EntityId'
+                      command:
+                        type: string
+                      metadata:
+                        description: |
+                          TODO Metadata describing the available parameters of the command. Simple "button like" commands
+                          don't have any parameters, whereas e.g. a light entity can also dim the light, change color or color
+                          temperature.
+                        type: object
+                sequence:
+                  $ref: '#/components/schemas/CommandSequence'
+              required:
+                - included_entities
+                - available_commands
+                - sequence
+          required:
+            - options
+    Macros:
+      type: array
+      items:
+        $ref: '#/components/schemas/Macro'
+    MacroCreate:
+      description: |
+        Dedicated request object to create a new macro.  
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        clone_from:
+          $ref: '#/components/schemas/EntityId'
+        options:
+          type: object
+          properties:
+            included_entities:
+              type: array
+              items:
+                type: object
+                properties:
+                  entity_id:
+                    $ref: '#/components/schemas/EntityId'
+                required:
+                  - entity_id
+          required:
+            - included_entities
+      required:
+        - name
+    MacroUpdate:
+      description: |
+        Dedicated request object to update an existing activity.  
+        All root properties are optional and only the provided objects are updated in the activity. Omitted objects are
+        ignored and not deleted from the activity.
+
+        The `included_entities` object must be managed by the client and is persisted when updating a macro.
+
+        Notes:
+        - Entities can be included in `included_entities` without being used in `sequence`.  
+          This allows to edit the macro in multiple sessions without having to reselect the desired entities.
+        - Every referenced entity in `sequence` must be included in `included_entities`, otherwise the activity cannot be saved.
+        - If the client removes a configured entity from the system which is included in a macro, it must make sure to also
+          remove all references in the macro. See `available` property in the included entities object when retrieving a macro.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          type: object
+          properties:
+            included_entities:
+              type: array
+              items:
+                type: object
+                properties:
+                  entity_id:
+                    $ref: '#/components/schemas/EntityId'
+                required:
+                  - entity_id
+            sequence:
+              $ref: '#/components/schemas/CommandSequence'
     Name:
       type: string
       minLength: 1
       maxLength: 50
+    RemoteInterface:
+      description: |
+        The remote user interface represent a remote that can be operated by buttons and UI soft buttons.
+      type: object
+      properties:
+        ui_id:
+          $ref: '#/components/schemas/UiId'
+        type:
+          description: TODO design it generic or specific for the remote interface?
+          type: string
+          enum:
+            - remote
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        available_commands:
+          description: |
+            All available commands from the `entity_id`. Using this list avoids retrieving the commands from the entity
+            separately. This is a read only object and not persisted when saving an interface.
+          type: array
+          items:
+            type: object
+            properties:
+              command:
+                type: string
+              metadata:
+                description: |
+                  TODO required for simple IR devices? Check HASS remote entity, e.g. repeat parameter etc.
+                type: object
+            required:
+              - command
+        button_mapping:
+          $ref: '#/components/schemas/DeviceButtonMappings'
+        user_interface:
+          $ref: '#/components/schemas/ActivityUserInterface'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+      required:
+        - ui_id
+        - name
+        - entity_id
+        - available_commands
+        - button_mapping
+        - user_interface
+    RemoteInterfaces:
+      type: array
+      items:
+        $ref: '#/components/schemas/RemoteInterfaces'
+    RemoteInterfaceCreate:
+      description: |
+        Dedicated request object to create a new remote interface.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+      required:
+        - name
+        - entity_id
+    RemoteInterfaceUpdate:
+      description: |
+        Dedicated request object to update an existing remote interface.  
+        All root properties are optional and only the provided objects are updated in the interface. Omitted objects are
+        ignored and not deleted from the interface.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        button_mapping:
+          $ref: '#/components/schemas/DeviceButtonMappings'
+        user_interface:
+          $ref: '#/components/schemas/ActivityUserInterface'
     Scopes:
       type: array
       items:
@@ -4113,14 +5306,6 @@ components:
         - name
         - hostname
         - port
-    DeviceState:
-      type: string
-      enum:
-        - UNKNOWN
-        - CONNECTING
-        - CONNECTED
-        - DISCONNECTED
-        - ERROR
     DriverState:
       type: string
       enum:
@@ -4265,17 +5450,27 @@ components:
       maxLength: 110
       description: Unique UC remote identifier over all entities and integrations.
     EntityCommand:
+      description: |
+        Entity command object. The `entity_id` only has to be specified if it's not already included as a parameter in the URL.
       type: object
       properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
         cmd_id:
           description: Entity specific command.
           type: string
         params:
           description: |
-            Optional command parameters as key / value pairs. See entity documentation for available parmeters.
+            Optional command parameters as key / value pairs. See entity documentation for available parameters.
           type: object
       required:
         - cmd_id
+      example:
+        entity_id: hass.main.light.living-room
+        cmd_id: 'on'
+        params:
+          hue: 180
+          saturation: 200
     EntityRequest:
       type: object
       description: |
@@ -4301,6 +5496,33 @@ components:
         - media_player
         - sensor
         - switch
+        - activity
+        - macro
+    GridItemSize:
+      description: 'Item size in the button grid. Default size if not specified: 1 x 1'
+      type: object
+      properties:
+        width:
+          type: integer
+          minimum: 1
+          default: 1
+        height:
+          type: integer
+          minimum: 1
+          default: 1
+    GridLocation:
+      description: Button placement in the grid with 0-based coordinates.
+      type: object
+      properties:
+        x:
+          type: integer
+          minimum: 0
+        'y':
+          type: integer
+          minimum: 0
+      required:
+        - x
+        - 'y'
     IntgAuthMethod:
       type: string
       description: |
@@ -4988,6 +6210,12 @@ components:
           type: string
         hw_revision:
           type: string
+    UiId:
+      type: string
+      format: '^[a-zA-Z0-9-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: Unique user interface identifier.
     VersionInfo:
       type: object
       properties:
