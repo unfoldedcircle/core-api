@@ -3074,6 +3074,806 @@
 			]
 		},
 		{
+			"name": "activities",
+			"item": [
+				{
+					"name": "getActivityCount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"pagination-count header is present\", function () {",
+									"    pm.response.to.have.header(\"pagination-count\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/activities",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getActivities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/activities?page=1&limit=100",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createActivity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} starts home office\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/activities",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createActivity Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} starts home office\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/activities",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllActivities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/activities",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getActivity",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/activities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "22d46f9b-649e-4b1b-b61b-680fa19c155c"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateActivity",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name2\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"},\n        \"options\": {\n        \"button_mapping\": [],\n        \"entity_ids\": [ \"7f9d8e22-3e94-4891-a6a2-7be5e8b06065\" ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": []\n        },\n        \"user_interface\": {\n            \"pages\": []\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/activities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "2bd4c6cb-cf20-4033-b980-50847d5c0350"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteActivity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/activities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "e026ca81-e641-41a0-b54b-7a23139bbb94"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "macros",
+			"item": [
+				{
+					"name": "getMacroCount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"pagination-count header is present\", function () {",
+									"    pm.response.to.have.header(\"pagination-count\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/macros",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getMacros",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/macros?page=1&limit=100",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createMacro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} comes home\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllMacros",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/macros",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getMacro",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/macros/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateMacro",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteMacro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/macros/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "e026ca81-e641-41a0-b54b-7a23139bbb94"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "remotes",
+			"item": [
+				{
+					"name": "getRemoteCount",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"pm.test(\"pagination-count header is present\", function () {",
+									"    pm.response.to.have.header(\"pagination-count\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRemotes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes?page=1&limit=100",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "100"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createRemote",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllRemotes",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRemote",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRemote",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteRemote",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "e026ca81-e641-41a0-b54b-7a23139bbb94"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "profiles",
 			"item": [
 				{
