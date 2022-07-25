@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.10.2
+  version: 0.10.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -39,13 +39,15 @@ tags:
       Common handling of configured entities like sending commands and modifying editable properties.  
       Entities are usually provided by integrations, except the special activity, macro and infrared-remote entities.
   - name: activities
-    description: "\U0001F477 **work in progress**! Combine multiple entities into an activity with optional on- & off-sequences, physical button mappings and a\ncustom user interface.\n"
+    description: |
+      Combine multiple entities into an activity with optional on- & off-sequences, physical button mappings and a
+      custom user interface.
   - name: macros
-    description: "\U0001F477 **work in progress**, not yet implemented! Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user\ninterface.\n"
+    description: "\U0001F477 **work in progress**, not yet fully implemented! Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user\ninterface.\n"
   - name: infrared
     description: "\U0001F477 **work in progress**, not yet implemented! Infrared code set lookup, custom IR code management and IR emitter devices.\n"
   - name: remotes
-    description: "\U0001F477 **work in progress**, not yet implemented! Customizable user interface and button mappings for remote-entities\ncontrolling single IR- and the like devices.\n"
+    description: "\U0001F477 **work in progress**, not yet fully implemented! Customizable user interface and button mappings for remote-entities\ncontrolling single IR- and the like devices.\n"
   - name: profiles
     description: 'User profile configuration with profiles, groups, pages'
   - name: cfg
@@ -1655,7 +1657,7 @@ paths:
     head:
       tags:
         - activities
-      summary: Get total number of activities.
+      summary: Get total number of activity entities.
       description: |
         The total number of available activities are returned in the `Pagination-Count` header. This allows to prepare the
         retrieval of the activities with the `GET` operation and paging parameters.
@@ -1713,7 +1715,7 @@ paths:
     post:
       tags:
         - activities
-      summary: Create a new activity.
+      summary: Create a new activity entity.
       description: |
         Create a new entity of type `activity`. An activity entity is a special internal entity without association to an
         integration driver.
@@ -1726,10 +1728,10 @@ paths:
 
         An activity can be cloned from another activity-, macro- or remote-entity identifier in `clone_from`. 
         All applicable configuration will be copied, except a new activity name must be specified. The `icon` and
-        `description` fields can still be specified and will override the copied data. The `options.included_entities` is
+        `description` fields can still be specified and will override the copied data. The `options.entity_ids` is
         not allowed when cloning data, additional entities can be added later with the `PUT` update operation.
 
-        The `included_entities` may be omitted when creating a new activity and specified later when updating the activity.
+        The `entity_ids` may be omitted when creating a new activity and specified later when updating the activity.
       operationId: createActivity
       requestBody:
         content:
@@ -1772,7 +1774,7 @@ paths:
     delete:
       tags:
         - activities
-      summary: Delete all activities.
+      summary: Delete all activity entities.
       description: |
         ⚠️ All defined activities will be irrevocably deleted!
       operationId: deleteAllActivities
@@ -1787,10 +1789,8 @@ paths:
     get:
       tags:
         - activities
-      summary: Get an activity by entity_id.
-      description: |
-        Returns all the information required to manage an existing activity. The included entities are enriched with `name`,
-        `icon` and active state (if the entity is still available or has been removed since the activity was defined).
+      summary: Get an activity by its entity_id.
+      description: "Returns all the information required to manage an existing activity. The included entities are enriched with `name`,\n`icon`, `entity_type`, available commands and if the entity is still available or has been removed since the\nactivity was defined.\n\nThe available entity commands are divided into:\n- `entity_commands`: regular entity commands as defined in the [entity documentation](https://github.com/unfoldedcircle/core-api/tree/main/doc/entities).\n   The identifier refers to the common entity command definitions, which describe all required parameters for \n   defining a command. This includes the mandatory `cmd_id` name and optional parameters.\n\n   \U0001F477 TODO endpoint to retrieve entity command definitions.\n- `simple_commands`: additional, simple dynamic commands of an entity. Like infrared code commands of a\n   remote-entity. A simple command relates directly to the `cmd_id` attribute when executing a command and there's\n   no further mapping as for _entity_commands_.\n"
       operationId: getActivity
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -1812,11 +1812,19 @@ paths:
     patch:
       tags:
         - activities
-      summary: Update an activity.
+      summary: "\U0001F477 Update an activity entity."
       operationId: updateActivity
       description: |
         Update one or multiple properties of an activity. The omitted properties are ignored and not deleted. To clear an
         array simply provide an empty array.
+
+        - Sequence- and button press commands are composed of command definitions (see description of `entity_commands` and
+          `simple_commands` in GET operation). The `entity_id` and `cmd_id` attributes are always required. The `params`
+          object is only required for `entity_commands` having parameters. 
+        - The special `"type": "delay"` command is not described in the entity command definitions and can only be used in
+          sequences.
+        - ⚠️ Only `options.button_mapping.short_press` can be defined at the moment. The `options.button_mapping.long_press`
+          is prepared in the data model, but not yet implemented!
       parameters:
         - $ref: '#/components/parameters/entity_id'
       requestBody:
@@ -1844,7 +1852,7 @@ paths:
     delete:
       tags:
         - activities
-      summary: Delete an activity.
+      summary: Delete an activity entity.
       description: |
         ⚠️ The given activity is irrevocably deleted.
       operationId: deleteActivity
@@ -1863,7 +1871,7 @@ paths:
     head:
       tags:
         - macros
-      summary: Get total number of macros.
+      summary: Get total number of macro entities.
       description: |
         The total number of available macros are returned in the `Pagination-Count` header. This allows to prepare the
         retrieval of the macros with the `GET` operation and paging parameters.
@@ -1923,7 +1931,7 @@ paths:
     post:
       tags:
         - macros
-      summary: Create a new macro.
+      summary: Create a new macro entity.
       description: |
         Create a new entity of type `macro`. An macro entity is a special internal entity without association to an
         integration driver.
@@ -1936,10 +1944,10 @@ paths:
 
         The new macro can be cloned from another macro-entity identifier in `clone_from`. All applicable configuration will
         be copied, except a new macro name must be specified. The `icon` and `description` fields can still be specified and
-        will override the copied data. The `options.included_entities` is not allowed when cloning data, additional entities
+        will override the copied data. The `options.entity_ids` is not allowed when cloning data, additional entities
         can be added later with the `PUT` update operation.
 
-        The `included_entities` may be omitted when creating a new macro and specified later when updating the macro.
+        The `entity_ids` may be omitted when creating a new macro and specified later when updating the macro.
       operationId: createMacro
       requestBody:
         content:
@@ -1982,7 +1990,7 @@ paths:
     delete:
       tags:
         - macros
-      summary: Delete all macros.
+      summary: Delete all macro entities.
       description: |
         ⚠️ All defined macros will be irrevocably deleted!
       operationId: deleteAllMacros
@@ -1997,10 +2005,11 @@ paths:
     get:
       tags:
         - macros
-      summary: Get a macro by entity_id.
+      summary: Get a macro by its entity_id.
       description: |
         Returns all the information required to manage an existing macro. The included entities are enriched with `name`,
-        `icon` and active state (if the entity is still available or has been removed since the macro was defined).
+        `icon`, `entity_type`, available commands and if the entity is still available or has been removed since the
+        macro was defined.
       operationId: getMacro
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -2022,7 +2031,7 @@ paths:
     patch:
       tags:
         - macros
-      summary: Update a macro.
+      summary: Update a macro entity.
       operationId: updateMacro
       description: |
         Update one or multiple properties of a macro. The omitted properties are ignored and not deleted. To clear an
@@ -2042,7 +2051,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiKey'
+                $ref: '#/components/schemas/Macro'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2054,7 +2063,7 @@ paths:
     delete:
       tags:
         - macros
-      summary: Delete a macro.
+      summary: Delete a macro entity.
       description: |
         ⚠️ The given macro is irrevocably deleted.
       operationId: deleteMacro
@@ -2075,12 +2084,13 @@ paths:
         - infrared
       summary: Search supported infrared device manufacturers.
       description: |
-        TODO.
+        Device manufacturer search. The returned manufacturer identification will be used for the manufacturer specific IR
+        code set search with `/ir/codes/manufacturers/{manufacturerId}`.
       operationId: searchIrDeviceManufacturers
       parameters:
         - name: q
           in: query
-          description: Manufacturer query
+          description: Manufacturer name query
           required: true
           schema:
             type: string
@@ -2107,9 +2117,22 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      description: Manufacturer identification
+                      type: string
+                    name:
+                      description: Manufacturer name
+                      type: string
+                  required:
+                    - id
+                    - name
+              example:
+                - id: lg
+                  name: LG
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2120,11 +2143,12 @@ paths:
         - infrared
       summary: Search for infrared device code sets by manufacturer to create a remote entity.
       description: |
-        TODO.
+        Searching without the optional device query will return the generic manufacturer IR code sets.
       operationId: searchInfraredDevice
       parameters:
         - name: manufacturerId
           in: path
+          description: Manufacturer identification from search
           required: true
           schema:
             type: string
@@ -2155,9 +2179,30 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      description: Code set identifier
+                      type: string
+                    name:
+                      description: Device name
+                      type: string
+                  required:
+                    - id
+                    - name
+              example:
+                - id: 1
+                  name: Generic TV 1
+                - id: 2
+                  name: Generic TV 2
+                - id: 3
+                  name: Generic TV 3
+                - id: 4
+                  name: Generic Projector
+                - id: 5
+                  name: Generic BluRay Player
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2168,7 +2213,7 @@ paths:
         - infrared
       summary: Retrieve IR codeset command information for testing IR commands.
       description: |
-        TODO.
+        Returns all command identifiers of a given manufacturer code set.
       operationId: getManufacturerCodeSet
       parameters:
         - name: manufacturerId
@@ -2184,25 +2229,42 @@ paths:
       responses:
         '200':
           description: Successful operation
-          headers:
-            Pagination-Count:
-              description: Total number of items.
-              schema:
-                type: integer
-            Pagination-Limit:
-              description: Number of returned items.
-              schema:
-                type: integer
-            Pagination-Page:
-              description: Current page number. 1-based.
-              schema:
-                type: integer
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                type: array
+                items:
+                  type: string
+              example:
+                - POWER_ON
+                - POWER_OFF
+                - POWER_TOGGLE
+                - VOLUME_UP
+                - VOLUME_DOWN
+                - MUTE
+                - CHANNEL_UP
+                - CHANNEL_DOWN
+                - DPAD_LEFT
+                - DPAD_RIGHT
+                - DPAD_UP
+                - DPAD_DOWN
+                - ENTER
+                - OSD
+                - SETUP
+                - NUMPAD_0
+                - NUMPAD_1
+                - NUMPAD_2
+                - NUMPAD_3
+                - NUMPAD_4
+                - NUMPAD_5
+                - NUMPAD_6
+                - NUMPAD_7
+                - NUMPAD_8
+                - NUMPAD_9
+                - HDMI_1
+                - HDMI_2
+                - HDMI_3
+                - HDMI_4
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2524,7 +2586,7 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  /remotes/entities:
+  /remotes:
     head:
       tags:
         - remotes
@@ -2630,7 +2692,7 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-  '/remotes/entities/{entityId}':
+  '/remotes/{entityId}':
     get:
       tags:
         - remotes
@@ -2705,11 +2767,11 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/remotes/entities/{entityId}/ui':
+  '/remotes/{entityId}/ui':
     get:
       tags:
         - remotes
-      summary: Get a remote user interface.
+      summary: "\U0001F6A7 Get a remote user interface. Might be refactored into base endpoint as in activity entity!"
       description: |
         Returns all the information required to manage an existing remote user interface. The included entities are enriched
         with `name`, `icon` and active state (if the entity is still available or has been removed since the remote user
@@ -2735,7 +2797,7 @@ paths:
     patch:
       tags:
         - remotes
-      summary: Update a remote user interface.
+      summary: "\U0001F6A7 Update a remote user interface. Might be refactored into base endpoint as in activity entity!"
       operationId: updateRemoteUi
       description: |
         Update one or multiple properties of a remote user interface. The omitted properties are ignored and not deleted.
@@ -2767,7 +2829,7 @@ paths:
     delete:
       tags:
         - remotes
-      summary: Reset a remote user interface to its default state.
+      summary: "\U0001F6A7 Reset a remote user interface to its default state. Might be refactored into base endpoint as in activity entity!"
       description: |
         The customization of the remote user interface is irrevocably deleted.
       operationId: deleteRemoteUi
@@ -3510,6 +3572,117 @@ paths:
                 $ref: '#/components/schemas/CfgDisplay'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/entity/commands:
+    get:
+      tags:
+        - cfg
+      summary: Get entity command definitions.
+      description: |
+        Meta-information about the entity commands.
+      operationId: getEntityCommandMetadata
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntityCommandMetadata'
+              example:
+                - id: button.press
+                  cmd_id: press
+                  name:
+                    en: Press
+                    de: Betätigen
+                - id: switch.on
+                  cmd_id: 'on'
+                  name:
+                    en: 'On'
+                    de: Ein
+                - id: switch.off
+                  cmd_id: 'off'
+                  name:
+                    en: 'Off'
+                    de: Aus
+                - id: switch.toggle
+                  cmd_id: toggle
+                  name:
+                    en: Toggle
+                    de: Umschalten
+                - id: light.on
+                  cmd_id: 'on'
+                  name:
+                    en: Turn on
+                    de: Einschalten
+                - id: light.off
+                  cmd_id: 'off'
+                  name:
+                    en: Turn off
+                    de: Ausschalten
+                - id: light.toggle
+                  cmd_id: toggle
+                  name:
+                    en: Toggle state
+                    de: Umschalten
+                - id: light.brightness
+                  cmd_id: 'on'
+                  name:
+                    en: Set brightness
+                    de: Setze Helligkeit
+                  params:
+                    - name:
+                        en: brightness
+                        de: Helligkeit
+                      param: brightness
+                      type: int
+                      min: 0
+                      max: 100
+                      step: 1
+                      unit: '%'
+                - id: light.color_temperature
+                  cmd_id: 'on'
+                  name:
+                    en: Set color temperature
+                    de: Setze Farbtemperatur
+                  params:
+                    - name:
+                        en: Color temperature
+                        de: Farbtemperatur
+                      param: color_temperature
+                      type: int
+                      min: 0
+                      max: 100
+                      step: 1
+                      unit: '%'
+                - id: light.color
+                  cmd_id: 'on'
+                  name:
+                    en: Set color
+                    de: Setze Farbe
+                  params:
+                    - name:
+                        en: Hue
+                        de: Farbton
+                      param: hue
+                      type: int
+                      min: 0
+                      max: 360
+                      step: 1
+                      unit: °
+                    - name:
+                        en: saturation
+                        de: Farbsättigung
+                      param: saturation
+                      type: int
+                      min: 0
+                      max: 100
+                      step: 1
+                      unit: '%'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -4965,9 +5138,9 @@ components:
                         $ref: '#/components/schemas/IconIdentifier'
                       entity_commands:
                         description: |
-                          Supported entity commands. These command identifiers refer to the common entity command definitions
-                          description all required parameters to set for calling the entity command like `cmd_id` and optional
-                          parameters.
+                          Supported entity command identifiers. A command identifier refers to the common entity command
+                          definitions, which describe all required parameters to set for calling the entity command. This
+                          includes the mandatory `cmd_id` attribute and optional parameters.
                         type: array
                         items:
                           type: string
@@ -5071,7 +5244,7 @@ components:
                       items:
                         $ref: '#/components/schemas/EntityId'
                   required:
-                    - included_entities
+                    - entity_ids
       required:
         - name
     ActivitySequences:
@@ -5141,22 +5314,108 @@ components:
                 $ref: '#/components/schemas/GridLocation'
               size:
                 $ref: '#/components/schemas/GridItemSize'
+    EntityCmdParamBool:
+      type: object
+      description: Boolean value parameter.
+    EntityCmdParamInt:
+      type: object
+      description: Integer value parameter with optional limits.
+      properties:
+        min:
+          description: Minimal allowed value (inclusive).
+          type: integer
+          default: 0
+        max:
+          description: Maximal allowed value (inclusive).
+          type: integer
+        step:
+          description: Step size between values.
+          type: integer
+          default: 1
+        unit:
+          description: Optional unit label of the value.
+          type: string
+      example:
+        min: 0
+        max: 100
+        step: 1
+        unit: '%'
+    EntityCmdParamRegex:
+      type: object
+      description: Text value parameter with optional regex validation.
+      properties:
+        regex:
+          description: Validation regex.
+          type: string
+    EntityCmdParamEnum:
+      type: object
+      description: Enumeration parameter. Only the defined values are allowed as parameter value.
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+      required:
+        - values
+      example:
+        values:
+          - Option 1
+          - Option 2
+          - Option 3
     EntityCommandMetadata:
       type: object
       properties:
-        entity_id:
-          $ref: '#/components/schemas/EntityId'
-        cmd_id:
-          description: Entity specific command.
+        id:
+          description: Entity command identifier
           type: string
-        parameters:
+        cmd_id:
+          description: Entity command.
+          type: string
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        params:
           description: |
-            TODO Metadata describing the available parameters of the command. Simple "button like" commands
+            Metadata describing the optional parameters of the command. Simple "button like" commands
             don't have any parameters, whereas e.g. a light entity can also dim the light, change color or color
             temperature.
-          type: object
+          type: array
+          items:
+            type: object
+            allOf:
+              - properties:
+                  name:
+                    $ref: '#/components/schemas/LanguageText'
+                  param:
+                    description: Parameter name.
+                    type: string
+                  type:
+                    description: Parameter type.
+                    type: string
+                    enum:
+                      - int
+                      - bool
+                      - regex
+                      - enum
+                required:
+                  - name
+                  - param
+                  - type
+              - oneOf:
+                  - $ref: '#/components/schemas/EntityCmdParamInt'
+                  - $ref: '#/components/schemas/EntityCmdParamBool'
+                  - $ref: '#/components/schemas/EntityCmdParamRegex'
+                  - $ref: '#/components/schemas/EntityCmdParamEnum'
+                discriminator:
+                  propertyName: type
+                  mapping:
+                    int: '#/components/schemas/EntityCmdParamInt'
+                    bool: '#/components/schemas/EntityCmdParamBool'
+                    regex: '#/components/schemas/EntityCmdParamRegex'
+                    enum: '#/components/schemas/EntityCmdParamEnum'
       required:
+        - id
         - cmd_id
+        - name
     ApiKey:
       type: object
       properties:
@@ -5677,9 +5936,9 @@ components:
                         $ref: '#/components/schemas/IconIdentifier'
                       entity_commands:
                         description: |
-                          Supported entity commands. These command identifiers refer to the common entity command definitions
-                          description all required parameters to set for calling the entity command like `cmd_id` and optional
-                          parameters.
+                          Supported entity command identifiers. A command identifier refers to the common entity command
+                          definitions, which describe all required parameters to set for calling the entity command. This
+                          includes the mandatory `cmd_id` attribute and optional parameters.
                         type: array
                         items:
                           type: string
@@ -5740,7 +5999,7 @@ components:
                       items:
                         $ref: '#/components/schemas/EntityId'
                   required:
-                    - included_entities
+                    - entity_ids
       required:
         - name
     MacroOverview:
@@ -5775,16 +6034,16 @@ components:
                   $ref: '#/components/schemas/CommandSequence'
     MacroUpdate:
       description: |
-        Dedicated request object to update an existing activity.  
-        All root properties are optional and only the provided objects are updated in the activity. Omitted objects are
-        ignored and not deleted from the activity.
+        Dedicated request object to update an existing macro.  
+        All root properties are optional and only the provided objects are updated in the macro. Omitted objects are
+        ignored and not deleted from the macro.
 
         The `entity_ids` object must be managed by the client and is persisted when updating a macro.
 
         Notes:
         - Entities can be included in `entity_ids` without being used in `sequence`.  
           This allows to edit the macro in multiple sessions without having to reselect the desired entities.
-        - Every referenced entity in `sequence` must be included in `entity_ids`, otherwise the activity cannot be saved.
+        - Every referenced entity in `sequence` must be included in `entity_ids`, otherwise the macro cannot be saved.
         - If the client removes a configured entity from the system which is included in a macro, it must make sure to also
           remove all references in the macro. See `available` property in the included entities object when retrieving a macro.
       type: object
@@ -5826,13 +6085,10 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         entity_id:
           $ref: '#/components/schemas/EntityId'
-        available_commands:
-          description: |
-            All available commands from the `entity_id`. Using this list avoids retrieving the commands from the entity
-            separately. This is a read only object and not persisted when saving an interface.
+        simple_commands:
           type: array
           items:
-            $ref: '#/components/schemas/EntityCommandMetadata'
+            type: string
         button_mapping:
           $ref: '#/components/schemas/DeviceButtonMappings'
         user_interface:
@@ -5843,7 +6099,7 @@ components:
         - ui_id
         - name
         - entity_id
-        - available_commands
+        - simple_commands
         - button_mapping
         - user_interface
     RemoteInterfaces:
@@ -6089,7 +6345,7 @@ components:
       format: '^[a-zA-Z0-9-_\.]+$'
       minLength: 5
       maxLength: 110
-      description: Unique UC remote identifier over all entities and integrations.
+      description: Unique UC Remote Two identifier over all entities and integrations.
     EntityCommand:
       description: |
         Entity command object. The `entity_id` only has to be specified if it's not already included as a parameter in the URL.
