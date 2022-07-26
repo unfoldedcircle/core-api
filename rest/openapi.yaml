@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.10.3
+  version: 0.10.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3629,7 +3629,7 @@ paths:
                   name:
                     en: Toggle state
                     de: Umschalten
-                - id: light.brightness
+                - id: light.dim
                   cmd_id: 'on'
                   name:
                     en: Set brightness
@@ -5136,6 +5136,16 @@ components:
                         $ref: '#/components/schemas/LanguageText'
                       icon:
                         $ref: '#/components/schemas/IconIdentifier'
+                      integration:
+                        description: |
+                          Optional integration information. Regular entities will have at least the integration name. Special
+                          entities like activities and macros might omit the integration object.
+                        type: object
+                        properties:
+                          name:
+                            $ref: '#/components/schemas/LanguageText'
+                          icon:
+                            $ref: '#/components/schemas/IconIdentifier'
                       entity_commands:
                         description: |
                           Supported entity command identifiers. A command identifier refers to the common entity command
@@ -5317,20 +5327,21 @@ components:
     EntityCmdParamBool:
       type: object
       description: Boolean value parameter.
-    EntityCmdParamInt:
+    EntityCmdParamNumber:
       type: object
-      description: Integer value parameter with optional limits.
+      description: |
+        Number value parameter with optional limits.   
       properties:
         min:
           description: Minimal allowed value (inclusive).
-          type: integer
+          type: number
           default: 0
         max:
           description: Maximal allowed value (inclusive).
-          type: integer
+          type: number
         step:
           description: Step size between values.
-          type: integer
+          type: number
           default: 1
         unit:
           description: Optional unit label of the value.
@@ -5392,7 +5403,7 @@ components:
                     description: Parameter type.
                     type: string
                     enum:
-                      - int
+                      - number
                       - bool
                       - regex
                       - enum
@@ -5401,14 +5412,14 @@ components:
                   - param
                   - type
               - oneOf:
-                  - $ref: '#/components/schemas/EntityCmdParamInt'
+                  - $ref: '#/components/schemas/EntityCmdParamNumber'
                   - $ref: '#/components/schemas/EntityCmdParamBool'
                   - $ref: '#/components/schemas/EntityCmdParamRegex'
                   - $ref: '#/components/schemas/EntityCmdParamEnum'
                 discriminator:
                   propertyName: type
                   mapping:
-                    int: '#/components/schemas/EntityCmdParamInt'
+                    number: '#/components/schemas/EntityCmdParamNumber'
                     bool: '#/components/schemas/EntityCmdParamBool'
                     regex: '#/components/schemas/EntityCmdParamRegex'
                     enum: '#/components/schemas/EntityCmdParamEnum'
@@ -5934,6 +5945,16 @@ components:
                         $ref: '#/components/schemas/LanguageText'
                       icon:
                         $ref: '#/components/schemas/IconIdentifier'
+                      integration:
+                        description: |
+                          Optional integration information. Regular entities will have at least the integration name. Special
+                          entities like activities and macros might omit the integration object.
+                        type: object
+                        properties:
+                          name:
+                            $ref: '#/components/schemas/LanguageText'
+                          icon:
+                            $ref: '#/components/schemas/IconIdentifier'
                       entity_commands:
                         description: |
                           Supported entity command identifiers. A command identifier refers to the common entity command
