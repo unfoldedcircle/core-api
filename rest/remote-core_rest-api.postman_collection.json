@@ -3962,7 +3962,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6423,6 +6423,70 @@
 						}
 					},
 					"response": []
+				}
+			]
+		},
+		{
+			"name": "ir",
+			"item": [
+				{
+					"name": "codes",
+					"item": [
+						{
+							"name": "manufacturers",
+							"item": [
+								{
+									"name": "search",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/manufacturers?q=lucky",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"manufacturers"
+											],
+											"query": [
+												{
+													"key": "q",
+													"value": "lucky"
+												},
+												{
+													"key": "page",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "100",
+													"disabled": true
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						}
+					]
 				}
 			]
 		},
