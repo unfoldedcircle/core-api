@@ -3302,7 +3302,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name2\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"},\n        \"options\": {\n        \"button_mapping\": [],\n        \"entity_ids\": [ \"7f9d8e22-3e94-4891-a6a2-7be5e8b06065\" ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": []\n        },\n        \"user_interface\": {\n            \"pages\": []\n        }\n    }\n}",
+							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"button_mapping\": [\n            {\n                \"button\": \"PLAY\",\n                \"short_press\": {\n                    \"entity_id\": \"1-2-3\",\n                    \"cmd_id\": \"play\"\n                }\n            },\n            {\n                \"button\": \"PAUSE\",\n                \"short_press\": {\n                    \"entity_id\": \"1-2-3\",\n                    \"cmd_id\": \"pause\"\n                }\n            }\n        ],\n        \"entity_ids\": [\n            \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"sequence_type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"foobar\",\n                        \"cmd_id\": \"stop\"\n                    }\n                }\n            ]\n        },\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"type\": \"icon\",\n                    \"command\": {\n                        \"entity_id\": \"bar\",\n                        \"cmd_id\": \"do_something\"\n                    },\n                    \"location\": {\n                        \"x\": 2,\n                        \"y\": 0\n                    }\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3492,6 +3492,94 @@
 					"response": []
 				},
 				{
+					"name": "createMacro with entities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} comes home\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [ \"88567410-e60a-496d-9e2f-53abd2eba81e\" ]\n    }\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createMacro clone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} comes home\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"clone_from\": \"88567410-e60a-496d-9e2f-53abd2eba81e\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "deleteAllMacros",
 					"event": [
 						{
@@ -3540,7 +3628,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "{{light_entity_id}}"
+									"value": "1fc7218f-1746-459e-a741-f568b3135d21"
 								}
 							]
 						}
@@ -3554,7 +3642,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3575,6 +3663,74 @@
 								{
 									"key": "entityId",
 									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateMacro sequence",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"sequence\": [\n            {\n                \"sequence_type\": \"command\",\n                \"command\": {\n                    \"entity_id\": \"foobar\",\n                    \"cmd_id\": \"stop\"\n                }\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "1fc7218f-1746-459e-a741-f568b3135d21"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateMacro included_entities",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\"88567410-e60a-496d-9e2f-53abd2eba81e\"]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "1fc7218f-1746-459e-a741-f568b3135d21"
 								}
 							]
 						}
@@ -3792,7 +3948,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "{{light_entity_id}}"
+									"value": "2e9615e4-3cdc-406d-8674-6103ffa74fc3"
 								}
 							]
 						}
@@ -3826,7 +3982,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "{{light_entity_id}}"
+									"value": "2e9615e4-3cdc-406d-8674-6103ffa74fc3"
 								}
 							]
 						}
@@ -5194,6 +5350,39 @@
 										"cfg",
 										"device",
 										"button_layout"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getEntityCommandMetadata",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/entity/commands",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"entity",
+										"commands"
 									]
 								}
 							},

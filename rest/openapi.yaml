@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.10.4
+  version: 0.10.5
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -43,7 +43,9 @@ tags:
       Combine multiple entities into an activity with optional on- & off-sequences, physical button mappings and a
       custom user interface.
   - name: macros
-    description: "\U0001F477 **work in progress**, not yet fully implemented! Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user\ninterface.\n"
+    description: |
+      Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user
+      interface.
   - name: infrared
     description: "\U0001F477 **work in progress**, not yet implemented! Infrared code set lookup, custom IR code management and IR emitter devices.\n"
   - name: remotes
@@ -1812,7 +1814,7 @@ paths:
     patch:
       tags:
         - activities
-      summary: "\U0001F477 Update an activity entity."
+      summary: Update an activity entity.
       operationId: updateActivity
       description: |
         Update one or multiple properties of an activity. The omitted properties are ignored and not deleted. To clear an
@@ -2591,7 +2593,10 @@ paths:
       tags:
         - remotes
       summary: Get total number of infrared remote entities.
-      operationId: getInfraredEntityCount
+      description: |
+        The total number of available remotes are returned in the `Pagination-Count` header. This allows to prepare the
+        retrieval of the remotes with the `GET` operation and paging parameters.
+      operationId: getRemoteCount
       responses:
         '200':
           description: Successful operation
@@ -2637,9 +2642,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                $ref: '#/components/schemas/Remotes'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2649,17 +2652,51 @@ paths:
     post:
       tags:
         - remotes
-      summary: Create a new infrared remote entity with a manufacturer IR code set or an empty custom code set.
+      summary: "\U0001F477 Create a new infrared remote entity with a manufacturer IR code set or an empty custom code set."
       description: |
-        TODO.
-      operationId: createInfraredEntity
+        Create a new entity of type `remote`. An remote entity is a special internal entity without association to an
+        integration driver.
+
+        To create a new remote at least a name must be provided. If no manufacturer infrared code set is specified in
+        `options.codeset_id`, a new custom code set is automatically created for the user to manually specify or learn the
+        codes.  
+        The `icon` and `description` properties are optional and can be set later with the `PUT` update operation.
+
+        When setting a text in a multilingual field, like name or description, the default `en` identifier should always be
+        included.
+
+        The new remote can be cloned from another remote-entity identifier in `clone_from`. All applicable configuration
+        will be copied, except a new remote name must be specified. The `icon` and `description` fields can still be
+        specified and will override the copied data. The `options.codeset_id` is not allowed when cloning data.
+      operationId: createRemote
       requestBody:
         content:
           application/json:
             schema:
-              type: string
-              enum:
-                - TODO
+              $ref: '#/components/schemas/RemoteCreate'
+            examples:
+              create with code set:
+                value:
+                  name:
+                    en: My new remote
+                  options:
+                    codeset_id: ir.manufacturer.123
+              crate with custom code set:
+                value:
+                  name:
+                    en: My custom remote
+              'remote with icon, description and custom code set':
+                value:
+                  name:
+                    en: My custom remote
+                  icon: 'uc:movie'
+                  description:
+                    en: Testing the custom code set feature
+              clone:
+                value:
+                  name:
+                    en: My cloned remote
+                  clone_from: uc.main.remote.my-other-remote
         required: true
       responses:
         '201':
@@ -2667,9 +2704,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                $ref: '#/components/schemas/Remote'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2684,7 +2719,7 @@ paths:
       summary: Delete all infrared remote entities.
       description: |
         ⚠️ All defined infrared entities will be irrevocably deleted!
-      operationId: deleteAllInfraredEntities
+      operationId: deleteAllRemotes
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -2696,10 +2731,10 @@ paths:
     get:
       tags:
         - remotes
-      summary: Get an infrared remote entity.
+      summary: Get an infrared remote entity by its entity_id.
       description: |
-        TODO.
-      operationId: getInfraredEntity
+        Returns all the information required to manage an existing remote.
+      operationId: getRemote
       parameters:
         - $ref: '#/components/parameters/entity_id'
       responses:
@@ -2708,9 +2743,9 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                $ref: '#/components/schemas/Remote'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2720,8 +2755,8 @@ paths:
     patch:
       tags:
         - remotes
-      summary: Update an infrared remote entity.
-      operationId: updateInfraredEntity
+      summary: "\U0001F477 Update an infrared remote entity."
+      operationId: updateRemote
       description: |
         Update one or multiple properties of an infrared entity. The omitted properties are ignored and not deleted.
         To clear an array simply provide an empty array.
@@ -2732,7 +2767,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RemoteInterfaceUpdate'
+              $ref: '#/components/schemas/RemoteUpdate'
         required: true
       responses:
         '200':
@@ -2755,7 +2790,7 @@ paths:
       summary: Delete an infrared remote entity.
       description: |
         The given infrared entity is irrevocably deleted.
-      operationId: deleteInfraredEntity
+      operationId: deleteRemote
       parameters:
         - $ref: '#/components/parameters/entity_id'
       responses:
@@ -2767,16 +2802,14 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/remotes/{entityId}/ui':
+  '/remotes/{entityId}/ir':
     get:
       tags:
         - remotes
-      summary: "\U0001F6A7 Get a remote user interface. Might be refactored into base endpoint as in activity entity!"
+      summary: "\U0001F477 Get the infrared dataset of the remote-entity."
       description: |
-        Returns all the information required to manage an existing remote user interface. The included entities are enriched
-        with `name`, `icon` and active state (if the entity is still available or has been removed since the remote user
-        interface was defined).
-      operationId: getRemoteUi
+        Returns all the information required to manage the infrared dataset.
+      operationId: getRemoteIrDataSet
       parameters:
         - $ref: '#/components/parameters/entity_id'
       responses:
@@ -2785,7 +2818,33 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteInterface'
+                $ref: '#/components/schemas/RemoteIrDataSet'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/ir/{cmdId}':
+    get:
+      tags:
+        - remotes
+      summary: "\U0001F477 Gets an infrared code in the codeset."
+      description: |
+        Returns the details of a given infrared command.
+      operationId: getRemoteIrCode
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/cmd_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteIrCode'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2797,19 +2856,16 @@ paths:
     patch:
       tags:
         - remotes
-      summary: "\U0001F6A7 Update a remote user interface. Might be refactored into base endpoint as in activity entity!"
-      operationId: updateRemoteUi
-      description: |
-        Update one or multiple properties of a remote user interface. The omitted properties are ignored and not deleted.
-        To clear an array simply provide an empty array.
+      summary: "\U0001F477 Update an infrared command in the codeset."
+      operationId: updateRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/cmd_id'
       requestBody:
-        description: Properties to update in the existing remote user interface.
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RemoteInterfaceUpdate'
+              $ref: '#/components/schemas/RemoteIrCode'
         required: true
       responses:
         '200':
@@ -2817,7 +2873,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteInterface'
+                $ref: '#/components/schemas/RemoteIrCode'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2829,15 +2885,16 @@ paths:
     delete:
       tags:
         - remotes
-      summary: "\U0001F6A7 Reset a remote user interface to its default state. Might be refactored into base endpoint as in activity entity!"
-      description: |
-        The customization of the remote user interface is irrevocably deleted.
-      operationId: deleteRemoteUi
+      summary: "\U0001F477 Delete a custom ir code or reset a modified manufacturer code in the codeset."
+      operationId: deleteOrResetRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/cmd_id'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -4926,6 +4983,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/ApiKeyId'
+    cmd_id:
+      name: cmdId
+      in: path
+      description: Command identification.
+      required: true
+      schema:
+        $ref: '#/components/schemas/SimpleId'
     dock_id:
       name: dockId
       in: path
@@ -5110,70 +5174,7 @@ components:
                   type: boolean
                   default: true
                 included_entities:
-                  description: |
-                    Included entities in the activity. This object is writable from the client and persisted when saving an
-                    activity.
-
-                    Notes:
-                    - Entities can be included without being used in a sequence.  
-                      This allows to edit the activity in multiple sessions without having to reselect the desired entities.
-                    - Every used entity in a sequence must be included, otherwise the activity cannot be saved.
-                    - If the client removes an entity which is included in an activity, it must make sure to also remove all
-                      references in the activities.
-                  type: array
-                  items:
-                    description: |
-                      When saving an activity only the `entity_id` is persisted. When retrieving an activity all other fields
-                      will be retrieved from the real entities to make sure they are up to date. I.e. the entity name or icon
-                      might change between saving an activity and retrieving it again!
-                    type: object
-                    properties:
-                      entity_id:
-                        $ref: '#/components/schemas/EntityId'
-                      entity_type:
-                        $ref: '#/components/schemas/EntityType'
-                      name:
-                        $ref: '#/components/schemas/LanguageText'
-                      icon:
-                        $ref: '#/components/schemas/IconIdentifier'
-                      integration:
-                        description: |
-                          Optional integration information. Regular entities will have at least the integration name. Special
-                          entities like activities and macros might omit the integration object.
-                        type: object
-                        properties:
-                          name:
-                            $ref: '#/components/schemas/LanguageText'
-                          icon:
-                            $ref: '#/components/schemas/IconIdentifier'
-                      entity_commands:
-                        description: |
-                          Supported entity command identifiers. A command identifier refers to the common entity command
-                          definitions, which describe all required parameters to set for calling the entity command. This
-                          includes the mandatory `cmd_id` attribute and optional parameters.
-                        type: array
-                        items:
-                          type: string
-                      simple_commands:
-                        description: |
-                          Simple commands are additional commands supported by the entity, which are not included in the
-                          common entity command definitions. A typical example are remote-entity commands like `VOLUME_UP` etc
-                          which don't have additional parameters. A simple command relates directly to the `cmd_id` attribute
-                          when calling a command.
-                        type: array
-                        items:
-                          type: string
-                      available:
-                        description: |
-                          State of the entity: True / missing = entity is available as configured entity and can be used.  
-                          False = entity has been removed and must be corrected by the user.
-
-                          If an entity is no longer available then all usages in the sequences are still present in case the
-                          entity is re-configured. The execution of the on- or off-sequence will then simply skip the actions
-                          of the no longer available entity.
-                        type: boolean
-                    required:
-                      - entity_id
+                  $ref: '#/components/schemas/IncludedEntities'
                 sequences:
                   $ref: '#/components/schemas/ActivitySequences'
                 button_mapping:
@@ -5324,109 +5325,6 @@ components:
                 $ref: '#/components/schemas/GridLocation'
               size:
                 $ref: '#/components/schemas/GridItemSize'
-    EntityCmdParamBool:
-      type: object
-      description: Boolean value parameter.
-    EntityCmdParamNumber:
-      type: object
-      description: |
-        Number value parameter with optional limits.   
-      properties:
-        min:
-          description: Minimal allowed value (inclusive).
-          type: number
-          default: 0
-        max:
-          description: Maximal allowed value (inclusive).
-          type: number
-        step:
-          description: Step size between values.
-          type: number
-          default: 1
-        unit:
-          description: Optional unit label of the value.
-          type: string
-      example:
-        min: 0
-        max: 100
-        step: 1
-        unit: '%'
-    EntityCmdParamRegex:
-      type: object
-      description: Text value parameter with optional regex validation.
-      properties:
-        regex:
-          description: Validation regex.
-          type: string
-    EntityCmdParamEnum:
-      type: object
-      description: Enumeration parameter. Only the defined values are allowed as parameter value.
-      properties:
-        values:
-          type: array
-          items:
-            type: string
-      required:
-        - values
-      example:
-        values:
-          - Option 1
-          - Option 2
-          - Option 3
-    EntityCommandMetadata:
-      type: object
-      properties:
-        id:
-          description: Entity command identifier
-          type: string
-        cmd_id:
-          description: Entity command.
-          type: string
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        params:
-          description: |
-            Metadata describing the optional parameters of the command. Simple "button like" commands
-            don't have any parameters, whereas e.g. a light entity can also dim the light, change color or color
-            temperature.
-          type: array
-          items:
-            type: object
-            allOf:
-              - properties:
-                  name:
-                    $ref: '#/components/schemas/LanguageText'
-                  param:
-                    description: Parameter name.
-                    type: string
-                  type:
-                    description: Parameter type.
-                    type: string
-                    enum:
-                      - number
-                      - bool
-                      - regex
-                      - enum
-                required:
-                  - name
-                  - param
-                  - type
-              - oneOf:
-                  - $ref: '#/components/schemas/EntityCmdParamNumber'
-                  - $ref: '#/components/schemas/EntityCmdParamBool'
-                  - $ref: '#/components/schemas/EntityCmdParamRegex'
-                  - $ref: '#/components/schemas/EntityCmdParamEnum'
-                discriminator:
-                  propertyName: type
-                  mapping:
-                    number: '#/components/schemas/EntityCmdParamNumber'
-                    bool: '#/components/schemas/EntityCmdParamBool'
-                    regex: '#/components/schemas/EntityCmdParamRegex'
-                    enum: '#/components/schemas/EntityCmdParamEnum'
-      required:
-        - id
-        - cmd_id
-        - name
     ApiKey:
       type: object
       properties:
@@ -5881,6 +5779,12 @@ components:
       description: |
         Optional image identifier. If specified the image will be set. An empty identifier, while updating the object,
         removes the existing image.
+    IrCodeSetType:
+      description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
+      type: string
+      enum:
+        - manufacturer
+        - custom
     LanguageText:
       type: object
       description: |
@@ -5921,68 +5825,7 @@ components:
                   type: boolean
                   default: true
                 included_entities:
-                  description: |
-                    Included entities in the macro. This object is writable from the client and persisted when saving a
-                    macro.
-
-                    Notes:
-                    - Entities can be included without being used in a sequence.  
-                      This allows to edit the macro in multiple sessions without having to reselect the desired entities.
-                    - Every used entity in a sequence must be included, otherwise the macro cannot be saved.
-                    - If the client removes an entity which is included in a macro, it must make sure to also remove all
-                      references in the activities.
-                  type: array
-                  items:
-                    description: |
-                      When saving a macro only the `entity_id` is persisted. When retrieving a macro all other fields
-                      will be retrieved from the real entities to make sure they are up to date. I.e. the entity name or icon
-                      might change between saving a macro and retrieving it again!
-                    type: object
-                    properties:
-                      entity_id:
-                        $ref: '#/components/schemas/EntityId'
-                      name:
-                        $ref: '#/components/schemas/LanguageText'
-                      icon:
-                        $ref: '#/components/schemas/IconIdentifier'
-                      integration:
-                        description: |
-                          Optional integration information. Regular entities will have at least the integration name. Special
-                          entities like activities and macros might omit the integration object.
-                        type: object
-                        properties:
-                          name:
-                            $ref: '#/components/schemas/LanguageText'
-                          icon:
-                            $ref: '#/components/schemas/IconIdentifier'
-                      entity_commands:
-                        description: |
-                          Supported entity command identifiers. A command identifier refers to the common entity command
-                          definitions, which describe all required parameters to set for calling the entity command. This
-                          includes the mandatory `cmd_id` attribute and optional parameters.
-                        type: array
-                        items:
-                          type: string
-                      simple_commands:
-                        description: |
-                          Simple commands are additional commands supported by the entity, which are not included in the
-                          common entity command definitions. A typical example are remote-entity commands like `VOLUME_UP` etc
-                          which don't have additional parameters. A simple command relates directly to the `cmd_id` attribute
-                          when calling a command.
-                        type: array
-                        items:
-                          type: string
-                      available:
-                        description: |
-                          State of the entity: True = entity is available as configured entity and can be used. False = entity
-                          has been removed and must be corrected by the user.
-
-                          If an entity is no longer available then all usages in the sequences are still present in case the
-                          entity is re-configured. The execution of the on- or off-sequence will then simply skip the actions
-                          of the no longer available entity.
-                        type: boolean
-                    required:
-                      - entity_id
+                  $ref: '#/components/schemas/IncludedEntities'
                 sequence:
                   $ref: '#/components/schemas/CommandSequence'
           required:
@@ -6088,6 +5931,161 @@ components:
       type: string
       minLength: 1
       maxLength: 50
+    Remote:
+      description: |
+        The remote entity executes a sequence of commands and at the end displays a user interface (similar to remote entity)
+        to the user. If the entity has an off sequence, it can be turned off.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - remote
+            features:
+              description: |
+                Supported features of the remote. If the remote has an `off` sequence, it supports the common `on_off`
+                feature, otherwise only `start`.
+              type: array
+              items:
+                type: string
+                enum:
+                  - on_off
+                  - send
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `false`: remote was provided by an integration and cannot be edited.
+                  type: boolean
+                  default: true
+                ir:
+                  description: |
+                    Infrared settings: codeset name und used infrared emitter to send commands.
+                  type: object
+                  properties:
+                    codeset:
+                      description: "Read-only information about the infrared codeset. \U0001F477 **TODO** Use `/remotes/entities/:entityId/ir`\nendpoints to manage infrared codes.\n"
+                      type: object
+                      properties:
+                        id:
+                          description: |
+                            Codeset identifier, either a custom codeset id or a manufacturer codeset id depending on `type`.
+                          type: string
+                        name:
+                          description: |
+                            User friendly name of the used codeset (custom or manufacturer) to show in a user interface.
+                          type: string
+                        type:
+                          $ref: '#/components/schemas/IrCodeSetType'
+                    output:
+                      description: |
+                        Infrared output device settings. Use `/ir/emitter` endpoints to retrieve further information.
+                      type: object
+                      properties:
+                        device_id:
+                          description: |
+                            IR emitter device identifier.
+                          type: string
+                        port_id:
+                          description: |
+                            IR emitter output port identifier.
+                          type: string
+                simple_commands:
+                  description: |
+                    All available commands of the infrared codeset for the button mapping and user interface.  
+                    These simple commands relate directly to the `cmd_id` attribute when defining or calling an entity command.
+
+                    The commands are read-only and updated automatically based on the infrared codeset.
+                  type: array
+                  items:
+                    type: string
+                button_mapping:
+                  $ref: '#/components/schemas/DeviceButtonMappings'
+                user_interface:
+                  $ref: '#/components/schemas/ActivityUserInterface'
+          required:
+            - options
+    Remotes:
+      type: array
+      items:
+        $ref: '#/components/schemas/RemoteOverview'
+    RemoteCreate:
+      description: |
+        Dedicated request object to create a new remote.
+      type: object
+      allOf:
+        - properties:
+            name:
+              $ref: '#/components/schemas/LanguageText'
+            icon:
+              $ref: '#/components/schemas/IconIdentifier'
+            description:
+              $ref: '#/components/schemas/LanguageText'
+        - oneOf:
+            - type: object
+              properties:
+                clone_from:
+                  $ref: '#/components/schemas/EntityId'
+              required:
+                - clone_from
+            - type: object
+              properties:
+                options:
+                  type: object
+                  properties:
+                    codeset_id:
+                      $ref: '#/components/schemas/SimpleId'
+                  required:
+                    - codeset_id
+      required:
+        - name
+    RemoteOverview:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - remote
+            features:
+              description: |
+                Supported features of the remote.
+              type: array
+              items:
+                type: string
+                enum:
+                  - send
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `false`: remote was provided by an integration and cannot be edited.
+                  type: boolean
+                  default: true
+    RemoteUpdate:
+      description: |
+        Dedicated request object to update an existing remote.  
+        All root properties are optional and only the provided objects are updated in the remote entity. Omitted objects are
+        ignored and not deleted from the remote entity.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        button_mapping:
+          $ref: '#/components/schemas/DeviceButtonMappings'
+        user_interface:
+          $ref: '#/components/schemas/ActivityUserInterface'
     RemoteInterface:
       description: |
         The remote user interface represent a remote that can be operated by buttons and UI soft buttons.
@@ -6143,23 +6141,49 @@ components:
       required:
         - name
         - entity_id
-    RemoteInterfaceUpdate:
-      description: |
-        Dedicated request object to update an existing remote interface.  
-        All root properties are optional and only the provided objects are updated in the interface. Omitted objects are
-        ignored and not deleted from the interface.
+    RemoteIrDataSet:
       type: object
       properties:
+        id:
+          description: |
+            Codeset identifier, either a custom codeset id or a manufacturer codeset id depending on `type`.
+          type: string
         name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        description:
-          $ref: '#/components/schemas/LanguageText'
-        button_mapping:
-          $ref: '#/components/schemas/DeviceButtonMappings'
-        user_interface:
-          $ref: '#/components/schemas/ActivityUserInterface'
+          description: User friendly name of the codeset (custom or manufacturer).
+          type: string
+        type:
+          $ref: '#/components/schemas/IrCodeSetType'
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemoteIrCode'
+    RemoteIrCode:
+      type: object
+      properties:
+        cmd_id:
+          $ref: '#/components/schemas/SimpleId'
+        code:
+          description: |
+            Custom infrared code. Only set for custom codeset or if a manufacturer codeset has been modified or enhanced.
+          type: object
+          properties:
+            value:
+              type: string
+            format:
+              type: string
+        custom:
+          description: |
+            Flag indicating if this code is a custom code in a manufacturer codeset. This is a manually added code which
+            was not present in the codeset. Custom codes can be deleted or edited by the user. The modified code is
+            stored in the `code` object.
+          type: boolean
+        modified:
+          description: |
+            Flag indicating if a manufacturer code has been replaced with a user code. The modified code is stored in
+            the `code` object. Modified codes can be edited by the user.
+          type: boolean
+      required:
+        - cmd_id
     Scopes:
       type: array
       items:
@@ -6389,6 +6413,109 @@ components:
         params:
           hue: 180
           saturation: 90
+    EntityCmdParamBool:
+      type: object
+      description: Boolean value parameter.
+    EntityCmdParamNumber:
+      type: object
+      description: |
+        Number value parameter with optional limits.   
+      properties:
+        min:
+          description: Minimal allowed value (inclusive).
+          type: number
+          default: 0
+        max:
+          description: Maximal allowed value (inclusive).
+          type: number
+        step:
+          description: Step size between values.
+          type: number
+          default: 1
+        unit:
+          description: Optional unit label of the value.
+          type: string
+      example:
+        min: 0
+        max: 100
+        step: 1
+        unit: '%'
+    EntityCmdParamRegex:
+      type: object
+      description: Text value parameter with optional regex validation.
+      properties:
+        regex:
+          description: Validation regex.
+          type: string
+    EntityCmdParamEnum:
+      type: object
+      description: Enumeration parameter. Only the defined values are allowed as parameter value.
+      properties:
+        values:
+          type: array
+          items:
+            type: string
+      required:
+        - values
+      example:
+        values:
+          - Option 1
+          - Option 2
+          - Option 3
+    EntityCommandMetadata:
+      type: object
+      properties:
+        id:
+          description: Entity command identifier
+          type: string
+        cmd_id:
+          description: Entity command.
+          type: string
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        params:
+          description: |
+            Metadata describing the optional parameters of the command. Simple "button like" commands
+            don't have any parameters, whereas e.g. a light entity can also dim the light, change color or color
+            temperature.
+          type: array
+          items:
+            type: object
+            allOf:
+              - properties:
+                  name:
+                    $ref: '#/components/schemas/LanguageText'
+                  param:
+                    description: Parameter name.
+                    type: string
+                  type:
+                    description: Parameter type.
+                    type: string
+                    enum:
+                      - number
+                      - bool
+                      - regex
+                      - enum
+                required:
+                  - name
+                  - param
+                  - type
+              - oneOf:
+                  - $ref: '#/components/schemas/EntityCmdParamNumber'
+                  - $ref: '#/components/schemas/EntityCmdParamBool'
+                  - $ref: '#/components/schemas/EntityCmdParamRegex'
+                  - $ref: '#/components/schemas/EntityCmdParamEnum'
+                discriminator:
+                  propertyName: type
+                  mapping:
+                    number: '#/components/schemas/EntityCmdParamNumber'
+                    bool: '#/components/schemas/EntityCmdParamBool'
+                    regex: '#/components/schemas/EntityCmdParamRegex'
+                    enum: '#/components/schemas/EntityCmdParamEnum'
+      required:
+        - id
+        - cmd_id
+        - name
     EntityRequest:
       type: object
       description: |
@@ -6442,6 +6569,72 @@ components:
       required:
         - x
         - 'y'
+    IncludedEntities:
+      description: |
+        Included entities in an activity or macro. This object is writable from the client and persisted when saving.
+
+        Notes:
+        - Entities can be included without being used in a sequence.  
+          This allows to edit the activity or macro in multiple sessions without having to reselect the desired entities.
+        - Every used entity in a sequence must be included, otherwise the activity or macro  cannot be saved.
+        - If the client removes an entity which is included in an activity or macro, it must make sure to also remove all
+          entity references the sequence(s), button mapping and user interface.
+      type: array
+      items:
+        $ref: '#/components/schemas/IncludedEntity'
+    IncludedEntity:
+      description: |
+        When saving an activity only the `entity_id` is persisted. When retrieving an activity all other fields
+        will be retrieved from the real entities to make sure they are up to date. I.e. the entity name or icon
+        might change between saving an activity and retrieving it again!
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        integration:
+          description: |
+            Optional integration information. Regular entities will have at least the integration name. Special
+            entities like activities and macros might omit the integration object.
+          type: object
+          properties:
+            name:
+              $ref: '#/components/schemas/LanguageText'
+            icon:
+              $ref: '#/components/schemas/IconIdentifier'
+        entity_commands:
+          description: |
+            Supported entity command identifiers. A command identifier refers to the common entity command
+            definitions, which describe all required parameters to set for calling the entity command. This
+            includes the mandatory `cmd_id` attribute and optional parameters.
+          type: array
+          items:
+            type: string
+        simple_commands:
+          description: |
+            Simple commands are additional commands supported by the entity, which are not included in the
+            common entity command definitions. A typical example are remote-entity commands like `VOLUME_UP` etc
+            which don't have additional parameters. A simple command relates directly to the `cmd_id` attribute
+            when calling a command.
+          type: array
+          items:
+            type: string
+        available:
+          description: |
+            State of the entity: True / missing = entity is available as configured entity and can be used.  
+            False = entity has been removed and must be corrected by the user.
+
+            If an entity is no longer available then all usages in the sequences are still present in case the
+            entity is re-configured. The execution of the on- or off-sequence will then simply skip the actions
+            of the no longer available entity.
+          type: boolean
+      required:
+        - entity_id
     IntgAuthMethod:
       type: string
       description: |
