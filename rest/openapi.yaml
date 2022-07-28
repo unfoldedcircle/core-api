@@ -2497,8 +2497,6 @@ paths:
       tags:
         - infrared
       summary: Get all infrared emitter devices for sending IR codes.
-      description: |
-        TODO.
       operationId: getInfraredDevices
       parameters:
         - $ref: '#/components/parameters/page'
@@ -2522,9 +2520,27 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                type: array
+                items:
+                  type: object
+                  properties:
+                    device_id:
+                      description: IR emitter device identifier.
+                      type: string
+                    name:
+                      description: Friendly name of the IR emitter device.
+                      type: string
+                    ports:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          port_id:
+                            description: IR emitter output port identifier.
+                            type: string
+                          name:
+                            description: Friendly name of the output port.
+                            type: string
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
