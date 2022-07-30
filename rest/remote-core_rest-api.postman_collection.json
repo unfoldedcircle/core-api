@@ -6483,8 +6483,359 @@
 										}
 									},
 									"response": []
+								},
+								{
+									"name": "codeSetSearch",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/manufacturers/:manufacturer_id?q=tv",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"manufacturers",
+												":manufacturer_id"
+											],
+											"query": [
+												{
+													"key": "q",
+													"value": "tv"
+												},
+												{
+													"key": "page",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "100",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "manufacturer_id",
+													"value": "lg"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getCodeSet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/manufacturers/:manufacturer_id/:codeset",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"manufacturers",
+												":manufacturer_id",
+												":codeset"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "1",
+													"disabled": true
+												},
+												{
+													"key": "limit",
+													"value": "100",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "manufacturer_id",
+													"value": "lg"
+												},
+												{
+													"key": "codeset",
+													"value": "lg1"
+												}
+											]
+										}
+									},
+									"response": []
 								}
 							]
+						}
+					]
+				},
+				{
+					"name": "emitters",
+					"item": [
+						{
+							"name": "getEmitterCount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"pm.test(\"pagination-count header is present\", function () {",
+											"    pm.response.to.have.header(\"pagination-count\");",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/ir/emitters",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"ir",
+										"emitters"
+									],
+									"query": [
+										{
+											"key": "active",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getEmitters",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/ir/emitters?page=1&limit=10",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"ir",
+										"emitters"
+									],
+									"query": [
+										{
+											"key": "active",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getEmitter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/ir/emitters/:emitterId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"ir",
+										"emitters",
+										":emitterId"
+									],
+									"query": [
+										{
+											"key": "active",
+											"value": "true",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "emitterId",
+											"value": "sim.1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendCommandOnEmitter",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"MUTE\",\n  \"port_id\": \"1\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"ir",
+										"emitters",
+										":deviceId",
+										"send"
+									],
+									"variable": [
+										{
+											"key": "deviceId",
+											"value": "sim.1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "sendCommandOnEmitter default port",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"HOME\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"ir",
+										"emitters",
+										":deviceId",
+										"send"
+									],
+									"variable": [
+										{
+											"key": "deviceId",
+											"value": "sim.1"
+										}
+									]
+								}
+							},
+							"response": []
 						}
 					]
 				}
