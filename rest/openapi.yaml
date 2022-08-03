@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.10.6
+  version: 0.10.7
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -947,6 +947,9 @@ paths:
       operationId: getIntegrationDriversCount
       parameters:
         - $ref: '#/components/parameters/enabled'
+        - $ref: '#/components/parameters/instantiable'
+        - $ref: '#/components/parameters/single_device'
+        - $ref: '#/components/parameters/has_instances'
       responses:
         '200':
           description: Successful operation.
@@ -970,6 +973,9 @@ paths:
       operationId: getIntegrationDrivers
       parameters:
         - $ref: '#/components/parameters/enabled'
+        - $ref: '#/components/parameters/instantiable'
+        - $ref: '#/components/parameters/single_device'
+        - $ref: '#/components/parameters/has_instances'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -1010,7 +1016,7 @@ paths:
         Depending on the driver capabilities it either provides a single access point to the provided entities, or exposes
         multiple devices, each with its own unique set of entities. The former could for example be used to provide GPIO
         access of a Raspberry Pi or gather all supported devices it is able to interact with (e.g. network sensors, light
-        switches etc.). The more cabable multi-device mode is suited to bridge home automation hubs where multiple
+        switches etc.). The more capable multi-device mode is suited to bridge home automation hubs where multiple
         instances should be supported.
 
         Once a driver is registered, one or more integration instances must be configured to interact with the driver.  
@@ -5090,6 +5096,29 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/EntityType'
+    has_instances:
+      name: has_instances
+      in: query
+      description: |
+        Filter if a driver has integration instances or not:
+        - true = only consider drivers which have at least one integration instance,
+        - false = drivers without instances
+        - NONE = any.
+      required: false
+      schema:
+        type: boolean
+    instantiable:
+      name: instantiable
+      in: query
+      description: |
+        Filter if a driver is instantiable or not:
+        - true = only consider drivers which allow new integration instances to be created from. Either single-device drivers
+          without an instance, or multi-device drivers.
+        - false = only drivers which allow no more instances
+        - NONE = any.
+      required: false
+      schema:
+        type: boolean
     intg_id:
       name: intg_id
       in: query
@@ -5133,6 +5162,14 @@ components:
       required: false
       schema:
         $ref: '#/components/schemas/ProfilePin'
+    single_device:
+      name: single_device
+      in: query
+      description: |
+        true = only consider single-device drivers, false = only multi-device drivers, NONE = all.
+      required: false
+      schema:
+        type: boolean
   schemas:
     AccessTokenId:
       type: string

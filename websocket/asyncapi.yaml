@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.9.2-alpha'
+  version: '0.9.3-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -3119,7 +3119,7 @@ components:
               type: object
               properties:
                 filter:
-                  $ref: '#/components/schemas/enabledFilter'
+                  $ref: '#/components/schemas/intgDriverFilter'
           required:
             - msg
     integrationDriverCountMsg:
@@ -3154,7 +3154,7 @@ components:
               type: object
               properties:
                 filter:
-                  $ref: '#/components/schemas/enabledFilter'
+                  $ref: '#/components/schemas/intgDriverFilter'
                 paging:
                   $ref: '#/components/schemas/paging'
           required:
@@ -3745,6 +3745,35 @@ components:
           type: object
           properties:
             enabled:
+              type: boolean
+
+    intgDriverFilter:
+      description: Filter for integration drivers.
+      type: object
+      properties:
+        filter:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            instantiable:
+              description: |
+                Filter if a driver is instantiable or not:
+                - true = only consider drivers which allow new integration instances to be created from. Either single-device drivers
+                  without an instance, or multi-device drivers.
+                - false = only drivers which allow no more instances
+                - NONE = any.
+              type: boolean
+            single_device:
+              description: |
+                true = only consider single-device drivers, false = only multi-device drivers, NONE = all.
+              type: boolean
+            has_instances:
+              description: |
+                Filter if a driver has integration instances or not:
+                - true = only consider drivers which have at least one integration instance,
+                - false = drivers without instances
+                - NONE = any.
               type: boolean
 
     availableEntityFilter:

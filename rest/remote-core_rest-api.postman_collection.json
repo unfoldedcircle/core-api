@@ -2305,6 +2305,46 @@
 						"method": "HEAD",
 						"header": [],
 						"url": {
+							"raw": "{{SERVER}}/api/intg/drivers?enabled=true",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg",
+								"drivers"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true"
+								},
+								{
+									"key": "instantiable",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "single_instance",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "has_instances",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getIntegrationDrivers",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
 							"raw": "{{SERVER}}/api/intg/drivers?enabled=true&page=1&limit=10",
 							"host": [
 								"{{SERVER}}"
@@ -2320,45 +2360,27 @@
 									"value": "true"
 								},
 								{
+									"key": "instantiable",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "single_device",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "has_instances",
+									"value": "false",
+									"disabled": true
+								},
+								{
 									"key": "page",
 									"value": "1"
 								},
 								{
 									"key": "limit",
 									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegrationDrivers",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers?enabled=true&page=1&limit=100",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers"
-							],
-							"query": [
-								{
-									"key": "enabled",
-									"value": "true"
-								},
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "100"
 								}
 							]
 						}
