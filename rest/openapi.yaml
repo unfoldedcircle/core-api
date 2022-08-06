@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.10.7
+  version: 0.10.8
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1153,8 +1153,8 @@ paths:
           schema:
             type: string
             enum:
-              - start
-              - stop
+              - START
+              - STOP
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -1366,8 +1366,8 @@ paths:
           schema:
             type: string
             enum:
-              - connect
-              - disconnect
+              - CONNECT
+              - DISCONNECT
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
