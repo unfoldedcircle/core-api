@@ -2273,7 +2273,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/intg?enabled=true&page=1&limit=100",
+							"raw": "{{SERVER}}/api/intg?page=1&limit=100",
 							"host": [
 								"{{SERVER}}"
 							],
@@ -2284,7 +2284,8 @@
 							"query": [
 								{
 									"key": "enabled",
-									"value": "true"
+									"value": "true",
+									"disabled": true
 								},
 								{
 									"key": "page",
@@ -2925,7 +2926,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/entities?page=1&limit=100&entity_type=light",
+							"raw": "{{SERVER}}/api/entities?page=1&limit=100",
 							"host": [
 								"{{SERVER}}"
 							],
@@ -2944,7 +2945,8 @@
 								},
 								{
 									"key": "entity_type",
-									"value": "light"
+									"value": "light",
+									"disabled": true
 								},
 								{
 									"key": "intg_id",
@@ -3141,7 +3143,11 @@
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
-									"});"
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"activity_id\", responseJson[0].entity_id);",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -3310,7 +3316,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "22d46f9b-649e-4b1b-b61b-680fa19c155c"
+									"value": "{{activity_id}}"
 								}
 							]
 						}
@@ -3324,7 +3330,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"button_mapping\": [\n            {\n                \"button\": \"PLAY\",\n                \"short_press\": {\n                    \"entity_id\": \"1-2-3\",\n                    \"cmd_id\": \"play\"\n                }\n            },\n            {\n                \"button\": \"PAUSE\",\n                \"short_press\": {\n                    \"entity_id\": \"1-2-3\",\n                    \"cmd_id\": \"pause\"\n                }\n            }\n        ],\n        \"entity_ids\": [\n            \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"sequence_type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"foobar\",\n                        \"cmd_id\": \"stop\"\n                    }\n                }\n            ]\n        },\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"type\": \"icon\",\n                    \"command\": {\n                        \"entity_id\": \"bar\",\n                        \"cmd_id\": \"do_something\"\n                    },\n                    \"location\": {\n                        \"x\": 2,\n                        \"y\": 0\n                    }\n                }\n            ]\n        }\n    }\n}",
+							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"button_mapping\": [\n            {\n                \"button\": \"PLAY\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            },\n            {\n                \"button\": \"NEXT\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            }\n        ],\n        \"entity_ids\": [\n            \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"sequence_type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                        \"cmd_id\": \"macro.run\"\n                    }\n                },\n                {\n                    \"sequence_type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        },\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"items\": [\n                        {\n                            \"type\": \"icon\",\n                            \"command\": {\n                                \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                                \"cmd_id\": \"macro.run\"\n                            },\n                            \"location\": {\n                                \"x\": 2,\n                                \"y\": 0\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3344,7 +3350,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "2bd4c6cb-cf20-4033-b980-50847d5c0350"
+									"value": "{{activity_id}}"
 								}
 							]
 						}
@@ -3382,7 +3388,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "e026ca81-e641-41a0-b54b-7a23139bbb94"
+									"value": "{{activity_id}}"
 								}
 							]
 						}
@@ -3437,7 +3443,11 @@
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
-									"});"
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"macro_id\", responseJson[0].entity_id);",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -3481,7 +3491,7 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									"postman.setEnvironmentVariable(\"macro_id\", responseJson.entity_id);",
 									""
 								],
 								"type": "text/javascript"
@@ -3525,7 +3535,7 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									"postman.setEnvironmentVariable(\"macro_id\", responseJson.entity_id);",
 									""
 								],
 								"type": "text/javascript"
@@ -3569,7 +3579,7 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									"postman.setEnvironmentVariable(\"macro_id\", responseJson.entity_id);",
 									""
 								],
 								"type": "text/javascript"
@@ -3650,7 +3660,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "1fc7218f-1746-459e-a741-f568b3135d21"
+									"value": "{{macro_id}}"
 								}
 							]
 						}
@@ -3684,7 +3694,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "{{light_entity_id}}"
+									"value": "{{macro_id}}"
 								}
 							]
 						}
@@ -3718,7 +3728,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "1fc7218f-1746-459e-a741-f568b3135d21"
+									"value": "{{macro_id}}"
 								}
 							]
 						}
@@ -3752,7 +3762,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "1fc7218f-1746-459e-a741-f568b3135d21"
+									"value": "{{macro_id}}"
 								}
 							]
 						}
@@ -3790,7 +3800,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "e026ca81-e641-41a0-b54b-7a23139bbb94"
+									"value": "{{macro_id}}"
 								}
 							]
 						}
@@ -3845,7 +3855,11 @@
 								"exec": [
 									"pm.test(\"Status code is 200\", function () {",
 									"    pm.response.to.have.status(200);",
-									"});"
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"remote_id\", responseJson[0].entity_id);",
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -3889,7 +3903,7 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
+									"postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
 									""
 								],
 								"type": "text/javascript"
@@ -3970,7 +3984,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "2e9615e4-3cdc-406d-8674-6103ffa74fc3"
+									"value": "{{remote_id}}"
 								}
 							]
 						}
@@ -3984,7 +3998,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"ir\": {\n            \"codeset\": {\n                \"id\": \"foobar\"\n            }\n        },\n        \"button_mapping\": [\n            {\n                \"button\": \"HOME\",\n                \"short_press\": {\n                    \"cmd_id\": \"OSD\"\n                },\n                \"long_press\": {\n                    \"cmd_id\": \"SETUP\"\n                }\n            }\n        ],\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"items\": [\n                        {\n                            \"type\": \"icon\",\n                            \"icon\": \"string\",\n                            \"text\": \"string\",\n                            \"command\": {\n                                \"cmd_id\": \"ENTER\"\n                            },\n                            \"location\": {\n                                \"x\": 3,\n                                \"y\": 5\n                            },\n                            \"size\": {\n                                \"width\": 1,\n                                \"height\": 1\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4004,7 +4018,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "2e9615e4-3cdc-406d-8674-6103ffa74fc3"
+									"value": "{{remote_id}}"
 								}
 							]
 						}
@@ -4042,7 +4056,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "e026ca81-e641-41a0-b54b-7a23139bbb94"
+									"value": "{{remote_id}}"
 								}
 							]
 						}

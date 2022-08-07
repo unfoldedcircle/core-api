@@ -5348,22 +5348,15 @@ components:
           items:
             type: object
             properties:
-              type:
+              name:
+                description: Optional page name
                 type: string
-                enum:
-                  - icon
-                  - text
-                  - numpad
-              icon:
-                $ref: '#/components/schemas/IconIdentifier'
-              text:
-                type: string
-              command:
-                $ref: '#/components/schemas/EntityCommand'
-              location:
-                $ref: '#/components/schemas/GridLocation'
-              size:
-                $ref: '#/components/schemas/GridItemSize'
+              items:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserInterfaceItem'
+            required:
+              - items
     ApiKey:
       type: object
       properties:
@@ -5625,7 +5618,7 @@ components:
     DeviceButtonMappings:
       description: |
         Physical button mapping to entity commands. The `entity_id` in the EntityCommand object is a required
-        property.
+        property for an activity and ignored for a remote-entity.
       type: array
       items:
         $ref: '#/components/schemas/DeviceButtonMapping'
@@ -6156,10 +6149,33 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         description:
           $ref: '#/components/schemas/LanguageText'
-        button_mapping:
-          $ref: '#/components/schemas/DeviceButtonMappings'
-        user_interface:
-          $ref: '#/components/schemas/ActivityUserInterface'
+        options:
+          type: object
+          properties:
+            ir:
+              type: object
+              properties:
+                codeset:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                  required:
+                    - id
+                output:
+                  type: object
+                  properties:
+                    device_id:
+                      type: string
+                    port_id:
+                      type: string
+                  required:
+                    - device_id
+                    - port_id
+            button_mapping:
+              $ref: '#/components/schemas/DeviceButtonMappings'
+            user_interface:
+              $ref: '#/components/schemas/ActivityUserInterface'
     RemoteInterface:
       description: |
         The remote user interface represent a remote that can be operated by buttons and UI soft buttons.
@@ -7402,6 +7418,28 @@ components:
       minLength: 1
       maxLength: 36
       description: Unique user interface identifier.
+    UserInterfaceItem:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - icon
+            - text
+            - numpad
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        text:
+          type: string
+        command:
+          $ref: '#/components/schemas/EntityCommand'
+        location:
+          $ref: '#/components/schemas/GridLocation'
+        size:
+          $ref: '#/components/schemas/GridItemSize'
+      required:
+        - type
+        - location
     VersionInfo:
       type: object
       properties:
