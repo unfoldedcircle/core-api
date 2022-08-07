@@ -3968,6 +3968,20 @@
 				},
 				{
 					"name": "getRemote",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -3993,6 +4007,20 @@
 				},
 				{
 					"name": "updateRemote",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -4057,6 +4085,190 @@
 								{
 									"key": "entityId",
 									"value": "{{remote_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRemoteIrDataSet",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId/ir",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId",
+								"ir"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{remote_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getRemoteIrCode",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId",
+								"ir",
+								":cmdId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{remote_id}}"
+								},
+								{
+									"key": "cmdId",
+									"value": "BACK"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteOrResetRemoteIrCode",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId",
+								"ir",
+								":cmdId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{remote_id}}"
+								},
+								{
+									"key": "cmdId",
+									"value": "BACK"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRemoteIrCode",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"value\": \"0000,006e,0022,0002,0155,00ac,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0041,0015,0015,0015,0015,0015,05e4,0155,0055,0015,0e40\",\n    \"format\": \"PRONTO\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId",
+								"ir",
+								":cmdId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{remote_id}}"
+								},
+								{
+									"key": "cmdId",
+									"value": "BACK"
 								}
 							]
 						}

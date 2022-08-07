@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.10.8
+  version: 0.11.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2766,7 +2766,7 @@ paths:
     patch:
       tags:
         - remotes
-      summary: "\U0001F477 Update an infrared remote entity."
+      summary: Update an infrared remote entity.
       operationId: updateRemote
       description: |
         Update one or multiple properties of an infrared entity. The omitted properties are ignored and not deleted.
@@ -2876,7 +2876,18 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RemoteIrCode'
+              type: object
+              properties:
+                value:
+                  type: string
+                format:
+                  type: string
+                  enum:
+                    - HEX
+                    - PRONTO
+              required:
+                - value
+                - format
         required: true
       responses:
         '200':
@@ -6261,6 +6272,9 @@ components:
               type: string
             format:
               type: string
+              enum:
+                - HEX
+                - PRONTO
         custom:
           description: |
             Flag indicating if this code is a custom code in a manufacturer codeset. This is a manually added code which
