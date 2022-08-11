@@ -4665,6 +4665,10 @@ components:
             - If the property is not specified the defined items will not be changed.
           items:
             $ref: '#/components/schemas/pageItem'
+      required:
+        - page_id
+        - profile_id
+        - name
 
     profiles:
       type: array

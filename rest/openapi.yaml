@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.11.0
+  version: 0.11.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2939,6 +2939,19 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/ProfileRequest'
+            examples:
+              Simple profile:
+                value:
+                  name: My profile
+              Profile with an icon:
+                value:
+                  name: My profile
+                  icon: 'uc:star'
+              Profile with a pin:
+                value:
+                  name: My secure profile
+                  icon: 'uc:star'
+                  pin: 1234
         required: true
       responses:
         '201':
@@ -3113,7 +3126,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Page'
+              $ref: '#/components/schemas/PageCreate'
+            examples:
+              Simple page:
+                value:
+                  name: My page
+              New page at the first position:
+                value:
+                  name: Favorites
+                  pos: 1
+              New page with items:
+                value:
+                  name: My other page
+                  items:
+                    - entity_id: switch1
+                    - entity_id: mediaplayer1
+                    - entity_id: blind1
+                    - group_id: 'def:g2'
         required: true
       responses:
         '201':
@@ -3216,6 +3245,17 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PageUpdate'
+            examples:
+              Rename page:
+                value:
+                  name: A better name
+              Rearrange items:
+                value:
+                  items:
+                    - entity_id: mediaplayer1
+                    - group_id: 'def:g2'
+                    - entity_id: blind1
+                    - entity_id: switch1
         required: true
       responses:
         '200':
@@ -7158,7 +7198,7 @@ components:
           $ref: '#/components/schemas/SimpleId'
         name:
           $ref: '#/components/schemas/Name'
-          description: Group name. Must be unique within the profile.
+          description: Page name. Must be unique within the profile.
         image:
           type: string
           description: Optional image identifier
@@ -7178,6 +7218,28 @@ components:
         - name
         - items
         - pos
+    PageCreate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Page name
+        image:
+          $ref: '#/components/schemas/ImageIdentifier'
+        items:
+          type: array
+          description: |
+            Optional page items.
+          items:
+            $ref: '#/components/schemas/PageItem'
+        pos:
+          type: integer
+          format: int32
+          minimum: 1
+          description: |
+            Optional 1-based position of the page within the profile. Default: last position
+      required:
+        - name
     PageItem:
       type: object
       properties:
@@ -7202,7 +7264,7 @@ components:
       properties:
         name:
           $ref: '#/components/schemas/Name'
-          description: Group name
+          description: Page name.
         image:
           $ref: '#/components/schemas/ImageIdentifier'
         items:

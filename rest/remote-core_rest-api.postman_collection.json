@@ -3330,7 +3330,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"button_mapping\": [\n            {\n                \"button\": \"PLAY\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            },\n            {\n                \"button\": \"NEXT\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            }\n        ],\n        \"entity_ids\": [\n            \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"sequence_type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                        \"cmd_id\": \"macro.run\"\n                    }\n                },\n                {\n                    \"sequence_type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        },\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"items\": [\n                        {\n                            \"type\": \"icon\",\n                            \"command\": {\n                                \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                                \"cmd_id\": \"macro.run\"\n                            },\n                            \"location\": {\n                                \"x\": 2,\n                                \"y\": 0\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    }\n}",
+							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"button_mapping\": [\n            {\n                \"button\": \"PLAY\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            },\n            {\n                \"button\": \"NEXT\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            }\n        ],\n        \"entity_ids\": [\n            \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                        \"cmd_id\": \"macro.run\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        },\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"items\": [\n                        {\n                            \"type\": \"icon\",\n                            \"command\": {\n                                \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                                \"cmd_id\": \"macro.run\"\n                            },\n                            \"location\": {\n                                \"x\": 2,\n                                \"y\": 0\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3708,7 +3708,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"options\": {\n        \"sequence\": [\n            {\n                \"sequence_type\": \"command\",\n                \"command\": {\n                    \"entity_id\": \"foobar\",\n                    \"cmd_id\": \"stop\"\n                }\n            }\n        ]\n    }\n}",
+							"raw": "{\n    \"options\": {\n        \"sequence\": [\n            {\n                \"type\": \"command\",\n                \"command\": {\n                    \"entity_id\": \"foobar\",\n                    \"cmd_id\": \"stop\"\n                }\n            }\n        ]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4561,7 +4561,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"{{$$randomCity}}\",\n    \"items\": [\n        {\n            \"entity_id\": \"switch1\"\n        },\n        {\n            \"entity_id\": \"mediaplayer1\"\n        },\n        {\n            \"entity_id\": \"blind1\"\n        },\n        {\n            \"entity_id\": \"light10\"\n        },\n        {\n            \"group_id\": \"def:g3\"\n        },\n        {\n            \"group_id\": \"def:g2\"\n        },\n        {\n            \"group_id\": \"def:g1\"\n        }\n    ]\n}\n",
+									"raw": "{\n    \"name\": \"{{$randomCity}}\",\n    \"items\": [\n        {\n            \"entity_id\": \"switch1\"\n        },\n        {\n            \"entity_id\": \"mediaplayer1\"\n        },\n        {\n            \"entity_id\": \"blind1\"\n        },\n        {\n            \"entity_id\": \"light10\"\n        },\n        {\n            \"group_id\": \"def:g3\"\n        },\n        {\n            \"group_id\": \"def:g2\"\n        },\n        {\n            \"group_id\": \"def:g1\"\n        }\n    ]\n}\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -5604,39 +5604,6 @@
 							"response": []
 						},
 						{
-							"name": "getEntityCommandMetadata",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/cfg/entity/commands",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"cfg",
-										"entity",
-										"commands"
-									]
-								}
-							},
-							"response": []
-						},
-						{
 							"name": "getDeviceIconMapping",
 							"event": [
 								{
@@ -5751,6 +5718,44 @@
 										"api",
 										"cfg",
 										"display"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "entity",
+					"item": [
+						{
+							"name": "getEntityCommandMetadata",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/cfg/entity/commands",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"cfg",
+										"entity",
+										"commands"
 									]
 								}
 							},
