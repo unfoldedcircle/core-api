@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.11.1
+  version: 0.11.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7164,6 +7164,8 @@ components:
           description: Entity identifiers belonging to the group
           items:
             $ref: '#/components/schemas/EntityId'
+        description:
+          $ref: '#/components/schemas/Description'
       required:
         - group_id
         - profile_id
@@ -7185,6 +7187,8 @@ components:
             If the property is not specified the defined entities will not be changed.
           items:
             $ref: '#/components/schemas/EntityId'
+        description:
+          $ref: '#/components/schemas/Description'
     Groups:
       type: array
       items:

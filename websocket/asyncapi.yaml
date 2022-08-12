@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.9.3-alpha'
+  version: '0.9.4-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -4541,6 +4541,8 @@ components:
           description: Entity identifiers belonging to the group
           items:
             $ref: '#/components/schemas/simpleId'
+        description:
+          $ref: '#/components/schemas/description'
       required:
         - group_id
         - profile_id
@@ -4570,6 +4572,8 @@ components:
             If the property is not specified the defined entities will not be changed.
           items:
             $ref: '#/components/schemas/simpleId'
+        description:
+          $ref: '#/components/schemas/description'
 
     iconIdentifier:
       type: string

@@ -4285,6 +4285,18 @@
 					"item": [
 						{
 							"name": "getGroupsInProfile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"group_id\", responseJson[0].group_id);"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -4334,7 +4346,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"Test\",\n    \"icon\": \"yio:test\",\n    \"entities\": [\n        \"light40\",\n        \"light41\",\n        \"light42\"\n    ]\n}\n",
+									"raw": "{\n    \"name\": \"{{$randomCity}}\",\n    \"icon\": \"yio:test\",\n    \"entities\": [\n        \"light40\",\n        \"light41\",\n        \"light42\"\n    ],\n    \"description\": \"Just a test\"\n}\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4418,7 +4430,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"name\": \"Test 4\",\n    \"icon\": \"yio:owl\",\n   \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light41\"\n    ]\n}\n",
+									"raw": "{\n    \"name\": \"Renamed\",\n    \"icon\": \"yio:owl\",\n    \"description\": \"This is a description\"\n}\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4465,7 +4477,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"icon\": \"yio:owl\",\n    \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light42\"\n    ]\n}\n",
+									"raw": "{\n    \"icon\": \"yio:owl\",\n    \"entities\": [\n        \"light43\",\n        \"light42\",\n        \"light41\"\n    ]\n}\n",
 									"options": {
 										"raw": {
 											"language": "json"
