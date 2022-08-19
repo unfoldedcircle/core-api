@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.9.4-alpha'
+  version: '0.10.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -400,6 +400,7 @@ channels:
           - $ref: '#/components/messages/integration_driver_change'
           - $ref: '#/components/messages/integration_change'
           - $ref: '#/components/messages/integration_state'
+          - $ref: '#/components/messages/profile_change'
           - $ref: '#/components/messages/configuration_change'
 
           # TODO define all events and response messages
@@ -1052,6 +1053,16 @@ components:
         $ref: '#/components/schemas/deleteAllProfilesMsg'
       x-response:
         $ref: '#/components/messages/result'
+
+    profile_change:
+      summary: 🔍 Profile change event.
+      description: |
+        Emitted if a profile configuration, related profile page or group has been changed, added or deleted.
+      tags:
+        - name: profile
+        - name: event
+      payload:
+        $ref: '#/components/schemas/profileChangeEventMsg'
 
     # --- page handling
 
@@ -2738,6 +2749,19 @@ components:
               const: delete_all_profiles
           required:
             - msg
+    profileChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: profile_change
+            msg_data:
+              $ref: '#/components/schemas/profileChange'
+          required:
+            - msg
+            - msg_data
 
     # --- page handling
 
@@ -3556,6 +3580,7 @@ components:
             - configuration
             - entities
             - integrations
+            - profiles
             # TODO define all event channels. Suggestions:
 #            - cfg_log
 #            - cfg_ui
@@ -4453,7 +4478,32 @@ components:
       required:
         - event_type
         - entity_id
-        - integration_id
+
+    profileChange:
+      type: object
+      description: |
+        The `new_state` property is omitted for `event_type` = `delete`.
+      properties:
+        event_type:
+          $ref: '#/components/schemas/defaultChangeEventType'
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        page_id:
+          $ref: '#/components/schemas/simpleId'
+        group_id:
+          $ref: '#/components/schemas/simpleId'
+        new_state:
+          type: object
+          properties:
+            profile:
+              $ref: '#/components/schemas/profileData'
+            page:
+              $ref: '#/components/schemas/pageData'
+            group:
+              $ref: '#/components/schemas/groupData'
+      required:
+        - event_type
+        - profile_id
 
     integrationDriverChange:
       type: object
