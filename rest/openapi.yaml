@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.11.2
+  version: 0.12.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1816,13 +1816,15 @@ paths:
         Update one or multiple properties of an activity. The omitted properties are ignored and not deleted. To clear an
         array simply provide an empty array.
 
-        - Sequence- and button press commands are composed of command definitions (see description of `entity_commands` and
+        - Button mappings are configured with the dedicated `/activities/{entityId}/buttons` and
+        `/activities/{entityId}/buttons/{button}` endpoints.
+        - The user interface is configured with the dedicated `/activities/{entityId}/ui`, `/activities/{entityId}/ui/pages`
+          and `/activities/{entityId}/ui/pages/{pageId}` endpoints.
+        - Sequence-commands are composed of command definitions (see description of `entity_commands` and
           `simple_commands` in GET operation). The `entity_id` and `cmd_id` attributes are always required. The `params`
           object is only required for `entity_commands` having parameters. 
         - The special `"type": "delay"` command is not described in the entity command definitions and can only be used in
           sequences.
-        - ⚠️ Only `options.button_mapping.short_press` can be defined at the moment. The `options.button_mapping.long_press`
-          is prepared in the data model, but not yet implemented!
       parameters:
         - $ref: '#/components/parameters/entity_id'
       requestBody:
@@ -1859,6 +1861,398 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/activities/{entityId}/buttons':
+    get:
+      tags:
+        - activities
+      summary: Get the physical button mappings.
+      operationId: getActivityButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Reset the physical button mappings to their default state.
+      description: |
+        An automatic mapping of common functions to the physical buttons is performed. This depends on the chosen entities,
+        e.g. an audio device will map the volume up & down keys and a TV or set-top box will map the channel up & down
+        commands.
+
+        ⚠️ The previous customization of the physical button mapping is irrevocably deleted.
+      operationId: resetActivityButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/activities/{entityId}/buttons/{button}':
+    get:
+      tags:
+        - activities
+      summary: Get a physical button mapping.
+      operationId: getActivityButtonMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMapping'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Update a physical button mapping.
+      description: |
+        Update the button mapping for either a short- or a long-press.
+      operationId: updateActivityButtonMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    short_press:
+                      $ref: '#/components/schemas/EntityCommand'
+                  required:
+                    - short_press
+                - type: object
+                  properties:
+                    long_press:
+                      $ref: '#/components/schemas/EntityCommand'
+                  required:
+                    - long_press
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMapping'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Remove a physical button mapping.
+      description: |
+        ⚠️ The previous customization of the physical button mapping is irrevocably deleted.
+      operationId: deleteActivityButtonMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/activities/{entityId}/ui':
+    get:
+      tags:
+        - activities
+      summary: Get the user interface definition of an activity.
+      description: |
+        Returns all the information required to manage an existing activity user interface.
+
+        At the moment a user interface only consists of pages.
+      operationId: getActivityUi
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Reset an activity user interface to its default state.
+      description: |
+        ⚠️ The customization of the activity user interface is irrevocably deleted.
+      operationId: deleteActivityUi
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterface'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/activities/{entityId}/ui/pages':
+    post:
+      tags:
+        - activities
+      summary: Create a new user interface page
+      description: |
+        Append a new empty page to the user interface pages. The new page identifier is returned in the response.
+
+        The payload fields are optional. A page name and the items of the page can be specified, or later be added with 
+        `PATCH /activities/{entityId}/ui/pages/{pageId}`.
+      operationId: createActivityUiPage
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUserInterfacePageUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page_id:
+                    $ref: '#/components/schemas/SimpleId'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    get:
+      tags:
+        - activities
+      summary: Get the user interface pages of an activity.
+      operationId: getActivityUiPages
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Update the activity user interface page order.
+      operationId: updateActivityUiPageOrder
+      description: |
+        Reorder the pages in the user interface according to the page identifiers in the `page_order` array.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_order:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SimpleId'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Reset the activity user interface pages to the default state.
+      description: |
+        The default page(s) is created and the page array returned.
+
+        ⚠️ The customization of the activity user interface is irrevocably deleted.
+      operationId: resetActivityUiPages
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/activities/{entityId}/ui/pages/{pageId}':
+    get:
+      tags:
+        - activities
+      summary: Get the user interface page definition of a remote-entity.
+      operationId: getActivityUiPage
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/page_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Update an activity user interface page.
+      operationId: updateActivityUiPage
+      description: |
+        Update one or multiple properties of an activity user interface page. The omitted properties are ignored and not
+        deleted. To clear an array simply provide an empty array.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/page_id'
+      requestBody:
+        description: Properties to update in the existing activity user interface page.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUserInterfacePageUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Delete an activity user interface page.
+      description: |
+        The given page is removed and the array of remaining pages is returned.
+
+        ⚠️ The customization of the activity user interface page is irrevocably deleted.
+      operationId: deleteActivityUiPage
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/page_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2273,7 +2667,7 @@ paths:
     head:
       tags:
         - infrared
-      summary: "\U0001F477 Get total number of custom infrared code sets."
+      summary: Get total number of custom infrared code sets.
       operationId: getCustomIrDeviceCount
       responses:
         '200':
@@ -2290,9 +2684,10 @@ paths:
     get:
       tags:
         - infrared
-      summary: "\U0001F477 Get all custom infrared code sets."
+      summary: Get all custom infrared code sets.
       description: |
-        TODO.
+        Retrieve all custom infrared code set with paging. Use `GET /ir/codes/custom/{codeSetId}` to access the IR code
+        definitions.
       operationId: getCustomIrDeviceCodes
       parameters:
         - $ref: '#/components/parameters/page'
@@ -2316,9 +2711,9 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                type: array
+                items:
+                  $ref: '#/components/schemas/CodeSetInfo'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2328,17 +2723,19 @@ paths:
     post:
       tags:
         - infrared
-      summary: "\U0001F477 Create a new custom infrared code set."
+      summary: Create a new custom infrared code set.
       description: |
-        TODO.
+        Create a new custom codeset for an IR device. The IR codes can already be provided or added later with
+        `GET /ir/codes/custom/{codeSetId}/{key}`.
+
+        If the manufacturer isn't provided, the codeset will be linked to the custom manufacturer entry for self learned
+        codes.
       operationId: createCustomIrDevice
       requestBody:
         content:
           application/json:
             schema:
-              type: string
-              enum:
-                - TODO
+              $ref: '#/components/schemas/CodeSetCreate'
         required: true
       responses:
         '201':
@@ -2346,9 +2743,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                $ref: '#/components/schemas/CodeSetInfo'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2360,7 +2755,7 @@ paths:
     delete:
       tags:
         - infrared
-      summary: "\U0001F477 Delete all custom infrared code sets."
+      summary: Delete all custom infrared code sets.
       description: |
         ⚠️ All defined custom infrared device codes will be irrevocably deleted!
       operationId: deleteAllCustomIrDeviceCodes
@@ -2375,9 +2770,9 @@ paths:
     get:
       tags:
         - infrared
-      summary: "\U0001F477 Get custom infrared code set."
+      summary: Get custom infrared code set.
       description: |
-        TODO.
+        Retrieve the full definition of an infrared code set including the IR codes.
       operationId: getCustomIrDeviceCodeSet
       parameters:
         - name: codeSetId
@@ -2404,9 +2799,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                $ref: '#/components/schemas/CodeSet'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2418,7 +2811,9 @@ paths:
         - infrared
       summary: "\U0001F477 Modify a custom infrared code set."
       description: |
-        TODO.
+        Rename the device or change the device type of an infrared code set.
+
+        A device name must be unique and only custom infrared code sets can be modified.
       operationId: updateCustomIrDeviceCodeSet
       parameters:
         - name: codeSetId
@@ -2430,19 +2825,15 @@ paths:
         content:
           application/json:
             schema:
-              type: string
-              enum:
-                - TODO
+              $ref: '#/components/schemas/CodeSetUpdate'
         required: true
       responses:
-        '201':
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                type: string
-                enum:
-                  - TODO
+                $ref: '#/components/schemas/CodeSetInfo'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2454,7 +2845,7 @@ paths:
     delete:
       tags:
         - infrared
-      summary: "\U0001F477 Delete custom infrared code set."
+      summary: Delete custom infrared code set.
       description: |
         ⚠️ All defined custom infrared device codes will be irrevocably deleted!
       operationId: deleteCustomIrDeviceCodeSet
@@ -2471,6 +2862,138 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  '/ir/codes/custom/{codeSetId}/{key}':
+    get:
+      tags:
+        - infrared
+      summary: Get a code definition from a custom infrared code set.
+      description: |
+        Retrieve the code definition for the given key in the infrared code set.
+      operationId: getCodeInCustomIrDeviceCodeSet
+      parameters:
+        - name: codeSetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IrCode'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - infrared
+      summary: Add a new key to a custom infrared code set.
+      description: |
+        Enhance the infrared code set with a new key. The key must be unique in a given code set. Only custom code sets can
+        be modified.
+      operationId: addKeyInCustomIrDeviceCodeSet
+      parameters:
+        - name: codeSetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IrCodeUpdate'
+        required: true
+      responses:
+        '201':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    put:
+      tags:
+        - infrared
+      summary: Modify a code in a custom infrared code set.
+      description: |
+        Update the code definition of a key in an infrared code set. Only custom code sets can be modified.
+      operationId: updateCodeInCustomIrDeviceCodeSet
+      parameters:
+        - name: codeSetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IrCodeUpdate'
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - infrared
+      summary: Delete and entry in a custom infrared code set.
+      description: |
+        ⚠️ The key in the custom infrared device code set will be irrevocably deleted!
+      operationId: deleteKeyInCustomIrDeviceCodeSet
+      parameters:
+        - name: codeSetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: key
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /ir/emitters:
     head:
       tags:
@@ -2603,7 +3126,7 @@ paths:
     head:
       tags:
         - remotes
-      summary: Get total number of infrared remote entities.
+      summary: Get total number of remote-entities.
       description: |
         The total number of available remotes are returned in the `Pagination-Count` header. This allows to prepare the
         retrieval of the remotes with the `GET` operation and paging parameters.
@@ -2623,7 +3146,7 @@ paths:
     get:
       tags:
         - remotes
-      summary: Get infrared remote entities overview with paging.
+      summary: Get remote-entities overview with paging.
       description: |
         Returns an overview of all defined remotes with the given paging parameters. Use the `HEAD` operation to retrieve
         the total number of defined remotes.
@@ -2663,9 +3186,9 @@ paths:
     post:
       tags:
         - remotes
-      summary: Create a new infrared remote entity with a manufacturer IR code set or an empty custom code set.
+      summary: Create a new remote-entity with a manufacturer IR code set or an empty custom code set.
       description: |
-        Create a new entity of type `remote`. An remote entity is a special internal entity without association to an
+        Create a new entity of type `remote`. An remote-entity is a special internal entity without association to an
         integration driver.
 
         To create a new remote at least a name must be provided. If no manufacturer infrared code set is specified in
@@ -2686,16 +3209,17 @@ paths:
             schema:
               $ref: '#/components/schemas/RemoteCreate'
             examples:
-              create with code set:
+              create with existing code set:
                 value:
                   name:
                     en: My new remote
-                  options:
-                    codeset_id: ir.manufacturer.123
-              crate with custom code set:
+                  codeset_id: ir.manufacturer.123
+              crate with custom code set (default device type & manufacturer):
                 value:
                   name:
                     en: My custom remote
+                  custom_codeset:
+                    device_name: My device
               'remote with icon, description and custom code set':
                 value:
                   name:
@@ -2703,6 +3227,10 @@ paths:
                   icon: 'uc:movie'
                   description:
                     en: Testing the custom code set feature
+                  custom_codeset:
+                    manufacturer_id: custom
+                    device_name: My device
+                    device_type: various
               clone:
                 value:
                   name:
@@ -2727,9 +3255,9 @@ paths:
     delete:
       tags:
         - remotes
-      summary: Delete all infrared remote entities.
+      summary: Delete all remote-entities.
       description: |
-        ⚠️ All defined infrared entities will be irrevocably deleted!
+        ⚠️ All defined entities will be irrevocably deleted!
       operationId: deleteAllRemotes
       responses:
         '200':
@@ -2742,7 +3270,7 @@ paths:
     get:
       tags:
         - remotes
-      summary: Get an infrared remote entity by its entity_id.
+      summary: Get a remote-entity by its entity_id.
       description: |
         Returns all the information required to manage an existing remote.
       operationId: getRemote
@@ -2766,15 +3294,20 @@ paths:
     patch:
       tags:
         - remotes
-      summary: Update an infrared remote entity.
+      summary: Update a remote-entity.
       operationId: updateRemote
       description: |
-        Update one or multiple properties of an infrared entity. The omitted properties are ignored and not deleted.
+        Update one or multiple properties of a remote-entity. The omitted properties are ignored and not deleted.
         To clear an array simply provide an empty array.
+
+        - Button mappings are configured with the dedicated `/remotes/{entityId}/buttons` and
+          `/remote/{entityId}/buttons/{button}` endpoints.
+        - The user interface is configured with the dedicated `/remotes/{entityId}/ui`, `/remotes/{entityId}/ui/pages`
+          and `/remotes/{entityId}/ui/pages/{pageId}` endpoints.
       parameters:
         - $ref: '#/components/parameters/entity_id'
       requestBody:
-        description: Properties to update in the existing infrared entity.
+        description: Properties to update in the existing remote-entity.
         content:
           application/json:
             schema:
@@ -2798,9 +3331,9 @@ paths:
     delete:
       tags:
         - remotes
-      summary: Delete an infrared remote entity.
+      summary: Delete a remote-entity.
       description: |
-        The given infrared entity is irrevocably deleted.
+        ⚠️ The given entity is irrevocably deleted.
       operationId: deleteRemote
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -2830,6 +3363,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RemoteIrDataSet'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/ir/{cmdId}':
+    post:
+      tags:
+        - remotes
+      summary: "\U0001F477 Add a custom infrared command to the codeset."
+      operationId: addRemoteIrCode
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/cmd_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  type: string
+                format:
+                  type: string
+                  enum:
+                    - HEX
+                    - PRONTO
+              required:
+                - value
+                - format
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RemoteIrCode'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -2838,7 +3410,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/remotes/{entityId}/ir/{cmdId}':
     get:
       tags:
         - remotes
@@ -2917,6 +3488,472 @@ paths:
           $ref: '#/components/responses/SuccessMessage'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/buttons':
+    get:
+      tags:
+        - remotes
+      summary: Get the physical button mappings.
+      operationId: getRemoteButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+              example:
+                - button: DPAD_DOWN
+                  short_press:
+                    cmd_id: CURSOR_DOWN
+                  long_press:
+                    cmd_id: BACK
+                - button: DPAD_MIDDLE
+                  short_press:
+                    cmd_id: CURSOR_ENTER
+                - button: DPAD_LEFT
+                  short_press:
+                    cmd_id: CURSOR_LEFT
+                - button: DPAD_RIGHT
+                  short_press:
+                    cmd_id: CURSOR_RIGHT
+                - button: DPAD_UP
+                  short_press:
+                    cmd_id: CURSOR_UP
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Reset the physical button mappings to their default state.
+      description: |
+        An automatic mapping of common functions to the physical buttons is performed. This depends on the chosen IR codeset
+        if e.g. the volume up & down keys are automatically mapped.
+
+        ⚠️ The previous customization of the physical button mapping is irrevocably deleted.
+      operationId: resetRemoteButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+              example:
+                - button: BACK
+                  short_press:
+                    cmd_id: BACK
+                - button: DPAD_DOWN
+                  short_press:
+                    cmd_id: CURSOR_DOWN
+                - button: DPAD_MIDDLE
+                  short_press:
+                    cmd_id: CURSOR_ENTER
+                - button: DPAD_LEFT
+                  short_press:
+                    cmd_id: CURSOR_LEFT
+                - button: DPAD_RIGHT
+                  short_press:
+                    cmd_id: CURSOR_RIGHT
+                - button: DPAD_UP
+                  short_press:
+                    cmd_id: CURSOR_UP
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/buttons/{button}':
+    get:
+      tags:
+        - remotes
+      summary: Get a physical button mapping.
+      operationId: getRemoteButtonMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMapping'
+              example:
+                button: DPAD_DOWN
+                short_press:
+                  cmd_id: HOME
+                long_press:
+                  cmd_id: MENU
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - remotes
+      summary: Update a physical button mapping.
+      description: |
+        Update the button mapping for either a short- or a long-press.
+
+        ⚠️ In the EntityCommand object the `entity_id` may not be specified. A remote-entity always operates on its own
+        commands. If you want to control other entities, an activity must be used.
+      operationId: updateRemoteButtonMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    short_press:
+                      $ref: '#/components/schemas/EntityCommand'
+                  required:
+                    - short_press
+                - type: object
+                  properties:
+                    long_press:
+                      $ref: '#/components/schemas/EntityCommand'
+                  required:
+                    - long_press
+            examples:
+              short button press:
+                value:
+                  short_press:
+                    cmd_id: HOME
+              long button press:
+                value:
+                  long_press:
+                    cmd_id: MENU
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMapping'
+              example:
+                button: DPAD_DOWN
+                short_press:
+                  cmd_id: HOME
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Remove a physical button mapping.
+      description: |
+        ⚠️ The previous customization of the physical button mapping is irrevocably deleted.
+      operationId: deleteRemoteButtonMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+              example:
+                - button: DPAD_MIDDLE
+                  short_press:
+                    cmd_id: CURSOR_ENTER
+                - button: DPAD_LEFT
+                  short_press:
+                    cmd_id: CURSOR_LEFT
+                - button: DPAD_RIGHT
+                  short_press:
+                    cmd_id: CURSOR_RIGHT
+                - button: DPAD_UP
+                  short_press:
+                    cmd_id: CURSOR_UP
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/ui':
+    get:
+      tags:
+        - remotes
+      summary: Get the user interface definition of a remote-entity.
+      description: |
+        Returns all the information required to manage an existing remote user interface.
+
+        At the moment a user interface only consists of pages.
+      operationId: getRemoteUi
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Reset a remote user interface to its default state.
+      description: |
+        ⚠️ The customization of the remote user interface is irrevocably deleted.
+      operationId: deleteRemoteUi
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterface'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/ui/pages':
+    post:
+      tags:
+        - remotes
+      summary: Create a new user interface page
+      description: |
+        Append a new empty page to the user interface pages. The new page identifier is returned in the response.
+
+        The payload fields are optional. A page name and the items of the page can be specified, or later be added with 
+        `PATCH /remotes/{entityId}/ui/pages/{pageId}`.
+
+        ⚠️ If the user interface items with `command` objects are specified, then the `EntityCommand` structure may not
+        contain an `entity_id` field. A remote-entity always operates on itself.
+      operationId: createRemoteUiPage
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUserInterfacePageUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page_id:
+                    $ref: '#/components/schemas/SimpleId'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    get:
+      tags:
+        - remotes
+      summary: Get the user interface pages of a remote-entity.
+      operationId: getRemoteUiPages
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - remotes
+      summary: Update the remote user interface page order.
+      operationId: updateRemoteUiPageOrder
+      description: |
+        Reorder the pages in the user interface according to the page identifiers in the `page_order` array.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                page_order:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SimpleId'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Reset the remote user interface pages to the default state.
+      description: |
+        The default page(s) is created and the page array returned.
+
+        ⚠️ The customization of the remote user interface is irrevocably deleted.
+      operationId: resetRemoteUiPages
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/ui/pages/{pageId}':
+    get:
+      tags:
+        - remotes
+      summary: Get the user interface page definition of a remote-entity.
+      operationId: getRemoteUiPage
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/page_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - remotes
+      summary: Update a remote user interface page.
+      operationId: updateRemoteUiPage
+      description: |
+        Update one or multiple properties of a remote user interface page. The omitted properties are ignored and not deleted.
+        To clear an array simply provide an empty array.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/page_id'
+      requestBody:
+        description: Properties to update in the existing remote user interface page.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUserInterfacePageUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Delete a remote user interface page.
+      description: |
+        The given page is removed and the array of remaining pages is returned.
+
+        ⚠️ The customization of the remote user interface page is irrevocably deleted.
+      operationId: deleteRemoteUiPage
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/page_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ActivityUserInterfacePage'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -5035,6 +6072,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/ApiKeyId'
+    button_id:
+      name: buttonId
+      in: path
+      description: Button identification.
+      required: true
+      schema:
+        $ref: '#/components/schemas/ButtonId'
     cmd_id:
       name: cmdId
       in: path
@@ -5310,12 +6354,6 @@ components:
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
-                sequences:
-                  $ref: '#/components/schemas/ActivitySequences'
-                button_mapping:
-                  $ref: '#/components/schemas/DeviceButtonMappings'
-                user_interface:
-                  $ref: '#/components/schemas/ActivityUserInterface'
     ActivityRequest:
       description: |
         Dedicated request object to create a new activity.  
@@ -5387,27 +6425,42 @@ components:
                 $ref: '#/components/schemas/EntityId'
             sequences:
               $ref: '#/components/schemas/ActivitySequences'
-            button_mapping:
-              $ref: '#/components/schemas/DeviceButtonMappings'
-            user_interface:
-              $ref: '#/components/schemas/ActivityUserInterface'
     ActivityUserInterface:
       type: object
       properties:
         pages:
           type: array
           items:
-            type: object
-            properties:
-              name:
-                description: Optional page name
-                type: string
-              items:
-                type: array
-                items:
-                  $ref: '#/components/schemas/UserInterfaceItem'
-            required:
-              - items
+            $ref: '#/components/schemas/ActivityUserInterfacePage'
+    ActivityUserInterfacePage:
+      type: object
+      properties:
+        page_id:
+          description: Page identifier. Used to access an individual page or reorder the pages in the user interface.
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          description: Optional page name
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserInterfaceItem'
+      required:
+        - page_id
+        - items
+    ActivityUserInterfacePageUpdate:
+      type: object
+      properties:
+        name:
+          description: Optional page name
+          type: string
+        items:
+          description: |
+            Updated user interface items. An empty array will REMOVE all items, if the property is omitted the existing
+            configuration is not changed.
+          type: array
+          items:
+            $ref: '#/components/schemas/UserInterfaceItem'
     ApiKey:
       type: object
       properties:
@@ -5559,6 +6612,12 @@ components:
       maxLength: 36
       description: |
         Entity identifier used in an integration driver (= available entities).  
+    ButtonId:
+      type: string
+      format: '^[A-Z0-9_]+$'
+      minLength: 1
+      maxLength: 20
+      description: Physical button identification
     CommandSequence:
       description: Sequence of commands to execute.
       type: array
@@ -5658,8 +6717,7 @@ components:
       type: object
       properties:
         button:
-          description: Button identifier.
-          type: string
+          $ref: '#/components/schemas/ButtonId'
         short_press:
           $ref: '#/components/schemas/EntityCommand'
         long_press:
@@ -5681,6 +6739,103 @@ components:
         - CONNECTED
         - DISCONNECTED
         - ERROR
+    DeviceType:
+      type: string
+      enum:
+        - audio
+        - radio
+        - cd_player
+        - receiver
+        - soundbar
+        - hdmi_switch
+        - television
+        - projector
+        - set_top_box
+        - media_player
+        - dvd_player
+        - bluray_player
+        - climate
+        - light
+        - various
+    CodeSet:
+      type: object
+      properties:
+        manufacturer_id:
+          type: string
+        manufacturer:
+          type: string
+        device_id:
+          type: string
+        device:
+          type: string
+        device_type:
+          type: string
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IrCode'
+      required:
+        - manufacturer
+        - manufacturer_id
+        - device_id
+        - device
+        - device_type
+        - codes
+    CodeSetCreate:
+      type: object
+      properties:
+        manufacturer:
+          description: |
+            Optional manufacturer name. If not specified: the codeset will be linked to the custom manufacturer entry
+            for self learned codes.
+          type: string
+        device:
+          type: string
+        device_type:
+          type: string
+        code_format:
+          type: string
+        codes:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+            required:
+              - key
+              - value
+      required:
+        - device
+        - device_type
+    CodeSetInfo:
+      type: object
+      properties:
+        manufacturer_id:
+          type: string
+        manufacturer:
+          type: string
+        device_id:
+          type: string
+        device:
+          type: string
+        device_type:
+          type: string
+      required:
+        - manufacturer_id
+        - manufacturer
+        - device_id
+        - device
+        - device_type
+    CodeSetUpdate:
+      type: object
+      properties:
+        device:
+          type: string
+        device_type:
+          type: string
     ResourceType:
       type: string
       format: '^[a-zA-Z]+$'
@@ -5862,12 +7017,37 @@ components:
       description: |
         Optional image identifier. If specified the image will be set. An empty identifier, while updating the object,
         removes the existing image.
+    IrCode:
+      type: object
+      properties:
+        key:
+          type: string
+        format:
+          type: string
+        value:
+          type: string
+      required:
+        - key
+        - format
+        - value
+    IrCodeCreate:
+      $ref: '#/components/schemas/IrCode'
     IrCodeSetType:
       description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
       type: string
       enum:
         - manufacturer
         - custom
+    IrCodeUpdate:
+      type: object
+      properties:
+        format:
+          type: string
+        value:
+          type: string
+      required:
+        - format
+        - value
     IrEmitter:
       type: object
       properties:
@@ -6012,8 +7192,6 @@ components:
                     - `false`: macro was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
-                sequence:
-                  $ref: '#/components/schemas/CommandSequence'
     MacroUpdate:
       description: |
         Dedicated request object to update an existing macro.  
@@ -6152,13 +7330,27 @@ components:
                 - clone_from
             - type: object
               properties:
-                options:
+                codeset_id:
+                  $ref: '#/components/schemas/SimpleId'
+              required:
+                - codeset_id
+            - type: object
+              properties:
+                custom_codeset:
                   type: object
                   properties:
-                    codeset_id:
-                      $ref: '#/components/schemas/SimpleId'
+                    manufacturer_id:
+                      type: string
+                      default: custom
+                    device_name:
+                      type: string
+                    device_type:
+                      $ref: '#/components/schemas/DeviceType'
+                      default: various
                   required:
-                    - codeset_id
+                    - device_name
+              required:
+                - custom_codeset
       required:
         - name
     RemoteOverview:
@@ -6190,8 +7382,8 @@ components:
     RemoteUpdate:
       description: |
         Dedicated request object to update an existing remote.  
-        All root properties are optional and only the provided objects are updated in the remote entity. Omitted objects are
-        ignored and not deleted from the remote entity.
+        All root properties are optional and only the provided objects are updated in the remote-entity. Omitted objects are
+        ignored and not deleted from the remote-entity.
       type: object
       properties:
         name:
@@ -6223,10 +7415,6 @@ components:
                   required:
                     - device_id
                     - port_id
-            button_mapping:
-              $ref: '#/components/schemas/DeviceButtonMappings'
-            user_interface:
-              $ref: '#/components/schemas/ActivityUserInterface'
     RemoteInterface:
       description: |
         The remote user interface represent a remote that can be operated by buttons and UI soft buttons.
@@ -6266,22 +7454,6 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/RemoteInterfaces'
-    RemoteInterfaceCreate:
-      description: |
-        Dedicated request object to create a new remote interface.
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        entity_id:
-          $ref: '#/components/schemas/EntityId'
-        description:
-          $ref: '#/components/schemas/LanguageText'
-      required:
-        - name
-        - entity_id
     RemoteIrDataSet:
       type: object
       properties:

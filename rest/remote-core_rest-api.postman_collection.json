@@ -3101,6 +3101,662 @@
 			"name": "activities",
 			"item": [
 				{
+					"name": "buttons",
+					"item": [
+						{
+							"name": "getActivityButtonMappings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"button\", responseJson[0].button);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/buttons",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"buttons"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "resetActivityButtonMappings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/buttons",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"buttons"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getActivityButtonMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/buttons/:button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"buttons",
+										":button"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										},
+										{
+											"key": "button",
+											"value": "{{button}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateActivityButtonMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"long_press\": {\n    \"entity_id\": \"92f2319b-1258-495b-ad27-7bf2f851c8ab\",\n    \"cmd_id\": \"NUMPAD_1\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/buttons/:button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"buttons",
+										":button"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										},
+										{
+											"key": "button",
+											"value": "{{button}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteActivityButtonMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/buttons/:button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"buttons",
+										":button"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										},
+										{
+											"key": "button",
+											"value": "{{button}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "ui",
+					"item": [
+						{
+							"name": "pages",
+							"item": [
+								{
+									"name": "page",
+									"item": [
+										{
+											"name": "getActivityUiPage",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/activities/:entityId/ui/pages/:page",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"activities",
+														":entityId",
+														"ui",
+														"pages",
+														":page"
+													],
+													"variable": [
+														{
+															"key": "entityId",
+															"value": "{{activity_id}}"
+														},
+														{
+															"key": "page",
+															"value": "main"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "updateActivityUiPage",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PATCH",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 1,\n                \"y\": 0\n            },\n            \"size\": {\n                \"width\": 2\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"HDMI\",\n            \"command\": {\n                \"cmd_id\": \"HDMI_1\",\n                \"entity_id\": \"92f2319b-1258-495b-ad27-7bf2f851c8ab\"\n            },\n            \"location\": {\n                \"x\": 2,\n                \"y\": 1\n            }\n        }\n    ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{SERVER}}/api/activities/:entityId/ui/pages/:page",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"activities",
+														":entityId",
+														"ui",
+														"pages",
+														":page"
+													],
+													"variable": [
+														{
+															"key": "entityId",
+															"value": "{{activity_id}}"
+														},
+														{
+															"key": "page",
+															"value": "main"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "deleteActivityUiPage",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/activities/:entityId/ui/pages/:page",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"activities",
+														":entityId",
+														"ui",
+														"pages",
+														":page"
+													],
+													"variable": [
+														{
+															"key": "entityId",
+															"value": "{{activity_id}}"
+														},
+														{
+															"key": "page",
+															"value": "main"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "createActivityUiPage",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"Test\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/activities/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"activities",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{activity_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getActivityUiPages",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/activities/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"activities",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{activity_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateActivityUiPageOrder",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"page_order\": [\"b99a3a0a-6859-4810-aae9-eff31043b980\", \"main\"]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/activities/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"activities",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{activity_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "resetActivityUiPages",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/activities/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"activities",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{activity_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "getActivityUi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/ui",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"ui"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteActivityUi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/activities/:entityId/ui",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"activities",
+										":entityId",
+										"ui"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{activity_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "getActivityCount",
 					"event": [
 						{
@@ -3330,7 +3986,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"button_mapping\": [\n            {\n                \"button\": \"PLAY\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            },\n            {\n                \"button\": \"NEXT\",\n                \"short_press\": {\n                    \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                    \"cmd_id\": \"macro.run\"\n                }\n            }\n        ],\n        \"entity_ids\": [\n            \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                        \"cmd_id\": \"macro.run\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        },\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"items\": [\n                        {\n                            \"type\": \"icon\",\n                            \"command\": {\n                                \"entity_id\": \"63e38a6c-c1ac-43fb-a223-89eb8e01b9af\",\n                                \"cmd_id\": \"macro.run\"\n                            },\n                            \"location\": {\n                                \"x\": 2,\n                                \"y\": 0\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    }\n}",
+							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [\n            \"92f2319b-1258-495b-ad27-7bf2f851c8ab\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"92f2319b-1258-495b-ad27-7bf2f851c8ab\",\n                        \"cmd_id\": \"POWER_ON\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -3813,6 +4469,851 @@
 			"name": "remotes",
 			"item": [
 				{
+					"name": "ir",
+					"item": [
+						{
+							"name": "getRemoteIrDataSet",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ir",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ir"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getRemoteIrCode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ir",
+										":cmdId"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "cmdId",
+											"value": "BACK"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateRemoteIrCode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"0000,006e,0022,0002,0155,00ac,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0041,0015,0015,0015,0015,0015,05e4,0155,0055,0015,0e40\",\n    \"format\": \"PRONTO\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ir",
+										":cmdId"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "cmdId",
+											"value": "BACK"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteOrResetRemoteIrCode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ir",
+										":cmdId"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "cmdId",
+											"value": "BACK"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "buttons",
+					"item": [
+						{
+							"name": "getRemoteButtonMappings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"button\", responseJson[0].button);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/buttons",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"buttons"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "resetRemoteButtonMappings",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/buttons",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"buttons"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getRemoteButtonMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/buttons/:button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"buttons",
+										":button"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "button",
+											"value": "{{button}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateRemoteButtonMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"short_press\": {\n    \"cmd_id\": \"BACK\"\n  }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/buttons/:button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"buttons",
+										":button"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "button",
+											"value": "{{button}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteRemoteButtonMapping",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/buttons/:button",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"buttons",
+										":button"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "button",
+											"value": "{{button}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "ui",
+					"item": [
+						{
+							"name": "pages",
+							"item": [
+								{
+									"name": "page",
+									"item": [
+										{
+											"name": "getRemoteUiPage",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages/:page",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"remotes",
+														":entityId",
+														"ui",
+														"pages",
+														":page"
+													],
+													"variable": [
+														{
+															"key": "entityId",
+															"value": "{{remote_id}}"
+														},
+														{
+															"key": "page",
+															"value": "main"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "updateRemoteUiPage",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PATCH",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 1,\n                \"y\": 0\n            },\n            \"size\": {\n                \"width\": 2\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"OK\",\n            \"command\": {\n                \"cmd_id\": \"ENTER\"\n            },\n            \"location\": {\n                \"x\": 3,\n                \"y\": 5\n            },\n            \"size\": {\n                \"width\": 1,\n                \"height\": 1\n            }\n        }\n    ]\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages/:page",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"remotes",
+														":entityId",
+														"ui",
+														"pages",
+														":page"
+													],
+													"variable": [
+														{
+															"key": "entityId",
+															"value": "{{remote_id}}"
+														},
+														{
+															"key": "page",
+															"value": "main"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "deleteRemoteUiPage",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages/:page",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"remotes",
+														":entityId",
+														"ui",
+														"pages",
+														":page"
+													],
+													"variable": [
+														{
+															"key": "entityId",
+															"value": "{{remote_id}}"
+														},
+														{
+															"key": "page",
+															"value": "main"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "createRemoteUiPage",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"name\": \"Test\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"remotes",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{remote_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getRemoteUiPages",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"remotes",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{remote_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateRemoteUiPageOrder",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"page_order\": [\"b99a3a0a-6859-4810-aae9-eff31043b980\", \"main\"]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"remotes",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{remote_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "resetRemoteUiPages",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/remotes/:entityId/ui/pages",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"remotes",
+												":entityId",
+												"ui",
+												"pages"
+											],
+											"variable": [
+												{
+													"key": "entityId",
+													"value": "{{remote_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "getRemoteUi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ui",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ui"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteRemoteUi",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ui",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ui"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "getRemoteCount",
 					"event": [
 						{
@@ -3936,6 +5437,138 @@
 					"response": []
 				},
 				{
+					"name": "createRemote with IR codeset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"codeset_id\": \"lg1\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createRemote with custom codeset - minimal",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"custom_codeset\": {\n        \"device_name\": \"My device\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createRemote with custom codeset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"custom_codeset\": {\n        \"manufacturer_id\": \"custom\",\n        \"device_name\": \"My new TV\",\n        \"device_type\": \"television\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "deleteAllRemotes",
 					"event": [
 						{
@@ -4026,7 +5659,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"ir\": {\n            \"codeset\": {\n                \"id\": \"foobar\"\n            }\n        },\n        \"button_mapping\": [\n            {\n                \"button\": \"HOME\",\n                \"short_press\": {\n                    \"cmd_id\": \"OSD\"\n                },\n                \"long_press\": {\n                    \"cmd_id\": \"SETUP\"\n                }\n            }\n        ],\n        \"user_interface\": {\n            \"pages\": [\n                {\n                    \"items\": [\n                        {\n                            \"type\": \"icon\",\n                            \"icon\": \"string\",\n                            \"text\": \"string\",\n                            \"command\": {\n                                \"cmd_id\": \"ENTER\"\n                            },\n                            \"location\": {\n                                \"x\": 3,\n                                \"y\": 5\n                            },\n                            \"size\": {\n                                \"width\": 1,\n                                \"height\": 1\n                            }\n                        }\n                    ]\n                }\n            ]\n        }\n    }\n}",
+							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"ir\": {\n            \"codeset\": {\n                \"id\": \"foobar\"\n            }\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4085,190 +5718,6 @@
 								{
 									"key": "entityId",
 									"value": "{{remote_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getRemoteIrDataSet",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/remotes/:entityId/ir",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"remotes",
-								":entityId",
-								"ir"
-							],
-							"variable": [
-								{
-									"key": "entityId",
-									"value": "{{remote_id}}"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getRemoteIrCode",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"remotes",
-								":entityId",
-								"ir",
-								":cmdId"
-							],
-							"variable": [
-								{
-									"key": "entityId",
-									"value": "{{remote_id}}"
-								},
-								{
-									"key": "cmdId",
-									"value": "BACK"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteOrResetRemoteIrCode",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"remotes",
-								":entityId",
-								"ir",
-								":cmdId"
-							],
-							"variable": [
-								{
-									"key": "entityId",
-									"value": "{{remote_id}}"
-								},
-								{
-									"key": "cmdId",
-									"value": "BACK"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "updateRemoteIrCode",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"value\": \"0000,006e,0022,0002,0155,00ac,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0041,0015,0015,0015,0015,0015,05e4,0155,0055,0015,0e40\",\n    \"format\": \"PRONTO\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"remotes",
-								":entityId",
-								"ir",
-								":cmdId"
-							],
-							"variable": [
-								{
-									"key": "entityId",
-									"value": "{{remote_id}}"
-								},
-								{
-									"key": "cmdId",
-									"value": "BACK"
 								}
 							]
 						}
@@ -4775,6 +6224,10 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
 											"const responseJson = pm.response.json();",
 											"postman.setEnvironmentVariable(\"group_id\", responseJson.group_id);"
 										],
@@ -4866,6 +6319,20 @@
 						},
 						{
 							"name": "updateGroup",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "PATCH",
 								"header": [],
@@ -4913,6 +6380,20 @@
 						},
 						{
 							"name": "updateGroup with duplicate entities",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 400\", function () {",
+											"    pm.response.to.have.status(400);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "PATCH",
 								"header": [],
@@ -4965,6 +6446,20 @@
 					"item": [
 						{
 							"name": "getPagesInProfile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -5002,6 +6497,10 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
 											"const responseJson = pm.response.json();",
 											"postman.setEnvironmentVariable(\"page_id\", responseJson.page_id);"
 										],
@@ -5051,6 +6550,20 @@
 						},
 						{
 							"name": "getPage",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -5181,6 +6694,12 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"profile_id\", responseJson[0].profile_id);",
 									""
 								],
 								"type": "text/javascript"
@@ -5252,6 +6771,10 @@
 							"listen": "test",
 							"script": {
 								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
 									"const responseJson = pm.response.json();",
 									"postman.setEnvironmentVariable(\"profile_id\", responseJson.profile_id);"
 								],
@@ -5286,6 +6809,20 @@
 				},
 				{
 					"name": "getProfile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"protocolProfileBehavior": {
 						"disableBodyPruning": true
 					},
@@ -5323,6 +6860,20 @@
 				},
 				{
 					"name": "updateProfile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -5357,6 +6908,20 @@
 				},
 				{
 					"name": "deleteProfile",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -6719,7 +8284,7 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{SERVER}}/api/ir/codes/manufacturers?q=lucky",
+											"raw": "{{SERVER}}/api/ir/codes/manufacturers?q=lg",
 											"host": [
 												"{{SERVER}}"
 											],
@@ -6732,7 +8297,7 @@
 											"query": [
 												{
 													"key": "q",
-													"value": "lucky"
+													"value": "lg"
 												},
 												{
 													"key": "page",
@@ -6791,7 +8356,7 @@
 												},
 												{
 													"key": "limit",
-													"value": "100",
+													"value": "1",
 													"disabled": true
 												}
 											],
@@ -6836,18 +8401,6 @@
 												":manufacturer_id",
 												":codeset"
 											],
-											"query": [
-												{
-													"key": "page",
-													"value": "1",
-													"disabled": true
-												},
-												{
-													"key": "limit",
-													"value": "100",
-													"disabled": true
-												}
-											],
 											"variable": [
 												{
 													"key": "manufacturer_id",
@@ -6856,6 +8409,498 @@
 												{
 													"key": "codeset",
 													"value": "lg1"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "custom",
+							"item": [
+								{
+									"name": "getCodeSetCount",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "HEAD",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getCodeSets",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"postman.setEnvironmentVariable(\"device_id\", responseJson[0].device_id);",
+													"postman.setEnvironmentVariable(\"device_name\", responseJson[0].device);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom?page=1&limit=10",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom"
+											],
+											"query": [
+												{
+													"key": "page",
+													"value": "1"
+												},
+												{
+													"key": "limit",
+													"value": "10"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "createCodeSet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"postman.setEnvironmentVariable(\"device_id\", responseJson.device_id);",
+													"postman.setEnvironmentVariable(\"device_name\", responseJson.device);"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"manufacturer\": \"Denon\",\n    \"device\": \"AVR-X2700\",\n    \"device_type\": \"receiver\",\n    \"code_format\": \"HEX\",\n    \"codes\": [\n        {\n            \"key\": \"POWER_ON\",\n            \"code\": \"123\"\n        },\n        {\n            \"key\": \"POWER_OFF\",\n            \"code\": \"222\"\n        },\n        {\n            \"key\": \"VOLUME_ON\",\n            \"code\": \"3\"\n        },\n        {\n            \"key\": \"VOLUME_OFF\",\n            \"code\": \"4\"\n        }\n    ]\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateCodeSet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PATCH",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"device\": \"AVR-X2700\",\n    \"device_type\": \"receiver\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getCodeSet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "deleteCodeSet",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "deleteAllCodeSets",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "addKey",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"format\": \"PRONTO\",\n    \"code\": \"42\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset/:key",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset",
+												":key"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												},
+												{
+													"key": "key",
+													"value": "TEST"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getCode",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset/:key",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset",
+												":key"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												},
+												{
+													"key": "key",
+													"value": "TEST"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateCode",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"format\": \"PRONTO\",\n    \"code\": \"1234\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset/:key",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset",
+												":key"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												},
+												{
+													"key": "key",
+													"value": "TEST"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "deleteKey",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset/:key",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset",
+												":key"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												},
+												{
+													"key": "key",
+													"value": "TEST"
 												}
 											]
 										}
