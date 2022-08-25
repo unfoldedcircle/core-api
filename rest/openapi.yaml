@@ -1914,7 +1914,7 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/activities/{entityId}/buttons/{button}':
+  '/activities/{entityId}/buttons/{buttonId}':
     get:
       tags:
         - activities
@@ -3311,7 +3311,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RemoteUpdate'
+              $ref: '#/components/schemas/Remote'
         required: true
       responses:
         '200':
@@ -3577,7 +3577,7 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/remotes/{entityId}/buttons/{button}':
+  '/remotes/{entityId}/buttons/{buttonId}':
     get:
       tags:
         - remotes
