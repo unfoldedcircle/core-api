@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.12.0
+  version: 0.12.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
