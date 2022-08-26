@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.12.1
+  version: 0.12.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3311,7 +3311,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Remote'
+              $ref: '#/components/schemas/RemoteUpdate'
         required: true
       responses:
         '200':
@@ -3319,7 +3319,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/RemoteInterface'
+                $ref: '#/components/schemas/Remote'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -7415,45 +7415,6 @@ components:
                   required:
                     - device_id
                     - port_id
-    RemoteInterface:
-      description: |
-        The remote user interface represent a remote that can be operated by buttons and UI soft buttons.
-      type: object
-      properties:
-        ui_id:
-          $ref: '#/components/schemas/UiId'
-        type:
-          description: TODO design it generic or specific for the remote interface?
-          type: string
-          enum:
-            - remote
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        entity_id:
-          $ref: '#/components/schemas/EntityId'
-        simple_commands:
-          type: array
-          items:
-            type: string
-        button_mapping:
-          $ref: '#/components/schemas/DeviceButtonMappings'
-        user_interface:
-          $ref: '#/components/schemas/ActivityUserInterface'
-        description:
-          $ref: '#/components/schemas/LanguageText'
-      required:
-        - ui_id
-        - name
-        - entity_id
-        - simple_commands
-        - button_mapping
-        - user_interface
-    RemoteInterfaces:
-      type: array
-      items:
-        $ref: '#/components/schemas/RemoteInterfaces'
     RemoteIrDataSet:
       type: object
       properties:
