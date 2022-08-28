@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.12.2
+  version: 0.12.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -49,7 +49,9 @@ tags:
   - name: infrared
     description: "\U0001F477 **work in progress**, not yet fully implemented! Infrared code set lookup, custom IR code management and IR emitter devices.\n"
   - name: remotes
-    description: "\U0001F477 **work in progress**, not yet fully implemented! Customizable user interface and button mappings for remote-entities\ncontrolling single IR- and the like devices.\n"
+    description: |
+      Customizable user interface and button mappings for remote-entities
+      controlling single IR- and the like devices.
   - name: profiles
     description: 'User profile configuration with profiles, groups, pages'
   - name: cfg
@@ -2809,7 +2811,7 @@ paths:
     patch:
       tags:
         - infrared
-      summary: "\U0001F477 Modify a custom infrared code set."
+      summary: Modify a custom infrared code set.
       description: |
         Rename the device or change the device type of an infrared code set.
 
@@ -3312,6 +3314,27 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/RemoteUpdate'
+            examples:
+              'Name, icon and description':
+                value:
+                  name:
+                    en: New remote name
+                  icon: 'uc:tv'
+                  description:
+                    en: Updated description
+              Output emitter:
+                value:
+                  options:
+                    ir:
+                      output:
+                        device_id: sim.1
+                        port_id: '4'
+              Infrared code set (NOT YET IMPLEMENTED):
+                value:
+                  options:
+                    ir:
+                      codeset:
+                        id: lg3
         required: true
       responses:
         '200':
@@ -3350,7 +3373,7 @@ paths:
     get:
       tags:
         - remotes
-      summary: "\U0001F477 Get the infrared dataset of the remote-entity."
+      summary: Get the infrared dataset of the remote-entity.
       description: |
         Returns all the information required to manage the infrared dataset.
       operationId: getRemoteIrDataSet
@@ -3373,7 +3396,7 @@ paths:
     post:
       tags:
         - remotes
-      summary: "\U0001F477 Add a custom infrared command to the codeset."
+      summary: Add a custom infrared command to the codeset.
       operationId: addRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -3413,7 +3436,7 @@ paths:
     get:
       tags:
         - remotes
-      summary: "\U0001F477 Gets an infrared code in the codeset."
+      summary: Gets an infrared code in the codeset.
       description: |
         Returns the details of a given infrared command.
       operationId: getRemoteIrCode
@@ -3438,7 +3461,7 @@ paths:
     patch:
       tags:
         - remotes
-      summary: "\U0001F477 Update an infrared command in the codeset."
+      summary: Update an infrared command in the codeset.
       operationId: updateRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -3478,7 +3501,7 @@ paths:
     delete:
       tags:
         - remotes
-      summary: "\U0001F477 Delete a custom ir code or reset a modified manufacturer code in the codeset."
+      summary: Delete a custom ir code or reset a modified manufacturer code in the codeset.
       operationId: deleteOrResetRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'

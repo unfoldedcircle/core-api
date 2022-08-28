@@ -2796,7 +2796,7 @@
 								},
 								{
 									"key": "entityId",
-									"value": "light.esstisch"
+									"value": "light.living_room_lights"
 								}
 							]
 						}
@@ -3408,7 +3408,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 1,\n                \"y\": 0\n            },\n            \"size\": {\n                \"width\": 2\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"HDMI\",\n            \"command\": {\n                \"cmd_id\": \"HDMI_1\",\n                \"entity_id\": \"92f2319b-1258-495b-ad27-7bf2f851c8ab\"\n            },\n            \"location\": {\n                \"x\": 2,\n                \"y\": 1\n            }\n        }\n    ]\n}",
+													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 2,\n                \"y\": 5\n            },\n            \"size\": {\n                \"width\": 2,\n                \"height\": 1\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"Toggle\",\n            \"command\": {\n                \"cmd_id\": \"light.toggle\",\n                \"entity_id\": \"hass.main.light.study_reading_light\"\n            },\n            \"location\": {\n                \"x\": 0,\n                \"y\": 0\n            },\n            \"size2\":{\"height\":6,\"width\":4}\n        }\n    ]\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -3880,50 +3880,6 @@
 					"response": []
 				},
 				{
-					"name": "createActivity Copy",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Successful POST request\", function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
-									"});",
-									"",
-									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"activity_id\", responseJson.entity_id);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} starts home office\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    }\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/activities",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"activities"
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "deleteAllActivities",
 					"event": [
 						{
@@ -3980,13 +3936,47 @@
 					"response": []
 				},
 				{
+					"name": "updateActivity with included entities",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.light.study_reading_light\"\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/activities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{activity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "updateActivity",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [\n            \"92f2319b-1258-495b-ad27-7bf2f851c8ab\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"92f2319b-1258-495b-ad27-7bf2f851c8ab\",\n                        \"cmd_id\": \"POWER_ON\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        }\n    }\n}",
+							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.light.study_reading_light\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"hass.main.light.study_reading_light\",\n                        \"cmd_id\": \"light.on\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4611,6 +4601,60 @@
 							"response": []
 						},
 						{
+							"name": "addRemoteIrCode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"0000,006e,0022,0002,0155,00ac,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0041,0015,0015,0015,0015,0015,05e4,0155,0055,0015,0e40\",\n    \"format\": \"PRONTO\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ir",
+										":cmdId"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "cmdId",
+											"value": "TEST"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "deleteOrResetRemoteIrCode",
 							"event": [
 								{
@@ -4965,7 +5009,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 1,\n                \"y\": 0\n            },\n            \"size\": {\n                \"width\": 2\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"OK\",\n            \"command\": {\n                \"cmd_id\": \"ENTER\"\n            },\n            \"location\": {\n                \"x\": 3,\n                \"y\": 5\n            },\n            \"size\": {\n                \"width\": 1,\n                \"height\": 1\n            }\n        }\n    ]\n}",
+													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 1,\n                \"y\": 0\n            },\n            \"size\": {\n                \"width\": 2\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"OK\",\n            \"command\": {\n                \"cmd_id\": \"BACK\"\n            },\n            \"location\": {\n                \"x\": 3,\n                \"y\": 5\n            },\n            \"size\": {\n                \"width\": 1,\n                \"height\": 1\n            }\n        }\n    ]\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -5481,6 +5525,50 @@
 					"response": []
 				},
 				{
+					"name": "createRemote with custom IR codeset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"codeset_id\": \"4bb87320-2025-4483-83e9-7aac07a26943\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "createRemote with custom codeset - minimal",
 					"event": [
 						{
@@ -5549,6 +5637,60 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"custom_codeset\": {\n        \"manufacturer_id\": \"custom\",\n        \"device_name\": \"My new TV\",\n        \"device_type\": \"television\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createRemote clone",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Successful POST request\", function () {",
+									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"//postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.set(\"remote\", pm.environment.get(\"remote_id\"));",
+									";"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} clone remote\"\n    },\n    \"clone_from\": \"{{remote}}\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5659,7 +5801,103 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"ir\": {\n            \"codeset\": {\n                \"id\": \"foobar\"\n            }\n        }\n    }\n}",
+							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{remote_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRemote Emitter output",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"ir\": {\n            \"output\": {\n                \"device_id\": \"sim.1\",\n                \"port_id\": \"4\"\n            }\n        }\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/remotes/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"remotes",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{remote_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateRemote IR codeset",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"ir\": {\n            \"codeset\": {\n                \"id\": \"lg1\"\n            }\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -8637,6 +8875,46 @@
 									"response": []
 								},
 								{
+									"name": "getCodeSet Copy",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"codes",
+												"custom",
+												":codeset"
+											],
+											"variable": [
+												{
+													"key": "codeset",
+													"value": "{{device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
 									"name": "deleteCodeSet",
 									"event": [
 										{
@@ -8729,7 +9007,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"format\": \"PRONTO\",\n    \"code\": \"42\"\n}",
+											"raw": "{\n    \"format\": \"HEX\",\n    \"value\": \"1000 2000 3000 4000\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -8756,7 +9034,7 @@
 												},
 												{
 													"key": "key",
-													"value": "TEST"
+													"value": "OFF"
 												}
 											]
 										}
@@ -9218,6 +9496,14 @@
 			"key": "apiKeyId",
 			"value": "SET_KEY_IN_CURRENT_VALUE",
 			"type": "string"
+		},
+		{
+			"key": "remote_id",
+			"value": ""
+		},
+		{
+			"key": "remote",
+			"value": ""
 		}
 	]
 }
