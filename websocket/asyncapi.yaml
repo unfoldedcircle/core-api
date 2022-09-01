@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.10.0-alpha'
+  version: '0.10.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -3940,6 +3940,9 @@ components:
         - media_player
         - sensor
         - switch
+        - activity
+        - macro
+        - remote
 
     languageCode:
       description: |
@@ -4473,6 +4476,8 @@ components:
           $ref: '#/components/schemas/defaultChangeEventType'
         entity_id:
           $ref: '#/components/schemas/entityId'
+        entity_type:
+          $ref: '#/components/schemas/entityType'
         new_state:
           $ref: '#/components/schemas/entityUpdate'
       required:
