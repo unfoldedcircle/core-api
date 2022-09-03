@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.12.3
+  version: 0.12.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8679,15 +8679,23 @@ components:
     VersionInfo:
       type: object
       properties:
+        device_name:
+          description: Custom name of the remote
+          type: string
         api:
+          description: API version
           type: string
         core:
+          description: Core app version
           type: string
-        app:
+        ui:
+          description: Frontend app version
           type: string
         os:
+          description: Operating system version
           type: string
         integrations:
+          description: 'Versions of the available integrations. Map of (integration_name, version).'
           type: object
           additionalProperties:
             type: string
