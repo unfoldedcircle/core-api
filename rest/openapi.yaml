@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.12.4
+  version: 0.13.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -693,9 +693,70 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ResourceType'
+                $ref: '#/components/schemas/SupportedResources'
+              example:
+                - type: Icon
+                  name:
+                    en: Icon
+                    de: Icon
+                  description:
+                    en: User interface icons for entities and integrations. Icons must be of size 90x90 pixels and either in PNG or JPG format. Maximum size is 32 KB.
+                    de: Icons für die Benutzeroberfläche von Objekten und Integrationen. Die Icons müssen 90x90 Pixel gross und im PNG oder JPG Format sein. Maximale Grösse ist 32 KB.
+                  file_formats:
+                    - png
+                    - jpg
+                  max_file_size: 32768
+                  max_count: 100
+                  image:
+                    sizes:
+                      - width: 90
+                        height: 90
+                - type: TvChannelIcon
+                  name:
+                    en: TV channel icon
+                    de: TV Sender Icon
+                  description:
+                    en: User interface icons for TV channels. Icons must be of size 90x90 pixels and either in PNG or JPG format. Maximum size is 32 KB.
+                    de: TV Sender Icons für die Benutzeroberfläche. Die Icons müssen 90x90 Pixel gross und im PNG oder JPG Format sein. Maximale Grösse ist 32 KB.
+                  file_formats:
+                    - png
+                    - jpg
+                  max_file_size: 32768
+                  max_count: 256
+                  image:
+                    sizes:
+                      - width: 90
+                        height: 90
+                - type: BackgroundImage
+                  name:
+                    en: Background image
+                    de: Hintergrund Bild
+                  description:
+                    en: Background image for user interface profile pages. Images must be of size 275x480 pixels and either in PNG or JPG format. Maximum size is 1 MB.
+                    de: Hintergrund Bild für Profil Seiten. Die Bilder müssen 275x480 Pixel gross und im PNG oder JPG Format sein. Maximale Grösse ist 1 MB.
+                  file_formats:
+                    - png
+                    - jpg
+                  max_file_size: 1048576
+                  max_count: 30
+                  image:
+                    sizes:
+                      - width: 275
+                        height: 480
+                - type: Sound
+                  name:
+                    en: Sound effect
+                    de: Klangeffekt
+                  description:
+                    en: User interface sound effects. Maximum size is 1 MB.
+                    de: Klangeffekte für die Benutzeroberfläche. Maximale Grösse ist 1 MB.
+                  file_formats:
+                    - wav
+                  max_file_size: 1048576
+                  max_count: 50
+                  sound:
+                    sampling_rates:
+                      - 44100
     delete:
       tags:
         - resources
@@ -771,6 +832,16 @@ paths:
       tags:
         - resources
       summary: Upload media resource files.
+      description: |
+        Upload one or more binary resource files as form-data. Files must conform to the given type according to the metadata
+        returned in `GET /api/resources`. E.g. an icon resource has other image size restrictions than a background image.
+
+        The file names are normalized (e.g. spaces replaced with underscores) and returned as resource identifiers.
+
+        Uploaded resources are verified, if they match expected formats. Status codes: 
+        - `400`: resource doesn't confirm to the expected parameters.
+        - `422`: resource already exists with the same name. Already existing resource files are NOT overwritten.
+        - `507`: insufficient storage to save a new resource.
       operationId: uploadFile
       parameters:
         - $ref: '#/components/parameters/resource_type'
@@ -800,6 +871,8 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
     delete:
       tags:
         - resources
@@ -841,7 +914,7 @@ paths:
               schema:
                 type: string
                 format: binary
-            audio/vorbis:
+            audio/wav:
               schema:
                 type: string
                 format: binary
@@ -8637,6 +8710,63 @@ components:
         - METRIC
         - US
         - UK
+    SupportedResource:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        file_formats:
+          description: 'Allowed file format extensions, e.g. `png`.'
+          type: array
+          items:
+            type: string
+        max_file_size:
+          description: Maximum file size in bytes.
+          type: integer
+        max_count:
+          description: Maximum number of custom resources.
+          type: integer
+        image:
+          description: Image specific restrictions. Only set for image resources.
+          type: object
+          properties:
+            sizes:
+              description: Allowed image sizes.
+              type: array
+              items:
+                type: object
+                properties:
+                  width:
+                    type: integer
+                  height:
+                    type: integer
+                required:
+                  - width
+                  - height
+          required:
+            - sizes
+        sound:
+          type: object
+          description: Sound file specific restrictions. Only set for sound resources.
+          properties:
+            sampling_rates:
+              type: array
+              items:
+                type: integer
+      required:
+        - type
+        - name
+        - file_formats
+        - max_file_size
+        - max_count
+    SupportedResources:
+      type: array
+      items:
+        $ref: '#/components/schemas/SupportedResource'
     SystemInfo:
       type: object
       properties:
@@ -8762,6 +8892,12 @@ components:
             $ref: '#/components/schemas/ApiResponse'
     Err503ServiceUnavailable:
       description: The server is not ready to handle the request. Try again later.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err507InsufficientStorage:
+      description: There is insufficient storage to store the resource.
       content:
         application/json:
           schema:
