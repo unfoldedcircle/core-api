@@ -932,6 +932,1283 @@
 			"name": "resources",
 			"item": [
 				{
+					"name": "Icon",
+					"item": [
+						{
+							"name": "deleteResources",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/Icons/fox.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile multiple",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/Icons/pizza.jpeg"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/Icons/owl-logo.png"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/Icons/fox2.jpeg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItemsCount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItems",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "2",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Icon"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "BackgroundImage",
+					"item": [
+						{
+							"name": "deleteResources",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/BackgroundImage/testpattern1.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile multiple",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/BackgroundImage/testpattern2.jpg"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/BackgroundImage/testpattern3.jpg"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/BackgroundImage/ambilight.jpg"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItemsCount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItems",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "2",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "BackgroundImage"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "TvChannelIcon",
+					"item": [
+						{
+							"name": "deleteResources",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/TvChannelIcons/bbc_world_news.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile multiple",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/TvChannelIcons/mtv.png"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/TvChannelIcons/cnn.png"
+										},
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Pictures/TvChannelIcons/euronews.png"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItemsCount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItems",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "2",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "TvChannelIcon"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "Sound",
+					"item": [
+						{
+							"name": "deleteResources",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Sound"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "uploadFile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "formdata",
+									"formdata": [
+										{
+											"key": "file",
+											"type": "file",
+											"src": "/Users/mzehnder/Downloads/test.wav"
+										}
+									]
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Sound"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItemsCount",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Sound"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResourceTypeItems",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "limit",
+											"value": "2",
+											"disabled": true
+										}
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Sound"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getResource",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Sound"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteResource",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/resources/:type/:resource",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"resources",
+										":type",
+										":resource"
+									],
+									"variable": [
+										{
+											"key": "type",
+											"value": "Sound"
+										},
+										{
+											"key": "resource",
+											"value": "{{resource_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "getResourceTypes",
 					"request": {
 						"method": "GET",
@@ -950,67 +2227,21 @@
 					"response": []
 				},
 				{
-					"name": "uploadFile",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "formdata",
-							"formdata": [
-								{
-									"key": "foobar",
-									"value": "icon",
-									"contentType": "",
-									"description": "1 2 3 foobar",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "type",
-									"value": "TvChannelIcon",
-									"contentType": "",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "file",
-									"type": "file",
-									"src": "/Users/mzehnder/Pictures/beaglebone-beagleboard-org-logo-clipart.png"
-								},
-								{
-									"key": "file",
-									"type": "file",
-									"src": "/Users/mzehnder/Pictures/ambilight.jpeg"
-								},
-								{
-									"key": "file",
-									"type": "file",
-									"src": "/Users/mzehnder/Pictures/Shelly.jpg"
-								}
-							]
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/resources/:type",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"resources",
-								":type"
-							],
-							"variable": [
-								{
-									"key": "type",
-									"value": "TvChannelIcon"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "deleteAllResources",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "DELETE",
 						"header": [],
@@ -1022,145 +2253,6 @@
 							"path": [
 								"api",
 								"resources"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteResources: TvChannelIcon",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/resources/:type",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"resources",
-								":type"
-							],
-							"variable": [
-								{
-									"key": "type",
-									"value": "TvChannelIcon"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getResourceTypeItems: TvChannelIcon",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/resources/:type",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"resources",
-								":type"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "5",
-									"disabled": true
-								},
-								{
-									"key": "limit",
-									"value": "2",
-									"disabled": true
-								}
-							],
-							"variable": [
-								{
-									"key": "type",
-									"value": "TvChannelIcon"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getResourceTypeItemsCount: TvChannelIcon",
-					"request": {
-						"method": "HEAD",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/resources/:type",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"resources",
-								":type"
-							],
-							"variable": [
-								{
-									"key": "type",
-									"value": "TvChannelIcon"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getResource",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/resources/:type/eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"resources",
-								":type",
-								"eTicket_NXl0SmljdjVjRUNXRTB2ZytGVUZzMGg2RXlWYm9uTEY4TVl1bThOTlRPYz0=.pdf"
-							],
-							"variable": [
-								{
-									"key": "type",
-									"value": "TvChannelIcon"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteResource: 0.png",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/resources/:type/0.png",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"resources",
-								":type",
-								"0.png"
-							],
-							"variable": [
-								{
-									"key": "type",
-									"value": "TvChannelIcon"
-								}
 							]
 						}
 					},
@@ -2346,7 +3438,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers?enabled=true&page=1&limit=10",
+							"raw": "{{SERVER}}/api/intg/drivers?page=1&limit=10",
 							"host": [
 								"{{SERVER}}"
 							],
@@ -2358,7 +3450,8 @@
 							"query": [
 								{
 									"key": "enabled",
-									"value": "true"
+									"value": "true",
+									"disabled": true
 								},
 								{
 									"key": "instantiable",
@@ -2641,7 +3734,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/intg/instances?enabled=true&page=1",
+							"raw": "{{SERVER}}/api/intg/instances?page=1",
 							"host": [
 								"{{SERVER}}"
 							],
@@ -2653,7 +3746,8 @@
 							"query": [
 								{
 									"key": "enabled",
-									"value": "true"
+									"value": "true",
+									"disabled": true
 								},
 								{
 									"key": "page",
@@ -2796,7 +3890,7 @@
 								},
 								{
 									"key": "entityId",
-									"value": "light.living_room_lights"
+									"value": "sensor.uptime"
 								}
 							]
 						}
@@ -2828,7 +3922,7 @@
 							"variable": [
 								{
 									"key": "intgId",
-									"value": "test.integration:1"
+									"value": "hass.main"
 								}
 							]
 						}
@@ -3012,31 +4106,6 @@
 					"response": []
 				},
 				{
-					"name": "getEntity Copy",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/entities/:entityId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"entities",
-								":entityId"
-							],
-							"variable": [
-								{
-									"key": "entityId",
-									"value": "hass.main.media_player.esstisch"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
 					"name": "updateEntity",
 					"request": {
 						"method": "PATCH",
@@ -3088,7 +4157,7 @@
 							"variable": [
 								{
 									"key": "entityId",
-									"value": "media_player.wohnzimmer.main.test.integration:1"
+									"value": "hass.main.sensor.uptime"
 								}
 							]
 						}
@@ -3252,7 +4321,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n  \"long_press\": {\n    \"entity_id\": \"92f2319b-1258-495b-ad27-7bf2f851c8ab\",\n    \"cmd_id\": \"NUMPAD_1\"\n  }\n}",
+									"raw": "{\n  \"long_press\": {\n    \"entity_id\": \"05ba8c78-3104-4d38-945d-02f602ba632c\",\n    \"cmd_id\": \"VOLUME_DOWN\"\n  }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3408,7 +4477,7 @@
 												"header": [],
 												"body": {
 													"mode": "raw",
-													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 2,\n                \"y\": 5\n            },\n            \"size\": {\n                \"width\": 2,\n                \"height\": 1\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"Toggle\",\n            \"command\": {\n                \"cmd_id\": \"light.toggle\",\n                \"entity_id\": \"hass.main.light.study_reading_light\"\n            },\n            \"location\": {\n                \"x\": 0,\n                \"y\": 0\n            },\n            \"size2\":{\"height\":6,\"width\":4}\n        }\n    ]\n}",
+													"raw": "{\n    \"name\": \"Test page\",\n    \"items\": [\n        {\n            \"type\": \"icon\",\n            \"icon\": \"uc:star\",\n            \"location\": {\n                \"x\": 2,\n                \"y\": 5\n            },\n            \"size\": {\n                \"width\": 2,\n                \"height\": 1\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"TEST\",\n            \"command\": {\n                \"entity_id\": \"05ba8c78-3104-4d38-945d-02f602ba632c\",\n                \"cmd_id\": \"VOLUME_UP\"\n            },\n            \"location\": {\n                \"x\": 0,\n                \"y\": 0\n            }\n        },\n        {\n            \"type\": \"text\",\n            \"text\": \"Toggle\",\n            \"command\": {\n                \"cmd_id\": \"light.toggle\",\n                \"entity_id\": \"hass.main.light.study_reading_light\"\n            },\n            \"location\": {\n                \"x\": 0,\n                \"y\": 0\n            },\n            \"size2\":{\"height\":6,\"width\":4}\n        }\n    ]\n}",
 													"options": {
 														"raw": {
 															"language": "json"
@@ -3942,7 +5011,41 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.light.study_reading_light\"\n        ]\n    }\n}",
+							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.sensor.uptime\",\n            \"hass.main.light.study_reading_light\"\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/activities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"activities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{activity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateActivity with included entities Copy",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.sensor.uptime\",\n            \"hass.main.light.study_reading_light\",\n            \"05ba8c78-3104-4d38-945d-02f602ba632c\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"hass.main.light.study_reading_light\",\n                        \"cmd_id\": \"light.on\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                },\n                {\n                    \"command\": {\n                        \"cmd_id\": \"light.off\",\n                        \"entity_id\": \"hass.main.light.study_reading_light\"\n                    },\n                    \"type\": \"command\"\n                },\n                {\n                    \"command\": {\n                        \"cmd_id\": \"CHANNEL_DOWN\",\n                        \"entity_id\": \"05ba8c78-3104-4d38-945d-02f602ba632c\"\n                    },\n                    \"type\": \"command\"\n                }\n            ]\n        }\n\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4348,7 +5451,7 @@
 					"response": []
 				},
 				{
-					"name": "updateMacro sequence",
+					"name": "updateMacro sequence invalid entity",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -4382,13 +5485,47 @@
 					"response": []
 				},
 				{
+					"name": "updateMacro sequence",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"options\": {\n        \"sequence\": [\n            {\n                \"type\": \"command\",\n                \"command\": {\n                    \"entity_id\": \"{{remote_id}}\",\n                    \"cmd_id\": \"remote.on\"\n                }\n            },\n            {\n                \"type\": \"delay\",\n                \"delay\": 400\n            }\n        ]\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/macros/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"macros",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{macro_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "updateMacro included_entities",
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\"88567410-e60a-496d-9e2f-53abd2eba81e\"]\n    }\n}",
+							"raw": "{\n    \"options\": {\n        \"entity_ids\": [\"{{remote_id}}\"]\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5431,50 +6568,6 @@
 									"key": "limit",
 									"value": "100"
 								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "createRemote",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Successful POST request\", function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
-									"});",
-									"",
-									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"remote_id\", responseJson.entity_id);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} super remote\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    }\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/remotes",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"remotes"
 							]
 						}
 					},
@@ -7145,6 +8238,54 @@
 					"response": []
 				},
 				{
+					"name": "updateProfile page order",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"Kusi\",\n  \"update_pin\": false,\n  \"pages\": [\n    \"33f0c925-8af6-4a98-a145-2ab17d73475c\",\n    \"2f713a9c-2baf-4f75-96e6-393a4dfce5b1\",\n    \"68cafdfb-45f0-4c98-929d-bafc5f0dd878\",\n    \"c897877b-547c-4a9c-ac25-9462c7aa47f1\",\n    \"2c4cb919-7d32-40bf-b9bd-d5619dd1367d\"\n  ]\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/profiles/:profileId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"profiles",
+								":profileId"
+							],
+							"variable": [
+								{
+									"key": "profileId",
+									"value": "{{profile_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "deleteProfile",
 					"event": [
 						{
@@ -8646,7 +9787,7 @@
 												},
 												{
 													"key": "codeset",
-													"value": "lg1"
+													"value": "lg2"
 												}
 											]
 										}
