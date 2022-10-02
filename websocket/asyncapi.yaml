@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.10.2-alpha'
+  version: '0.11.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -142,8 +142,8 @@ channels:
           - $ref: '#/components/messages/system_cmd'
           - $ref: '#/components/messages/get_factory_reset_token'
           - $ref: '#/components/messages/factory_reset'
-#          - $ref: '#/components/messages/service_cmd'
-#          - $ref: '#/components/messages/get_service_status'
+          - $ref: '#/components/messages/set_api_access'
+          - $ref: '#/components/messages/get_api_access'
 #          - $ref: '#/components/messages/check_updates'
 #          - $ref: '#/components/messages/update'
           # --- configuration handling
@@ -215,7 +215,7 @@ channels:
           - $ref: '#/components/messages/version_info'
           - $ref: '#/components/messages/system_info'
           - $ref: '#/components/messages/factory_reset_token'
-#          - $ref: '#/components/messages/service_status'
+          - $ref: '#/components/messages/api_access'
 #          - $ref: '#/components/messages/available_updates'
 #          # --- configuration handling
           - $ref: '#/components/messages/configuration'
@@ -575,6 +575,29 @@ components:
         $ref: '#/components/schemas/factoryResetMsg'
       x-response:
         $ref: '#/components/messages/result'
+
+    set_api_access:
+      summary: Enable or disable API access.
+      description: |
+        Enable / disable API access for web-configurator. If the account gets disabled, all active sessions are closed
+        and WebSocket connections disconnected.   
+        The server will respond with a `result` message and a status code of the request.
+      payload:
+        $ref: '#/components/schemas/setApiAccessMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    get_api_access:
+      summary: Get API access status.
+      description: |
+        The server will respond with an `api_access` message.
+      payload:
+        $ref: '#/components/schemas/getApiAccessMsg'
+      x-response:
+        $ref: '#/components/messages/api_access'
+    api_access:
+      summary: API access status response.
+      payload:
+        $ref: '#/components/schemas/apiAccessMsg'
 
     reset_configuration:
       summary: 👷 Reset all settings to default values.
@@ -1793,6 +1816,78 @@ components:
           required:
             - msg
             - msg_data
+
+    setApiAccessMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_api_access
+            msg_data:
+              properties:
+                web_configurator:
+                  type: object
+                  properties:
+                    enabled:
+                      description: Enable or disable access for the web-configurator.
+                      type: boolean
+                    pin:
+                      description: Set a new access pin.
+                      type: string
+                      minLength: 4
+                    valid_to:
+                      description: |
+                        Optional timestamp when the access automatically expires. If not set the access is allowed until
+                        the account is disabled.
+                      type: string
+                      format: date-time
+                  required:
+                    - enabled
+              required:
+                - web_configurator
+          required:
+            - msg
+            - msg_data
+    getApiAccessMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_api_access
+          required:
+            - msg
+    apiAccessMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: api_access
+            msg_data:
+              properties:
+                web_configurator:
+                  type: object
+                  properties:
+                    enabled:
+                      type: boolean
+                    valid_to:
+                      description: |
+                        Optional timestamp when the access automatically expires. If not set the access is allowed until
+                        the account is disabled.
+                      type: string
+                      format: date-time
+                  required:
+                    - enabled
+              required:
+                - web_configurator
+          required: # msg_data is not required to reply with error code for invalid request
+            - msg
+
     resetConfigurationMsg:
       type: object
       allOf:
@@ -2559,6 +2654,9 @@ components:
             msg:
               type: string
               const: entity_change
+            cat:
+              type: string
+              const: ENTITY
             msg_data:
               $ref: '#/components/schemas/entityChange'
           required:
@@ -2757,6 +2855,9 @@ components:
             msg:
               type: string
               const: profile_change
+            cat:
+              type: string
+              const: UI
             msg_data:
               $ref: '#/components/schemas/profileChange'
           required:
@@ -3601,6 +3702,9 @@ components:
             msg:
               type: string
               const: integration_driver_change
+            cat:
+              type: string
+              const: DEVICE
             msg_data:
               $ref: '#/components/schemas/integrationDriverChange'
           required:
@@ -3614,6 +3718,9 @@ components:
             msg:
               type: string
               const: integration_change
+            cat:
+              type: string
+              const: DEVICE
             msg_data:
               $ref: '#/components/schemas/integrationChange'
           required:
@@ -3627,6 +3734,9 @@ components:
             msg:
               type: string
               const: integration_state
+            cat:
+              type: string
+              const: DEVICE
             msg_data:
               $ref: '#/components/schemas/integrationState'
           required:
@@ -3641,6 +3751,9 @@ components:
             msg:
               type: string
               const: configuration_change
+            cat:
+              type: string
+              const: REMOTE
             msg_data:
               $ref: '#/components/schemas/configurationChange'
           required:
