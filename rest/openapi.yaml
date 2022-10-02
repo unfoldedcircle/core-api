@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.13.0
+  version: 0.13.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -755,7 +755,15 @@ paths:
                   max_file_size: 1048576
                   max_count: 50
                   sound:
+                    bits:
+                      - 8
+                      - 16
+                    channels:
+                      - 1
+                      - 2
                     sampling_rates:
+                      - 11025
+                      - 22050
                       - 44100
     delete:
       tags:
@@ -8753,6 +8761,14 @@ components:
           type: object
           description: Sound file specific restrictions. Only set for sound resources.
           properties:
+            bits:
+              type: array
+              items:
+                type: integer
+            channels:
+              type: array
+              items:
+                type: integer
             sampling_rates:
               type: array
               items:
