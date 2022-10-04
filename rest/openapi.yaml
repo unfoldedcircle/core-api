@@ -7109,18 +7109,25 @@ components:
       maxLength: 64
     IconIdentifier:
       type: string
-      format: '^[a-zA-Z0-9-_\.:]+$'
+      format: '^[a-z0-9]+:[a-zA-Z0-9-_\.]+$'
       maxLength: 255
       description: |
-        Optional icon identifier. If specified the icon will be set. An empty identifier, while updating the object,
-        removes the existing icon.
+        Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
+        Available prefixes:
+        - `uc:` - integrated icon font 
+        - `custom:` - custom resource
+
+        An empty identifier, while updating the object, removes the existing icon.
     ImageIdentifier:
       type: string
-      format: '^[a-zA-Z0-9-_\.:]+$'
+      format: '^[a-z0-9]+:[a-zA-Z0-9-_\.]+$'
       maxLength: 255
       description: |
-        Optional image identifier. If specified the image will be set. An empty identifier, while updating the object,
-        removes the existing image.
+        Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
+        Available prefixes:
+        - `custom:` - custom resource
+
+        An empty identifier, while updating the object, removes the existing image.
     IrCode:
       type: object
       properties:
