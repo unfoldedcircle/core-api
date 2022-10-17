@@ -2491,11 +2491,28 @@
 					"item": [
 						{
 							"name": "getDocks",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"dock_id\", responseJson[0].service_name);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks?page=1",
+									"raw": "{{SERVER}}/api/docks?page=1&active=true",
 									"host": [
 										"{{SERVER}}"
 									],
@@ -2515,8 +2532,7 @@
 										},
 										{
 											"key": "active",
-											"value": "false",
-											"disabled": true
+											"value": "true"
 										}
 									]
 								}
@@ -2570,6 +2586,20 @@
 						},
 						{
 							"name": "getDock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -2586,7 +2616,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-246F283FCDCC"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2620,7 +2650,41 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-246F283FCDCC"
+											"value": "{{dock_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateDock set active",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"active\": true\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										":dock_id"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2645,7 +2709,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-246F283FE578"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2685,7 +2749,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-246F283FCDCC"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2720,7 +2784,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-1"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2755,7 +2819,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-1"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2790,7 +2854,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-1"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2825,7 +2889,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-1"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2860,7 +2924,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "v2-pcb"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -2895,7 +2959,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-1"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3046,7 +3110,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "v2-pcb"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3103,7 +3167,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "v2-pcb"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3156,7 +3220,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-3"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3214,7 +3278,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-3"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3250,7 +3314,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-3"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3319,7 +3383,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-246F283FCDCC"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -3345,7 +3409,7 @@
 									"variable": [
 										{
 											"key": "dock_id",
-											"value": "YIO-Dock-246F283FCDCC"
+											"value": "{{dock_id}}"
 										}
 									]
 								}
@@ -4112,7 +4176,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"raw": "{\n    \"name\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"uc:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5006,6 +5070,19 @@
 				},
 				{
 					"name": "updateActivity with included entities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -5040,6 +5117,19 @@
 				},
 				{
 					"name": "updateActivity with included entities Copy",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -5074,12 +5164,25 @@
 				},
 				{
 					"name": "updateActivity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.light.study_reading_light\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"hass.main.light.study_reading_light\",\n                        \"cmd_id\": \"light.on\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        }\n    }\n}",
+							"raw": "{\n    \"name2\": {\n        \"en\": \"light {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"uc:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [\n            \"hass.main.light.study_reading_light\"\n        ],\n        \"sequences\": {\n            \"off\": [],\n            \"on\": [\n                {\n                    \"type\": \"command\",\n                    \"command\": {\n                        \"entity_id\": \"hass.main.light.study_reading_light\",\n                        \"cmd_id\": \"light.on\"\n                    }\n                },\n                {\n                    \"type\": \"delay\",\n                    \"delay\": 400\n                }\n            ]\n        }\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -5418,12 +5521,25 @@
 				},
 				{
 					"name": "updateMacro",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "PATCH",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"raw": "{\n    \"name\": { \"en\": \"macro {{$randomProductAdjective}}\" },\n    \"icon\": \"uc:{{$randomProductMaterial}}\",\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6894,7 +7010,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"yio:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    }\n}",
+							"raw": "{\n    \"name\": {\n        \"en\": \"macro {{$randomProductAdjective}}\"\n    },\n    \"icon\": \"uc:{{$randomProductMaterial}}\",\n    \"description\": {\n        \"en\": \"{{$randomLoremSentence}}\"\n    }\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -8210,7 +8326,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": \"{{$randomFirstName}}\",\n    \"icon\": \"yio:panda\",\n    \"update_pin\": false,\n    \"description\": \"update test\"\n}\n",
+							"raw": "{\n    \"name\": \"{{$randomFirstName}}\",\n    \"icon\": \"uc:panda\",\n    \"update_pin\": false,\n    \"description\": \"update test\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -10148,7 +10264,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"format\": \"HEX\",\n    \"value\": \"1000 2000 3000 4000\"\n}",
+											"raw": "{\n    \"format\": \"PRONTO\",\n    \"value\": \"1234\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -10175,7 +10291,7 @@
 												},
 												{
 													"key": "key",
-													"value": "OFF"
+													"value": "TEST"
 												}
 											]
 										}
@@ -10247,7 +10363,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"format\": \"PRONTO\",\n    \"code\": \"1234\"\n}",
+											"raw": "{\n    \"format\": \"PRONTO\",\n    \"value\": \"1234\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -10334,6 +10450,247 @@
 					"name": "emitters",
 					"item": [
 						{
+							"name": "learn",
+							"item": [
+								{
+									"name": "getLearningStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:emitterId/learn",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":emitterId",
+												"learn"
+											],
+											"variable": [
+												{
+													"key": "emitterId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "startLearning",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:emitterId/learn?timeout=10",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":emitterId",
+												"learn"
+											],
+											"query": [
+												{
+													"key": "timeout",
+													"value": "10"
+												}
+											],
+											"variable": [
+												{
+													"key": "emitterId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopLearning",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:emitterId/learn",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":emitterId",
+												"learn"
+											],
+											"query": [
+												{
+													"key": "active",
+													"value": "true",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "emitterId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "send",
+							"item": [
+								{
+									"name": "sendCommandOnEmitter",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"MUTE\",\n  \"port_id\": \"1\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":deviceId",
+												"send"
+											],
+											"variable": [
+												{
+													"key": "deviceId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendCommandOnEmitter default port",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"HOME\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":deviceId",
+												"send"
+											],
+											"variable": [
+												{
+													"key": "deviceId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "getEmitterCount",
 							"event": [
 								{
@@ -10382,9 +10739,13 @@
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
+											"pm.test(\"Status code is 201\", function () {",
 											"    pm.response.to.have.status(200);",
-											"});"
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"emitter_id\", responseJson[0].device_id);",
+											""
 										],
 										"type": "text/javascript"
 									}
@@ -10394,7 +10755,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/ir/emitters?page=1&limit=10",
+									"raw": "{{SERVER}}/api/ir/emitters?active=true",
 									"host": [
 										"{{SERVER}}"
 									],
@@ -10406,16 +10767,17 @@
 									"query": [
 										{
 											"key": "active",
-											"value": "true",
-											"disabled": true
+											"value": "true"
 										},
 										{
 											"key": "page",
-											"value": "1"
+											"value": "2",
+											"disabled": true
 										},
 										{
 											"key": "limit",
-											"value": "10"
+											"value": "1",
+											"disabled": true
 										}
 									]
 								}
@@ -10461,105 +10823,7 @@
 									"variable": [
 										{
 											"key": "emitterId",
-											"value": "sim.1"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sendCommandOnEmitter",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"MUTE\",\n  \"port_id\": \"1\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"ir",
-										"emitters",
-										":deviceId",
-										"send"
-									],
-									"variable": [
-										{
-											"key": "deviceId",
-											"value": "sim.1"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sendCommandOnEmitter default port",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});"
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"HOME\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"ir",
-										"emitters",
-										":deviceId",
-										"send"
-									],
-									"variable": [
-										{
-											"key": "deviceId",
-											"value": "sim.1"
+											"value": "{{emitter_id}}"
 										}
 									]
 								}

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.13.1
+  version: 0.14.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -23,39 +23,31 @@ security:
   - cookieAuth: []
 tags:
   - name: info
-    description: Public status information and health checks
+    description: "\U0001F481 Public status information and health checks"
   - name: auth
-    description: Session authentication
+    description: "\U0001F510 Session authentication"
   - name: api-keys
-    description: API keys for authentication.
+    description: "\U0001F511 API keys for authentication."
   - name: external-token
-    description: Access token handling for external systems.
+    description: "\U0001F48E Access token handling for external systems."
   - name: resources
-    description: 'Media files handling, e.g. manage background images, icons or sound effects.'
+    description: "\U0001F508 Media files handling, e.g. manage background images, icons or sound effects."
   - name: integrations
-    description: Integration handling
+    description: "\U0001F9E9 Integration handling"
   - name: entities
-    description: |
-      Common handling of configured entities like sending commands and modifying editable properties.  
-      Entities are usually provided by integrations, except the special activity, macro and infrared-remote entities.
+    description: "\U0001F4FA Common handling of configured entities like sending commands and modifying editable properties.  \nEntities are usually provided by integrations, except the special activity, macro and infrared-remote entities.\n"
   - name: activities
-    description: |
-      Combine multiple entities into an activity with optional on- & off-sequences, physical button mappings and a
-      custom user interface.
+    description: "\U0001F39B️ Combine multiple entities into an activity with optional on- & off-sequences, physical button mappings and a\ncustom user interface.\n"
   - name: macros
-    description: |
-      Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user
-      interface.
+    description: "\U0001F522 Macros execute a sequence of commands which is exposed as an entity command. Macros don't have a custom user\ninterface.\n"
   - name: infrared
-    description: "\U0001F477 **work in progress**, not yet fully implemented! Infrared code set lookup, custom IR code management and IR emitter devices.\n"
+    description: "\U0001F308 Infrared code set lookup, custom IR code management and IR emitter devices.\n"
   - name: remotes
-    description: |
-      Customizable user interface and button mappings for remote-entities
-      controlling single IR- and the like devices.
+    description: "\U0001F3AE Customizable user interface and button mappings for remote-entities\ncontrolling single IR- and the like devices.\n"
   - name: profiles
-    description: 'User profile configuration with profiles, groups, pages'
+    description: "\U0001F464 User profile configuration with profiles, groups, pages"
   - name: cfg
-    description: Configuration settings
+    description: "\U0001F4DD Configuration settings"
   - name: dock
     description: "\U0001F477 Dock infrared handling - **work in progress**"
   - name: system
@@ -3132,18 +3124,14 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/ir/emitters/{deviceId}':
+  '/ir/emitters/{emitterId}':
     get:
       tags:
         - infrared
       summary: Get an IR emitter device.
       operationId: getIrEmitter
       parameters:
-        - name: deviceId
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/emitter_id'
       responses:
         '200':
           description: Successful operation.
@@ -3159,7 +3147,7 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/ir/emitters/{deviceId}/send':
+  '/ir/emitters/{emitterId}/send':
     put:
       tags:
         - infrared
@@ -3168,11 +3156,7 @@ paths:
         Send an IR command from the specified command set on the given emitter and output port.
       operationId: sendCommandOnEmitter
       parameters:
-        - name: deviceId
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/emitter_id'
       requestBody:
         description: IR command
         content:
@@ -3205,6 +3189,110 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
+  '/ir/emitters/{emitterId}/learn':
+    get:
+      tags:
+        - infrared
+      summary: Get IR learning status and results.
+      description: |
+        Returns the current status and if the dock is in IR learning mode. All learned codes will be returned since the
+        start of the learning session.
+      operationId: irLearningStatusEmitter
+      parameters:
+        - $ref: '#/components/parameters/emitter_id'
+      responses:
+        '200':
+          description: IR learning status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  device_id:
+                    description: IR emitter device identifier.
+                    type: string
+                  learning_active:
+                    description: |
+                      Device is in IR learning mode. Usually an emitter can't send IR commands while it is in learning mode.
+                    type: boolean
+                  codes:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LearnedIrCode'
+                required:
+                  - device_id
+                  - learning_active
+                  - codes
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - infrared
+      summary: Start IR learning.
+      description: |
+        Learn IR commands from the given emitter with learning capability. The learning session will be stopped
+        automatically after the timeout, unless it hasn't been stopped with the `DELETE` operation, or a new learning
+        session has been initiated.
+
+        Any learned code will immediately be sent as a WebSocket `ir_learning`event message in the `emitters` channel.
+        Furthermore, the codes are stored for retrieval with the `GET` status call. There's a maximum of 16 learned
+        codes per session. Any additional codes will be ignored and only sent as a WebSocket event.
+
+        Calling this function, while learning is still active, will extend the timeout. Any previously learned codes
+        will not be deleted.
+      operationId: startIrLearningEmitter
+      parameters:
+        - $ref: '#/components/parameters/emitter_id'
+        - name: timeout
+          in: query
+          description: Timeout in seconds.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 60
+            minimum: 1
+            maximum: 300
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - infrared
+      summary: Stop IR learning and clear results.
+      description: |
+        The current status and any learned codes will be returned. After this call the learned codes are no longer
+        accessible through the `GET` status call.
+      operationId: stopIrLearningEmitter
+      parameters:
+        - $ref: '#/components/parameters/emitter_id'
+      responses:
+        '200':
+          description: IR learning status
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1ir~1emitters~1%7BemitterId%7D~1learn/get/responses/200/content/application~1json/schema'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /remotes:
     head:
       tags:
@@ -5842,77 +5930,6 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/docks/{dockId}/ir/learn':
-    get:
-      tags:
-        - dock
-      summary: Get IR learning status and results.
-      description: |
-        The current status and if the dock is in IR learning mode, any learned codes will be returned.
-      operationId: irLearningStatus
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-      responses:
-        '200':
-          description: IR learning status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IrStatus'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-    post:
-      tags:
-        - dock
-      summary: Start IR learning.
-      description: |
-        Puts the dock into IR learning mode. Use the GET status request to check on learned codes or DELETE to stop learning.
-      operationId: startIrLearning
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-        - name: timeout
-          in: query
-          description: 'Timeout in seconds to switch off learning mode. Default: 30'
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 255
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-    delete:
-      tags:
-        - dock
-      summary: Stop IR learning and clear results.
-      description: |
-        The current status and any learned codes will be returned. After this call any learned codes are no longer accessible
-        through the GET status call.
-      operationId: stopIrLearning
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-      responses:
-        '200':
-          description: IR learning status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/IrStatus'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
   /system:
     get:
       tags:
@@ -6204,6 +6221,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/DriverId'
+    emitter_id:
+      name: emitterId
+      in: path
+      description: Emitter device id.
+      required: true
+      schema:
+        $ref: '#/components/schemas/SimpleId'
     entity_id:
       name: entityId
       in: path
@@ -7165,13 +7189,24 @@ components:
         device_id:
           description: IR emitter device identifier.
           type: string
+        type:
+          $ref: '#/components/schemas/IrEmitterType'
         name:
           description: Friendly name of the IR emitter device.
           type: string
         active:
           description: Emitter device is active or currently not available.
           type: boolean
+        capabilities:
+          description: Optional capabilities of the emitter.
+          type: object
+          properties:
+            learning:
+              $ref: '#/components/schemas/IrEmitterLearningCapability'
         ports:
+          description: |
+            Available output ports of the emitter. A simple emitter might only have one IR output, whereas the Remote Two dock
+            has 4 individual outputs.
           type: array
           items:
             type: object
@@ -7187,13 +7222,39 @@ components:
               - name
       required:
         - device_id
+        - type
         - name
         - active
         - ports
+    IrEmitterLearningCapability:
+      type: object
+      description: Emitter can also be used for learning IR codes.
+      properties:
+        description:
+          type: string
+        instruction:
+          type: string
+        formats:
+          type: array
+          items:
+            type: string
+        send_while_learn:
+          description: Emitter is able to send IR codes while in learn mode.
+          type: boolean
+          default: false
+      required:
+        - formats
     IrEmitters:
       type: array
       items:
         $ref: '#/components/schemas/IrEmitter'
+    IrEmitterType:
+      type: string
+      description: 'The type of the device, e.g. a Remote Two docking station, a network based IR blaster or something else.'
+      enum:
+        - DOCK
+        - IR_BLASTER
+        - OTHER
     LanguageText:
       type: object
       description: |
@@ -7672,7 +7733,7 @@ components:
           description: Auto connect to dock when network is available
         state:
           $ref: '#/components/schemas/DockState'
-        learning:
+        learning_active:
           type: boolean
           description: Dock is in IR learning mode
         description:
@@ -8303,7 +8364,8 @@ components:
             - HEX
             - PRONTO
         timestamp:
-          type: integer
+          type: string
+          format: date-time
     LoginRequest:
       type: object
       properties:

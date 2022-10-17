@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.11.0-alpha'
+  version: '0.11.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -402,6 +402,8 @@ channels:
           - $ref: '#/components/messages/integration_state'
           - $ref: '#/components/messages/profile_change'
           - $ref: '#/components/messages/configuration_change'
+          # ---
+          - $ref: '#/components/messages/ir_learning'
 
           # TODO define all events and response messages
 #          - $ref: '#/components/messages/battery_status'
@@ -1561,6 +1563,15 @@ components:
       payload:
         $ref: '#/components/schemas/configurationChangeEventMsg'
 
+    ir_learning:
+      summary: IR code learn event.
+      description: |
+        Emitted if learning mode is started, stopped or a new IR code was learned from an IR emitter device.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/irLearningEventMsg'
+        
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
     # =========================================================================
@@ -3682,6 +3693,7 @@ components:
             - entities
             - integrations
             - profiles
+            - emitters
             # TODO define all event channels. Suggestions:
 #            - cfg_log
 #            - cfg_ui
@@ -3756,6 +3768,23 @@ components:
               const: REMOTE
             msg_data:
               $ref: '#/components/schemas/configurationChange'
+          required:
+            - msg
+            - msg_data
+
+    irLearningEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: ir_learning
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/irLearning'
           required:
             - msg
             - msg_data
@@ -4687,6 +4716,40 @@ components:
           $ref: '#/components/schemas/configuration'
       required:
         - new_state
+
+    irLearning:
+      type: object
+      properties:
+        device_id:
+          description: IR emitter device identifier.
+          type: string
+        event_type:
+          type: string
+          enum:
+            - START
+            - STOP
+            - CODE
+        code:
+          $ref: '#/components/schemas/irLearningCode'
+      required:
+        - device_id
+        - event_type
+
+    irLearningCode:
+      type: object
+      properties:
+        format:
+          description: IR format of learned IR code data.
+          type: string
+          enum:
+            - HEX
+            - PRONTO
+        value:
+          description: Learned IR code data.
+          type: string
+      required:
+        - format
+        - value
 
     description:
       type: string
