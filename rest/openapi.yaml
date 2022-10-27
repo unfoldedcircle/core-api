@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.14.0
+  version: 0.14.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2951,11 +2951,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: key
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ir_key'
       responses:
         '200':
           description: Successful operation
@@ -2983,11 +2979,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: key
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ir_key'
       requestBody:
         content:
           application/json:
@@ -3020,11 +3012,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: key
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ir_key'
       requestBody:
         content:
           application/json:
@@ -3055,11 +3043,7 @@ paths:
           required: true
           schema:
             type: string
-        - name: key
-          in: path
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ir_key'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -3577,12 +3561,9 @@ paths:
               type: object
               properties:
                 value:
-                  type: string
+                  $ref: '#/components/schemas/IrCodeValue'
                 format:
-                  type: string
-                  enum:
-                    - HEX
-                    - PRONTO
+                  $ref: '#/components/schemas/IrCodeFormat'
               required:
                 - value
                 - format
@@ -3611,7 +3592,12 @@ paths:
       operationId: getRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
-        - $ref: '#/components/parameters/cmd_id'
+        - name: cmdId
+          in: path
+          description: IR command identification.
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -3634,7 +3620,12 @@ paths:
       operationId: updateRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
-        - $ref: '#/components/parameters/cmd_id'
+        - name: cmdId
+          in: path
+          description: IR command identification.
+          required: true
+          schema:
+            type: string
       requestBody:
         content:
           application/json:
@@ -3642,12 +3633,9 @@ paths:
               type: object
               properties:
                 value:
-                  type: string
+                  $ref: '#/components/schemas/IrCodeValue'
                 format:
-                  type: string
-                  enum:
-                    - HEX
-                    - PRONTO
+                  $ref: '#/components/schemas/IrCodeFormat'
               required:
                 - value
                 - format
@@ -3674,7 +3662,12 @@ paths:
       operationId: deleteOrResetRemoteIrCode
       parameters:
         - $ref: '#/components/parameters/entity_id'
-        - $ref: '#/components/parameters/cmd_id'
+        - name: cmdId
+          in: path
+          description: IR command identification.
+          required: true
+          schema:
+            type: string
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -6203,10 +6196,10 @@ components:
     cmd_id:
       name: cmdId
       in: path
-      description: Command identification.
+      description: IR command identification.
       required: true
       schema:
-        $ref: '#/components/schemas/SimpleId'
+        $ref: '#/components/schemas/IrCodeKey'
     dock_id:
       name: dockId
       in: path
@@ -6249,6 +6242,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/IntegrationId'
+    ir_key:
+      name: key
+      in: path
+      description: IR command key
+      required: true
+      schema:
+        $ref: '#/components/schemas/IrCodeKey'
     page_id:
       name: pageId
       in: path
@@ -6396,7 +6396,7 @@ components:
   schemas:
     AccessTokenId:
       type: string
-      format: '^[a-zA-Z0-9-_]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 36
       description: Unique token identifier. Usually a UUID.
@@ -6617,7 +6617,7 @@ components:
           format: date-time
     ApiKeyId:
       type: string
-      format: '^[a-zA-Z0-9-_]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 36
       description: Unique key identifier. Usually a UUID.
@@ -6735,7 +6735,7 @@ components:
         - features
     AvailableEntityId:
       type: string
-      format: '^[a-zA-Z0-9-_\.]+$'
+      format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 1
       maxLength: 36
       description: |
@@ -6917,21 +6917,25 @@ components:
             Optional manufacturer name. If not specified: the codeset will be linked to the custom manufacturer entry
             for self learned codes.
           type: string
+          minLength: 1
+          maxLength: 100
         device:
           type: string
+          minLength: 1
+          maxLength: 100
         device_type:
-          type: string
+          $ref: '#/components/schemas/DeviceType'
         code_format:
-          type: string
+          $ref: '#/components/schemas/IrCodeFormat'
         codes:
           type: array
           items:
             type: object
             properties:
               key:
-                type: string
+                $ref: '#/components/schemas/IrCodeKey'
               value:
-                type: string
+                $ref: '#/components/schemas/IrCodeValue'
             required:
               - key
               - value
@@ -6962,8 +6966,10 @@ components:
       properties:
         device:
           type: string
+          minLength: 1
+          maxLength: 100
         device_type:
-          type: string
+          $ref: '#/components/schemas/DeviceType'
     ResourceType:
       type: string
       format: '^[a-zA-Z]+$'
@@ -6998,7 +7004,7 @@ components:
           $ref: '#/components/schemas/ExternalSystemName'
     ExternalSystemId:
       type: string
-      format: '^[a-zA-Z0-9-_]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 50
       description: Unique external system identifier registered by an R2 integration to interact with the API.
@@ -7124,7 +7130,7 @@ components:
       description: Device identifier for multi-device integrations only.
     DriverId:
       type: string
-      format: '^[a-zA-Z0-9-_]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 36
       description: 'Unique integration driver identifier, e.g. `homeassistant`, `homey`, etc.'
@@ -7133,7 +7139,7 @@ components:
       maxLength: 64
     IconIdentifier:
       type: string
-      format: '^[a-z0-9]+:[a-zA-Z0-9-_\.]+$'
+      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
       maxLength: 255
       description: |
         Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
@@ -7144,7 +7150,7 @@ components:
         An empty identifier, while updating the object, removes the existing icon.
     ImageIdentifier:
       type: string
-      format: '^[a-z0-9]+:[a-zA-Z0-9-_\.]+$'
+      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
       maxLength: 255
       description: |
         Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
@@ -7158,7 +7164,7 @@ components:
         key:
           type: string
         format:
-          type: string
+          $ref: '#/components/schemas/IrCodeFormat'
         value:
           type: string
       required:
@@ -7167,6 +7173,16 @@ components:
         - value
     IrCodeCreate:
       $ref: '#/components/schemas/IrCode'
+    IrCodeFormat:
+      description: Supported IR code formats
+      type: string
+      enum:
+        - HEX
+        - PRONTO
+    IrCodeKey:
+      description: IR command key identifier
+      type: string
+      format: '^[A-Z0-9\-_\.]{1,50}$'
     IrCodeSetType:
       description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
       type: string
@@ -7177,12 +7193,16 @@ components:
       type: object
       properties:
         format:
-          type: string
+          $ref: '#/components/schemas/IrCodeFormat'
         value:
-          type: string
+          $ref: '#/components/schemas/IrCodeValue'
       required:
         - format
         - value
+    IrCodeValue:
+      description: 'IR code value, either in HEX or PRONTO format as defined in the format field.'
+      type: string
+      format: '^(?:[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}|[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,})$'
     IrEmitter:
       type: object
       properties:
@@ -7616,10 +7636,7 @@ components:
             value:
               type: string
             format:
-              type: string
-              enum:
-                - HEX
-                - PRONTO
+              $ref: '#/components/schemas/IrCodeFormat'
         custom:
           description: |
             Flag indicating if this code is a custom code in a manufacturer codeset. This is a manually added code which
@@ -7836,7 +7853,7 @@ components:
         - name
     EntityId:
       type: string
-      format: '^[a-zA-Z0-9-_\.]+$'
+      format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 5
       maxLength: 110
       description: Unique UC Remote Two identifier over all entities and integrations.
@@ -8291,7 +8308,7 @@ components:
         - enabled
     IntegrationId:
       type: string
-      format: '^[a-zA-Z0-9-_\.]+$'
+      format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 1
       maxLength: 73
       description: |
@@ -8359,10 +8376,7 @@ components:
         code:
           type: string
         format:
-          type: string
-          enum:
-            - HEX
-            - PRONTO
+          $ref: '#/components/schemas/IrCodeFormat'
         timestamp:
           type: string
           format: date-time
@@ -8591,7 +8605,7 @@ components:
         $ref: '#/components/schemas/Page'
     SimpleId:
       type: string
-      format: '^[a-zA-Z0-9-_\.]+$'
+      format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 1
       maxLength: 36
       description: 'Simple string identifier, also usable as URL parameter or file identifier'
@@ -8865,7 +8879,7 @@ components:
           type: string
     UiId:
       type: string
-      format: '^[a-zA-Z0-9-_]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 36
       description: Unique user interface identifier.
