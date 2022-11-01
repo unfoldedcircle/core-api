@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.11.1-alpha'
+  version: '0.11.2-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -404,6 +404,8 @@ channels:
           - $ref: '#/components/messages/configuration_change'
           # ---
           - $ref: '#/components/messages/ir_learning'
+          - $ref: '#/components/messages/dock_discovery'
+          - $ref: '#/components/messages/dock_setup_change'
 
           # TODO define all events and response messages
 #          - $ref: '#/components/messages/battery_status'
@@ -1571,7 +1573,25 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/irLearningEventMsg'
-        
+
+    dock_discovery:
+      summary: Docking station discovery event.
+      description: |
+        Emitted if dock discovery is started, stopped or a new dock was discovered on the network or via Bluetooth.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/dockDiscoveryEventMsg'
+
+    dock_setup_change:
+      summary: Docking station setup state change event.
+      description: |
+        Emitted for all dock setup flow state changes.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/dockSetupChangeEventMsg'
+
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
     # =========================================================================
@@ -3789,6 +3809,40 @@ components:
             - msg
             - msg_data
 
+    dockDiscoveryEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: dock_discovery
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/dockDiscovery'
+          required:
+            - msg
+            - msg_data
+
+    dockSetupChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: dock_setup_change
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/dockSetupChange'
+          required:
+            - msg
+            - msg_data
+
     # =========================================================================
     # Event message schemas
     # =========================================================================
@@ -4751,6 +4805,94 @@ components:
         - format
         - value
 
+    dockDiscovery:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - START
+            - STOP
+            - DISCOVER
+        dock:
+          $ref: '#/components/schemas/dockDiscoveryInformation'
+      required:
+        - event_type
+
+    dockDiscoveryInformation:
+      type: object
+      properties:
+        id:
+          type: string
+        configured:
+          type: boolean
+        friendly_name:
+          type: string
+        address:
+          description: Resolved device network address.
+          type: string
+        model:
+          description: Detected dock model.
+          type: string
+        version:
+          description: Detected firmware version.
+          type: string
+        discovery_type:
+          $ref: '#/components/schemas/discoveryType'
+        timestamp:
+          description: Timestamp of dock discovery.
+          type: string
+          format: date-time
+        bt:
+          type: object
+          description: Optional Bluetooth discovery information. Not present for network device.
+          properties:
+            signal:
+              description: Bluetooth signal strength. 0 = min, 5 = max.
+              type: integer
+              minimum: 0
+              maximum: 5
+            last_seen_sec:
+              description: |
+                Last time the device was seen on a Bluetooth scan. Values over 15 sec indicate that the device is no longer
+                reachable.
+              type: integer
+              format: int32
+      required:
+        - id
+        - configured
+        - discovery_type
+
+    discoveryType:
+      type: string
+      description: |
+        Device discovery type:
+        - `BT`: Bluetooth
+        - `NET`: LAN or WAN network
+      enum:
+        - BT
+        - NET
+
+    dockSetupChange:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - START
+            - SETUP
+            - STOP
+        dock_id:
+          type: string
+        state:
+          type: string
+        error:
+          type: string
+      required:
+        - event_type
+        - dock_id
+        - state
+
     description:
       type: string
       maxLength: 255
@@ -4816,7 +4958,7 @@ components:
 
     iconIdentifier:
       type: string
-      format: "^[a-z0-9]+:[a-zA-Z0-9-_\\.]+$"
+      format: "^[a-z0-9]+:[a-zA-Z0-9\\-_\\.]+$"
       maxLength: 255
       description: |
         Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
@@ -4828,7 +4970,7 @@ components:
 
     imageIdentifier:
       type: string
-      format: "^[a-z0-9]+:[a-zA-Z0-9-_\\.]+$"
+      format: "^[a-z0-9]+:[a-zA-Z0-9\\-_\\.]+$"
       maxLength: 255
       description: |
         Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
@@ -4980,21 +5122,21 @@ components:
 
     simpleId:
       type: string
-      format: "^[a-zA-Z0-9-_\\.]+$"
+      format: "^[a-zA-Z0-9\\-_\\.]+$"
       minLength: 1
       maxLength: 36
       description: Simple string identifier, also usable as URL parameter or file identifier.
 
     driverId:
       type: string
-      format: "^[a-zA-Z0-9-_]+$"
+      format: "^[a-zA-Z0-9\\-_]+$"
       minLength: 1
       maxLength: 36
       description: Unique integration driver identifier, e.g. `hass`, `homey`, etc.
 
     integrationId:
       type: string
-      format: "^[a-zA-Z0-9-_\\.]+$"
+      format: "^[a-zA-Z0-9\\-_\\.]+$"
       minLength: 1
       maxLength: 73
       description: |
@@ -5002,14 +5144,14 @@ components:
 
     deviceId:
       type: string
-      format: "^[a-zA-Z0-9-_]+$"
+      format: "^[a-zA-Z0-9\\-_]+$"
       minLength: 1
       maxLength: 36
       description: Device identifier for multi-device integrations only.
 
     entityId:
       type: string
-      format: "^[a-zA-Z0-9-_\\.]+$"
+      format: "^[a-zA-Z0-9\\-_\\.]+$"
       minLength: 1
       maxLength: 110
       description: UC remote entity identifier.

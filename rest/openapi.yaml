@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.14.1
+  version: 0.15.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Software update checks, download & installation\n- Integration setup flow\n- Docking station integration\n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Software update checks, download & installation\n- Integration setup flow\n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -49,11 +49,9 @@ tags:
   - name: cfg
     description: "\U0001F4DD Configuration settings"
   - name: dock
-    description: "\U0001F477 Dock infrared handling - **work in progress**"
+    description: "\U0001F6F0\U0001F477 Docking station management, discovery and infrared testing functions - **work in progress**"
   - name: system
     description: "\U0001F477 System information and commands - **work in progress**"
-  - name: mdns
-    description: "\U0001F477 Service Discovery - **work in progress**"
 paths:
   /pub/version:
     get:
@@ -5594,6 +5592,33 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+    put:
+      tags:
+        - dock
+      summary: "\U0001F477 Connect or disconnect all active dock connections."
+      description: |
+        Requests all active docks to establish or stop a session to the dock.  
+        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
+      operationId: executeCommandOnAllDocks
+      parameters:
+        - name: cmd
+          in: query
+          description: Command to execute.
+          required: true
+          schema:
+            type: string
+            enum:
+              - CONNECT
+              - DISCONNECT
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
     delete:
       tags:
         - dock
@@ -5609,42 +5634,7 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-  /docks/connect:
-    post:
-      tags:
-        - dock
-      summary: Start all active dock connections
-      description: |
-        Requests all active docks to establish a session to the dock.  
-        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
-      operationId: connectAllDocks
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-  /docks/disconnect:
-    post:
-      tags:
-        - dock
-      summary: Stop all dock connections
-      description: |
-        Disconnects all active dock sessions.
-      operationId: disconnectAllDocks
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-  '/docks/{dockId}':
+  '/docks/devices/{dockId}':
     get:
       tags:
         - dock
@@ -5683,7 +5673,7 @@ paths:
               properties:
                 name:
                   type: string
-                  maxLength: 64
+                  maxLength: 40
                   description: User assignable friendly name to use instead of service_name
                 custom_ws_url:
                   type: string
@@ -5692,6 +5682,7 @@ paths:
                   description: Dock WebSocket URL to override auto-discovery from service_name
                 token:
                   type: string
+                  maxLength: 40
                   description: |
                     Access token to connect to the dock.
                     This does not change the token in the dock! Use the `command` resource to change the token.
@@ -5716,6 +5707,34 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - dock
+      summary: "\U0001F477 Start or stop a dock connection."
+      description: |
+        Establish or stop a session to the dock.  
+        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
+      operationId: executeDockCommand
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - name: cmd
+          in: query
+          description: Command to execute.
+          required: true
+          schema:
+            type: string
+            enum:
+              - CONNECT
+              - DISCONNECT
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
     delete:
       tags:
         - dock
@@ -5732,7 +5751,7 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/docks/{dockId}/command':
+  '/docks/devices/{dockId}/command':
     post:
       tags:
         - dock
@@ -5776,50 +5795,48 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
-  '/docks/{dockId}/connect':
-    post:
-      tags:
-        - dock
-      summary: Start dock connection
-      description: |
-        Establish a session to the dock.  
-        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
-      operationId: connectDock
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-  '/docks/{dockId}/disconnect':
-    post:
-      tags:
-        - dock
-      summary: Stop dock connection
-      description: |
-        Disconnects the dock session.
-      operationId: disconnectDock
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-  '/docks/{dockId}/ir/send':
+  '/docks/devices/{dockId}/update':
     get:
       tags:
         - dock
-      summary: Test IR command.
+      summary: "\U0001F477 Check for dock firmware updates and update progress"
+      description: |
+        TODO
+      operationId: checkDockFirmwareUpdate
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - dock
+      summary: "\U0001F477 Update dock firmware"
+      description: |
+        TODO
+      operationId: updateDockFirmware
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/docks/devices/{dockId}/ir/send':
+    get:
+      tags:
+        - dock
+      summary: "\U0001F477 Test IR command."
       description: |
         Test function for sending IR commands. The IR code can either be in Pronto format or Hex.
         If no output is specified, the code will only be emitted from the dock.
@@ -5874,7 +5891,7 @@ paths:
     post:
       tags:
         - dock
-      summary: Send IR command.
+      summary: "\U0001F477 Send IR command."
       description: |
         Send an IR command, either in Pronto or [IRremoteESP8266 Hex](https://github.com/crankyoldgit/IRremoteESP8266) format.
 
@@ -5912,6 +5929,263 @@ paths:
                   description: Hex IR code
                   type: string
                   pattern: '^[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}$'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /docks/discover:
+    get:
+      tags:
+        - dock
+      summary: Get docking station discovery status.
+      description: |
+        _TODO_
+      operationId: getDockDiscoveryStatus
+      responses:
+        '200':
+          description: Dock discovery status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockDiscoveryStatus'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    put:
+      tags:
+        - dock
+      summary: Start discovery of new docking stations.
+      description: |
+        _TODO_
+      operationId: startDockDiscovery
+      parameters:
+        - name: timeout
+          in: query
+          description: Timeout in seconds.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 30
+            minimum: 1
+            maximum: 300
+        - name: bt
+          in: query
+          description: Use Bluetooth to discover new docks.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: net
+          in: query
+          description: Query network to discover new docks.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: new
+          in: query
+          description: 'Only return new devices, filter out already configured docks.'
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Stop discovery of new docking stations.
+      description: |
+        _TODO_
+      operationId: stopDockDiscovery
+      responses:
+        '200':
+          description: Dock discovery status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockDiscoveryStatus'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /docks/setup:
+    get:
+      tags:
+        - dock
+      summary: Get current dock setup processes.
+      description: |
+        Return a list of all active setup process identifiers. The returned ids can be used with the
+        `/docks/setup/:id` endpoints to continue or abort a setup process.
+      operationId: getDockSetupProcesses
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    post:
+      tags:
+        - dock
+      summary: Start setting up a new docking station.
+      description: |
+        Create a new setup process for the given dock id. The required request data can be obtained from the
+        `/api/docks/discover` endpoints when searching for docking stations over Bluetooth or Ethernet. Simply provide the
+        returned `DockDiscovery` data object (which is a super set of the required data to start a setup process).
+
+        The returned `id` in the `DockSetupInfo` response will be the identifier for the further setup operations with the
+        `/docks/setup/:id` endpoints.
+
+        If there's already a setup process running for the given dock id, it will be reset as soon as a currently running
+        operation can be aborted. However, using the `DELETE /docks/setup/:id` operation is preferred.
+
+        Response status codes:
+        - `400`: invalid data in request body
+        - `503`: service not available to setup docking station.  
+           E.g. Bluetooth is disabled and therefore the docking station cannot be setup over Bluetooth. Either enable
+           Bluetooth or setup the dock over Ethernet.
+      operationId: setupDock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDockSetup'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSetupInfo'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Abort and remove all setup processes.
+      description: |
+        Stop all setup processes at the next possible operation and remove all setup process information.
+      operationId: stopAllDockSetups
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/docks/setup/{dockId}':
+    get:
+      tags:
+        - dock
+      summary: Get docking station setup status.
+      description: |
+        Poll operation to retrieve the current docking station setup state. See the `state` and `error` fields in the
+        response message. There are also WebSocket event messages for state changes to avoid polling.
+
+        Defined setup states:
+        - `NEW`: setup has not yet been started. Use the `PUT` operation to provide the required data and to start setting up the dock.
+        - `CONFIGURING`: setup data is currently being transferred to the dock.
+        - `RESTARTING`: dock has been configured and is restarting to integrate into the network.
+        - `OK`: setup process has been completed successfully, the dock can now be used.
+        - `ERROR`: the setup process failed. Check the `error` field for more information.
+      operationId: getDockSetupStatus
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSetupInfo'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - dock
+      summary: Setup docking station.
+      description: |
+        Set required data to start the setup process and configure the docking station.
+        When using Bluetooth the WiFi network name and credentials must be provided to connect the dock to the WiFi network.
+
+        The `state` field in the response message indicate the current state of the setup process. Use the `GET` operation
+        to poll for state updates or listen to the corresponding WebSocket event messages.
+      operationId: startDockSetup
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DockSetup'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSetupInfo'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Abort the dock setup process.
+      description: |
+        Stop the setup process at the next possible operation and remove the setup process information.  
+        To start a new setup process, use the `POST /docks/setup` operation again.
+      operationId: stopDockSetup
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -6026,157 +6300,6 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
-  /test/mdns/discover:
-    get:
-      tags:
-        - mdns
-      summary: Browse and resolve for service instances.
-      operationId: discoverAllServices
-      parameters:
-        - name: timeout_browse
-          in: query
-          description: Service browse timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 30
-        - name: timeout_browse1
-          in: query
-          description: Single service browse timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 15
-        - name: timeout_resolve
-          in: query
-          description: Resolve timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 10
-        - name: timeout_address
-          in: query
-          description: Address resolve timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 10
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceInstances'
-        '500':
-          $ref: '#/components/responses/Err500InternalServerError'
-  '/test/mdns/discover/{query}':
-    get:
-      tags:
-        - mdns
-      summary: Resolve service instances of a given type.
-      operationId: discoverService
-      parameters:
-        - in: path
-          name: query
-          description: 'Service type, e.g. `_uc-remote._tcp`'
-          required: true
-          schema:
-            type: string
-        - name: timeout_browse
-          in: query
-          description: Service browse timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 30
-        - name: timeout_browse1
-          in: query
-          description: Single service browse timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 15
-        - name: timeout_resolve
-          in: query
-          description: Resolve timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 10
-        - name: timeout_address
-          in: query
-          description: Address resolve timeout in seconds
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 10
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ServiceInstances'
-        '500':
-          $ref: '#/components/responses/Err500InternalServerError'
-  /test/mdns/publish:
-    post:
-      tags:
-        - mdns
-      summary: Publish a service.
-      operationId: publishService
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  reg_type:
-                    type: string
-                  port:
-                    type: integer
-                    minimum: 1
-                    maximum: 65535
-                  txt:
-                    type: object
-                    additionalProperties:
-                      type: string
-                required:
-                  - reg_type
-                  - port
-        '500':
-          $ref: '#/components/responses/Err500InternalServerError'
-  '/test/mdns/publish/{name}':
-    delete:
-      tags:
-        - mdns
-      summary: Unpublish a previously published service.
-      operationId: unpublishService
-      parameters:
-        - in: path
-          name: name
-          description: Service name
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-        '500':
-          $ref: '#/components/responses/Err500InternalServerError'
 components:
   parameters:
     api_key_id:
@@ -6447,7 +6570,7 @@ components:
             - options
     ActivityId:
       type: string
-      format: '^[a-zA-Z0-9-_]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 36
       description: Activity identifier
@@ -6695,6 +6818,15 @@ components:
           description: 'Optional expiration timestamp. If not set, the API key is valid until revoked.'
         description:
           $ref: '#/components/schemas/Description'
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Status code
+        message:
+          type: string
+          description: Status message describing the result or error. This message is intended for error analysis and should not directly shown to the end user.
     AvailableEntity:
       description: Provided entity from an integration which can be configured to be used in the remote.
       type: object
@@ -6746,145 +6878,180 @@ components:
       minLength: 1
       maxLength: 20
       description: Physical button identification
-    CommandSequence:
-      description: Sequence of commands to execute.
-      type: array
-      items:
-        oneOf:
-          - $ref: '#/components/schemas/CommandSequenceEntity'
-          - $ref: '#/components/schemas/CommandSequenceDelay'
-        discriminator:
-          propertyName: type
-          mapping:
-            command: '#/components/schemas/CommandSequenceEntity'
-            delay: '#/components/schemas/CommandSequenceDelay'
-    CommandSequenceEntity:
-      description: Entity command step in a command sequence.
-      type: object
-      properties:
-        type:
-          type: string
-        command:
-          $ref: '#/components/schemas/EntityCommand'
-      required:
-        - type
-        - command
-      example:
-        type: command
-        command:
-          entity_id: hass.main.light.living-room
-          cmd_id: 'on'
-          params:
-            brightness: 75
-    CommandSequenceDelay:
-      description: Delay step in a command sequence.
-      type: object
-      properties:
-        type:
-          type: string
-        delay:
-          description: Delay in milliseconds.
-          type: integer
-          minimum: 1
-      required:
-        - type
-        - delay
-      example:
-        type: delay
-        delay: 100
-    DeviceButtonGroup:
-      description: Button group type.
-      type: string
-      enum:
-        - keypad
-    DeviceButtonLayout:
-      description: 'Button group definitions with layout placement, size, icon and language specific names.'
-      type: object
-      properties:
-        type:
-          $ref: '#/components/schemas/DeviceButtonGroup'
-        grid:
-          description: Grid layout size.
-          type: object
-          properties:
-            width:
-              type: integer
-              minimum: 1
-            height:
-              type: integer
-              minimum: 1
-          required:
-            - width
-            - height
-        buttons:
-          type: array
-          items:
-            type: object
-            properties:
-              button:
-                description: Unique button identifier over all button groups.
-                type: string
-              icon:
-                $ref: '#/components/schemas/IconIdentifier'
-              name:
-                $ref: '#/components/schemas/LanguageText'
-              location:
-                $ref: '#/components/schemas/GridLocation'
-              size:
-                $ref: '#/components/schemas/GridItemSize'
-            required:
-              - button
-              - icon
-              - name
-              - location
-      required:
-        - type
-        - grid
-        - buttons
-    DeviceButtonMapping:
+    CfgAll:
       type: object
       properties:
         button:
-          $ref: '#/components/schemas/ButtonId'
-        short_press:
-          $ref: '#/components/schemas/EntityCommand'
-        long_press:
-          $ref: '#/components/schemas/EntityCommand'
+          $ref: '#/components/schemas/CfgButtons'
+        device:
+          $ref: '#/components/schemas/CfgRemoteDevice'
+        display:
+          $ref: '#/components/schemas/CfgDisplay'
+        haptic:
+          $ref: '#/components/schemas/CfgHaptic'
+        localization:
+          $ref: '#/components/schemas/CfgLocalization'
+        network:
+          $ref: '#/components/schemas/CfgNetwork'
+        power_saving:
+          $ref: '#/components/schemas/CfgPowerSaving'
+        software_update:
+          $ref: '#/components/schemas/CfgSoftwareUpdate'
+        sound:
+          $ref: '#/components/schemas/CfgSound'
+        voice_control:
+          $ref: '#/components/schemas/CfgVoiceControl'
+    CfgButtons:
+      type: object
+      properties:
+        brightness:
+          description: 'Button backlight brightness. 0 = off, 100 = max.'
+          type: integer
+          minimum: 0
+          maximum: 100
+        auto_brightness:
+          description: 'When enabled, button backlight will automatically turn on in a dark room.'
+          type: boolean
       required:
-        - button
-    DeviceButtonMappings:
-      description: |
-        Physical button mapping to entity commands. The `entity_id` in the EntityCommand object is a required
-        property for an activity and ignored for a remote-entity.
-      type: array
-      items:
-        $ref: '#/components/schemas/DeviceButtonMapping'
-    DeviceState:
-      type: string
-      enum:
-        - UNKNOWN
-        - CONNECTING
-        - CONNECTED
-        - DISCONNECTED
-        - ERROR
-    DeviceType:
-      type: string
-      enum:
-        - audio
-        - radio
-        - cd_player
-        - receiver
-        - soundbar
-        - hdmi_switch
-        - television
-        - projector
-        - set_top_box
-        - media_player
-        - dvd_player
-        - bluray_player
-        - climate
-        - light
-        - various
+        - brightness
+        - auto_brightness
+    CfgDisplay:
+      type: object
+      properties:
+        brightness:
+          description: Display brightness.
+          type: integer
+          minimum: 0
+          maximum: 100
+        auto_brightness:
+          description: Automatically adjust the display brightness based on ambient lighting conditions.
+          type: boolean
+      required:
+        - brightness
+        - auto_brightness
+    CfgHaptic:
+      type: object
+      properties:
+        enabled:
+          description: Haptic feedback enabled.
+          type: boolean
+      required:
+        - enabled
+    CfgLocalization:
+      type: object
+      properties:
+        language_code:
+          $ref: '#/components/schemas/LanguageCode'
+        country_code:
+          $ref: '#/components/schemas/CountryCode'
+        time_zone:
+          description: 'Time zone name according to IANA <https://www.iana.org/time-zones>, e.g. `Europe/Copenhagen`.'
+          type: string
+        time_format_24h:
+          type: boolean
+        measurement_unit:
+          $ref: '#/components/schemas/MeasurementUnit'
+      required:
+        - language_code
+        - country_code
+        - time_zone
+        - time_format_24h
+        - measurement_unit
+    CfgNetwork:
+      type: object
+      properties:
+        bt_enabled:
+          description: Enable Bluetooth.
+          type: boolean
+        wifi_enabled:
+          description: Enable WiFi.
+          type: boolean
+      required:
+        - bt_enabled
+        - wifi_enabled
+    CfgPowerSaving:
+      type: object
+      properties:
+        wakeup_sensitivity:
+          description: Amount of movement needed to wake up the remote. 0 = disabled.
+          type: integer
+          minimum: 0
+          maximum: 3
+        display_off_sec:
+          type: integer
+          minimum: 0
+          maximum: 60
+          description: Turn off display after given seconds.
+        standby_sec:
+          type: integer
+          minimum: 0
+          maximum: 10800
+          description: Activate standby after given seconds. 0 disables standby mode.
+      required:
+        - wakeup_sensitivity
+        - display_off_sec
+        - standby_sec
+    CfgRemoteDevice:
+      type: object
+      properties:
+        name:
+          description: Custom name of the remote
+          type: string
+          minimum: 1
+          maximum: 50
+      required:
+        - name
+    CfgSoftwareUpdate:
+      type: object
+      properties:
+        check_for_updates:
+          description: |
+            Automatically check for updates. If `auto_update` is enabled, the updates are automatically installed,
+            otherwise the user is only notified about the updates.
+          type: boolean
+        auto_update:
+          description: |
+            Automatically update the remote when new software is available. Requires `check_for_updates` to be enabled.
+          type: boolean
+      required:
+        - check_for_updates
+        - auto_update
+    CfgSound:
+      type: object
+      properties:
+        enabled:
+          description: Sound effects enabled.
+          type: boolean
+        volume:
+          description: Sound effects volume.
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+        - enabled
+        - volume
+    CfgVoiceControl:
+      type: object
+      properties:
+        microphone:
+          description: |
+            Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
+            with the remote or integrations.
+          type: boolean
+        enabled:
+          description: |
+            Enable voice control. Disabling voice control will still let you use voice dictation with integrations. 
+            Disable the microphone to completely switch off any microphone related functionality.
+          type: boolean
+        voice_assistant:
+          description: |
+            TODO
+          type: string
+          default: None
+      required:
+        - microphone
+        - enabled
+        - voice_assistant
     CodeSet:
       type: object
       properties:
@@ -6970,777 +7137,198 @@ components:
           maxLength: 100
         device_type:
           $ref: '#/components/schemas/DeviceType'
-    ResourceType:
-      type: string
-      format: '^[a-zA-Z]+$'
-      minLength: 1
-      maxLength: 32
-    ResourceItems:
+    CommandSequence:
+      description: Sequence of commands to execute.
       type: array
       items:
-        $ref: '#/components/schemas/ResourceItem'
-    ResourceItem:
+        oneOf:
+          - $ref: '#/components/schemas/CommandSequenceEntity'
+          - $ref: '#/components/schemas/CommandSequenceDelay'
+        discriminator:
+          propertyName: type
+          mapping:
+            command: '#/components/schemas/CommandSequenceEntity'
+            delay: '#/components/schemas/CommandSequenceDelay'
+    CommandSequenceEntity:
+      description: Entity command step in a command sequence.
       type: object
       properties:
         type:
-          $ref: '#/components/schemas/ResourceType'
-        id:
           type: string
-          description: Resource identifier (normalized filename)
-        size:
-          type: integer
-          format: int32
-          description: Size in bytes
-    ExternalSystems:
-      type: array
-      items:
-        $ref: '#/components/schemas/ExternalSystem'
-    ExternalSystem:
-      type: object
-      properties:
-        system:
-          $ref: '#/components/schemas/ExternalSystemId'
-        name:
-          $ref: '#/components/schemas/ExternalSystemName'
-    ExternalSystemId:
-      type: string
-      format: '^[a-zA-Z0-9\-_]+$'
-      minLength: 1
-      maxLength: 50
-      description: Unique external system identifier registered by an R2 integration to interact with the API.
-    ExternalSystemName:
-      type: string
-      minLength: 1
-      maxLength: 50
-      description: |
-        Friendly name of the external system to display to the user within the app. This name must be unique for an external
-        system and should be as short and concise as possible.
-        Use the description field for more information.
-    ExternalAccessTokens:
-      type: array
-      items:
-        type: object
-        properties:
-          system:
-            $ref: '#/components/schemas/ExternalSystemName'
-          token_id:
-            type: string
-          name:
-            type: string
-          description:
-            type: string
-            maxLength: 2048
-            description: Optional description of the external access token.
-          url:
-            type: string
-            maxLength: 2048
-            description: Optional URL of the external system.
-          data:
-            type: string
-            maxLength: 2048
-            description: Optional data from the external system for the R2 integration.
-          creation_date:
-            type: string
-            format: date-time
-    ExternalAccessToken:
-      type: object
-      properties:
-        system:
-          $ref: '#/components/schemas/ExternalSystemName'
-        token_id:
-          type: string
-        name:
-          type: string
-        token:
-          type: string
-          minLength: 1
-          maxLength: 2048
-          description: |
-            The token to access the external system with the corresponding R2 integration.
-            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
-            system.
-        description:
-          type: string
-          maxLength: 2048
-          description: Optional description of the external access token.
-        url:
-          type: string
-          maxLength: 2048
-          description: Optional URL of the external system.
-        data:
-          type: string
-          maxLength: 2048
-          description: Optional data from the external system for the R2 integration.
-        creation_date:
-          type: string
-          format: date-time
-    ExternalAccessTokenRequest:
-      type: object
-      properties:
-        token_id:
-          type: string
-          format: '^[a-zA-Z0-9\-_]+$'
-          minLength: 1
-          maxLength: 36
-          description: |
-            Unique token identifier, used for later token management through the external system or management ui.
-            This identifier can be provided by the external system. If omitted, an UUID is generated and returned in the
-            ExternalAccessToken response.
-        name:
-          $ref: '#/components/schemas/ExternalSystemName'
-        token:
-          type: string
-          minLength: 1
-          maxLength: 2048
-          description: |
-            The token to access the external system with the corresponding R2 integration.
-            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
-            system.
-        description:
-          type: string
-          maxLength: 2048
-          description: Optional description of the external access token.
-        url:
-          type: string
-          maxLength: 2048
-          description: Optional URL of the external system.
-        data:
-          type: string
-          maxLength: 2048
-          description: Optional data from the external system for the R2 integration.
+        command:
+          $ref: '#/components/schemas/EntityCommand'
       required:
-        - name
-        - token
+        - type
+        - command
       example:
-        token_id: 1-2-3
-        name: My smart home
-        token: secret-sauce-42!
-        description: Any other informative message about the external system
-        url: 'ws://smart.home'
-        data: 'optional: true, foo: bar, free: text'
+        type: command
+        command:
+          entity_id: hass.main.light.living-room
+          cmd_id: 'on'
+          params:
+            brightness: 75
+    CommandSequenceDelay:
+      description: Delay step in a command sequence.
+      type: object
+      properties:
+        type:
+          type: string
+        delay:
+          description: Delay in milliseconds.
+          type: integer
+          minimum: 1
+      required:
+        - type
+        - delay
+      example:
+        type: delay
+        delay: 100
+    CountryCode:
+      description: 'Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).'
+      type: string
+      format: iso-3166
+    CreateDockSetup:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DockId'
+        friendly_name:
+          $ref: '#/components/schemas/DockName'
+        address:
+          description: Resolved device network address.
+          type: string
+        model:
+          description: Detected dock model.
+          type: string
+        version:
+          description: Detected firmware version.
+          type: string
+        discovery_type:
+          $ref: '#/components/schemas/DiscoveryType'
+      required:
+        - id
+        - discovery_type
     Description:
       type: string
       maxLength: 255
       description: Optional description
-    DeviceId:
-      type: string
-      format: '^[a-zA-Z0-9-_]+$'
-      minLength: 1
-      maxLength: 36
-      description: Device identifier for multi-device integrations only.
-    DriverId:
-      type: string
-      format: '^[a-zA-Z0-9\-_]+$'
-      minLength: 1
-      maxLength: 36
-      description: 'Unique integration driver identifier, e.g. `homeassistant`, `homey`, etc.'
-    FriendlyName:
-      type: string
-      maxLength: 64
-    IconIdentifier:
-      type: string
-      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
-      maxLength: 255
-      description: |
-        Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
-        Available prefixes:
-        - `uc:` - integrated icon font 
-        - `custom:` - custom resource
-
-        An empty identifier, while updating the object, removes the existing icon.
-    ImageIdentifier:
-      type: string
-      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
-      maxLength: 255
-      description: |
-        Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
-        Available prefixes:
-        - `custom:` - custom resource
-
-        An empty identifier, while updating the object, removes the existing image.
-    IrCode:
-      type: object
-      properties:
-        key:
-          type: string
-        format:
-          $ref: '#/components/schemas/IrCodeFormat'
-        value:
-          type: string
-      required:
-        - key
-        - format
-        - value
-    IrCodeCreate:
-      $ref: '#/components/schemas/IrCode'
-    IrCodeFormat:
-      description: Supported IR code formats
+    DeviceButtonGroup:
+      description: Button group type.
       type: string
       enum:
-        - HEX
-        - PRONTO
-    IrCodeKey:
-      description: IR command key identifier
-      type: string
-      format: '^[A-Z0-9\-_\.]{1,50}$'
-    IrCodeSetType:
-      description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
-      type: string
-      enum:
-        - manufacturer
-        - custom
-    IrCodeUpdate:
+        - keypad
+    DeviceButtonLayout:
+      description: 'Button group definitions with layout placement, size, icon and language specific names.'
       type: object
       properties:
-        format:
-          $ref: '#/components/schemas/IrCodeFormat'
-        value:
-          $ref: '#/components/schemas/IrCodeValue'
-      required:
-        - format
-        - value
-    IrCodeValue:
-      description: 'IR code value, either in HEX or PRONTO format as defined in the format field.'
-      type: string
-      format: '^(?:[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}|[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,})$'
-    IrEmitter:
-      type: object
-      properties:
-        device_id:
-          description: IR emitter device identifier.
-          type: string
         type:
-          $ref: '#/components/schemas/IrEmitterType'
-        name:
-          description: Friendly name of the IR emitter device.
-          type: string
-        active:
-          description: Emitter device is active or currently not available.
-          type: boolean
-        capabilities:
-          description: Optional capabilities of the emitter.
+          $ref: '#/components/schemas/DeviceButtonGroup'
+        grid:
+          description: Grid layout size.
           type: object
           properties:
-            learning:
-              $ref: '#/components/schemas/IrEmitterLearningCapability'
-        ports:
-          description: |
-            Available output ports of the emitter. A simple emitter might only have one IR output, whereas the Remote Two dock
-            has 4 individual outputs.
+            width:
+              type: integer
+              minimum: 1
+            height:
+              type: integer
+              minimum: 1
+          required:
+            - width
+            - height
+        buttons:
           type: array
           items:
             type: object
             properties:
-              port_id:
-                description: IR emitter output port identifier.
+              button:
+                description: Unique button identifier over all button groups.
                 type: string
+              icon:
+                $ref: '#/components/schemas/IconIdentifier'
               name:
-                description: Friendly name of the output port.
-                type: string
+                $ref: '#/components/schemas/LanguageText'
+              location:
+                $ref: '#/components/schemas/GridLocation'
+              size:
+                $ref: '#/components/schemas/GridItemSize'
             required:
-              - port_id
+              - button
+              - icon
               - name
+              - location
       required:
-        - device_id
         - type
-        - name
-        - active
-        - ports
-    IrEmitterLearningCapability:
+        - grid
+        - buttons
+    DeviceButtonMapping:
       type: object
-      description: Emitter can also be used for learning IR codes.
       properties:
-        description:
-          type: string
-        instruction:
-          type: string
-        formats:
-          type: array
-          items:
-            type: string
-        send_while_learn:
-          description: Emitter is able to send IR codes while in learn mode.
-          type: boolean
-          default: false
+        button:
+          $ref: '#/components/schemas/ButtonId'
+        short_press:
+          $ref: '#/components/schemas/EntityCommand'
+        long_press:
+          $ref: '#/components/schemas/EntityCommand'
       required:
-        - formats
-    IrEmitters:
+        - button
+    DeviceButtonMappings:
+      description: |
+        Physical button mapping to entity commands. The `entity_id` in the EntityCommand object is a required
+        property for an activity and ignored for a remote-entity.
       type: array
       items:
-        $ref: '#/components/schemas/IrEmitter'
-    IrEmitterType:
+        $ref: '#/components/schemas/DeviceButtonMapping'
+    DeviceId:
       type: string
-      description: 'The type of the device, e.g. a Remote Two docking station, a network based IR blaster or something else.'
-      enum:
-        - DOCK
-        - IR_BLASTER
-        - OTHER
-    LanguageText:
-      type: object
-      description: |
-        Key value pairs of language texts. Key: ISO 639-1 code with optional country suffix to represent a `culture code`.
-        Examples: `en`, `en_UK`, `en_US`, `de`, `de_CH`.
-
-        If we need to support more regional differences within a country, then the
-        [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) might be a solution. This would even
-        support the various Swiss German dialects!
-      additionalProperties:
-        type: string
-    Macro:
-      description: |
-        The macro entity executes a sequence of commands.
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Entity'
-        - properties:
-            entity_type:
-              type: string
-              enum:
-                - macro
-            features:
-              description: |
-                Supported features of the macro.
-              type: array
-              items:
-                type: string
-                enum:
-                  - start
-            options:
-              type: object
-              properties:
-                editable:
-                  description: |
-                    - `true` / property missing: macro was created by Remote Two and can be edited.
-                    - `false`: macro was provided by an integration and cannot be edited.
-                  type: boolean
-                  default: true
-                included_entities:
-                  $ref: '#/components/schemas/IncludedEntities'
-                sequence:
-                  $ref: '#/components/schemas/CommandSequence'
-          required:
-            - options
-    Macros:
-      type: array
-      items:
-        $ref: '#/components/schemas/MacroOverview'
-    MacroCreate:
-      description: |
-        Dedicated request object to create a new macro.  
-      type: object
-      allOf:
-        - properties:
-            name:
-              $ref: '#/components/schemas/LanguageText'
-            icon:
-              $ref: '#/components/schemas/IconIdentifier'
-            description:
-              $ref: '#/components/schemas/LanguageText'
-        - oneOf:
-            - type: object
-              properties:
-                clone_from:
-                  $ref: '#/components/schemas/EntityId'
-              required:
-                - clone_from
-            - type: object
-              properties:
-                options:
-                  type: object
-                  properties:
-                    entity_ids:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/EntityId'
-                  required:
-                    - entity_ids
-      required:
-        - name
-    MacroOverview:
-      description: |
-        The macro entity executes a sequence of commands.
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Entity'
-        - properties:
-            entity_type:
-              type: string
-              enum:
-                - macro
-            features:
-              description: |
-                Supported features of the macro.
-              type: array
-              items:
-                type: string
-                enum:
-                  - start
-            options:
-              type: object
-              properties:
-                editable:
-                  description: |
-                    - `true` / property missing: macro was created by Remote Two and can be edited.
-                    - `false`: macro was provided by an integration and cannot be edited.
-                  type: boolean
-                  default: true
-    MacroUpdate:
-      description: |
-        Dedicated request object to update an existing macro.  
-        All root properties are optional and only the provided objects are updated in the macro. Omitted objects are
-        ignored and not deleted from the macro.
-
-        The `entity_ids` object must be managed by the client and is persisted when updating a macro.
-
-        Notes:
-        - Entities can be included in `entity_ids` without being used in `sequence`.  
-          This allows to edit the macro in multiple sessions without having to reselect the desired entities.
-        - Every referenced entity in `sequence` must be included in `entity_ids`, otherwise the macro cannot be saved.
-        - If the client removes a configured entity from the system which is included in a macro, it must make sure to also
-          remove all references in the macro. See `available` property in the included entities object when retrieving a macro.
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        description:
-          $ref: '#/components/schemas/LanguageText'
-        options:
-          type: object
-          properties:
-            entity_ids:
-              type: array
-              items:
-                $ref: '#/components/schemas/EntityId'
-            sequence:
-              $ref: '#/components/schemas/CommandSequence'
-    Name:
-      type: string
-      minLength: 1
-      maxLength: 50
-    Remote:
-      description: |
-        The remote entity executes a sequence of commands and at the end displays a user interface (similar to remote entity)
-        to the user. If the entity has an off sequence, it can be turned off.
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Entity'
-        - properties:
-            entity_type:
-              type: string
-              enum:
-                - remote
-            features:
-              description: |
-                Supported features of the remote. If the remote has an `off` sequence, it supports the common `on_off`
-                feature, otherwise only `start`.
-              type: array
-              items:
-                type: string
-                enum:
-                  - on_off
-                  - send
-            options:
-              type: object
-              properties:
-                editable:
-                  description: |
-                    - `true` / property missing: remote was created by Remote Two and can be edited.
-                    - `false`: remote was provided by an integration and cannot be edited.
-                  type: boolean
-                  default: true
-                ir:
-                  description: |
-                    Infrared settings: codeset name und used infrared emitter to send commands.
-                  type: object
-                  properties:
-                    codeset:
-                      description: "Read-only information about the infrared codeset. \U0001F477 **TODO** Use `/remotes/entities/:entityId/ir`\nendpoints to manage infrared codes.\n"
-                      type: object
-                      properties:
-                        id:
-                          description: |
-                            Codeset identifier, either a custom codeset id or a manufacturer codeset id depending on `type`.
-                          type: string
-                        name:
-                          description: |
-                            User friendly name of the used codeset (custom or manufacturer) to show in a user interface.
-                          type: string
-                        type:
-                          $ref: '#/components/schemas/IrCodeSetType'
-                    output:
-                      description: |
-                        Infrared output device settings. Use `/ir/emitter` endpoints to retrieve further information.
-                      type: object
-                      properties:
-                        device_id:
-                          description: |
-                            IR emitter device identifier.
-                          type: string
-                        port_id:
-                          description: |
-                            IR emitter output port identifier.
-                          type: string
-                simple_commands:
-                  description: |
-                    All available commands of the infrared codeset for the button mapping and user interface.  
-                    These simple commands relate directly to the `cmd_id` attribute when defining or calling an entity command.
-
-                    The commands are read-only and updated automatically based on the infrared codeset.
-                  type: array
-                  items:
-                    type: string
-                button_mapping:
-                  $ref: '#/components/schemas/DeviceButtonMappings'
-                user_interface:
-                  $ref: '#/components/schemas/ActivityUserInterface'
-          required:
-            - options
-    Remotes:
-      type: array
-      items:
-        $ref: '#/components/schemas/RemoteOverview'
-    RemoteCreate:
-      description: |
-        Dedicated request object to create a new remote.
-      type: object
-      allOf:
-        - properties:
-            name:
-              $ref: '#/components/schemas/LanguageText'
-            icon:
-              $ref: '#/components/schemas/IconIdentifier'
-            description:
-              $ref: '#/components/schemas/LanguageText'
-        - oneOf:
-            - type: object
-              properties:
-                clone_from:
-                  $ref: '#/components/schemas/EntityId'
-              required:
-                - clone_from
-            - type: object
-              properties:
-                codeset_id:
-                  $ref: '#/components/schemas/SimpleId'
-              required:
-                - codeset_id
-            - type: object
-              properties:
-                custom_codeset:
-                  type: object
-                  properties:
-                    manufacturer_id:
-                      type: string
-                      default: custom
-                    device_name:
-                      type: string
-                    device_type:
-                      $ref: '#/components/schemas/DeviceType'
-                      default: various
-                  required:
-                    - device_name
-              required:
-                - custom_codeset
-      required:
-        - name
-    RemoteOverview:
-      type: object
-      allOf:
-        - $ref: '#/components/schemas/Entity'
-        - properties:
-            entity_type:
-              type: string
-              enum:
-                - remote
-            features:
-              description: |
-                Supported features of the remote.
-              type: array
-              items:
-                type: string
-                enum:
-                  - send
-            options:
-              type: object
-              properties:
-                editable:
-                  description: |
-                    - `true` / property missing: remote was created by Remote Two and can be edited.
-                    - `false`: remote was provided by an integration and cannot be edited.
-                  type: boolean
-                  default: true
-    RemoteUpdate:
-      description: |
-        Dedicated request object to update an existing remote.  
-        All root properties are optional and only the provided objects are updated in the remote-entity. Omitted objects are
-        ignored and not deleted from the remote-entity.
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        description:
-          $ref: '#/components/schemas/LanguageText'
-        options:
-          type: object
-          properties:
-            ir:
-              type: object
-              properties:
-                codeset:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                  required:
-                    - id
-                output:
-                  type: object
-                  properties:
-                    device_id:
-                      type: string
-                    port_id:
-                      type: string
-                  required:
-                    - device_id
-                    - port_id
-    RemoteIrDataSet:
-      type: object
-      properties:
-        id:
-          description: |
-            Codeset identifier, either a custom codeset id or a manufacturer codeset id depending on `type`.
-          type: string
-        name:
-          description: User friendly name of the codeset (custom or manufacturer).
-          type: string
-        type:
-          $ref: '#/components/schemas/IrCodeSetType'
-        codes:
-          type: array
-          items:
-            $ref: '#/components/schemas/RemoteIrCode'
-    RemoteIrCode:
-      type: object
-      properties:
-        cmd_id:
-          $ref: '#/components/schemas/SimpleId'
-        code:
-          description: |
-            Custom infrared code. Only set for custom codeset or if a manufacturer codeset has been modified or enhanced.
-          type: object
-          properties:
-            value:
-              type: string
-            format:
-              $ref: '#/components/schemas/IrCodeFormat'
-        custom:
-          description: |
-            Flag indicating if this code is a custom code in a manufacturer codeset. This is a manually added code which
-            was not present in the codeset. Custom codes can be deleted or edited by the user. The modified code is
-            stored in the `code` object.
-          type: boolean
-        modified:
-          description: |
-            Flag indicating if a manufacturer code has been replaced with a user code. The modified code is stored in
-            the `code` object. Modified codes can be edited by the user.
-          type: boolean
-      required:
-        - cmd_id
-    Scopes:
-      type: array
-      items:
-        $ref: '#/components/schemas/Scope'
-    Scope:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/ScopeName'
-        description:
-          type: string
-          description: Permission scope description
-      required:
-        - name
-    ScopeName:
-      type: string
-      format: '^[a-zA-Z\-:]+$'
+      format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 36
-      description: Permission scope name
-    ApiResponse:
-      type: object
-      properties:
-        code:
-          type: string
-          description: Status code
-        message:
-          type: string
-          description: Status message describing the result or error. This message is intended for error analysis and should not directly shown to the end user.
-    ServiceInstances:
-      type: array
-      items:
-        $ref: '#/components/schemas/ServiceInstance'
-    ServiceInstance:
-      type: object
-      properties:
-        service_type:
-          type: string
-        name:
-          type: string
-          description: Instance name
-        hostname:
-          type: string
-        port:
-          type: integer
-          minimum: 1
-          maximum: 65535
-        addr_v4:
-          type: array
-          items:
-            type: string
-        addr_v6:
-          type: array
-          items:
-            type: string
-        txt:
-          type: object
-          additionalProperties:
-            type: string
-      required:
-        - service_type
-        - name
-        - hostname
-        - port
-    DriverState:
+      description: Device identifier for multi-device integrations only.
+    DeviceState:
       type: string
       enum:
-        - IDLE
+        - UNKNOWN
         - CONNECTING
-        - ACTIVE
-        - RECONNECTING
+        - CONNECTED
+        - DISCONNECTED
         - ERROR
-    DockId:
+    DeviceType:
       type: string
-      format: '^[a-zA-Z0-9-_\.]+$'
-      minLength: 1
-      maxLength: 64
-      description: Dock identifier
+      enum:
+        - audio
+        - radio
+        - cd_player
+        - receiver
+        - soundbar
+        - hdmi_switch
+        - television
+        - projector
+        - set_top_box
+        - media_player
+        - dvd_player
+        - bluray_player
+        - climate
+        - light
+        - various
+    DiscoveryType:
+      type: string
+      description: |
+        Device discovery type:
+        - `BT`: Bluetooth
+        - `NET`: LAN or WAN network
+      enum:
+        - BT
+        - NET
     DockConfiguration:
       type: object
       properties:
         service_name:
           $ref: '#/components/schemas/DockId'
         name:
-          $ref: '#/components/schemas/FriendlyName'
-          description: User assignable friendly name to use instead of service_name
+          $ref: '#/components/schemas/DockName'
         custom_ws_url:
-          type: string
-          minLength: 6
-          maxLength: 256
-          description: Dock WebSocket URL to override auto-discovery from service_name
+          $ref: '#/components/schemas/DockUrl'
         resolved_ws_url:
           type: string
           maxLength: 256
@@ -7765,16 +7353,11 @@ components:
         service_name:
           $ref: '#/components/schemas/DockId'
         name:
-          $ref: '#/components/schemas/FriendlyName'
-          description: Optional friendly name to use instead of service_name
+          $ref: '#/components/schemas/DockName'
         custom_ws_url:
-          type: string
-          minLength: 6
-          maxLength: 256
-          description: Custom WebSocket URL to override service_name lookup
+          $ref: '#/components/schemas/DockUrl'
         token:
-          type: string
-          description: Access token
+          $ref: '#/components/schemas/DockToken'
         active:
           type: boolean
           description: Auto connect to dock when network is available
@@ -7784,6 +7367,139 @@ components:
         - service_name
         - token
         - active
+    DockDiscovery:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DockId'
+        configured:
+          description: |
+            Dock configuration flag for this remote:
+            - true: device has already been configured
+            - false: device has not yet been configured
+          type: boolean
+        friendly_name:
+          $ref: '#/components/schemas/DockName'
+        address:
+          description: Resolved device network address.
+          type: string
+        model:
+          description: Detected dock model.
+          type: string
+        version:
+          description: Detected firmware version.
+          type: string
+        discovery_type:
+          $ref: '#/components/schemas/DiscoveryType'
+        timestamp:
+          description: Timestamp of dock discovery.
+          type: string
+          format: date-time
+        bt:
+          type: object
+          description: Optional Bluetooth discovery information. Not present for network device.
+          properties:
+            signal:
+              description: 'Bluetooth signal strength. 0 = min, 5 = max.'
+              type: integer
+              minimum: 0
+              maximum: 5
+            last_seen_sec:
+              description: |
+                Last time the device was seen on a Bluetooth scan. Values over 15 sec indicate that the device is no longer
+                reachable.
+              type: integer
+              format: int32
+      required:
+        - id
+        - configured
+        - discovery_type
+    DockDiscoveryStatus:
+      type: object
+      properties:
+        active:
+          description: |
+            Dock discovery still active or not.
+          type: boolean
+        docks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DockDiscovery'
+      required:
+        - discovery_active
+        - docks
+    DockId:
+      type: string
+      format: '^[a-zA-Z0-9\-\.]+$'
+      minLength: 1
+      maxLength: 64
+      description: Dock identifier
+    DockName:
+      type: string
+      minLength: 1
+      maxLength: 40
+      description: User assignable friendly name to use instead of service_name
+    DockSetup:
+      type: object
+      description: Dock setup data
+      properties:
+        name:
+          $ref: '#/components/schemas/DockName'
+        token:
+          $ref: '#/components/schemas/DockToken'
+        custom_ws_url:
+          $ref: '#/components/schemas/DockUrl'
+        description:
+          $ref: '#/components/schemas/Description'
+        wifi:
+          description: |
+            Optional WiFi information if the dock should connect to (or be prepared for) WiFi instead of Ethernet.
+          type: object
+          properties:
+            ssid:
+              type: string
+            password:
+              type: string
+              format: password
+          required:
+            - ssid
+            - password
+      required:
+        - name
+    DockSetupError:
+      type: string
+      enum:
+        - NONE
+        - NOT_FOUND
+        - CONNECTION_REFUSED
+        - AUTHORIZATION_ERROR
+        - TIMEOUT
+        - OTHER
+    DockSetupInfo:
+      type: object
+      description: Dock setup state
+      properties:
+        id:
+          type: string
+        name:
+          $ref: '#/components/schemas/DockName'
+        discovery_type:
+          $ref: '#/components/schemas/DiscoveryType'
+        state:
+          $ref: '#/components/schemas/DockSetupState'
+        error:
+          $ref: '#/components/schemas/DockSetupError'
+      required:
+        - id
+        - state
+    DockSetupState:
+      type: string
+      enum:
+        - NEW
+        - CONFIGURING
+        - RESTARTING
+        - OK
+        - ERROR
     DockState:
       type: string
       description: Connection state
@@ -7794,6 +7510,17 @@ components:
         - Authenticated
         - Disconnected
         - Closing
+    DockToken:
+      type: string
+      format: password
+      minLength: 1
+      maxLength: 40
+      description: Access token
+    DockUrl:
+      type: string
+      minLength: 6
+      maxLength: 64
+      description: Dock WebSocket URL to override auto-discovery from service_name
     DriverDeveloper:
       type: object
       description: Optional information about the integration developer.
@@ -7812,6 +7539,20 @@ components:
           type: string
           format: email
           maxLength: 100
+    DriverId:
+      type: string
+      format: '^[a-zA-Z0-9\-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: 'Unique integration driver identifier, e.g. `homeassistant`, `homey`, etc.'
+    DriverState:
+      type: string
+      enum:
+        - IDLE
+        - CONNECTING
+        - ACTIVE
+        - RECONNECTING
+        - ERROR
     Entities:
       type: array
       items:
@@ -8010,6 +7751,136 @@ components:
         - activity
         - macro
         - remote
+    ExternalSystems:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExternalSystem'
+    ExternalSystem:
+      type: object
+      properties:
+        system:
+          $ref: '#/components/schemas/ExternalSystemId'
+        name:
+          $ref: '#/components/schemas/ExternalSystemName'
+    ExternalSystemId:
+      type: string
+      format: '^[a-zA-Z0-9\-_]+$'
+      minLength: 1
+      maxLength: 50
+      description: Unique external system identifier registered by an R2 integration to interact with the API.
+    ExternalSystemName:
+      type: string
+      minLength: 1
+      maxLength: 50
+      description: |
+        Friendly name of the external system to display to the user within the app. This name must be unique for an external
+        system and should be as short and concise as possible.
+        Use the description field for more information.
+    ExternalAccessTokens:
+      type: array
+      items:
+        type: object
+        properties:
+          system:
+            $ref: '#/components/schemas/ExternalSystemName'
+          token_id:
+            type: string
+          name:
+            type: string
+          description:
+            type: string
+            maxLength: 2048
+            description: Optional description of the external access token.
+          url:
+            type: string
+            maxLength: 2048
+            description: Optional URL of the external system.
+          data:
+            type: string
+            maxLength: 2048
+            description: Optional data from the external system for the R2 integration.
+          creation_date:
+            type: string
+            format: date-time
+    ExternalAccessToken:
+      type: object
+      properties:
+        system:
+          $ref: '#/components/schemas/ExternalSystemName'
+        token_id:
+          type: string
+        name:
+          type: string
+        token:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: |
+            The token to access the external system with the corresponding R2 integration.
+            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
+            system.
+        description:
+          type: string
+          maxLength: 2048
+          description: Optional description of the external access token.
+        url:
+          type: string
+          maxLength: 2048
+          description: Optional URL of the external system.
+        data:
+          type: string
+          maxLength: 2048
+          description: Optional data from the external system for the R2 integration.
+        creation_date:
+          type: string
+          format: date-time
+    ExternalAccessTokenRequest:
+      type: object
+      properties:
+        token_id:
+          type: string
+          format: '^[a-zA-Z0-9\-_]+$'
+          minLength: 1
+          maxLength: 36
+          description: |
+            Unique token identifier, used for later token management through the external system or management ui.
+            This identifier can be provided by the external system. If omitted, an UUID is generated and returned in the
+            ExternalAccessToken response.
+        name:
+          $ref: '#/components/schemas/ExternalSystemName'
+        token:
+          type: string
+          minLength: 1
+          maxLength: 2048
+          description: |
+            The token to access the external system with the corresponding R2 integration.
+            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
+            system.
+        description:
+          type: string
+          maxLength: 2048
+          description: Optional description of the external access token.
+        url:
+          type: string
+          maxLength: 2048
+          description: Optional URL of the external system.
+        data:
+          type: string
+          maxLength: 2048
+          description: Optional data from the external system for the R2 integration.
+      required:
+        - name
+        - token
+      example:
+        token_id: 1-2-3
+        name: My smart home
+        token: secret-sauce-42!
+        description: Any other informative message about the external system
+        url: 'ws://smart.home'
+        data: 'optional: true, foo: bar, free: text'
+    FriendlyName:
+      type: string
+      maxLength: 64
     GridItemSize:
       description: 'Item size in the button grid. Default size if not specified: 1 x 1'
       type: object
@@ -8035,6 +7906,75 @@ components:
       required:
         - x
         - 'y'
+    Group:
+      type: object
+      description: |
+        The shown group switch in the UI is automatically determined by the capabilities of the group's entities.
+      properties:
+        group_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name. Must be unique within the profile.
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entities:
+          type: array
+          description: Entity identifiers belonging to the group
+          items:
+            $ref: '#/components/schemas/EntityId'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - group_id
+        - profile_id
+        - name
+        - entities
+    GroupUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entities:
+          type: array
+          description: |
+            Changed or re-ordered group entities.
+            An empty array remove all entities.
+            If the property is not specified the defined entities will not be changed.
+          items:
+            $ref: '#/components/schemas/EntityId'
+        description:
+          $ref: '#/components/schemas/Description'
+    Groups:
+      type: array
+      items:
+        $ref: '#/components/schemas/Group'
+    IconIdentifier:
+      type: string
+      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
+      maxLength: 255
+      description: |
+        Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
+        Available prefixes:
+        - `uc:` - integrated icon font 
+        - `custom:` - custom resource
+
+        An empty identifier, while updating the object, removes the existing icon.
+    ImageIdentifier:
+      type: string
+      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
+      maxLength: 255
+      description: |
+        Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
+        Available prefixes:
+        - `custom:` - custom resource
+
+        An empty identifier, while updating the object, removes the existing image.
     IncludedEntities:
       description: |
         Included entities in an activity or macro. This object is writable from the client and persisted when saving.
@@ -8356,6 +8296,123 @@ components:
           $ref: '#/components/schemas/DriverState'
         enabled:
           type: boolean
+    IrCode:
+      type: object
+      properties:
+        key:
+          type: string
+        format:
+          $ref: '#/components/schemas/IrCodeFormat'
+        value:
+          type: string
+      required:
+        - key
+        - format
+        - value
+    IrCodeCreate:
+      $ref: '#/components/schemas/IrCode'
+    IrCodeFormat:
+      description: Supported IR code formats
+      type: string
+      enum:
+        - HEX
+        - PRONTO
+    IrCodeKey:
+      description: IR command key identifier
+      type: string
+      format: '^[A-Z0-9\-_\.]{1,50}$'
+    IrCodeSetType:
+      description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
+      type: string
+      enum:
+        - manufacturer
+        - custom
+    IrCodeUpdate:
+      type: object
+      properties:
+        format:
+          $ref: '#/components/schemas/IrCodeFormat'
+        value:
+          $ref: '#/components/schemas/IrCodeValue'
+      required:
+        - format
+        - value
+    IrCodeValue:
+      description: 'IR code value, either in HEX or PRONTO format as defined in the format field.'
+      type: string
+      format: '^(?:[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}|[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,})$'
+    IrEmitter:
+      type: object
+      properties:
+        device_id:
+          description: IR emitter device identifier.
+          type: string
+        type:
+          $ref: '#/components/schemas/IrEmitterType'
+        name:
+          description: Friendly name of the IR emitter device.
+          type: string
+        active:
+          description: Emitter device is active or currently not available.
+          type: boolean
+        capabilities:
+          description: Optional capabilities of the emitter.
+          type: object
+          properties:
+            learning:
+              $ref: '#/components/schemas/IrEmitterLearningCapability'
+        ports:
+          description: |
+            Available output ports of the emitter. A simple emitter might only have one IR output, whereas the Remote Two dock
+            has 4 individual outputs.
+          type: array
+          items:
+            type: object
+            properties:
+              port_id:
+                description: IR emitter output port identifier.
+                type: string
+              name:
+                description: Friendly name of the output port.
+                type: string
+            required:
+              - port_id
+              - name
+      required:
+        - device_id
+        - type
+        - name
+        - active
+        - ports
+    IrEmitterLearningCapability:
+      type: object
+      description: Emitter can also be used for learning IR codes.
+      properties:
+        description:
+          type: string
+        instruction:
+          type: string
+        formats:
+          type: array
+          items:
+            type: string
+        send_while_learn:
+          description: Emitter is able to send IR codes while in learn mode.
+          type: boolean
+          default: false
+      required:
+        - formats
+    IrEmitters:
+      type: array
+      items:
+        $ref: '#/components/schemas/IrEmitter'
+    IrEmitterType:
+      type: string
+      description: 'The type of the device, e.g. a Remote Two docking station, a network based IR blaster or something else.'
+      enum:
+        - DOCK
+        - IR_BLASTER
+        - OTHER
     IrStatus:
       type: object
       properties:
@@ -8370,6 +8427,25 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/LearnedIrCode'
+    LanguageCode:
+      description: |
+        Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
+        separated by an underscore.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
+      type: string
+      pattern: '^[a-z]{2}(_\w+)?$'
+    LanguageText:
+      type: object
+      description: |
+        Key value pairs of language texts. Key: ISO 639-1 code with optional country suffix to represent a `culture code`.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_CH`.
+
+        If we need to support more regional differences within a country, then the
+        [IETF language tag](https://en.wikipedia.org/wiki/IETF_language_tag) might be a solution. This would even
+        support the various Swiss German dialects!
+      additionalProperties:
+        type: string
     LearnedIrCode:
       type: object
       properties:
@@ -8393,126 +8469,145 @@ components:
       example:
         username: admin
         password: '1234'
-    Profile:
-      type: object
-      properties:
-        profile_id:
-          $ref: '#/components/schemas/SimpleId'
-        name:
-          $ref: '#/components/schemas/Name'
-          description: Profile name
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        protected:
-          type: boolean
-          description: A protected profile can only be accessed with the profile specific pin code
-        description:
-          $ref: '#/components/schemas/Description'
-      required:
-        - profile_id
-        - name
-        - protected
-    ProfilePin:
-      type: string
-      maxLength: 20
-      description: Optional profile pin
-    ProfileRequest:
-      type: object
-      properties:
-        profile_id:
-          $ref: '#/components/schemas/SimpleId'
-        name:
-          $ref: '#/components/schemas/Name'
-          description: Profile name
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        pin:
-          $ref: '#/components/schemas/ProfilePin'
-        description:
-          $ref: '#/components/schemas/Description'
-      required:
-        - name
-    ProfileUpdate:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/Name'
-          description: Profile name
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        update_pin:
-          type: boolean
-          description: |
-            true: Update or remove the pin if the `pin` property is set
-            false: Don't change existing pin
-        pin:
-          type: string
-          description: |
-            Optional pin code for a protected profile. Only relevant if `update_pin: true`.
-        description:
-          $ref: '#/components/schemas/Description'
-        pages:
-          description: |
-            Used for update only: modify page order or delete pages in profile.
-            - An empty `pages` array will delete all pages and containing groups!
-            - If the property is missing, the existing page configuration will not be changed.
-          type: array
-          items:
-            $ref: '#/components/schemas/SimpleId'
-      required:
-        - update_pin
-    Profiles:
-      type: array
-      items:
-        $ref: '#/components/schemas/Profile'
-    Group:
-      type: object
+    Macro:
       description: |
-        The shown group switch in the UI is automatically determined by the capabilities of the group's entities.
-      properties:
-        group_id:
-          $ref: '#/components/schemas/SimpleId'
-        profile_id:
-          $ref: '#/components/schemas/SimpleId'
-        name:
-          $ref: '#/components/schemas/Name'
-          description: Group name. Must be unique within the profile.
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        entities:
-          type: array
-          description: Entity identifiers belonging to the group
-          items:
-            $ref: '#/components/schemas/EntityId'
-        description:
-          $ref: '#/components/schemas/Description'
+        The macro entity executes a sequence of commands.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - macro
+            features:
+              description: |
+                Supported features of the macro.
+              type: array
+              items:
+                type: string
+                enum:
+                  - start
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true` / property missing: macro was created by Remote Two and can be edited.
+                    - `false`: macro was provided by an integration and cannot be edited.
+                  type: boolean
+                  default: true
+                included_entities:
+                  $ref: '#/components/schemas/IncludedEntities'
+                sequence:
+                  $ref: '#/components/schemas/CommandSequence'
+          required:
+            - options
+    Macros:
+      type: array
+      items:
+        $ref: '#/components/schemas/MacroOverview'
+    MacroCreate:
+      description: |
+        Dedicated request object to create a new macro.  
+      type: object
+      allOf:
+        - properties:
+            name:
+              $ref: '#/components/schemas/LanguageText'
+            icon:
+              $ref: '#/components/schemas/IconIdentifier'
+            description:
+              $ref: '#/components/schemas/LanguageText'
+        - oneOf:
+            - type: object
+              properties:
+                clone_from:
+                  $ref: '#/components/schemas/EntityId'
+              required:
+                - clone_from
+            - type: object
+              properties:
+                options:
+                  type: object
+                  properties:
+                    entity_ids:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/EntityId'
+                  required:
+                    - entity_ids
       required:
-        - group_id
-        - profile_id
         - name
-        - entities
-    GroupUpdate:
+    MacroOverview:
+      description: |
+        The macro entity executes a sequence of commands.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - macro
+            features:
+              description: |
+                Supported features of the macro.
+              type: array
+              items:
+                type: string
+                enum:
+                  - start
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true` / property missing: macro was created by Remote Two and can be edited.
+                    - `false`: macro was provided by an integration and cannot be edited.
+                  type: boolean
+                  default: true
+    MacroUpdate:
+      description: |
+        Dedicated request object to update an existing macro.  
+        All root properties are optional and only the provided objects are updated in the macro. Omitted objects are
+        ignored and not deleted from the macro.
+
+        The `entity_ids` object must be managed by the client and is persisted when updating a macro.
+
+        Notes:
+        - Entities can be included in `entity_ids` without being used in `sequence`.  
+          This allows to edit the macro in multiple sessions without having to reselect the desired entities.
+        - Every referenced entity in `sequence` must be included in `entity_ids`, otherwise the macro cannot be saved.
+        - If the client removes a configured entity from the system which is included in a macro, it must make sure to also
+          remove all references in the macro. See `available` property in the included entities object when retrieving a macro.
       type: object
       properties:
         name:
-          $ref: '#/components/schemas/Name'
-          description: Group name
+          $ref: '#/components/schemas/LanguageText'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
-        entities:
-          type: array
-          description: |
-            Changed or re-ordered group entities.
-            An empty array remove all entities.
-            If the property is not specified the defined entities will not be changed.
-          items:
-            $ref: '#/components/schemas/EntityId'
         description:
-          $ref: '#/components/schemas/Description'
-    Groups:
-      type: array
-      items:
-        $ref: '#/components/schemas/Group'
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          type: object
+          properties:
+            entity_ids:
+              type: array
+              items:
+                $ref: '#/components/schemas/EntityId'
+            sequence:
+              $ref: '#/components/schemas/CommandSequence'
+    MeasurementUnit:
+      type: string
+      enum:
+        - METRIC
+        - US
+        - UK
+    Name:
+      type: string
+      minLength: 1
+      maxLength: 50
     Page:
       type: object
       properties:
@@ -8603,204 +8698,391 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Page'
+    Profile:
+      type: object
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Profile name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        protected:
+          type: boolean
+          description: A protected profile can only be accessed with the profile specific pin code
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - profile_id
+        - name
+        - protected
+    ProfilePin:
+      type: string
+      maxLength: 20
+      description: Optional profile pin
+    ProfileRequest:
+      type: object
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Profile name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        pin:
+          $ref: '#/components/schemas/ProfilePin'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - name
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Profile name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        update_pin:
+          type: boolean
+          description: |
+            true: Update or remove the pin if the `pin` property is set
+            false: Don't change existing pin
+        pin:
+          type: string
+          description: |
+            Optional pin code for a protected profile. Only relevant if `update_pin: true`.
+        description:
+          $ref: '#/components/schemas/Description'
+        pages:
+          description: |
+            Used for update only: modify page order or delete pages in profile.
+            - An empty `pages` array will delete all pages and containing groups!
+            - If the property is missing, the existing page configuration will not be changed.
+          type: array
+          items:
+            $ref: '#/components/schemas/SimpleId'
+      required:
+        - update_pin
+    Profiles:
+      type: array
+      items:
+        $ref: '#/components/schemas/Profile'
+    Remote:
+      description: |
+        The remote entity executes a sequence of commands and at the end displays a user interface (similar to remote entity)
+        to the user. If the entity has an off sequence, it can be turned off.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - remote
+            features:
+              description: |
+                Supported features of the remote. If the remote has an `off` sequence, it supports the common `on_off`
+                feature, otherwise only `start`.
+              type: array
+              items:
+                type: string
+                enum:
+                  - on_off
+                  - send
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `false`: remote was provided by an integration and cannot be edited.
+                  type: boolean
+                  default: true
+                ir:
+                  description: |
+                    Infrared settings: codeset name und used infrared emitter to send commands.
+                  type: object
+                  properties:
+                    codeset:
+                      description: "Read-only information about the infrared codeset. \U0001F477 **TODO** Use `/remotes/entities/:entityId/ir`\nendpoints to manage infrared codes.\n"
+                      type: object
+                      properties:
+                        id:
+                          description: |
+                            Codeset identifier, either a custom codeset id or a manufacturer codeset id depending on `type`.
+                          type: string
+                        name:
+                          description: |
+                            User friendly name of the used codeset (custom or manufacturer) to show in a user interface.
+                          type: string
+                        type:
+                          $ref: '#/components/schemas/IrCodeSetType'
+                    output:
+                      description: |
+                        Infrared output device settings. Use `/ir/emitter` endpoints to retrieve further information.
+                      type: object
+                      properties:
+                        device_id:
+                          description: |
+                            IR emitter device identifier.
+                          type: string
+                        port_id:
+                          description: |
+                            IR emitter output port identifier.
+                          type: string
+                simple_commands:
+                  description: |
+                    All available commands of the infrared codeset for the button mapping and user interface.  
+                    These simple commands relate directly to the `cmd_id` attribute when defining or calling an entity command.
+
+                    The commands are read-only and updated automatically based on the infrared codeset.
+                  type: array
+                  items:
+                    type: string
+                button_mapping:
+                  $ref: '#/components/schemas/DeviceButtonMappings'
+                user_interface:
+                  $ref: '#/components/schemas/ActivityUserInterface'
+          required:
+            - options
+    Remotes:
+      type: array
+      items:
+        $ref: '#/components/schemas/RemoteOverview'
+    RemoteCreate:
+      description: |
+        Dedicated request object to create a new remote.
+      type: object
+      allOf:
+        - properties:
+            name:
+              $ref: '#/components/schemas/LanguageText'
+            icon:
+              $ref: '#/components/schemas/IconIdentifier'
+            description:
+              $ref: '#/components/schemas/LanguageText'
+        - oneOf:
+            - type: object
+              properties:
+                clone_from:
+                  $ref: '#/components/schemas/EntityId'
+              required:
+                - clone_from
+            - type: object
+              properties:
+                codeset_id:
+                  $ref: '#/components/schemas/SimpleId'
+              required:
+                - codeset_id
+            - type: object
+              properties:
+                custom_codeset:
+                  type: object
+                  properties:
+                    manufacturer_id:
+                      type: string
+                      default: custom
+                    device_name:
+                      type: string
+                    device_type:
+                      $ref: '#/components/schemas/DeviceType'
+                      default: various
+                  required:
+                    - device_name
+              required:
+                - custom_codeset
+      required:
+        - name
+    RemoteOverview:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - remote
+            features:
+              description: |
+                Supported features of the remote.
+              type: array
+              items:
+                type: string
+                enum:
+                  - send
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `false`: remote was provided by an integration and cannot be edited.
+                  type: boolean
+                  default: true
+    RemoteUpdate:
+      description: |
+        Dedicated request object to update an existing remote.  
+        All root properties are optional and only the provided objects are updated in the remote-entity. Omitted objects are
+        ignored and not deleted from the remote-entity.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          type: object
+          properties:
+            ir:
+              type: object
+              properties:
+                codeset:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                  required:
+                    - id
+                output:
+                  type: object
+                  properties:
+                    device_id:
+                      type: string
+                    port_id:
+                      type: string
+                  required:
+                    - device_id
+                    - port_id
+    RemoteIrDataSet:
+      type: object
+      properties:
+        id:
+          description: |
+            Codeset identifier, either a custom codeset id or a manufacturer codeset id depending on `type`.
+          type: string
+        name:
+          description: User friendly name of the codeset (custom or manufacturer).
+          type: string
+        type:
+          $ref: '#/components/schemas/IrCodeSetType'
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/RemoteIrCode'
+    RemoteIrCode:
+      type: object
+      properties:
+        cmd_id:
+          $ref: '#/components/schemas/SimpleId'
+        code:
+          description: |
+            Custom infrared code. Only set for custom codeset or if a manufacturer codeset has been modified or enhanced.
+          type: object
+          properties:
+            value:
+              type: string
+            format:
+              $ref: '#/components/schemas/IrCodeFormat'
+        custom:
+          description: |
+            Flag indicating if this code is a custom code in a manufacturer codeset. This is a manually added code which
+            was not present in the codeset. Custom codes can be deleted or edited by the user. The modified code is
+            stored in the `code` object.
+          type: boolean
+        modified:
+          description: |
+            Flag indicating if a manufacturer code has been replaced with a user code. The modified code is stored in
+            the `code` object. Modified codes can be edited by the user.
+          type: boolean
+      required:
+        - cmd_id
+    ResourceType:
+      type: string
+      format: '^[a-zA-Z]+$'
+      minLength: 1
+      maxLength: 32
+    ResourceItems:
+      type: array
+      items:
+        $ref: '#/components/schemas/ResourceItem'
+    ResourceItem:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/ResourceType'
+        id:
+          type: string
+          description: Resource identifier (normalized filename)
+        size:
+          type: integer
+          format: int32
+          description: Size in bytes
+    Scopes:
+      type: array
+      items:
+        $ref: '#/components/schemas/Scope'
+    Scope:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/ScopeName'
+        description:
+          type: string
+          description: Permission scope description
+      required:
+        - name
+    ScopeName:
+      type: string
+      format: '^[a-zA-Z\-:]+$'
+      minLength: 1
+      maxLength: 36
+      description: Permission scope name
+    ServiceInstances:
+      type: array
+      items:
+        $ref: '#/components/schemas/ServiceInstance'
+    ServiceInstance:
+      type: object
+      properties:
+        service_type:
+          type: string
+        name:
+          type: string
+          description: Instance name
+        hostname:
+          type: string
+        port:
+          type: integer
+          minimum: 1
+          maximum: 65535
+        addr_v4:
+          type: array
+          items:
+            type: string
+        addr_v6:
+          type: array
+          items:
+            type: string
+        txt:
+          type: object
+          additionalProperties:
+            type: string
+      required:
+        - service_type
+        - name
+        - hostname
+        - port
     SimpleId:
       type: string
       format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 1
       maxLength: 36
       description: 'Simple string identifier, also usable as URL parameter or file identifier'
-    CfgAll:
-      type: object
-      properties:
-        button:
-          $ref: '#/components/schemas/CfgButtons'
-        device:
-          $ref: '#/components/schemas/CfgRemoteDevice'
-        display:
-          $ref: '#/components/schemas/CfgDisplay'
-        haptic:
-          $ref: '#/components/schemas/CfgHaptic'
-        localization:
-          $ref: '#/components/schemas/CfgLocalization'
-        network:
-          $ref: '#/components/schemas/CfgNetwork'
-        power_saving:
-          $ref: '#/components/schemas/CfgPowerSaving'
-        software_update:
-          $ref: '#/components/schemas/CfgSoftwareUpdate'
-        sound:
-          $ref: '#/components/schemas/CfgSound'
-        voice_control:
-          $ref: '#/components/schemas/CfgVoiceControl'
-    CfgButtons:
-      type: object
-      properties:
-        brightness:
-          description: 'Button backlight brightness. 0 = off, 100 = max.'
-          type: integer
-          minimum: 0
-          maximum: 100
-        auto_brightness:
-          description: 'When enabled, button backlight will automatically turn on in a dark room.'
-          type: boolean
-      required:
-        - brightness
-        - auto_brightness
-    CfgDisplay:
-      type: object
-      properties:
-        brightness:
-          description: Display brightness.
-          type: integer
-          minimum: 0
-          maximum: 100
-        auto_brightness:
-          description: Automatically adjust the display brightness based on ambient lighting conditions.
-          type: boolean
-      required:
-        - brightness
-        - auto_brightness
-    CfgHaptic:
-      type: object
-      properties:
-        enabled:
-          description: Haptic feedback enabled.
-          type: boolean
-      required:
-        - enabled
-    CfgLocalization:
-      type: object
-      properties:
-        language_code:
-          $ref: '#/components/schemas/LanguageCode'
-        country_code:
-          $ref: '#/components/schemas/CountryCode'
-        time_zone:
-          description: 'Time zone name according to IANA <https://www.iana.org/time-zones>, e.g. `Europe/Copenhagen`.'
-          type: string
-        time_format_24h:
-          type: boolean
-        measurement_unit:
-          $ref: '#/components/schemas/MeasurementUnit'
-      required:
-        - language_code
-        - country_code
-        - time_zone
-        - time_format_24h
-        - measurement_unit
-    CfgNetwork:
-      type: object
-      properties:
-        bt_enabled:
-          description: Enable Bluetooth.
-          type: boolean
-        wifi_enabled:
-          description: Enable WiFi.
-          type: boolean
-      required:
-        - bt_enabled
-        - wifi_enabled
-    CfgPowerSaving:
-      type: object
-      properties:
-        wakeup_sensitivity:
-          description: Amount of movement needed to wake up the remote. 0 = disabled.
-          type: integer
-          minimum: 0
-          maximum: 3
-        display_off_sec:
-          type: integer
-          minimum: 0
-          maximum: 60
-          description: Turn off display after given seconds.
-        standby_sec:
-          type: integer
-          minimum: 0
-          maximum: 10800
-          description: Activate standby after given seconds. 0 disables standby mode.
-      required:
-        - wakeup_sensitivity
-        - display_off_sec
-        - standby_sec
-    CfgRemoteDevice:
-      type: object
-      properties:
-        name:
-          description: Custom name of the remote
-          type: string
-          minimum: 1
-          maximum: 50
-      required:
-        - name
-    CfgSoftwareUpdate:
-      type: object
-      properties:
-        check_for_updates:
-          description: |
-            Automatically check for updates. If `auto_update` is enabled, the updates are automatically installed,
-            otherwise the user is only notified about the updates.
-          type: boolean
-        auto_update:
-          description: |
-            Automatically update the remote when new software is available. Requires `check_for_updates` to be enabled.
-          type: boolean
-      required:
-        - check_for_updates
-        - auto_update
-    CfgSound:
-      type: object
-      properties:
-        enabled:
-          description: Sound effects enabled.
-          type: boolean
-        volume:
-          description: Sound effects volume.
-          type: integer
-          minimum: 0
-          maximum: 100
-      required:
-        - enabled
-        - volume
-    CfgVoiceControl:
-      type: object
-      properties:
-        microphone:
-          description: |
-            Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
-            with the remote or integrations.
-          type: boolean
-        enabled:
-          description: |
-            Enable voice control. Disabling voice control will still let you use voice dictation with integrations. 
-            Disable the microphone to completely switch off any microphone related functionality.
-          type: boolean
-        voice_assistant:
-          description: |
-            TODO
-          type: string
-          default: None
-      required:
-        - microphone
-        - enabled
-        - voice_assistant
-    CountryCode:
-      description: 'Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).'
-      type: string
-      format: iso-3166
-    LanguageCode:
-      description: |
-        Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
-        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
-        separated by an underscore.
-        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
-      type: string
-      pattern: '^[a-z]{2}(_\w+)?$'
-    MeasurementUnit:
-      type: string
-      enum:
-        - METRIC
-        - US
-        - UK
     SupportedResource:
       type: object
       properties:
