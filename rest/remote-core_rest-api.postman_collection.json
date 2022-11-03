@@ -3851,6 +3851,93 @@
 							"response": []
 						}
 					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "checkDockFirmwareUpdate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"devices",
+										":dock_id",
+										"update"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "{{dock_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateDockFirmware",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"devices",
+										":dock_id",
+										"update"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "{{dock_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				}
 			]
 		},
