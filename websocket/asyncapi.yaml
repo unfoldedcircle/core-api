@@ -4885,13 +4885,32 @@ components:
         dock_id:
           type: string
         state:
-          type: string
+          $ref: '#/components/schemas/dockSetupState'
         error:
-          type: string
+          $ref: '#/components/schemas/dockSetupError'
       required:
         - event_type
         - dock_id
         - state
+
+    dockSetupState:
+      type: string
+      enum:
+        - NEW
+        - CONFIGURING
+        - RESTARTING
+        - OK
+        - ERROR
+
+    dockSetupError:
+      type: string
+      enum:
+        - NONE
+        - NOT_FOUND
+        - CONNECTION_REFUSED
+        - AUTHORIZATION_ERROR
+        - TIMEOUT
+        - OTHER
 
     description:
       type: string

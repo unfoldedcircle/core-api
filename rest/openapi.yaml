@@ -5595,10 +5595,10 @@ paths:
     put:
       tags:
         - dock
-      summary: "\U0001F477 Connect or disconnect all active dock connections."
+      summary: Connect or disconnect all active dock connections.
       description: |
         Requests all active docks to establish or stop a session to the dock.  
-        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
+        Use `GET /docks` or `GET /docks/devices/{dockId}` to check on the connection status.
       operationId: executeCommandOnAllDocks
       parameters:
         - name: cmd
@@ -5710,10 +5710,10 @@ paths:
     put:
       tags:
         - dock
-      summary: "\U0001F477 Start or stop a dock connection."
+      summary: Start or stop a dock connection.
       description: |
         Establish or stop a session to the dock.  
-        Use `GET /docks` or `GET /docks/{dockId}` to check on the connection status.
+        Use `GET /docks` or `GET /docks/devices/{dockId}` to check on the connection status.
       operationId: executeDockCommand
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5799,15 +5799,19 @@ paths:
     get:
       tags:
         - dock
-      summary: "\U0001F477 Check for dock firmware updates and update progress"
+      summary: "\U0001F477 Check for dock firmware updates"
       description: |
-        TODO
+        Check if there is an update available for the dock.
       operationId: checkDockFirmwareUpdate
       parameters:
         - $ref: '#/components/parameters/dock_id'
       responses:
         '200':
-          $ref: '#/components/responses/SuccessMessage'
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockUpdateCheck'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -5819,19 +5823,60 @@ paths:
         - dock
       summary: "\U0001F477 Update dock firmware"
       description: |
-        TODO
+        Start a firmware update on the given dock. The returned update identifier can be used to poll for the update 
+        progress with the `GET /docks/devices/{dockId}/update/{id}` operation or listen to the WebSocket event message.
       operationId: updateDockFirmware
       parameters:
         - $ref: '#/components/parameters/dock_id'
       responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
+        '201':
+          description: Firmware update started
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  '/docks/devices/{dockId}/update/{id}':
+    get:
+      tags:
+        - dock
+      summary: "\U0001F477 Check for dock firmware update progress"
+      description: |
+        Get the current progress and status information about a dock firmware upgrade.
+      operationId: dockFirmwareUpdateProgress
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - name: id
+          in: path
+          description: Update identification
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockUpdateProgress'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   '/docks/devices/{dockId}/ir/send':
     get:
       tags:
@@ -6063,6 +6108,8 @@ paths:
         The returned `id` in the `DockSetupInfo` response will be the identifier for the further setup operations with the
         `/docks/setup/:id` endpoints.
 
+        Emits the WebSocket event `dock_setup_change` with `event_type: START`.
+
         If there's already a setup process running for the given dock id, it will be reset as soon as a currently running
         operation can be aborted. However, using the `DELETE /docks/setup/:id` operation is preferred.
 
@@ -6149,7 +6196,8 @@ paths:
         When using Bluetooth the WiFi network name and credentials must be provided to connect the dock to the WiFi network.
 
         The `state` field in the response message indicate the current state of the setup process. Use the `GET` operation
-        to poll for state updates or listen to the corresponding WebSocket event messages.
+        to poll for state updates or listen to the corresponding WebSocket `dock_setup_change` event messages with
+        `event_type: SETUP`.
       operationId: startDockSetup
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -6183,6 +6231,8 @@ paths:
       description: |
         Stop the setup process at the next possible operation and remove the setup process information.  
         To start a new setup process, use the `POST /docks/setup` operation again.
+
+        Emits the WebSocket event `dock_setup_change` with `event_type: STOP`.
       operationId: stopDockSetup
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -7428,6 +7478,22 @@ components:
       required:
         - discovery_active
         - docks
+    DockFirmwareUpdate:
+      type: object
+      description: Dock firmware information
+      properties:
+        model:
+          description: Dock model
+          type: string
+        version:
+          description: Firmware version
+          type: string
+        release_notes_url:
+          type: string
+          format: uri
+      required:
+        - model
+        - version
     DockId:
       type: string
       format: '^[a-zA-Z0-9\-\.]+$'
@@ -7516,6 +7582,62 @@ components:
       minLength: 1
       maxLength: 40
       description: Access token
+    DockUpdateCheck:
+      type: object
+      description: Dock firmware update check information
+      properties:
+        dock_id:
+          type: string
+        version:
+          description: Installed firmware version
+          type: string
+        model:
+          description: Dock model
+          type: string
+        update_available:
+          type: boolean
+        firmware_update:
+          $ref: '#/components/schemas/DockFirmwareUpdate'
+        update_id:
+          description: Update identifier if an update is currently in progress
+          type: string
+      required:
+        - dock_id
+        - version
+        - update_available
+    DockUpdateProgress:
+      type: object
+      description: Dock firmware update progress
+      properties:
+        dock_id:
+          type: string
+        update_id:
+          description: Update identifier
+          type: string
+        version:
+          description: Firmware version being installed
+          type: string
+        progress:
+          description: Update progress in percent
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
+        state:
+          type: string
+          enum:
+            - CONNECTING
+            - UPDATING
+            - REBOOTING
+            - SUCCESS
+            - ERROR
+        error:
+          type: string
+      required:
+        - dock_id
+        - update_id
+        - version
+        - state
     DockUrl:
       type: string
       minLength: 6

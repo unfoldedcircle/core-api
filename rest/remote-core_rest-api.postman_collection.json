@@ -2512,7 +2512,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks?page=1&active=true",
+									"raw": "{{SERVER}}/api/docks",
 									"host": [
 										"{{SERVER}}"
 									],
@@ -2523,7 +2523,8 @@
 									"query": [
 										{
 											"key": "page",
-											"value": "1"
+											"value": "1",
+											"disabled": true
 										},
 										{
 											"key": "limit",
@@ -2532,7 +2533,8 @@
 										},
 										{
 											"key": "active",
-											"value": "true"
+											"value": "true",
+											"disabled": true
 										}
 									]
 								}
@@ -2541,12 +2543,29 @@
 						},
 						{
 							"name": "createDock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"dock_id\", responseJson.service_name);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "POST",
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"service_name\": \"YIO-Dock-246F283FCDCC\",\n    \"custom_ws_url\": \"ws://172.16.16.176:946\",\n    \"token\": \"0\",\n    \"active\": false,\n    \"description\": \"testing\"\n}\n",
+									"raw": "{\n    \"service_name\": \"UC-Dock-E831CDD012A8\",\n    \"custom_ws_url\": \"ws://172.16.16.106:946\",\n    \"token\": \"0\",\n    \"active\": true,\n    \"description\": \"Golden sample\"\n}\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -2604,13 +2623,14 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id"
 									],
 									"variable": [
@@ -2638,13 +2658,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id"
 									],
 									"variable": [
@@ -2672,13 +2693,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id"
 									],
 									"variable": [
@@ -2697,13 +2719,14 @@
 								"method": "DELETE",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id"
 									],
 									"variable": [
@@ -2736,13 +2759,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2771,13 +2795,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2806,13 +2831,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2841,13 +2867,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2876,13 +2903,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2911,13 +2939,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2946,13 +2975,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/command",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"command"
 									],
@@ -2980,13 +3010,14 @@
 										"method": "GET",
 										"header": [],
 										"url": {
-											"raw": "{{SERVER}}/api/docks/:dock_id/ir/learn",
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn",
 											"host": [
 												"{{SERVER}}"
 											],
 											"path": [
 												"api",
 												"docks",
+												"devices",
 												":dock_id",
 												"ir",
 												"learn"
@@ -3007,13 +3038,14 @@
 										"method": "POST",
 										"header": [],
 										"url": {
-											"raw": "{{SERVER}}/api/docks/:dock_id/ir/learn?timeout=10",
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn?timeout=10",
 											"host": [
 												"{{SERVER}}"
 											],
 											"path": [
 												"api",
 												"docks",
+												"devices",
 												":dock_id",
 												"ir",
 												"learn"
@@ -3040,13 +3072,14 @@
 										"method": "DELETE",
 										"header": [],
 										"url": {
-											"raw": "{{SERVER}}/api/docks/:dock_id/ir/learn",
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn",
 											"host": [
 												"{{SERVER}}"
 											],
 											"path": [
 												"api",
 												"docks",
+												"devices",
 												":dock_id",
 												"ir",
 												"learn"
@@ -3081,13 +3114,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&hex=17;0x221C;14;0",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&hex=17;0x221C;14;0",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"ir",
 										"send"
@@ -3135,13 +3169,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&ext1=true&format=PRONTO&code=0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&format=PRONTO&code=0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"ir",
 										"send"
@@ -3192,13 +3227,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&ext1=true&hex=3;0x20F0B54A;32;0",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&hex=3;0x20F0B54A;32;0",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"ir",
 										"send"
@@ -3245,13 +3281,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send?base=true&ext1=true&pronto=0001,0002,0002,affe,cafe,beef,dead",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&pronto=0001,0002,0002,affe,cafe,beef,dead",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"ir",
 										"send"
@@ -3300,13 +3337,14 @@
 									}
 								},
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/ir/send",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
+										"devices",
 										":dock_id",
 										"ir",
 										"send"
@@ -3329,17 +3367,22 @@
 						{
 							"name": "connectAllDocks",
 							"request": {
-								"method": "POST",
+								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/connect",
+									"raw": "{{SERVER}}/api/docks?cmd=CONNECT",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
-										"docks",
-										"connect"
+										"docks"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "CONNECT"
+										}
 									]
 								}
 							},
@@ -3348,17 +3391,22 @@
 						{
 							"name": "disconnectAllDocks",
 							"request": {
-								"method": "POST",
+								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/disconnect",
+									"raw": "{{SERVER}}/api/docks?cmd=DISCONNECT",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
-										"docks",
-										"disconnect"
+										"docks"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "DISCONNECT"
+										}
 									]
 								}
 							},
@@ -3367,18 +3415,24 @@
 						{
 							"name": "connectDock",
 							"request": {
-								"method": "POST",
+								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/connect",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id?cmd=CONNECT",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
-										":dock_id",
-										"connect"
+										"devices",
+										":dock_id"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "CONNECT"
+										}
 									],
 									"variable": [
 										{
@@ -3393,24 +3447,404 @@
 						{
 							"name": "disconnectDock",
 							"request": {
-								"method": "POST",
+								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/:dock_id/disconnect",
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id?cmd=DISCONNECT",
 									"host": [
 										"{{SERVER}}"
 									],
 									"path": [
 										"api",
 										"docks",
-										":dock_id",
-										"disconnect"
+										"devices",
+										":dock_id"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "DISCONNECT"
+										}
 									],
 									"variable": [
 										{
 											"key": "dock_id",
 											"value": "{{dock_id}}"
 										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "discover",
+					"item": [
+						{
+							"name": "getDockDiscoveryStatus",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/discover",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"discover"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "startDockDiscovery",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/discover?timeout=5&bt=false",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"discover"
+									],
+									"query": [
+										{
+											"key": "timeout",
+											"value": "5"
+										},
+										{
+											"key": "bt",
+											"value": "false"
+										},
+										{
+											"key": "net",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "new",
+											"value": "false",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "stopDockDiscovery",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/discover",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"discover"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup",
+					"item": [
+						{
+							"name": "device",
+							"item": [
+								{
+									"name": "getDockSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/setup/:dock_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"setup",
+												":dock_id"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "startDockSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"name\": \"Test station\",\n  \"token\": \"123\",\n  \"custom_ws_url\": \"ws://test-station.local:1946\",\n  \"description\": \"Setup test\",\n  \"wifi\": {\n    \"ssid\": \"My Network\",\n    \"password\": \"0123456789\"\n  }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/setup/:dock_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"setup",
+												":dock_id"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopDockSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/setup/:dock_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"setup",
+												":dock_id"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "getDockSetupProcesses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "setupDock",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"postman.setEnvironmentVariable(\"dock_setup_id\", responseJson.id);",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"UC-Dock-E831CDD012A8\",\n    \"configured\": true,\n    \"friendly_name\": \"UC-Dock-E831CDD012A8\",\n    \"address\": \"172.1.1.106:946\",\n    \"model\": \"Remote Two dock\",\n    \"version\": \"0.1.0\",\n    \"discovery_type\": \"NET\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "stopAllDockSetups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"setup"
 									]
 								}
 							},
@@ -5855,6 +6289,60 @@
 						},
 						{
 							"name": "addRemoteIrCode",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"value\": \"0000,006e,0022,0002,0155,00ac,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0041,0015,0015,0015,0015,0015,05e4,0155,0055,0015,0e40\",\n    \"format\": \"PRONTO\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"remotes",
+										":entityId",
+										"ir",
+										":cmdId"
+									],
+									"variable": [
+										{
+											"key": "entityId",
+											"value": "{{remote_id}}"
+										},
+										{
+											"key": "cmdId",
+											"value": "TEST"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "addRemoteIrCode Copy",
 							"event": [
 								{
 									"listen": "test",
@@ -9903,7 +10391,7 @@
 												},
 												{
 													"key": "codeset",
-													"value": "lg2"
+													"value": "lg1"
 												}
 											]
 										}
@@ -10019,7 +10507,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"manufacturer\": \"Denon\",\n    \"device\": \"AVR-X2700\",\n    \"device_type\": \"receiver\",\n    \"code_format\": \"HEX\",\n    \"codes\": [\n        {\n            \"key\": \"POWER_ON\",\n            \"code\": \"123\"\n        },\n        {\n            \"key\": \"POWER_OFF\",\n            \"code\": \"222\"\n        },\n        {\n            \"key\": \"VOLUME_ON\",\n            \"code\": \"3\"\n        },\n        {\n            \"key\": \"VOLUME_OFF\",\n            \"code\": \"4\"\n        }\n    ]\n}",
+											"raw": "{\n    \"manufacturer\": \"Denon\",\n    \"device\": \"AVR-X2700\",\n    \"device_type\": \"receiver2\",\n    \"code_format\": \"PRONTO\",\n    \"codes\": [\n        {\n            \"key\": \"POWER_ON\",\n            \"value\": \"0000 006d 0000 0024 0157 00ac 0015,0015,0015,0015,0015,0040,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0040,0015,0040,0015,0015,0015,0040,0015,0040,0015,0040,0015,0040,0015,0040,0015,0015,0015,0015,0015,0040,0015,0015,0015,0015,0015,0015,0015,0040,0015,0040,0015,0040,0015,0040,0015,0015,0015,0040,0015,0040,0015,0040,0015,0015,0015,0015,0015,0689,0157,0056,0015,0e94\"\n        },\n        {\n            \"key\": \"POWER_OFF\",\n            \"value\": \"0000,006d,0000,0024,0157,00ab,0015,0015,0016,0015,0016,003f,0016,0015,0015,0016,0015,0015,0016,0015,0016,0015,0015,0040,0015,0040,0015,0015,0016,003f,0016,003f,0016,003f,0016,003f,0016,003f,0016,003f,0016,0015,0016,003f,0016,0015,0015,0015,0016,0015,0016,003f,0016,003f,0016,0015,0015,0040,0015,0015,0016,003f,0016,003f,0016,003f,0016,0015,0016,0015,0015,05fd,0156,0055,0016,0ee1\"\n        },\n        {\n            \"key\": \"VOLUME_UP\",\n            \"value\": \"0000,006c,0022,0002,015b,00ad,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,05f7,015b,0057,0016,0e6c\"\n        },\n        {\n            \"key\": \"VOLUME_DOWN\",\n            \"value\": \"0000,006c,0022,0002,015b,00ad,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,05f7,015b,0057,0016,0e6c\"\n        }\n    ]\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -10093,46 +10581,6 @@
 								},
 								{
 									"name": "getCodeSet",
-									"event": [
-										{
-											"listen": "test",
-											"script": {
-												"exec": [
-													"pm.test(\"Status code is 200\", function () {",
-													"    pm.response.to.have.status(200);",
-													"});"
-												],
-												"type": "text/javascript"
-											}
-										}
-									],
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{SERVER}}/api/ir/codes/custom/:codeset",
-											"host": [
-												"{{SERVER}}"
-											],
-											"path": [
-												"api",
-												"ir",
-												"codes",
-												"custom",
-												":codeset"
-											],
-											"variable": [
-												{
-													"key": "codeset",
-													"value": "{{device_id}}"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "getCodeSet Copy",
 									"event": [
 										{
 											"listen": "test",
@@ -10264,7 +10712,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"format\": \"PRONTO\",\n    \"value\": \"1234\"\n}",
+											"raw": "{\n    \"format\": \"PRONTO\",\n    \"value\": \"0000,0068,0000,0010,0060,0018,0018,0018,0018,0018,0030,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0030,0018,0018,0018,0018,0018,0030,0018,0030,0018,0018,0018,0018,0318\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -10363,7 +10811,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"format\": \"PRONTO\",\n    \"value\": \"1234\"\n}",
+											"raw": "{\n    \"format\": \"PRONTO\",\n    \"value\": \"0000,0068,0000,0010,0060,0018,0018,0018,0018,0018,0030,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0030,0018,0018,0018,0018,0018,0030,0018,0030,0018,0018,0018,0018,0318\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -10659,7 +11107,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"codeset_id\": \"sony1\",\n  \"cmd_id\": \"HOME\"\n}",
+											"raw": "{\n  \"codeset_id\": \"lg1\",\n  \"cmd_id\": \"POWER_ON\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -10771,7 +11219,7 @@
 										},
 										{
 											"key": "page",
-											"value": "2",
+											"value": "3",
 											"disabled": true
 										},
 										{
