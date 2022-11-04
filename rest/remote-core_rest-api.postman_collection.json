@@ -2493,49 +2493,13 @@
 							"name": "command",
 							"item": [
 								{
-									"name": "LedBrightnessStart",
+									"name": "SetLedBrightness",
 									"request": {
 										"method": "POST",
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"command\": \"LED_BRIGHTNESS_START\",\n    \"value\": \"100\"\n}",
-											"options": {
-												"raw": {
-													"language": "json"
-												}
-											}
-										},
-										"url": {
-											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-											"host": [
-												"{{SERVER}}"
-											],
-											"path": [
-												"api",
-												"docks",
-												"devices",
-												":dock_id",
-												"command"
-											],
-											"variable": [
-												{
-													"key": "dock_id",
-													"value": "{{dock_id}}"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "LedBrightnessStop",
-									"request": {
-										"method": "POST",
-										"header": [],
-										"body": {
-											"mode": "raw",
-											"raw": "{\n    \"command\": \"LED_BRIGHTNESS_STOP\"\n}",
+											"raw": "{\n    \"command\": \"SET_LED_BRIGHTNESS\",\n    \"value\": \"66\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -3237,6 +3201,22 @@
 							"response": []
 						},
 						{
+							"name": "connectDock",
+							"request": {
+								"method": "PUT",
+								"header": []
+							},
+							"response": []
+						},
+						{
+							"name": "disconnectDock",
+							"request": {
+								"method": "PUT",
+								"header": []
+							},
+							"response": []
+						},
+						{
 							"name": "updateDock",
 							"request": {
 								"method": "PATCH",
@@ -3321,123 +3301,6 @@
 										"docks",
 										"devices",
 										":dock_id"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "connection",
-					"item": [
-						{
-							"name": "connectAllDocks",
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks?cmd=CONNECT",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks"
-									],
-									"query": [
-										{
-											"key": "cmd",
-											"value": "CONNECT"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "disconnectAllDocks",
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks?cmd=DISCONNECT",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks"
-									],
-									"query": [
-										{
-											"key": "cmd",
-											"value": "DISCONNECT"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "connectDock",
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id?cmd=CONNECT",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id"
-									],
-									"query": [
-										{
-											"key": "cmd",
-											"value": "CONNECT"
-										}
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "disconnectDock",
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id?cmd=DISCONNECT",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id"
-									],
-									"query": [
-										{
-											"key": "cmd",
-											"value": "DISCONNECT"
-										}
 									],
 									"variable": [
 										{
@@ -3874,6 +3737,22 @@
 								}
 							]
 						}
+					},
+					"response": []
+				},
+				{
+					"name": "connectAllDocks",
+					"request": {
+						"method": "PUT",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "disconnectAllDocks",
+					"request": {
+						"method": "PUT",
+						"header": []
 					},
 					"response": []
 				},

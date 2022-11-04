@@ -5768,15 +5768,14 @@ paths:
                 command:
                   type: string
                   enum:
-                    - LED_BRIGHTNESS_START
-                    - LED_BRIGHTNESS_STOP
+                    - SET_LED_BRIGHTNESS
                     - REMOTE_LOW_BATTERY
                     - REMOTE_CHARGED
                     - SET_FRIENDLY_NAME
                     - REBOOT
                     - RESET
                 value:
-                  description: Required for brightness start and friendly name
+                  description: Required for `SET_LED_BRIGHTNESS` and `SET_FRIENDLY_NAME`
                   type: string
                 token:
                   description: Required for reset
