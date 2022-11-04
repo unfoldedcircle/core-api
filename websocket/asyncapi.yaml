@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.11.2-alpha'
+  version: '0.11.3-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -406,6 +406,7 @@ channels:
           - $ref: '#/components/messages/ir_learning'
           - $ref: '#/components/messages/dock_discovery'
           - $ref: '#/components/messages/dock_setup_change'
+          - $ref: '#/components/messages/dock_update_change'
 
           # TODO define all events and response messages
 #          - $ref: '#/components/messages/battery_status'
@@ -1591,6 +1592,15 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/dockSetupChangeEventMsg'
+
+    dock_update_change:
+      summary: Docking station firmware update change event.
+      description: |
+        Emitted for firmware update and progress state changes.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/dockUpdateChangeEventMsg'
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -3843,6 +3853,23 @@ components:
             - msg
             - msg_data
 
+    dockUpdateChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: dock_update_change
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/dockUpdateChange'
+          required:
+            - msg
+            - msg_data
+
     # =========================================================================
     # Event message schemas
     # =========================================================================
@@ -4898,6 +4925,7 @@ components:
       enum:
         - NEW
         - CONFIGURING
+        - UPLOADING
         - RESTARTING
         - OK
         - ERROR
@@ -4911,6 +4939,26 @@ components:
         - AUTHORIZATION_ERROR
         - TIMEOUT
         - OTHER
+
+    dockUpdateChange:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - START
+            - UPDATE
+            - STOP
+        dock_id:
+          type: string
+        state:
+          $ref: '#/components/schemas/dockSetupState'
+        error:
+          $ref: '#/components/schemas/dockSetupError'
+      required:
+        - event_type
+        - dock_id
+        - state
 
     description:
       type: string

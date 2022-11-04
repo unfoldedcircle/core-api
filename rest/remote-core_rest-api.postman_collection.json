@@ -2487,121 +2487,714 @@
 			"name": "docks",
 			"item": [
 				{
-					"name": "configuration",
+					"name": "devices",
 					"item": [
 						{
-							"name": "getDocks",
-							"event": [
+							"name": "command",
+							"item": [
 								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											"",
-											"const responseJson = pm.response.json();",
-											"postman.setEnvironmentVariable(\"dock_id\", responseJson[0].service_name);",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks"
-									],
-									"query": [
-										{
-											"key": "page",
-											"value": "1",
-											"disabled": true
+									"name": "LedBrightnessStart",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"LED_BRIGHTNESS_START\",\n    \"value\": \"100\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
 										},
-										{
-											"key": "limit",
-											"value": "2",
-											"disabled": true
-										},
-										{
-											"key": "active",
-											"value": "true",
-											"disabled": true
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
 										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "createDock",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 201\", function () {",
-											"    pm.response.to.have.status(201);",
-											"});",
-											"",
-											"const responseJson = pm.response.json();",
-											"postman.setEnvironmentVariable(\"dock_id\", responseJson.service_name);",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"service_name\": \"UC-Dock-E831CDD012A8\",\n    \"custom_ws_url\": \"ws://172.16.16.106:946\",\n    \"token\": \"0\",\n    \"active\": true,\n    \"description\": \"Golden sample\"\n}\n",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
+									},
+									"response": []
 								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks"
-									]
+								{
+									"name": "LedBrightnessStop",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"LED_BRIGHTNESS_STOP\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "RemoteLowBattery",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"REMOTE_LOW_BATTERY\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "RemoteCharged",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"REMOTE_CHARGED\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "SetFriendlyName",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"v2-pcb\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Reboot",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"REBOOT\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "Reset",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"RESET\",\n    \"value\": \"0123\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
 						},
 						{
-							"name": "deleteAllDocks",
-							"request": {
-								"method": "DELETE",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks"
+							"name": "infrared",
+							"item": [
+								{
+									"name": "learn",
+									"item": [
+										{
+											"name": "irLearningStatus",
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"docks",
+														"devices",
+														":dock_id",
+														"ir",
+														"learn"
+													],
+													"variable": [
+														{
+															"key": "dock_id",
+															"value": "YIO-Dock-3"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "startIrLearning",
+											"request": {
+												"method": "POST",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn?timeout=10",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"docks",
+														"devices",
+														":dock_id",
+														"ir",
+														"learn"
+													],
+													"query": [
+														{
+															"key": "timeout",
+															"value": "10"
+														}
+													],
+													"variable": [
+														{
+															"key": "dock_id",
+															"value": "YIO-Dock-3"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "stopIrLearning",
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"docks",
+														"devices",
+														":dock_id",
+														"ir",
+														"learn"
+													],
+													"variable": [
+														{
+															"key": "dock_id",
+															"value": "YIO-Dock-3"
+														}
+													]
+												}
+											},
+											"response": []
+										}
 									]
+								},
+								{
+									"name": "sendIrTest",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&hex=17;0x221C;14;0",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"ir",
+												"send"
+											],
+											"query": [
+												{
+													"key": "base",
+													"value": "true"
+												},
+												{
+													"key": "ext1",
+													"value": "true",
+													"disabled": true
+												},
+												{
+													"key": "hex",
+													"value": "17;0x221C;14;0"
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendIrTest Copy 2",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&format=PRONTO&code=0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"ir",
+												"send"
+											],
+											"query": [
+												{
+													"key": "base",
+													"value": "true"
+												},
+												{
+													"key": "ext1",
+													"value": "true"
+												},
+												{
+													"key": "format",
+													"value": "PRONTO"
+												},
+												{
+													"key": "code",
+													"value": "0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace"
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendIrTest hex",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&hex=3;0x20F0B54A;32;0",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"ir",
+												"send"
+											],
+											"query": [
+												{
+													"key": "base",
+													"value": "true"
+												},
+												{
+													"key": "ext1",
+													"value": "true"
+												},
+												{
+													"key": "hex",
+													"value": "3;0x20F0B54A;32;0"
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendIrTest pronto",
+									"protocolProfileBehavior": {
+										"disableBodyPruning": true
+									},
+									"request": {
+										"method": "GET",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&pronto=0001,0002,0002,affe,cafe,beef,dead",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"ir",
+												"send"
+											],
+											"query": [
+												{
+													"key": "base",
+													"value": "true"
+												},
+												{
+													"key": "ext1",
+													"value": "true"
+												},
+												{
+													"key": "pronto",
+													"value": "0001,0002,0002,affe,cafe,beef,dead"
+												},
+												{
+													"key": "hex",
+													"value": "3;0x20F0B54A;32;0",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendIr pronto",
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"int1\": true,\n    \"int2\": false,\n    \"ext1\": true,\n    \"ext2\": false,\n    \"pronto\":\"0001,0002,0002,affe,cafe,beef,dead\",\n    \"hex2\": \"3;0x20F0B54A;32;0\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"ir",
+												"send"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
 								}
-							},
-							"response": []
+							]
+						},
+						{
+							"name": "update",
+							"item": [
+								{
+									"name": "checkDockFirmwareUpdate",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"update"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateDockFirmware",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"update"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						},
 						{
 							"name": "getDock",
@@ -2728,626 +3321,6 @@
 										"docks",
 										"devices",
 										":dock_id"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "command",
-					"item": [
-						{
-							"name": "LedBrightnessStart",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"LED_BRIGHTNESS_START\",\n    \"value\": \"100\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "LedBrightnessStop",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"LED_BRIGHTNESS_STOP\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "RemoteLowBattery",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"REMOTE_LOW_BATTERY\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "RemoteCharged",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"REMOTE_CHARGED\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "SetFriendlyName",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"v2-pcb\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Reboot",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"REBOOT\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "Reset",
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"command\": \"RESET\",\n    \"value\": \"0123\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"command"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						}
-					]
-				},
-				{
-					"name": "infrared",
-					"item": [
-						{
-							"name": "learn",
-							"item": [
-								{
-									"name": "irLearningStatus",
-									"request": {
-										"method": "GET",
-										"header": [],
-										"url": {
-											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn",
-											"host": [
-												"{{SERVER}}"
-											],
-											"path": [
-												"api",
-												"docks",
-												"devices",
-												":dock_id",
-												"ir",
-												"learn"
-											],
-											"variable": [
-												{
-													"key": "dock_id",
-													"value": "YIO-Dock-3"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "startIrLearning",
-									"request": {
-										"method": "POST",
-										"header": [],
-										"url": {
-											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn?timeout=10",
-											"host": [
-												"{{SERVER}}"
-											],
-											"path": [
-												"api",
-												"docks",
-												"devices",
-												":dock_id",
-												"ir",
-												"learn"
-											],
-											"query": [
-												{
-													"key": "timeout",
-													"value": "10"
-												}
-											],
-											"variable": [
-												{
-													"key": "dock_id",
-													"value": "YIO-Dock-3"
-												}
-											]
-										}
-									},
-									"response": []
-								},
-								{
-									"name": "stopIrLearning",
-									"request": {
-										"method": "DELETE",
-										"header": [],
-										"url": {
-											"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/learn",
-											"host": [
-												"{{SERVER}}"
-											],
-											"path": [
-												"api",
-												"docks",
-												"devices",
-												":dock_id",
-												"ir",
-												"learn"
-											],
-											"variable": [
-												{
-													"key": "dock_id",
-													"value": "YIO-Dock-3"
-												}
-											]
-										}
-									},
-									"response": []
-								}
-							]
-						},
-						{
-							"name": "sendIrTest",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&hex=17;0x221C;14;0",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"ir",
-										"send"
-									],
-									"query": [
-										{
-											"key": "base",
-											"value": "true"
-										},
-										{
-											"key": "ext1",
-											"value": "true",
-											"disabled": true
-										},
-										{
-											"key": "hex",
-											"value": "17;0x221C;14;0"
-										}
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sendIrTest Copy 2",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&format=PRONTO&code=0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"ir",
-										"send"
-									],
-									"query": [
-										{
-											"key": "base",
-											"value": "true"
-										},
-										{
-											"key": "ext1",
-											"value": "true"
-										},
-										{
-											"key": "format",
-											"value": "PRONTO"
-										},
-										{
-											"key": "code",
-											"value": "0000,0070,0000,0032,0080,0040,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0030,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0010,0030,0010,0010,0010,0ace"
-										}
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sendIrTest hex",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&hex=3;0x20F0B54A;32;0",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"ir",
-										"send"
-									],
-									"query": [
-										{
-											"key": "base",
-											"value": "true"
-										},
-										{
-											"key": "ext1",
-											"value": "true"
-										},
-										{
-											"key": "hex",
-											"value": "3;0x20F0B54A;32;0"
-										}
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sendIrTest pronto",
-							"protocolProfileBehavior": {
-								"disableBodyPruning": true
-							},
-							"request": {
-								"method": "GET",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send?base=true&ext1=true&pronto=0001,0002,0002,affe,cafe,beef,dead",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"ir",
-										"send"
-									],
-									"query": [
-										{
-											"key": "base",
-											"value": "true"
-										},
-										{
-											"key": "ext1",
-											"value": "true"
-										},
-										{
-											"key": "pronto",
-											"value": "0001,0002,0002,affe,cafe,beef,dead"
-										},
-										{
-											"key": "hex",
-											"value": "3;0x20F0B54A;32;0",
-											"disabled": true
-										}
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "sendIr pronto",
-							"request": {
-								"method": "PUT",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"int1\": true,\n    \"int2\": false,\n    \"ext1\": true,\n    \"ext2\": false,\n    \"pronto\":\"0001,0002,0002,affe,cafe,beef,dead\",\n    \"hex2\": \"3;0x20F0B54A;32;0\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/ir/send",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"ir",
-										"send"
 									],
 									"variable": [
 										{
@@ -3853,91 +3826,118 @@
 					]
 				},
 				{
-					"name": "update",
-					"item": [
+					"name": "getDocks",
+					"event": [
 						{
-							"name": "checkDockFirmwareUpdate",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "GET",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"update"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "updateDockFirmware",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"url": {
-									"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"docks",
-										"devices",
-										":dock_id",
-										"update"
-									],
-									"variable": [
-										{
-											"key": "dock_id",
-											"value": "{{dock_id}}"
-										}
-									]
-								}
-							},
-							"response": []
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"dock_id\", responseJson[0].dock_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
 						}
-					]
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/docks",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"docks"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "2",
+									"disabled": true
+								},
+								{
+									"key": "active",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "createDock",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {",
+									"    pm.response.to.have.status(201);",
+									"});",
+									"",
+									"const responseJson = pm.response.json();",
+									"postman.setEnvironmentVariable(\"dock_id\", responseJson.dock_id);",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"dock_id\": \"test\",\n    \"custom_ws_url\": \"ws://172.16.16.106:946\",\n    \"token\": \"123\",\n    \"active\": true,\n    \"description\": \"Golden sample\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/docks",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"docks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAllDocks",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/docks",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"docks"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},

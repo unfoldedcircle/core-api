@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.0
+  version: 0.15.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -49,7 +49,7 @@ tags:
   - name: cfg
     description: "\U0001F4DD Configuration settings"
   - name: dock
-    description: "\U0001F6F0\U0001F477 Docking station management, discovery and infrared testing functions - **work in progress**"
+    description: "\U0001F6F0 Docking station management, discovery and infrared testing functions"
   - name: system
     description: "\U0001F477 System information and commands - **work in progress**"
 paths:
@@ -5565,10 +5565,12 @@ paths:
       description: |
         Create and persist a new dock configuration. To establish a session to the dock, a connect operation must be called
         afterwards.  
-        - Error `422` is returned if the given `service_name` already exists.
-        - If `custom_ws_url` is not specified, the dock address is resolved with a mDNS lookup based on `service_name`.   
+        - Error `422` is returned if the given service name in `dock_id` already exists.
+        - If `custom_ws_url` is not specified, the dock address is resolved through an mDNS service name lookup with `dock_id`.   
         - The `active` flag specifies if the dock will participate to connection requests.
         - Non-active docks will not auto-connect and must be enabled first to be used.
+        - If no `token` is provided the default token is used. 
+        - If `model` is provided it must be one of the known dock model identifiers: `UCD2` or `YIO1DOCK`.
       operationId: createDock
       requestBody:
         description: Client information requesting access
@@ -5674,12 +5676,9 @@ paths:
                 name:
                   type: string
                   maxLength: 40
-                  description: User assignable friendly name to use instead of service_name
+                  description: User assignable friendly name to use instead of dock_id (service name).
                 custom_ws_url:
-                  type: string
-                  minLength: 6
-                  maxLength: 256
-                  description: Dock WebSocket URL to override auto-discovery from service_name
+                  $ref: '#/components/schemas/DockUrl'
                 token:
                   type: string
                   maxLength: 40
@@ -5688,10 +5687,10 @@ paths:
                     This does not change the token in the dock! Use the `command` resource to change the token.
                 active:
                   type: boolean
-                  description: Auto connect to dock when network is available
+                  description: Auto connect to dock when network is available.
                 description:
                   type: string
-                  description: Optional description
+                  description: Optional description.
       responses:
         '200':
           description: Successful operation
@@ -5799,9 +5798,17 @@ paths:
     get:
       tags:
         - dock
-      summary: "\U0001F477 Check for dock firmware updates"
+      summary: Check for dock firmware updates.
       description: |
         Check if there is an update available for the dock.
+
+        This operation will use the cached update information from the software update cloud service, which runs
+        periodically to check for available updates and independently from this operation.  
+        The returned `update_check_enabled` flag indicates if the online update check is enabled or not.
+
+        If `update_id` is set then an update is currently in progress and can be monitored either with listening to the
+        WebSocket `dock_update_change` event messages or polling the status with the
+        `GET /docks/devices/{dockId}/update/{id}` operation.
       operationId: checkDockFirmwareUpdate
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5821,10 +5828,15 @@ paths:
     post:
       tags:
         - dock
-      summary: "\U0001F477 Update dock firmware"
+      summary: Update dock firmware.
       description: |
         Start a firmware update on the given dock. The returned update identifier can be used to poll for the update 
-        progress with the `GET /docks/devices/{dockId}/update/{id}` operation or listen to the WebSocket event message.
+        progress with the `GET /docks/devices/{dockId}/update/{id}` operation or listen to the WebSocket
+        `dock_update_change` event message.
+
+        Response codes:
+        - `409`: Conflict, an update is already running. Use the `GET` operation to retrieve the current update identifier.
+        - `503`: The dock is not connected, or the update service is unavailable. Please try again later.
       operationId: updateDockFirmware
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5844,15 +5856,19 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
   '/docks/devices/{dockId}/update/{id}':
     get:
       tags:
         - dock
-      summary: "\U0001F477 Check for dock firmware update progress"
+      summary: Check for dock firmware update progress.
       description: |
         Get the current progress and status information about a dock firmware upgrade.
+
+        Instead of using polling one can also listen to the WebSocket `dock_update_change` event messages.
       operationId: dockFirmwareUpdateProgress
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5883,6 +5899,8 @@ paths:
         - dock
       summary: "\U0001F477 Test IR command."
       description: |
+        **Work in progress.**
+
         Test function for sending IR commands. The IR code can either be in Pronto format or Hex.
         If no output is specified, the code will only be emitted from the dock.
       operationId: sendIrTest
@@ -5938,6 +5956,8 @@ paths:
         - dock
       summary: "\U0001F477 Send IR command."
       description: |
+        **Work in progress.**
+
         Send an IR command, either in Pronto or [IRremoteESP8266 Hex](https://github.com/crankyoldgit/IRremoteESP8266) format.
 
         Hex format: `<protocol>,<hex-ir-code>,<bits>,<repeat-count>`
@@ -7373,7 +7393,7 @@ components:
     DockConfiguration:
       type: object
       properties:
-        service_name:
+        dock_id:
           $ref: '#/components/schemas/DockId'
         name:
           $ref: '#/components/schemas/DockName'
@@ -7381,18 +7401,25 @@ components:
           $ref: '#/components/schemas/DockUrl'
         resolved_ws_url:
           type: string
-          maxLength: 256
-          description: Resolved WebSocket URL from service_name if no custom_ws_url is used
+          maxLength: 64
+          description: Resolved WebSocket URL from the service name in `dock_id` if no `custom_ws_url` is used.
         active:
           type: boolean
-          description: Auto connect to dock when network is available
+          description: |
+            Enable flag: active docks are automatically connected when network is available.
+        model:
+          type: string
+          description: Dock model number.
         state:
           $ref: '#/components/schemas/DockState'
         learning_active:
           type: boolean
-          description: Dock is in IR learning mode
+          description: Dock is in IR learning mode.
         description:
           $ref: '#/components/schemas/Description'
+      required:
+        - dock_id
+        - active
     DockConfigurations:
       type: array
       items:
@@ -7400,7 +7427,7 @@ components:
     DockConfigurationRequest:
       type: object
       properties:
-        service_name:
+        dock_id:
           $ref: '#/components/schemas/DockId'
         name:
           $ref: '#/components/schemas/DockName'
@@ -7410,12 +7437,15 @@ components:
           $ref: '#/components/schemas/DockToken'
         active:
           type: boolean
-          description: Auto connect to dock when network is available
+          description: |
+            Enable flag: active docks are automatically connected when network is available.
+        model:
+          type: string
+          description: Dock model number.
         description:
           $ref: '#/components/schemas/Description'
       required:
-        - service_name
-        - token
+        - dock_id
         - active
     DockDiscovery:
       type: object
@@ -7504,7 +7534,7 @@ components:
       type: string
       minLength: 1
       maxLength: 40
-      description: User assignable friendly name to use instead of service_name
+      description: User assignable friendly name to use instead of dock_id (service name).
     DockSetup:
       type: object
       description: Dock setup data
@@ -7563,6 +7593,7 @@ components:
       enum:
         - NEW
         - CONFIGURING
+        - UPLOADING
         - RESTARTING
         - OK
         - ERROR
@@ -7584,27 +7615,30 @@ components:
       description: Access token
     DockUpdateCheck:
       type: object
-      description: Dock firmware update check information
+      description: Dock firmware update check information.
       properties:
         dock_id:
           type: string
         version:
-          description: Installed firmware version
-          type: string
-        model:
-          description: Dock model
+          description: Installed firmware version.
           type: string
         update_available:
+          description: Whether or not an update is available. An available update is set in the `firmware_update` object.
+          type: boolean
+        update_check_enabled:
+          description: |
+            Whether or not the online update check is enabled or not. If disabled, `update_available` will always be false. 
           type: boolean
         firmware_update:
           $ref: '#/components/schemas/DockFirmwareUpdate'
         update_id:
-          description: Update identifier if an update is currently in progress
+          description: Update identifier if an update is currently in progress.
           type: string
       required:
         - dock_id
         - version
         - update_available
+        - update_check_enabled
     DockUpdateProgress:
       type: object
       description: Dock firmware update progress
@@ -7624,15 +7658,9 @@ components:
           minimum: 0
           maximum: 100
         state:
-          type: string
-          enum:
-            - CONNECTING
-            - UPDATING
-            - REBOOTING
-            - SUCCESS
-            - ERROR
+          $ref: '#/components/schemas/DockSetupState'
         error:
-          type: string
+          $ref: '#/components/schemas/DockSetupError'
       required:
         - dock_id
         - update_id
@@ -7642,7 +7670,7 @@ components:
       type: string
       minLength: 6
       maxLength: 64
-      description: Dock WebSocket URL to override auto-discovery from service_name
+      description: Dock WebSocket URL to override auto-discovery from the service name in `dock_id`.
     DriverDeveloper:
       type: object
       description: Optional information about the integration developer.
@@ -9353,6 +9381,12 @@ components:
             $ref: '#/components/schemas/ApiResponse'
     Err403Forbidden:
       description: 'The request is understood, but the client does not have access rights to the content.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err409Conflict:
+      description: The request conflicts with the current state of the target resource.
       content:
         application/json:
           schema:
