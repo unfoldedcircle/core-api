@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.1
+  version: 0.15.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -5859,6 +5859,26 @@ paths:
           $ref: '#/components/responses/Err409Conflict'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Abort the dock firmware update.
+      description: |
+        Stop the firmware update process at the next possible operation and remove the update process information.
+
+        Emits the WebSocket event `dock_update_change` with `event_type: STOP`
+      operationId: stopDockFirmwareUpdate
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   '/docks/devices/{dockId}/update/{id}':
     get:
       tags:

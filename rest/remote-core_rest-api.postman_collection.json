@@ -3077,6 +3077,57 @@
 							"name": "update",
 							"item": [
 								{
+									"name": "progress",
+									"item": [
+										{
+											"name": "getUpdateProgress",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/docks/devices/:dock_id/update/:update_id",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"docks",
+														"devices",
+														":dock_id",
+														"update",
+														":update_id"
+													],
+													"variable": [
+														{
+															"key": "dock_id",
+															"value": "{{dock_id}}"
+														},
+														{
+															"key": "update_id",
+															"value": "{{dock_update_id}}"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
 									"name": "checkDockFirmwareUpdate",
 									"event": [
 										{
@@ -3086,6 +3137,9 @@
 													"pm.test(\"Status code is 200\", function () {",
 													"    pm.response.to.have.status(200);",
 													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"postman.setEnvironmentVariable(\"dock_update_id\", responseJson.update_id);",
 													""
 												],
 												"type": "text/javascript"
@@ -3124,6 +3178,50 @@
 											"listen": "test",
 											"script": {
 												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"postman.setEnvironmentVariable(\"dock_update_id\", responseJson.update_id);",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"update"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopUpdate",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
 													"pm.test(\"Status code is 200\", function () {",
 													"    pm.response.to.have.status(200);",
 													"});",
@@ -3134,7 +3232,7 @@
 										}
 									],
 									"request": {
-										"method": "POST",
+										"method": "DELETE",
 										"header": [],
 										"url": {
 											"raw": "{{SERVER}}/api/docks/devices/:dock_id/update",
