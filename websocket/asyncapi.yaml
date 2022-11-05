@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.11.3-alpha'
+  version: '0.11.4-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -4951,6 +4951,18 @@ components:
             - STOP
         dock_id:
           type: string
+        update_id:
+          description: Update identifier
+          type: string
+        version:
+          description: Firmware version being installed
+          type: string
+        progress:
+          description: Update progress in percent
+          type: integer
+          format: int32
+          minimum: 0
+          maximum: 100
         state:
           $ref: '#/components/schemas/dockSetupState'
         error:
