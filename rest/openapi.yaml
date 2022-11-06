@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.2
+  version: 0.15.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -5521,12 +5521,35 @@ paths:
         '403':
           $ref: '#/components/responses/Err403Forbidden'
   /docks:
+    head:
+      tags:
+        - dock
+      summary: Get total number of configured docks.
+      description: |
+        By default only active docks are counted. This can be changed with the `active` query parameter.
+      operationId: getDockCount
+      parameters:
+        - $ref: '#/components/parameters/active'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
     get:
       tags:
         - dock
       summary: List configured docks and their connection state.
       description: |
         Returns all dock configuration enriched with current connection information.
+
+        By default only active docks are returned. This can be changed with the `active` query parameter.
       operationId: getDocks
       parameters:
         - $ref: '#/components/parameters/active'
@@ -5769,6 +5792,7 @@ paths:
                   type: string
                   enum:
                     - SET_LED_BRIGHTNESS
+                    - IDENTIFY
                     - REMOTE_LOW_BATTERY
                     - REMOTE_CHARGED
                     - SET_FRIENDLY_NAME
@@ -5776,9 +5800,6 @@ paths:
                     - RESET
                 value:
                   description: Required for `SET_LED_BRIGHTNESS` and `SET_FRIENDLY_NAME`
-                  type: string
-                token:
-                  description: Required for reset
                   type: string
               required:
                 - command
@@ -7429,6 +7450,12 @@ components:
         model:
           type: string
           description: Dock model number.
+        connection_type:
+          type: string
+          description: |
+            Network connection of the dock: `Ethernet` or `WiFi`.
+        version:
+          type: string
         state:
           $ref: '#/components/schemas/DockState'
         learning_active:

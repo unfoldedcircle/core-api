@@ -2529,6 +2529,42 @@
 									"response": []
 								},
 								{
+									"name": "Identify",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"IDENTIFY\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
 									"name": "RemoteLowBattery",
 									"request": {
 										"method": "POST",
@@ -2679,7 +2715,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"command\": \"RESET\",\n    \"value\": \"0123\"\n}",
+											"raw": "{\n    \"command\": \"RESET\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -3425,6 +3461,11 @@
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
 											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.docks[0]) {",
+											"    postman.setEnvironmentVariable(\"discovered_dock_device\", JSON.stringify(responseJson.docks[0]));",
+											"}",
 											""
 										],
 										"type": "text/javascript"
@@ -3468,7 +3509,7 @@
 								"method": "PUT",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/docks/discover?timeout=5&bt=false",
+									"raw": "{{SERVER}}/api/docks/discover",
 									"host": [
 										"{{SERVER}}"
 									],
@@ -3480,11 +3521,13 @@
 									"query": [
 										{
 											"key": "timeout",
-											"value": "5"
+											"value": "5",
+											"disabled": true
 										},
 										{
 											"key": "bt",
-											"value": "false"
+											"value": "false",
+											"disabled": true
 										},
 										{
 											"key": "net",
@@ -3718,7 +3761,9 @@
 											"});",
 											"",
 											"const responseJson = pm.response.json();",
-											"postman.setEnvironmentVariable(\"dock_setup_id\", responseJson.id);",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"dock_setup_id\", responseJson.id);",
+											"}",
 											""
 										],
 										"type": "text/javascript"
@@ -3731,6 +3776,60 @@
 								"body": {
 									"mode": "raw",
 									"raw": "{\n    \"id\": \"UC-Dock-E831CDD012A8\",\n    \"configured\": true,\n    \"friendly_name\": \"UC-Dock-E831CDD012A8\",\n    \"address\": \"172.1.1.106:946\",\n    \"model\": \"Remote Two dock\",\n    \"version\": \"0.1.0\",\n    \"discovery_type\": \"NET\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "setupDock from discovery",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"",
+											"pm.test(\"Check response\", () => {",
+											"  pm.expect(responseJson).to.be.an(\"object\");",
+											"  pm.expect(responseJson.id).to.be.a(\"string\");",
+											"  pm.expect(responseJson.discovery_type).to.be.a(\"string\");",
+											"});",
+											"",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"dock_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{{discovered_dock_device}}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3787,6 +3886,31 @@
 					]
 				},
 				{
+					"name": "getDockCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/docks",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"docks"
+							],
+							"query": [
+								{
+									"key": "active",
+									"value": "false",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "getDocks",
 					"event": [
 						{
@@ -3798,7 +3922,9 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"dock_id\", responseJson[0].dock_id);",
+									"if (responseJson[0] && responseJson[0].dock_id) {",
+									"    postman.setEnvironmentVariable(\"dock_id\", responseJson[0].dock_id);",
+									"}",
 									""
 								],
 								"type": "text/javascript"
@@ -3820,17 +3946,17 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "1",
+									"value": "8",
 									"disabled": true
 								},
 								{
 									"key": "limit",
-									"value": "2",
+									"value": "1",
 									"disabled": true
 								},
 								{
 									"key": "active",
-									"value": "true",
+									"value": "false",
 									"disabled": true
 								}
 							]
@@ -3866,8 +3992,9 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"dock_id\", responseJson.dock_id);",
-									""
+									"if (responseJson.dock_id) {",
+									"    postman.setEnvironmentVariable(\"dock_id\", responseJson.dock_id);",
+									"}"
 								],
 								"type": "text/javascript"
 							}
