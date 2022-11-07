@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.3
+  version: 0.15.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -5547,7 +5547,8 @@ paths:
         - dock
       summary: List configured docks and their connection state.
       description: |
-        Returns all dock configuration enriched with current connection information.
+        Returns all dock configuration with paging. The configuration data is enriched with current connection information.
+        Use the `HEAD` operation to retrieve the total number of defined docking stations.
 
         By default only active docks are returned. This can be changed with the `active` query parameter.
       operationId: getDocks
@@ -5586,13 +5587,17 @@ paths:
         - dock
       summary: Create a new dock configuration.
       description: |
-        Create and persist a new dock configuration. To establish a session to the dock, a connect operation must be called
-        afterwards.  
+        Manually create and persist a new dock configuration. This is a low-level operation without configuring and setting
+        up the dock as with the `/docks/setup` endpoints! To establish a session to the dock, the connect operation must be
+        called afterwards.  
         - Error `422` is returned if the given service name in `dock_id` already exists.
-        - If `custom_ws_url` is not specified, the dock address is resolved through an mDNS service name lookup with `dock_id`.   
-        - The `active` flag specifies if the dock will participate to connection requests.
+        - If `custom_ws_url` is not specified, the dock address is resolved through an mDNS service name lookup in `dock_id`.   
+        - The `active` flag specifies if the dock will react to connection requests.
         - Non-active docks will not auto-connect and must be enabled first to be used.
-        - If no `token` is provided the default token is used. 
+        - Non-active docks won't be visible in the web-configurator.
+        - If no `token` is provided the default token is used! The token is used to authenticate the WebSocket
+          connection once a connection to the dock is established. To change an existing token, use the 
+          `PATCH /docks/devices/:dockId` operation.
         - If `model` is provided it must be one of the known dock model identifiers: `UCD2` or `YIO1DOCK`.
       operationId: createDock
       requestBody:
@@ -5649,8 +5654,9 @@ paths:
         - dock
       summary: Delete all dock configurations.
       description: |
-        This clears all dock configuration: active dock sessions are disconnected and the persisted dock configuration will
-        be removed. If `/docks/connect` is called afterwards, there are no more dock connections to be established.
+        ⚠️ All defined dock configurations will be irrevocably deleted!
+
+        Active dock sessions will be disconnected and the persisted dock configurations removed.
       operationId: deleteAllDocks
       responses:
         '200':
@@ -5659,11 +5665,339 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /docks/discover:
+    get:
+      tags:
+        - dock
+      summary: Get docking station discovery status.
+      description: |
+        Returns the current discovery status and any discovered docks.
+
+        Use the DELETE operation to clear the discovered devices and PUT to start a new discovery.
+      operationId: getDockDiscoveryStatus
+      responses:
+        '200':
+          description: Dock discovery status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockDiscoveryStatus'
+              example:
+                active: true
+                docks:
+                  - id: UC-Dock-E831CDD012A8
+                    configured: false
+                    friendly_name: Living room
+                    address: '192.168.1.106:946'
+                    model: UCD2
+                    version: 0.1.0
+                    discovery_type: NET
+                    timestamp: '2022-11-07T07:46:04.370629Z'
+                  - id: sim.1
+                    configured: false
+                    friendly_name: Simulated dock
+                    address: '127.0.0.1:946'
+                    version: 0.1.2
+                    discovery_type: NET
+                    timestamp: '2022-11-07T07:46:05.245759Z'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    put:
+      tags:
+        - dock
+      summary: Start discovery of new docking stations.
+      description: |
+        Start device discovery over Bluetooth and mDNS. Bluetooth or network discovery can be disabled with a query
+        parameter. By default the discovery automatically stops after 30 seconds. Use the GET status request to check on
+        discovered devices or DELETE to stop discovery.
+
+        By default only new network devices are returned. If a dock is already configured it will be omitted from the
+        results, unless the query parameter `new=false` is set. Docks with Bluetooth enabled are always returned, since
+        this usually means that the dock needs to be re-configured.
+
+        - Emits the WebSocket event `dock_discovery` with `event_type: START` when discovery starts.
+        - For each discovered device the WebSocket event `dock_discovery` with `event_type: DISCOVER` is emitted.
+      operationId: startDockDiscovery
+      parameters:
+        - name: timeout
+          in: query
+          description: Timeout in seconds.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            default: 30
+            minimum: 1
+            maximum: 300
+        - name: bt
+          in: query
+          description: Use Bluetooth to discover new docks.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: net
+          in: query
+          description: Query network to discover new docks.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: new
+          in: query
+          description: 'Only return new devices, filter out already configured docks.'
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Stop discovery of new docking stations.
+      description: |
+        Stops the device discovery. The current discovery status is returned in the response and afterwards removed from
+        the session. I.e. it can no longer be retrieved with `GET /docks/discover`.
+
+        Emits the WebSocket event `dock_discovery` with `event_type: STOP`.
+      operationId: stopDockDiscovery
+      responses:
+        '200':
+          description: Dock discovery status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockDiscoveryStatus'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /docks/setup:
+    get:
+      tags:
+        - dock
+      summary: Get current dock setup processes.
+      description: |
+        Return a list of all active setup process identifiers. The returned ids can be used with the
+        `/docks/setup/:id` endpoints to continue or abort a setup process.
+      operationId: getDockSetupProcesses
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    post:
+      tags:
+        - dock
+      summary: Start setting up a new docking station.
+      description: |
+        Create a new setup process for the given dock id. The required request data can be obtained from the
+        `/api/docks/discover` endpoints when searching for docking stations over Bluetooth or Ethernet. Simply provide the
+        returned `DockDiscovery` data object (which is a super set of the required data to start a setup process).
+
+        The returned `id` in the `DockSetupInfo` response will be the identifier for the further setup operations with the
+        `/docks/setup/:id` endpoints.
+
+        Emits the WebSocket event `dock_setup_change` with `event_type: START`.
+
+        If there's already a setup process running for the given dock id, it will be reset as soon as a currently running
+        operation can be aborted. However, using the `DELETE /docks/setup/:id` operation is preferred.
+
+        Response status codes:
+        - `400`: invalid data in request body
+        - `503`: service not available to setup docking station.  
+           E.g. Bluetooth is disabled and therefore the docking station cannot be setup over Bluetooth. Either enable
+           Bluetooth or setup the dock over Ethernet.
+      operationId: setupDock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateDockSetup'
+            example:
+              id: UC-Dock-E831CDD012A8
+              friendly_name: 'null'
+              address: '192.168.1.106:946'
+              model: UCD2
+              version: 0.1.0
+              discovery_type: NET
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSetupInfo'
+              example:
+                id: UC-Dock-E831CDD012A8
+                name: Living room
+                model: UCD2_VIRTUAL
+                discovery_type: NET
+                state: NEW
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Abort and remove all setup processes.
+      description: |
+        Stop all setup processes at the next possible operation and remove all setup process information.
+      operationId: stopAllDockSetups
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/docks/setup/{dockId}':
+    get:
+      tags:
+        - dock
+      summary: Get docking station setup status.
+      description: |
+        Poll operation to retrieve the current docking station setup state. See the `state` and `error` fields in the
+        response message. There are also WebSocket `dock_setup_change` event messages for state changes to avoid polling.
+
+        Defined setup states:
+        - `NEW`: setup has not yet been started. Use the `PUT` operation to provide the required data and to start setting up the dock.
+        - `CONFIGURING`: setup data is currently being transferred to the dock.
+        - `RESTARTING`: dock has been configured and is restarting to integrate into the network.
+        - `OK`: setup process has been completed successfully, the dock can now be used.
+        - `ERROR`: the setup process failed. Check the `error` field for more information.
+      operationId: getDockSetupStatus
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSetupInfo'
+              example:
+                id: UC-Dock-E831CDD012A8
+                name: Living room
+                model: UCD2_VIRTUAL
+                discovery_type: NET
+                state: OK
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - dock
+      summary: Setup docking station.
+      description: |
+        Set required data to start the setup process and configure the docking station.
+        When using Bluetooth the WiFi network name and credentials must be provided to connect the dock to the WiFi network.
+
+        The `state` field in the response message indicate the current state of the setup process. Use the `GET` operation
+        to poll for state updates or listen to the corresponding WebSocket `dock_setup_change` event messages with
+        `event_type: SETUP`.
+      operationId: startDockSetup
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DockSetup'
+            example:
+              name: Living room
+              token: '123'
+              description: Setup test
+              wifi:
+                ssid: My Network
+                password: 0123456789
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockSetupInfo'
+              example:
+                id: UC-Dock-E831CDD012A8
+                name: Living room
+                model: UCD2_VIRTUAL
+                discovery_type: NET
+                state: CONFIGURING
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: Abort the dock setup process.
+      description: |
+        Stop the setup process at the next possible operation and remove the setup process information.  
+        To start a new setup process, use the `POST /docks/setup` operation again.
+
+        Emits the WebSocket event `dock_setup_change` with `event_type: STOP`.
+      operationId: stopDockSetup
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   '/docks/devices/{dockId}':
     get:
       tags:
         - dock
       summary: Get dock configuration.
+      description: |
+        Returns the dock configuration, enriched with the current session information if a dock connection is established.
       operationId: getDock
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5674,6 +6008,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DockConfiguration'
+              example:
+                dock_id: UC-Dock-E831CDD012A8
+                name: Living room
+                resolved_ws_url: 'ws://UC-Dock-E831CDD012A8:946'
+                active: true
+                model: UCD2
+                state: Connected
+                learning_active: false
+                description: Setup test
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -5685,7 +6028,12 @@ paths:
         - dock
       summary: Change dock configuration like auto-connect or access token.
       description: |
-        Update one or more dock fields
+        Update one or more dock fields.
+
+        - If the dock is in an `active` connection state, then the `name` and `token` values are persisted in the dock if
+          provided in the request.
+        - If the dock is not active, the values are only stored in the remote. A changed `token` will be used for the next
+          connection attempt.
       operationId: updateDock
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5705,9 +6053,7 @@ paths:
                 token:
                   type: string
                   maxLength: 40
-                  description: |
-                    Access token to connect to the dock.
-                    This does not change the token in the dock! Use the `command` resource to change the token.
+                  description: Access token to connect to the dock.
                 active:
                   type: boolean
                   description: Auto connect to dock when network is available.
@@ -5761,6 +6107,10 @@ paths:
       tags:
         - dock
       summary: Delete dock configuration.
+      description: |
+        ⚠️ The dock configuration will be irrevocably deleted!
+
+        An active dock session will be disconnected and the persisted dock configuration removed.
       operationId: deleteDock
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5778,6 +6128,15 @@ paths:
       tags:
         - dock
       summary: Send a dock command.
+      description: |
+        The following `command` values are defined:
+        - `SET_LED_BRIGHTNESS`: set the maximum brightness of the front indicator LED. Set the `0..100` percentage as
+           string parameter in the `value` field.  
+        - `IDENTIFY`: identify the dock with blinking the indicator LED.
+        - `REMOTE_LOW_BATTERY`: trigger the low battery status indicator on the dock.
+        - `REMOTE_CHARGED`: trigger the remote charged indicator on the dock.
+        - `REBOOT`: reboot the dock.
+        - `RESET`: ⚠️ factory reset the dock. Requires administrator privileges.
       operationId: dockCommand
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -5795,14 +6154,34 @@ paths:
                     - IDENTIFY
                     - REMOTE_LOW_BATTERY
                     - REMOTE_CHARGED
-                    - SET_FRIENDLY_NAME
                     - REBOOT
                     - RESET
                 value:
-                  description: Required for `SET_LED_BRIGHTNESS` and `SET_FRIENDLY_NAME`
+                  description: Command parameter value. Required for `SET_LED_BRIGHTNESS`.
                   type: string
               required:
                 - command
+            examples:
+              Set LED brightness to 50%:
+                value:
+                  command: SET_LED_BRIGHTNESS
+                  value: '50'
+              Set LED brightness to maximum:
+                value:
+                  command: SET_LED_BRIGHTNESS
+                  value: '100'
+              Identify the dock:
+                value:
+                  command: IDENTIFY
+              Trigger low battery indicator:
+                value:
+                  command: REMOTE_LOW_BATTERY
+              Trigger remote charged indicator:
+                value:
+                  command: REMOTE_CHARGED
+              Reboot the dock:
+                value:
+                  command: REBOOT
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -6034,268 +6413,6 @@ paths:
                   description: Hex IR code
                   type: string
                   pattern: '^[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}$'
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-  /docks/discover:
-    get:
-      tags:
-        - dock
-      summary: Get docking station discovery status.
-      description: |
-        _TODO_
-      operationId: getDockDiscoveryStatus
-      responses:
-        '200':
-          description: Dock discovery status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DockDiscoveryStatus'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-    put:
-      tags:
-        - dock
-      summary: Start discovery of new docking stations.
-      description: |
-        _TODO_
-      operationId: startDockDiscovery
-      parameters:
-        - name: timeout
-          in: query
-          description: Timeout in seconds.
-          required: false
-          schema:
-            type: integer
-            format: int32
-            default: 30
-            minimum: 1
-            maximum: 300
-        - name: bt
-          in: query
-          description: Use Bluetooth to discover new docks.
-          required: false
-          schema:
-            type: boolean
-            default: true
-        - name: net
-          in: query
-          description: Query network to discover new docks.
-          required: false
-          schema:
-            type: boolean
-            default: true
-        - name: new
-          in: query
-          description: 'Only return new devices, filter out already configured docks.'
-          required: false
-          schema:
-            type: boolean
-            default: true
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '503':
-          $ref: '#/components/responses/Err503ServiceUnavailable'
-    delete:
-      tags:
-        - dock
-      summary: Stop discovery of new docking stations.
-      description: |
-        _TODO_
-      operationId: stopDockDiscovery
-      responses:
-        '200':
-          description: Dock discovery status
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DockDiscoveryStatus'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-  /docks/setup:
-    get:
-      tags:
-        - dock
-      summary: Get current dock setup processes.
-      description: |
-        Return a list of all active setup process identifiers. The returned ids can be used with the
-        `/docks/setup/:id` endpoints to continue or abort a setup process.
-      operationId: getDockSetupProcesses
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: string
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-    post:
-      tags:
-        - dock
-      summary: Start setting up a new docking station.
-      description: |
-        Create a new setup process for the given dock id. The required request data can be obtained from the
-        `/api/docks/discover` endpoints when searching for docking stations over Bluetooth or Ethernet. Simply provide the
-        returned `DockDiscovery` data object (which is a super set of the required data to start a setup process).
-
-        The returned `id` in the `DockSetupInfo` response will be the identifier for the further setup operations with the
-        `/docks/setup/:id` endpoints.
-
-        Emits the WebSocket event `dock_setup_change` with `event_type: START`.
-
-        If there's already a setup process running for the given dock id, it will be reset as soon as a currently running
-        operation can be aborted. However, using the `DELETE /docks/setup/:id` operation is preferred.
-
-        Response status codes:
-        - `400`: invalid data in request body
-        - `503`: service not available to setup docking station.  
-           E.g. Bluetooth is disabled and therefore the docking station cannot be setup over Bluetooth. Either enable
-           Bluetooth or setup the dock over Ethernet.
-      operationId: setupDock
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateDockSetup'
-        required: true
-      responses:
-        '201':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DockSetupInfo'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '503':
-          $ref: '#/components/responses/Err503ServiceUnavailable'
-    delete:
-      tags:
-        - dock
-      summary: Abort and remove all setup processes.
-      description: |
-        Stop all setup processes at the next possible operation and remove all setup process information.
-      operationId: stopAllDockSetups
-      responses:
-        '200':
-          $ref: '#/components/responses/SuccessMessage'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-  '/docks/setup/{dockId}':
-    get:
-      tags:
-        - dock
-      summary: Get docking station setup status.
-      description: |
-        Poll operation to retrieve the current docking station setup state. See the `state` and `error` fields in the
-        response message. There are also WebSocket event messages for state changes to avoid polling.
-
-        Defined setup states:
-        - `NEW`: setup has not yet been started. Use the `PUT` operation to provide the required data and to start setting up the dock.
-        - `CONFIGURING`: setup data is currently being transferred to the dock.
-        - `RESTARTING`: dock has been configured and is restarting to integrate into the network.
-        - `OK`: setup process has been completed successfully, the dock can now be used.
-        - `ERROR`: the setup process failed. Check the `error` field for more information.
-      operationId: getDockSetupStatus
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DockSetupInfo'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-    put:
-      tags:
-        - dock
-      summary: Setup docking station.
-      description: |
-        Set required data to start the setup process and configure the docking station.
-        When using Bluetooth the WiFi network name and credentials must be provided to connect the dock to the WiFi network.
-
-        The `state` field in the response message indicate the current state of the setup process. Use the `GET` operation
-        to poll for state updates or listen to the corresponding WebSocket `dock_setup_change` event messages with
-        `event_type: SETUP`.
-      operationId: startDockSetup
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DockSetup'
-        required: true
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DockSetupInfo'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
-        '503':
-          $ref: '#/components/responses/Err503ServiceUnavailable'
-    delete:
-      tags:
-        - dock
-      summary: Abort the dock setup process.
-      description: |
-        Stop the setup process at the next possible operation and remove the setup process information.  
-        To start a new setup process, use the `POST /docks/setup` operation again.
-
-        Emits the WebSocket event `dock_setup_change` with `event_type: STOP`.
-      operationId: stopDockSetup
-      parameters:
-        - $ref: '#/components/parameters/dock_id'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
