@@ -3595,6 +3595,11 @@
 													"pm.test(\"Status code is 200\", function () {",
 													"    pm.response.to.have.status(200);",
 													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
 													""
 												],
 												"type": "text/javascript"
@@ -4049,6 +4054,593 @@
 			"name": "integrations",
 			"item": [
 				{
+					"name": "discover",
+					"item": []
+				},
+				{
+					"name": "setup",
+					"item": []
+				},
+				{
+					"name": "driver",
+					"item": [
+						{
+							"name": "getIntegrationDriversCount",
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers?enabled=true",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers"
+									],
+									"query": [
+										{
+											"key": "enabled",
+											"value": "true"
+										},
+										{
+											"key": "instantiable",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "single_instance",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "has_instances",
+											"value": "true",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getIntegrationDrivers",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers?page=1&limit=10",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers"
+									],
+									"query": [
+										{
+											"key": "enabled",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "instantiable",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "single_device",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "has_instances",
+											"value": "false",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "10"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "registerIntegrationDriver",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id2\": \"test\",\n    \"name\": {\n        \"de\": \"Testtreiber\",\n        \"en\": \"Test driver\"\n    },\n    \"driver_url\": \"ws://none\",\n    \"version\": \"0.0.1\",\n    \"icon\": \"yio:test\",\n    \"enabled\": true,\n    \"description\": {\n        \"en\": \"Only for testing\",\n        \"de\": \"Nur zum testen\"\n    },\n    \"device_discovery\": false,\n    \"setup_data_schema\": {},\n    \"release_date\": \"2022-04-02\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getIntegrationDriver",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers",
+										":driverId"
+									],
+									"variable": [
+										{
+											"key": "driverId",
+											"value": "hass"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "updateIntegrationDriver",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"test\",\n    \"name\": {\n        \"en\": \"Test Driver\"\n    },\n    \"driver_url\": \"ws://localhost:8000/ws\",\n    \"version\": \"0.0.1\",\n    \"description\": {\n        \"en\": \"Only for testing\"\n    },\n    \"device_discovery\": false,\n    \"setup_data_schema\": {\n        \"foobar\": \"bar3\",\n        \"foo\": \"bar\",\n        \"bar\": true\n    },\n    \"developer\": {\n        \"name\": \"kusi\"\n    },\n    \"release_date\": \"2022-01-01\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers",
+										":driverId"
+									],
+									"variable": [
+										{
+											"key": "driverId",
+											"value": "test"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteIntegrationDriver",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers",
+										":driverId"
+									],
+									"variable": [
+										{
+											"key": "driverId",
+											"value": "8f7e16af-4092-496f-b90e-2676866aeb09"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "startIntegrationDriver",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers/:driverId?cmd=START",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers",
+										":driverId"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "START"
+										}
+									],
+									"variable": [
+										{
+											"key": "driverId",
+											"value": "hass"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "stopIntegrationDriver",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers/:driverId?cmd=STOP",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers",
+										":driverId"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "STOP"
+										}
+									],
+									"variable": [
+										{
+											"key": "driverId",
+											"value": "hass"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "createIntegrationInstance",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"device_id\": \"ä\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/drivers/:driverId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"drivers",
+										":driverId"
+									],
+									"variable": [
+										{
+											"key": "driverId",
+											"value": "simple"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "instances",
+					"item": [
+						{
+							"name": "getIntegrationsCount",
+							"request": {
+								"method": "HEAD",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances?enabled=true&page=1&limit=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances"
+									],
+									"query": [
+										{
+											"key": "enabled",
+											"value": "true"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getIntegrations",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances?page=1",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances"
+									],
+									"query": [
+										{
+											"key": "enabled",
+											"value": "true",
+											"disabled": true
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "1",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getIntegration",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances/:intgId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances",
+										":intgId"
+									],
+									"variable": [
+										{
+											"key": "intgId",
+											"value": "hass.main"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "deleteIntegration",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances/:intgId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances",
+										":intgId"
+									],
+									"variable": [
+										{
+											"key": "intgId",
+											"value": "test.2"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getAvailableEntitiesFromIntegration",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances/:intgId/entities?page=1&limit=100&reload=true",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances",
+										":intgId",
+										"entities"
+									],
+									"query": [
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "limit",
+											"value": "100"
+										},
+										{
+											"key": "reload",
+											"value": "true"
+										}
+									],
+									"variable": [
+										{
+											"key": "intgId",
+											"value": "hass.main"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "configureEntityFromIntegration",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances/:intgId/entities/:entityId",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances",
+										":intgId",
+										"entities",
+										":entityId"
+									],
+									"variable": [
+										{
+											"key": "intgId",
+											"value": "hass.main"
+										},
+										{
+											"key": "entityId",
+											"value": "sensor.uptime"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "connect",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances/:intgId?cmd=CONNECT",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances",
+										":intgId"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "CONNECT"
+										}
+									],
+									"variable": [
+										{
+											"key": "intgId",
+											"value": "hass.main"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "disconnect",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/instances/:intgId?cmd=DISCONNECT",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"instances",
+										":intgId"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "DISCONNECT"
+										}
+									],
+									"variable": [
+										{
+											"key": "intgId",
+											"value": "test.integration:1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "getIntegrationStatus",
 					"request": {
 						"method": "GET",
@@ -4075,575 +4667,6 @@
 								{
 									"key": "limit",
 									"value": "100"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegrationDriversCount",
-					"request": {
-						"method": "HEAD",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers?enabled=true",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers"
-							],
-							"query": [
-								{
-									"key": "enabled",
-									"value": "true"
-								},
-								{
-									"key": "instantiable",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "single_instance",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "has_instances",
-									"value": "true",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegrationDrivers",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers?page=1&limit=10",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers"
-							],
-							"query": [
-								{
-									"key": "enabled",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "instantiable",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "single_device",
-									"value": "false",
-									"disabled": true
-								},
-								{
-									"key": "has_instances",
-									"value": "false",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "10"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegrationDriver",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers",
-								":driverId"
-							],
-							"variable": [
-								{
-									"key": "driverId",
-									"value": "hass"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "registerIntegrationDriver",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"driver_id2\": \"test\",\n    \"name\": {\n        \"de\": \"Testtreiber\",\n        \"en\": \"Test driver\"\n    },\n    \"driver_url\": \"ws://none\",\n    \"version\": \"0.0.1\",\n    \"icon\": \"yio:test\",\n    \"enabled\": true,\n    \"description\": {\n        \"en\": \"Only for testing\",\n        \"de\": \"Nur zum testen\"\n    },\n    \"device_discovery\": false,\n    \"setup_data_schema\": {},\n    \"release_date\": \"2022-04-02\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteIntegrationDriver",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers",
-								":driverId"
-							],
-							"variable": [
-								{
-									"key": "driverId",
-									"value": "8f7e16af-4092-496f-b90e-2676866aeb09"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "startIntegrationDriver",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers/:driverId?cmd=START",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers",
-								":driverId"
-							],
-							"query": [
-								{
-									"key": "cmd",
-									"value": "START"
-								}
-							],
-							"variable": [
-								{
-									"key": "driverId",
-									"value": "hass"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "stopIntegrationDriver",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers/:driverId?cmd=stop",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers",
-								":driverId"
-							],
-							"query": [
-								{
-									"key": "cmd",
-									"value": "stop"
-								}
-							],
-							"variable": [
-								{
-									"key": "driverId",
-									"value": null
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "updateIntegrationDriver",
-					"request": {
-						"method": "PATCH",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"driver_id\": \"test\",\n    \"name\": {\n        \"en\": \"Test Driver\"\n    },\n    \"driver_url\": \"ws://localhost:8000/ws\",\n    \"version\": \"0.0.1\",\n    \"description\": {\n        \"en\": \"Only for testing\"\n    },\n    \"device_discovery\": false,\n    \"setup_data_schema\": {\n        \"foobar\": \"bar3\",\n        \"foo\": \"bar\",\n        \"bar\": true\n    },\n    \"developer\": {\n        \"name\": \"kusi\"\n    },\n    \"release_date\": \"2022-01-01\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers",
-								":driverId"
-							],
-							"variable": [
-								{
-									"key": "driverId",
-									"value": "test"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "createIntegrationInstance",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"device_id\": \"ä\"\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/intg/drivers/:driverId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"drivers",
-								":driverId"
-							],
-							"variable": [
-								{
-									"key": "driverId",
-									"value": "simple"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegrationsCount",
-					"request": {
-						"method": "HEAD",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances?enabled=true&page=1&limit=1",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances"
-							],
-							"query": [
-								{
-									"key": "enabled",
-									"value": "true"
-								},
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "1"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegrations",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances?page=1",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances"
-							],
-							"query": [
-								{
-									"key": "enabled",
-									"value": "true",
-									"disabled": true
-								},
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "1",
-									"disabled": true
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getIntegration",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances/:intgId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances",
-								":intgId"
-							],
-							"variable": [
-								{
-									"key": "intgId",
-									"value": "hass.main"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "deleteIntegration",
-					"request": {
-						"method": "DELETE",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances/:intgId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances",
-								":intgId"
-							],
-							"variable": [
-								{
-									"key": "intgId",
-									"value": "test.2"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "getAvailableEntitiesFromIntegration",
-					"request": {
-						"method": "GET",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances/:intgId/entities?page=1&limit=100&reload=true",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances",
-								":intgId",
-								"entities"
-							],
-							"query": [
-								{
-									"key": "page",
-									"value": "1"
-								},
-								{
-									"key": "limit",
-									"value": "100"
-								},
-								{
-									"key": "reload",
-									"value": "true"
-								}
-							],
-							"variable": [
-								{
-									"key": "intgId",
-									"value": "hass.main"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "configureEntityFromIntegration",
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances/:intgId/entities/:entityId",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances",
-								":intgId",
-								"entities",
-								":entityId"
-							],
-							"variable": [
-								{
-									"key": "intgId",
-									"value": "hass.main"
-								},
-								{
-									"key": "entityId",
-									"value": "sensor.uptime"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "connect",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances/:intgId?cmd=CONNECT",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances",
-								":intgId"
-							],
-							"query": [
-								{
-									"key": "cmd",
-									"value": "CONNECT"
-								}
-							],
-							"variable": [
-								{
-									"key": "intgId",
-									"value": "hass.main"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "disconnect",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg/instances/:intgId?cmd=disconnect",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg",
-								"instances",
-								":intgId"
-							],
-							"query": [
-								{
-									"key": "cmd",
-									"value": "disconnect"
-								}
-							],
-							"variable": [
-								{
-									"key": "intgId",
-									"value": "test.integration:1"
 								}
 							]
 						}
@@ -4680,7 +4703,7 @@
 						"method": "PUT",
 						"header": [],
 						"url": {
-							"raw": "{{SERVER}}/api/intg?cmd=disconnect",
+							"raw": "{{SERVER}}/api/intg?cmd=DISCONNECT",
 							"host": [
 								"{{SERVER}}"
 							],
@@ -4691,7 +4714,7 @@
 							"query": [
 								{
 									"key": "cmd",
-									"value": "disconnect"
+									"value": "DISCONNECT"
 								}
 							]
 						}
@@ -11299,6 +11322,153 @@
 										"body": {
 											"mode": "raw",
 											"raw": "{\n  \"codeset_id\": \"lg1\",\n  \"cmd_id\": \"POWER_ON\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":deviceId",
+												"send"
+											],
+											"variable": [
+												{
+													"key": "deviceId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendProntoCodeOnEmitter default port",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"code\": \"0000,0068,0000,0010,0060,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0018,0018,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0318\",\n  \"format\": \"PRONTO\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":deviceId",
+												"send"
+											],
+											"variable": [
+												{
+													"key": "deviceId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendProntoCodeOnEmitter",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"code\": \"0000,0068,0000,0010,0060,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0018,0018,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0318\",\n  \"format\": \"PRONTO\",\n  \"port_id\": \"1\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/ir/emitters/:deviceId/send",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"ir",
+												"emitters",
+												":deviceId",
+												"send"
+											],
+											"variable": [
+												{
+													"key": "deviceId",
+													"value": "{{emitter_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "sendHexCodeOnEmitter",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});"
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"code\": \"3;0x20F0A956;32;0\",\n  \"format\": \"HEX\",\n  \"port_id\": \"1\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"

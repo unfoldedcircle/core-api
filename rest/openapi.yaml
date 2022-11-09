@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.4
+  version: 0.15.5
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3133,9 +3133,9 @@ paths:
     put:
       tags:
         - infrared
-      summary: Send IR command from a command set.
+      summary: Send IR command.
       description: |
-        Send an IR command from the specified command set on the given emitter and output port.
+        Send an IR command from the specified command set or a learned code on the given emitter and output port.
       operationId: sendCommandOnEmitter
       parameters:
         - $ref: '#/components/parameters/emitter_id'
@@ -3144,20 +3144,54 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                codeset_id:
-                  description: Infrared codeset identifier.
-                  type: string
-                cmd_id:
-                  description: Command identifier in the codeset.
-                  type: string
-                port_id:
-                  description: Optional output port identifier. The default output will be used if omitted.
-                  type: string
-              required:
-                - codeset_id
-                - cmd_id
+              oneOf:
+                - type: object
+                  description: Command from a codeset.
+                  properties:
+                    codeset_id:
+                      description: Infrared codeset identifier.
+                      type: string
+                    cmd_id:
+                      description: Command identifier in the codeset.
+                      type: string
+                    port_id:
+                      description: Optional output port identifier. The default output will be used if omitted.
+                      type: string
+                  required:
+                    - codeset_id
+                    - cmd_id
+                - type: object
+                  description: Learned IR code.
+                  properties:
+                    code:
+                      description: IR code. PRONTO codes can use a space or comma as separator.
+                      type: string
+                    format:
+                      $ref: '#/components/schemas/IrCodeFormat'
+                    port_id:
+                      description: Optional output port identifier. The default output will be used if omitted.
+                      type: string
+                  required:
+                    - code
+                    - format
+            examples:
+              Command from a codeset on default output:
+                value:
+                  codeset_id: ir.manufacturer.123
+                  cmd_id: CHANNEL_DOWN
+              Command from a codeset on specific output:
+                value:
+                  codeset_id: ir.manufacturer.123
+                  cmd_id: CHANNEL_DOWN
+                  port_id: '4'
+              Learned PRONTO code:
+                value:
+                  code: '0000,0068,0000,0010,0060,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0018,0018,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0318'
+                  format: PRONTO
+              Learned HEX code:
+                value:
+                  code: 3;0x20F0A956;32;0
+                  format: HEX
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
