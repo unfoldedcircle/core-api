@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.5
+  version: 0.15.6
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3184,14 +3184,15 @@ paths:
                   codeset_id: ir.manufacturer.123
                   cmd_id: CHANNEL_DOWN
                   port_id: '4'
-              Learned PRONTO code:
+              Learned PRONTO code on default output:
                 value:
                   code: '0000,0068,0000,0010,0060,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0018,0018,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0318'
                   format: PRONTO
-              Learned HEX code:
+              Learned HEX code on specific output:
                 value:
                   code: 3;0x20F0A956;32;0
                   format: HEX
+                  port_id: '4'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -7798,12 +7799,13 @@ components:
       type: string
       description: Connection state
       enum:
-        - Idle
-        - Connecting
-        - Connected
-        - Authenticated
-        - Disconnected
-        - Closing
+        - IDLE
+        - CONNECTING
+        - CONNECTED
+        - AUTHENTICATED
+        - DISCONNECTED
+        - CLOSING
+        - ERROR
     DockToken:
       type: string
       format: password
