@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.15.6
+  version: 0.15.7
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -5848,20 +5848,30 @@ paths:
         - dock
       summary: Start setting up a new docking station.
       description: |
-        Create a new setup process for the given dock id. The required request data can be obtained from the
-        `/api/docks/discover` endpoints when searching for docking stations over Bluetooth or Ethernet. Simply provide the
-        returned `DockDiscovery` data object (which is a super set of the required data to start a setup process).
+        Create a new setup process from a discovered dock or from a manually provided dock address.
 
-        The returned `id` in the `DockSetupInfo` response will be the identifier for the further setup operations with the
-        `/docks/setup/:id` endpoints.
+        - If there's already a setup process running for the given dock id, status code `409` is returned.
+        - Emits the WebSocket event `dock_setup_change` with `event_type: START` when this operation returns `201`.
 
-        Emits the WebSocket event `dock_setup_change` with `event_type: START`.
+        Start setup from dock discovery:
+        - The required request data can be obtained from the `/api/docks/discover` endpoints when searching for docking
+          stations over Bluetooth or Ethernet. Simply provide the returned `DockDiscovery` data object (which is a super
+          set of the required data to start a setup process).
+        - The returned `id` in the `DockSetupInfo` response will be the identifier for the next `PUT /docks/setup/:id`
+          call to provide additional data.
 
-        If there's already a setup process running for the given dock id, it will be reset as soon as a currently running
-        operation can be aborted. However, using the `DELETE /docks/setup/:id` operation is preferred.
+        Manual setup:
+        - A dock identifier will automatically be created and returned in `DockSetupInfo`.
+        - The dock must be reachable on the network with the provided `custom_ws_url` and optional `token`. Otherwise,
+          status code `503` is returned.
+        - The setup process is automatically started after a successful POST request, no call to `PUT /docks/setup/:id`
+          is required.
 
         Response status codes:
-        - `400`: invalid data in request body
+        - `201`: setup process successfully started. Use `GET /docks/setup/:id` to poll for status updates, or listen to
+           WebSocket `dock_setup_change` event messages.
+        - `400`: invalid data in request body.
+        - `409`: a setup process is already running. Either wait until finished, or abort it.
         - `503`: service not available to setup docking station.  
            E.g. Bluetooth is disabled and therefore the docking station cannot be setup over Bluetooth. Either enable
            Bluetooth or setup the dock over Ethernet.
@@ -5871,13 +5881,31 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateDockSetup'
-            example:
-              id: UC-Dock-E831CDD012A8
-              friendly_name: 'null'
-              address: '192.168.1.106:946'
-              model: UCD2
-              version: 0.1.0
-              discovery_type: NET
+            examples:
+              From dock discovery:
+                value:
+                  discovery:
+                    id: UC-Dock-E831CDD012A8
+                    friendly_name: Living room
+                    address: '192.168.1.106:946'
+                    model: UCD2
+                    version: 0.1.0
+                    discovery_type: NET
+              Manually:
+                value:
+                  manually:
+                    name: Living room
+                    token: '0000'
+                    custom_ws_url: 192.168.1.106
+              Manually with WiFi:
+                value:
+                  manually:
+                    name: Living room
+                    token: '0000'
+                    custom_ws_url: 192.168.1.106
+                    wifi:
+                      ssid: My network
+                      password: don't tell anyone
         required: true
       responses:
         '201':
@@ -5889,7 +5917,6 @@ paths:
               example:
                 id: UC-Dock-E831CDD012A8
                 name: Living room
-                model: UCD2_VIRTUAL
                 discovery_type: NET
                 state: NEW
         '400':
@@ -5898,6 +5925,8 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
     delete:
@@ -5990,7 +6019,7 @@ paths:
               example:
                 id: UC-Dock-E831CDD012A8
                 name: Living room
-                model: UCD2_VIRTUAL
+                model: UCD2
                 discovery_type: NET
                 state: CONFIGURING
         '400':
@@ -6049,7 +6078,7 @@ paths:
                 resolved_ws_url: 'ws://UC-Dock-E831CDD012A8:946'
                 active: true
                 model: UCD2
-                state: Connected
+                state: CONNECTED
                 learning_active: false
                 description: Setup test
         '401':
@@ -7449,27 +7478,6 @@ components:
       description: 'Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).'
       type: string
       format: iso-3166
-    CreateDockSetup:
-      type: object
-      properties:
-        id:
-          $ref: '#/components/schemas/DockId'
-        friendly_name:
-          $ref: '#/components/schemas/DockName'
-        address:
-          description: Resolved device network address.
-          type: string
-        model:
-          description: Detected dock model.
-          type: string
-        version:
-          description: Detected firmware version.
-          type: string
-        discovery_type:
-          $ref: '#/components/schemas/DiscoveryType'
-      required:
-        - id
-        - discovery_type
     Description:
       type: string
       maxLength: 255
@@ -7733,6 +7741,21 @@ components:
       minLength: 1
       maxLength: 40
       description: User assignable friendly name to use instead of dock_id (service name).
+    CreateDockSetup:
+      type: object
+      oneOf:
+        - type: object
+          properties:
+            discovery:
+              $ref: '#/components/schemas/DockSetupFromDiscovery'
+          required:
+            - discovery
+        - type: object
+          properties:
+            manually:
+              $ref: '#/components/schemas/DockSetup'
+          required:
+            - manual
     DockSetup:
       type: object
       description: Dock setup data
@@ -7760,6 +7783,27 @@ components:
             - password
       required:
         - name
+    DockSetupFromDiscovery:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/DockId'
+        friendly_name:
+          $ref: '#/components/schemas/DockName'
+        address:
+          description: Resolved device network address.
+          type: string
+        model:
+          description: Detected dock model.
+          type: string
+        version:
+          description: Detected firmware version.
+          type: string
+        discovery_type:
+          $ref: '#/components/schemas/DiscoveryType'
+      required:
+        - id
+        - discovery_type
     DockSetupError:
       type: string
       enum:
