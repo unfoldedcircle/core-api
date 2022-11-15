@@ -2643,7 +2643,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"v2-pcb\"\n}",
+											"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"Ethernet dock\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -3421,6 +3421,41 @@
 							"response": []
 						},
 						{
+							"name": "updateDock set active Copy",
+							"request": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"active\": true\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"devices",
+										":dock_id"
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "{{dock_id}}"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
 							"name": "deleteDock",
 							"request": {
 								"method": "DELETE",
@@ -3651,7 +3686,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"name\": \"Test station\",\n  \"token\": \"123\",\n  \"custom_ws_url\": \"ws://test-station.local:1946\",\n  \"description\": \"Setup test\",\n  \"wifi\": {\n    \"ssid\": \"My Network\",\n    \"password\": \"0123456789\"\n  }\n}",
+											"raw": "{\n  \"name\": \"Living room\",\n  \"token\": \"123\",\n  \"custom_ws_url2\": \"ws://test-station.local:1946\",\n  \"description\": \"Setup test\",\n  \"wifi\": {\n    \"ssid\": \"My Network\",\n    \"password\": \"0123456789\"\n  }\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -3780,7 +3815,54 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"id\": \"UC-Dock-E831CDD012A8\",\n    \"configured\": true,\n    \"friendly_name\": \"UC-Dock-E831CDD012A8\",\n    \"address\": \"172.1.1.106:946\",\n    \"model\": \"Remote Two dock\",\n    \"version\": \"0.1.0\",\n    \"discovery_type\": \"NET\"\n}",
+									"raw": "{\n    \"discovery\": {\n        \"id\": \"UC-Dock-E831CDD012A8\",\n        \"configured\": true,\n        \"friendly_name\": \"My new dock\",\n        \"address\": \"172.1.1.106:946\",\n        \"model\": \"UCD2\",\n        \"version\": \"0.1.0\",\n        \"discovery_type\": \"NET\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/docks/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "setupDock manually",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"dock_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"manually\": {\n        \"name\": \"Test manual setup\",\n        \"custom_ws_url\": \"172.1.1.106\"\n    }\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3834,7 +3916,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{{discovered_dock_device}}",
+									"raw": "{\n    \"discovery\":\n        {{discovered_dock_device}}\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3951,7 +4033,7 @@
 							"query": [
 								{
 									"key": "page",
-									"value": "8",
+									"value": "2",
 									"disabled": true
 								},
 								{
