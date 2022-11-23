@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.11.4-alpha'
+  version: '0.12.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -407,6 +407,8 @@ channels:
           - $ref: '#/components/messages/dock_discovery'
           - $ref: '#/components/messages/dock_setup_change'
           - $ref: '#/components/messages/dock_update_change'
+          - $ref: '#/components/messages/integration_discovery'
+          - $ref: '#/components/messages/integration_setup_change'
 
           # TODO define all events and response messages
 #          - $ref: '#/components/messages/battery_status'
@@ -1601,6 +1603,24 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/dockUpdateChangeEventMsg'
+
+    integration_discovery:
+      summary: Integration discovery event.
+      description: |
+        Emitted if integration discovery is started, stopped or a new integration was discovered on the network.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/integrationDiscoveryEventMsg'
+
+    integration_setup_change:
+      summary: Integration setup state change event.
+      description: |
+        Emitted for all integration setup flow state changes.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/integrationSetupChangeEventMsg'
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -3870,6 +3890,40 @@ components:
             - msg
             - msg_data
 
+    integrationDiscoveryEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: integration_discovery
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/integrationDiscovery'
+          required:
+            - msg
+            - msg_data
+
+    integrationSetupChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: integration_setup_change
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/integrationSetupChange'
+          required:
+            - msg
+            - msg_data
+
     # =========================================================================
     # Event message schemas
     # =========================================================================
@@ -4449,6 +4503,12 @@ components:
         - RECONNECTING
         - ERROR
 
+    integrationDriverType:
+      type: string
+      enum:
+        - LOCAL
+        - EXTERNAL
+
     integrationDriverInfo:
       description: |
         Summary data of an integration driver intended for overview screens.
@@ -4458,6 +4518,10 @@ components:
           $ref: '#/components/schemas/driverId'
         name:
           $ref: '#/components/schemas/languageText'
+        developer_name:
+          type: string
+        driver_type:
+          $ref: '#/components/schemas/integrationDriverType'
         driver_url:
           description: WebSocket URL of the driver
           type: string
@@ -4472,7 +4536,7 @@ components:
       required:
         - driver_id
         - name
-        - driver_url
+        - driver_type
         - version
         - enabled
 
@@ -4493,6 +4557,8 @@ components:
           $ref: '#/components/schemas/driverId'
         name:
           $ref: '#/components/schemas/languageText'
+        driver_type:
+          $ref: '#/components/schemas/integrationDriverType'
         driver_url:
           description: WebSocket URL of the driver
           type: string
@@ -4541,6 +4607,7 @@ components:
             
             **Not yet finalized**.
           type: object
+          #$ref: '#/components/schemas/settingsPage'
         release_date:
           description: Release date of the driver.
           type: string
@@ -4634,6 +4701,7 @@ components:
             
             **TODO Not yet finalized**.
           type: object
+          #$ref: '#/components/schemas/settingsPage'
         release_date:
           description: Release date of the driver.
           type: string
@@ -4690,7 +4758,7 @@ components:
         icon:
           $ref: '#/components/schemas/iconIdentifier'
         enabled:
-          description: Enable / disable flag.
+          description: Enable / disable flag. For development use only!
           type: boolean
         setup_data:
           description: Instance configuration object.
@@ -4971,6 +5039,326 @@ components:
         - event_type
         - dock_id
         - state
+
+    integrationDiscovery:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - START
+            - STOP
+            - DISCOVER
+        integration:
+          $ref: '#/components/schemas/integrationDiscoveryInformation'
+      required:
+        - event_type
+
+    integrationDiscoveryInformation:
+      type: object
+      properties:
+        id:
+          type: string
+        configured:
+          type: boolean
+        name:
+          type: string
+        icon:
+          type: string
+        developer_name:
+          type: string
+        driver_url:
+          description: Resolved driver url.
+          type: string
+        version:
+          description: Detected driver version.
+          type: string
+        timestamp:
+          description: Timestamp of driver discovery.
+          type: string
+          format: date-time
+      required:
+        - id
+        - configured
+        - name
+        - driver_url
+        - timestamp
+
+    integrationSetupChange: # TODO finalize object
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - START
+            - SETUP
+            - STOP
+        driver_id:
+          type: string
+        state:
+          $ref: '#/components/schemas/integrationSetupState'
+        error:
+          $ref: '#/components/schemas/integrationSetupError'
+        require_user_action:
+          description: If set, the setup process waits for the specified user action.
+          type: object
+          oneOf:
+            - type: object
+              properties:
+                input:
+                  type: object
+                  $ref: '#/components/schemas/SettingsPage'
+              required:
+                - input
+            - type: object
+              properties:
+                confirmation:
+                  type: object
+                  $ref: '#/components/schemas/ConfirmationPage'
+              required:
+                - confirmation
+      required:
+        - event_type
+        - driver_id
+        - state
+
+    integrationSetupState:
+      type: string
+      enum:
+        - SETUP
+        - WAIT_USER_ACTION
+        - OK
+        - ERROR
+
+    integrationSetupError:
+      type: string
+      enum:
+        - NONE
+        - NOT_FOUND
+        - CONNECTION_REFUSED
+        - AUTHORIZATION_ERROR
+        - TIMEOUT
+        - OTHER
+    
+    ConfirmationPage:
+      description: Confirmation screen
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/languageText'
+        message1:
+          description: Message to display between title and image (if supplied). Supports Markdown formatting.
+          $ref: '#/components/schemas/languageText'
+        image:
+          description: |
+            Optional base64-encoded image.
+
+            TODO maximum encoded length to avoid WebSocket continuation frames, supported image formats
+            (png & svg?), max height & width
+          type: string
+          format: byte
+          maxLength: 32768
+        message2:
+          description: Message to display below message1 or image (if supplied). Supports Markdown formatting.
+          $ref: '#/components/schemas/languageText'
+      required:
+        - title
+
+    SettingsPage:
+      description: Settings definition page, e.g. to configure an integration driver.
+      type: object
+      properties:
+        title:
+          $ref: '#/components/schemas/languageText'
+        settings:
+          description: One or multiple input field definitions, with optional pre-set values.
+          type: array
+          items:
+            $ref: '#/components/schemas/Setting'
+      required:
+        - title
+        - settings
+
+    Setting:
+      description: |
+        An input setting is of a specific type defined in `field.type` which defines how it is presented to the user.
+
+        Inspired by the [Homey SDK settings](https://apps.developer.homey.app/the-basics/devices/settings) concept.
+      type: object
+      properties:
+        id:
+          description: Unique identifier of the setting to be returned with the entered value.
+          type: string
+          maximum: 50
+        label:
+          $ref: '#/components/schemas/languageText'
+        field:
+          oneOf:
+            - $ref: '#/components/schemas/SettingTypeNumber'
+            - $ref: '#/components/schemas/SettingTypeText'
+            - $ref: '#/components/schemas/SettingTypeTextArea'
+            - $ref: '#/components/schemas/SettingTypePassword'
+            - $ref: '#/components/schemas/SettingTypeCheckbox'
+            - $ref: '#/components/schemas/SettingTypeDropdown'
+            - $ref: '#/components/schemas/SettingTypeLabel'
+      required:
+        - id
+        - label
+        - field
+
+    SettingTypeNumber:
+      description: |
+        Number input with optional `min`, `max`, `steps` and `decimals` properties. The default value must be specified
+        in `value`. An optional unit of the number setting can be specified in `units`, which will be displayed next to
+        the input field.
+      type: object
+      properties:
+        number:
+          type: object
+          properties:
+            value:
+              description: Default value for input field.
+              type: number
+            min:
+              description: "Optional validation: minimum allowed value (inclusive)."
+              type: number
+            max:
+              description: "Optional validation: maximum allowed value (inclusive)."
+              type: number
+            steps:
+              description: |
+                Optional validation: allowed step increment between values. Might also be used in the UI for input helpers.
+              type: number
+            decimals:
+              description: "Number of decimal places. 0 = integer value"
+              type: integer
+              minimum: 0
+              default: 0
+            unit:
+              $ref: '#/components/schemas/languageText'
+          required:
+            - value
+      required:
+        - number
+
+    SettingTypeText:
+      description: |
+        Single line of text input.
+
+        TODO: format specifier for e.g. email, url, date, datetime etc.?
+      type: object
+      properties:
+        text:
+          type: object
+          properties:
+            value:
+              description: Optional default value.
+              type: string
+            regex:
+              description: Optional regex validation pattern for the input value.
+              type: string
+      required:
+        - text
+
+    SettingTypeTextArea:
+      description: Multi-line text input, e.g. for providing a description.
+      type: object
+      properties:
+        textarea:
+          type: object
+          properties:
+            value:
+              description: Optional default value.
+              type: string
+      required:
+        - textarea
+
+    SettingTypePassword:
+      description: |
+        Password or pin entry field with the input text hidden from the user. Otherwise the same as text input.
+      type: object
+      properties:
+        password:
+          type: object
+          properties:
+            value:
+              description: Optional default value.
+              type: string
+              format: password
+            regex:
+              description: Optional regex validation pattern for the input value.
+              type: string
+      required:
+        - password
+
+    SettingTypeCheckbox:
+      description: Checkbox setting with `true` / `false` values.
+      type: object
+      properties:
+        checkbox:
+          type: object
+          properties:
+            value:
+              description: Initial setting.
+              type: boolean
+          required:
+            - value
+      required:
+        - checkbox
+
+    SettingTypeDropdown:
+      description: Dropdown setting to pick a single value from a list. All values must be strings.
+      type: object
+      properties:
+        dropdown:
+          type: object
+          properties:
+            value:
+              description: Pre-selected dropdown id
+              type: string
+            items:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    description: Selection identifier.
+                    type: string
+                  label:
+                    $ref: '#/components/schemas/languageText'
+                required:
+                  - id
+                  - label
+          required:
+            - items
+      required:
+        - dropdown
+
+    SettingTypeLabel:
+      description: |
+        Additional read-only text for information purpose between other settings. Supports Markdown formatting.
+      type: object
+      properties:
+        label:
+          type: object
+          properties:
+            value:
+              $ref: '#/components/schemas/languageText'
+          required:
+            - value
+      required:
+        - label
+
+    SettingsValues:
+      description: |
+        User input result of a SettingsPage as key values.
+        - key: id of the field
+        - value: entered user value as string. This is either the entered text or number, selected checkbox state or the
+          selected dropdown item id.  
+          ⚠️ Non native string values as numbers or booleans are represented as string values!
+      type: object
+      additionalProperties:
+        type: string
 
     description:
       type: string

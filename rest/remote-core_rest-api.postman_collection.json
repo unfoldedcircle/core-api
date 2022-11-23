@@ -3338,7 +3338,31 @@
 							"name": "connectDock",
 							"request": {
 								"method": "PUT",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id?cmd=CONNECT",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"devices",
+										":dock_id"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "CONNECT"
+										}
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "{{dock_id}}"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -3346,7 +3370,31 @@
 							"name": "disconnectDock",
 							"request": {
 								"method": "PUT",
-								"header": []
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/docks/devices/:dock_id?cmd=DISCONNECT",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"docks",
+										"devices",
+										":dock_id"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "DISCONNECT"
+										}
+									],
+									"variable": [
+										{
+											"key": "dock_id",
+											"value": "{{dock_id}}"
+										}
+									]
+								}
 							},
 							"response": []
 						},
@@ -3498,7 +3546,7 @@
 											"});",
 											"",
 											"const responseJson = pm.response.json();",
-											"if (responseJson.docks[0]) {",
+											"if (responseJson.docks && responseJson.docks[0]) {",
 											"    postman.setEnvironmentVariable(\"discovered_dock_device\", JSON.stringify(responseJson.docks[0]));",
 											"}",
 											""
@@ -4055,7 +4103,23 @@
 					"name": "connectAllDocks",
 					"request": {
 						"method": "PUT",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/docks?cmd=CONNECT",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"docks"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "CONNECT"
+								}
+							]
+						}
 					},
 					"response": []
 				},
@@ -4063,7 +4127,23 @@
 					"name": "disconnectAllDocks",
 					"request": {
 						"method": "PUT",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/docks?cmd=DISCONNECT",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"docks"
+							],
+							"query": [
+								{
+									"key": "cmd",
+									"value": "DISCONNECT"
+								}
+							]
+						}
 					},
 					"response": []
 				},
@@ -4137,11 +4217,593 @@
 			"item": [
 				{
 					"name": "discover",
-					"item": []
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getDiscoveredDriver",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.integrations && responseJson.integrations[0]) {",
+													"    postman.setEnvironmentVariable(\"discovered_integration\", JSON.stringify(responseJson.integrations[0]));",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/discover/:driverId",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"discover",
+												":driverId"
+											],
+											"variable": [
+												{
+													"key": "driverId",
+													"value": "{{discovered_integration_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "connectionTest",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.integrations && responseJson.integrations[0]) {",
+													"    postman.setEnvironmentVariable(\"discovered_integration\", JSON.stringify(responseJson.integrations[0]));",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n  \"connection\": {\n    \"driver_url\": \"ws://my-integration.local:8080\",\n    \"token\": \"0000\"\n  }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/intg/discover/:driverId?cmd=CONNECTION_TEST",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"discover",
+												":driverId"
+											],
+											"query": [
+												{
+													"key": "cmd",
+													"value": "CONNECTION_TEST"
+												}
+											],
+											"variable": [
+												{
+													"key": "driverId",
+													"value": "{{discovered_integration_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "configureDiscoveredDriver",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/intg/discover/:driverId",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"discover",
+												":driverId"
+											],
+											"variable": [
+												{
+													"key": "driverId",
+													"value": "{{discovered_integration_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "getDiscoveryStatus",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.integrations && responseJson.integrations[0]) {",
+											"    postman.setEnvironmentVariable(\"discovered_integration\", JSON.stringify(responseJson.integrations[0]));",
+											"    postman.setEnvironmentVariable(\"discovered_integration_id\", responseJson.integrations[0].id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/discover",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"discover"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "startDiscovery",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/discover",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"discover"
+									],
+									"query": [
+										{
+											"key": "timeout",
+											"value": "5",
+											"disabled": true
+										},
+										{
+											"key": "new",
+											"value": "false",
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "stopDiscovery",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/discover",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"discover"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "setup",
-					"item": []
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"input_values\": {\n        \"name\": \"Living room\",\n        \"token\": \"123\",\n        \"custom_ws_url2\": \"ws://test-station.local:1946\",\n        \"description\": \"Setup test\"\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "getIntegrationSetupProcesses",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson[0]);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "setupIntegration",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"homey\",\n    \"name\": {\n        \"en\": \"My test integration\"\n    },\n    \"setup_data\": {\n        \"url\": \"ws://test-station.local:1946\",\n        \"token\": \"123\",\n        \"ssl\": \"false\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "setupIntegration sim-test",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"sim-test\",\n    \"name\": {\n        \"en\": \"My test integration\"\n    },\n    \"setup_data\": {}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "stopAllIntegrationSetups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
 				},
 				{
 					"name": "driver",
@@ -4162,6 +4824,11 @@
 										"drivers"
 									],
 									"query": [
+										{
+											"key": "driver_type",
+											"value": "EXTERNAL",
+											"disabled": true
+										},
 										{
 											"key": "enabled",
 											"value": "true"
@@ -4192,7 +4859,7 @@
 								"method": "GET",
 								"header": [],
 								"url": {
-									"raw": "{{SERVER}}/api/intg/drivers?page=1&limit=10",
+									"raw": "{{SERVER}}/api/intg/drivers?instantiable=true&page=1&limit=10",
 									"host": [
 										"{{SERVER}}"
 									],
@@ -4203,14 +4870,18 @@
 									],
 									"query": [
 										{
+											"key": "driver_type",
+											"value": "LOCAL",
+											"disabled": true
+										},
+										{
 											"key": "enabled",
 											"value": "true",
 											"disabled": true
 										},
 										{
 											"key": "instantiable",
-											"value": "true",
-											"disabled": true
+											"value": "true"
 										},
 										{
 											"key": "single_device",
@@ -4723,6 +5394,31 @@
 					]
 				},
 				{
+					"name": "getIntegrationStatuskCount",
+					"request": {
+						"method": "HEAD",
+						"header": [],
+						"url": {
+							"raw": "{{SERVER}}/api/intg",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"intg"
+							],
+							"query": [
+								{
+									"key": "enabled",
+									"value": "true",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "getIntegrationStatus",
 					"request": {
 						"method": "GET",
@@ -4810,6 +5506,20 @@
 			"item": [
 				{
 					"name": "getEntities",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4876,6 +5586,20 @@
 				},
 				{
 					"name": "getEntity",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
 					"request": {
 						"method": "GET",
 						"header": [],
@@ -4901,6 +5625,40 @@
 				},
 				{
 					"name": "updateEntity",
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"uc:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{SERVER}}/api/entities/:entityId",
+							"host": [
+								"{{SERVER}}"
+							],
+							"path": [
+								"api",
+								"entities",
+								":entityId"
+							],
+							"variable": [
+								{
+									"key": "entityId",
+									"value": "{{light_entity_id}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateEntity Copy",
 					"request": {
 						"method": "PATCH",
 						"header": [],
@@ -8204,6 +8962,25 @@
 					"item": [
 						{
 							"name": "getPagesInProfile",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson[0].page_id) {",
+											"    postman.setEnvironmentVariable(\"page_id\", responseJson[0].page_id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
 							"request": {
 								"method": "GET",
 								"header": [],
@@ -8241,6 +9018,10 @@
 									"listen": "test",
 									"script": {
 										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
 											"const responseJson = pm.response.json();",
 											"postman.setEnvironmentVariable(\"page_id\", responseJson.page_id);"
 										],
@@ -8685,6 +9466,11 @@
 											"pm.test(\"Status code is 200\", function () {",
 											"    pm.response.to.have.status(200);",
 											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson[0].page_id) {",
+											"    postman.setEnvironmentVariable(\"profile_id\", responseJson[0].page_id);",
+											"}",
 											""
 										],
 										"type": "text/javascript"
@@ -8930,7 +9716,9 @@
 									"});",
 									"",
 									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"profile_id\", responseJson[0].profile_id);",
+									"if (responseJson[0].profile_id) {",
+									"    postman.setEnvironmentVariable(\"profile_id\", responseJson[0].profile_id);",
+									"}",
 									""
 								],
 								"type": "text/javascript"
