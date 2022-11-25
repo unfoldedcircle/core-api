@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.16.3
+  version: 0.16.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -9197,6 +9197,8 @@ components:
           description: Release date of the driver.
           type: string
           format: date
+        driver_state:
+          $ref: '#/components/schemas/DriverState'
       required:
         - driver_id
         - name
@@ -9226,6 +9228,8 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         enabled:
           type: boolean
+        driver_state:
+          $ref: '#/components/schemas/DriverState'
       required:
         - driver_id
         - name
@@ -9327,6 +9331,8 @@ components:
         setup_data:
           description: Instance configuration object
           type: object
+        device_state:
+          $ref: '#/components/schemas/DeviceState'
       required:
         - integration_id
         - driver_id

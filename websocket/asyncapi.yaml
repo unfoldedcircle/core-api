@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.12.1-alpha'
+  version: '0.12.2-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -4482,6 +4482,8 @@ components:
           $ref: '#/components/schemas/deviceState'
         driver_state:
           $ref: '#/components/schemas/driverState'
+        state:
+          type: string
         enabled:
           type: boolean
 
@@ -4497,6 +4499,7 @@ components:
     driverState:
       type: string
       enum:
+        - NOT_CONFIGURED
         - IDLE
         - CONNECTING
         - ACTIVE
@@ -4533,6 +4536,8 @@ components:
           $ref: '#/components/schemas/iconIdentifier'
         enabled:
           type: boolean
+        driver_state:
+          $ref: "#/components/schemas/driverState"
       required:
         - driver_id
         - name
@@ -4612,6 +4617,8 @@ components:
           description: Release date of the driver.
           type: string
           format: date
+        driver_state:
+          $ref: "#/components/schemas/driverState"
       required:
         - driver_id
         - name
@@ -4731,6 +4738,8 @@ components:
         setup_data:
           description: Optional configuration data if supported or required by the driver.
           type: object
+        device_state:
+          $ref: "#/components/schemas/deviceState"
       required:
         - integration_id
         - driver_id
