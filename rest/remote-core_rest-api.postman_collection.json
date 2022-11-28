@@ -1478,7 +1478,9 @@
 											"});",
 											"",
 											"const responseJson = pm.response.json();",
-											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											"if (responseJson[0]) {",
+											"    postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											"}",
 											""
 										],
 										"type": "text/javascript"
@@ -1814,7 +1816,9 @@
 											"});",
 											"",
 											"const responseJson = pm.response.json();",
-											"postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											"if (responseJson[0]) {",
+											"    postman.setEnvironmentVariable(\"resource_id\", responseJson[0].id);",
+											"}",
 											""
 										],
 										"type": "text/javascript"
@@ -4569,7 +4573,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"input_values\": {\n        \"name\": \"Living room\",\n        \"token\": \"123\",\n        \"custom_ws_url2\": \"ws://test-station.local:1946\",\n        \"description\": \"Setup test\"\n    }\n}",
+											"raw": "{\n    \"input_values\": {\n        \"name\": \"Living room\",\n        \"token\": \"123\",\n        \"custom_ws_url2\": \"ws://test-station.local:1946\",\n        \"description\": \"Setup test\"\n    }\n}\n",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -4725,6 +4729,374 @@
 							"response": []
 						},
 						{
+							"name": "stopAllIntegrationSetups",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup sim-intg",
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"input_values\": {\n        \"choice\": \"blue\",\n        \"upper_case_text\": \"ABC\",\n        \"ip4\": \"192.168.2.33\",\n        \"integer\": \"44\",\n        \"number\": \"1.25\"\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "setupIntegration sim-intg",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"sim-intg\",\n    \"name\": {\n        \"en\": \"My simulated integration\"\n    },\n    \"setup_data\": {}\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup sim-test",
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"input_values\": {\n        \"code\": \"BLUEZZ\"\n    }\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "setupIntegration sim-test",
 							"event": [
 								{
@@ -4750,7 +5122,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"driver_id\": \"sim-test\",\n    \"name\": {\n        \"en\": \"My test integration\"\n    },\n    \"setup_data\": {}\n}",
+									"raw": "{\n    \"driver_id\": \"sim-test\",\n    \"name\": {\n        \"en\": \"My simulated demo integration\"\n    },\n    \"setup_data\": {}\n}",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -4770,17 +5142,77 @@
 								}
 							},
 							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup uc:bo",
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
 						},
 						{
-							"name": "stopAllIntegrationSetups",
+							"name": "setupIntegration uc:bo",
 							"event": [
 								{
 									"listen": "test",
 									"script": {
 										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
 											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
 											""
 										],
 										"type": "text/javascript"
@@ -4788,8 +5220,412 @@
 								}
 							],
 							"request": {
-								"method": "DELETE",
+								"method": "POST",
 								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"uc:bo\",\n    \"name\": {\n        \"en\": \"My simulated B&O integration\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup uc:homey",
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "setupIntegration uc:homey",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"uc:homey\",\n    \"name\": {\n        \"en\": \"My simulated Homey integration\"\n    },\n    \"setup_data\": {\n        \"choice\": \"red\",\n        \"input\": \"1\",\n        \"integer\": \"66\",\n        \"number\": \"0.34\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup uc:hue",
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "updateIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"confirm\": true\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopIntegrationSetup",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "setupIntegration uc:hue",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"uc:hue\",\n    \"name\": {\n        \"en\": \"My simulated Hue integration\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{SERVER}}/api/intg/setup",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"intg",
+										"setup"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "setup sim-foobar",
+					"item": [
+						{
+							"name": "driver",
+							"item": [
+								{
+									"name": "getIntegrationSetupStatus",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													"",
+													"const responseJson = pm.response.json();",
+													"if (responseJson.id && responseJson.state == \"OK\") {",
+													"    postman.setEnvironmentVariable(\"dock_id\", responseJson.id);",
+													"}",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/intg/setup/:driver_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"intg",
+												"setup",
+												":driver_id"
+											],
+											"variable": [
+												{
+													"key": "driver_id",
+													"value": "{{intg_setup_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "setupIntegration sim-foobar",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 201\", function () {",
+											"    pm.response.to.have.status(201);",
+											"});",
+											"",
+											"const responseJson = pm.response.json();",
+											"if (responseJson.id) {",
+											"    postman.setEnvironmentVariable(\"intg_setup_id\", responseJson.id);",
+											"}",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"driver_id\": \"sim-foobar\",\n    \"name\": {\n        \"en\": \"My simulated FooBar integration\"\n    },\n    \"setup_data\": {\n        \"address\": \"test-host.local\",\n        \"port\": \"65535\",\n        \"token\": \"\",\n        \"ssl\": \"false\"\n    }\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
 								"url": {
 									"raw": "{{SERVER}}/api/intg/setup",
 									"host": [
