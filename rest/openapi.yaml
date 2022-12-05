@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.16.4
+  version: 0.16.6
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1029,6 +1029,7 @@ paths:
         By default only new integration drivers are returned. If a driver is already configured it will be omitted from the
         results, unless the query parameter `new=false` is set.
 
+        - Previously discovered integrations are removed, only newly discovered integrations will be returned.
         - Emits the WebSocket event `integration_discovery` with `event_type: START` when discovery starts.
         - For each discovered driver the WebSocket event `integration_discovery` with `event_type: DISCOVER` is emitted.
       operationId: startIntegrationDiscovery
@@ -1066,8 +1067,7 @@ paths:
         - integrations
       summary: Stop discovery of external integration drivers.
       description: |
-        Stops the driver discovery. The current discovery status is returned in the response and afterwards removed from
-        the session. I.e. it can no longer be retrieved with `GET /intg/discover`.
+        Stops the driver discovery and returns the current discovery status in the response.
 
         Emits the WebSocket event `integration_discovery` with `event_type: STOP`.
       operationId: stopIntegrationDiscovery
@@ -9114,7 +9114,7 @@ components:
         - id
         - configured
         - name
-        - address
+        - driver_url
     IntegrationDiscoveryStatus:
       type: object
       properties:
@@ -9162,6 +9162,9 @@ components:
           maxLength: 2048
         auth_method:
           $ref: '#/components/schemas/IntgAuthMethod'
+        pwd_protected:
+          description: Driver requires a connection password.
+          type: boolean
         version:
           description: 'Driver version, [SemVer](https://semver.org/) preferred.'
           type: string
@@ -9371,6 +9374,18 @@ components:
         setup_data:
           description: Instance configuration object.
           type: object
+    IntegrationState:
+      type: string
+      enum:
+        - NOT_CONFIGURED
+        - UNKNOWN
+        - IDLE
+        - CONNECTING
+        - CONNECTED
+        - DISCONNECTED
+        - RECONNECTING
+        - ACTIVE
+        - ERROR
     IntegrationStatus:
       type: object
       description: |
@@ -9387,7 +9402,7 @@ components:
         driver_type:
           $ref: '#/components/schemas/IntegrationDriverType'
         state:
-          type: string
+          $ref: '#/components/schemas/IntegrationState'
       required:
         - name
         - driver_type
