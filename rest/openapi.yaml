@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.16.6
+  version: 0.16.7
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -10506,6 +10506,53 @@ components:
       required:
         - type
         - location
+    ValidationErrorResponse:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Message describing the validation error. This message is intended for error analysis and should not directly shown to the end user.
+        errors:
+          description: Optional validation errors
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    ValidationError:
+      type: object
+      properties:
+        field:
+          description: Field identifier with an invalid value.
+          type: string
+        field_errors:
+          description: |
+            Optional field validation error descriptions. A field can have multiple validation rules with an error.
+          type: array
+          items:
+            $ref: '#/components/schemas/FieldValidationError'
+      required:
+        - field
+    FieldValidationError:
+      type: object
+      properties:
+        code:
+          description: |
+            Validation error code. This can be a custom code or one of the common pre-defined codes:
+            - `LENGTH`: String is either too short or too long.
+            - `RANGE`: Number is not in valid range.
+            - `REGEX`: Regex validation failed.
+            - `INVALID_FORMAT`: value is in an invalid format.
+          type: string
+        message:
+          description: Validation rule message.
+          type: string
+        params:
+          description: 'Optional code related parameters. E.g. `min`, `max` for string-length or number-range validation.'
+          type: object
+      required:
+        - message
     VersionInfo:
       type: object
       properties:
@@ -10541,7 +10588,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ApiResponse'
+            $ref: '#/components/schemas/ValidationErrorResponse'
     Err401Unauthorized:
       description: Authentication credentials were missing or incorrect. The client must authenticate itself to get the requested response.
       content:
