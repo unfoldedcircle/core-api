@@ -36,7 +36,7 @@ jobs:
       - name: Validate dock-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.9
         with:
-          filepath: './dock-api/asyncapi.yaml'
+          filepath: './dock-api/UCD2-asyncapi.yaml'
 
       - name: Prepare AsyncAPI html output
         run: |
