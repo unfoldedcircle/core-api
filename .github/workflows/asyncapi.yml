@@ -50,14 +50,14 @@ jobs:
 #          output: ./static/api/ws
 
       - name: Generate integration AsyncAPI HTML doc
-        uses: docker://asyncapi/github-action-for-generator:2.1.8
+        uses: docker://asyncapi/github-action-for-generator:2.0.3
         with:
           template: '@asyncapi/html-template@0.28'
           filepath: ./integration-api/asyncapi.yaml
           output: ./static/api/integration
 
       - name: Generate dock AsyncAPI HTML doc
-        uses: docker://asyncapi/github-action-for-generator:2.1.8
+        uses: docker://asyncapi/github-action-for-generator:2.0.3
         with:
           template: '@asyncapi/html-template@0.28'
           filepath: ./dock-api/UCD2-asyncapi.yaml
