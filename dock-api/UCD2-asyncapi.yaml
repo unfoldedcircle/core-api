@@ -1,0 +1,690 @@
+asyncapi: 2.2.0
+id: 'urn:com:unfoldedcircle:dock'
+info:
+  title: Remote Two WebSocket Dock-API
+  version: '0.5.0-beta'
+  contact:
+    name: API Support
+    url: https://github.com/unfoldedcircle/core-api/issues
+  license:
+    name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+    url: https://creativecommons.org/licenses/by-sa/4.0/
+  description: |
+    **Work in progress** API definition of the Remote Two Dock WebSocket API.
+    
+    API message status legend:
+    
+    | Icon | Description                                                                     |
+    |------|---------------------------------------------------------------------------------|
+    | 💡   | Idea, not yet official part of API definition.                                  |
+    | 🚧   | Planned feature and most likely not (fully) implemented in the initial release. |
+    | 👷   | API definition is work in progress, not ready yet for implementation.           |
+    | 🔍   | API definition review & implementation.                                         |
+    | 🧪   | API has been implemented in the Dock and is currently being tested.             |
+    | 🚀   | Ready to use - feedback welcomed.                                               |
+    
+    ## Overview
+
+    The Remote Two WebSocket Dock-API allows you to interact with the Unfolded Circle smart charging dock and take
+    full control of its features.  
+
+    ## 🚧 Missing Features
+    
+    **This API is a beta version and does not yet contain all functionality.**
+    
+    Planned features:
+    
+    - Static network settings for WiFi and ethernet.
+    - Additional event messages for a multi-remote setup, e.g. IR learning started.
+    
+    ## API Versioning
+    
+    The API is versioned according to [SemVer](https://semver.org/).  
+    The initial public release will be `1.0.0` once it is considered stable enough.
+    
+    **Any major version zero (`0.y.z`) is for initial development and may change at any time!**  
+    I.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!
+
+    ## WebSocket Connection
+    
+    - A client must authenticate itself after opening a connection to use all defined request messages.  
+      Only the following messages can be used without authentication:
+      - `get_sysinfo`
+    - The dock supports a maximum af 5 concurrent WebSocket connections.
+    
+    ### Authentication
+
+    The dock will send the `auth_required` message right after the connection is established.
+
+    - The client must reply with the `auth` message containing the access token.
+
+      - All other messages requiring authentication will be ignored, until the client successfully authenticates itself.
+      - The dock will close the connection after a timeout.
+
+    - The dock replies with the `authentication` event including the result code of the authentication:
+
+      - `200`: authentication succeeded, API can be used.
+      - `401`: invalid authentication and the connection will be closed.
+
+
+externalDocs:
+  description: Find out more about the Remote Two
+  url: 'https://www.unfoldedcircle.com/'
+defaultContentType: application/json
+
+servers:
+  test:
+    url: ws://uc-dock.local:946
+    protocol: ws
+    description: |
+      Test docking station.
+
+channels:
+  /:
+    publish:
+      description: |
+        Dock-API for clients to interact with the docking station.
+        
+      operationId: pubDockMessage
+      message:
+        oneOf:
+          # --- common
+          - $ref: '#/components/messages/auth'
+          - $ref: '#/components/messages/ping'
+          # --- commands
+          - $ref: '#/components/messages/command'
+          - $ref: '#/components/messages/get_sysinfo'
+          - $ref: '#/components/messages/ir_send'
+          - $ref: '#/components/messages/set_config'
+          - $ref: '#/components/messages/set_brightness'
+          - $ref: '#/components/messages/set_logging'
+
+    subscribe:
+      description: Dock-API for clients to receive messages from the docking station.
+      operationId: subDockMessage
+      message:
+        oneOf:
+          # --- common
+          - $ref: '#/components/messages/pong'
+          # --- responses
+          - $ref: '#/components/messages/authentication'
+          - $ref: '#/components/messages/result'
+          - $ref: '#/components/messages/sysinfo'
+          # --- events
+          - $ref: '#/components/messages/auth_required'
+          - $ref: '#/components/messages/ir_receive'
+
+
+components:
+
+  # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  messages:
+    request:
+      summary: 🚀 Generic request message.
+      payload:
+        $ref: '#/components/schemas/commonReq'
+    result:
+      summary: 🚀 Command result message.
+      payload:
+        $ref: '#/components/schemas/commonResp'
+    event:
+      summary: 🧪 Generic event message.
+      payload:
+        $ref: '#/components/schemas/commonEvent'
+    auth_required:
+      summary: 🚀 Authentication request event after connection is established.
+      description: |
+        The event contains additional metadata of the dock to inform the client of the specific dock model and firmware
+        version.  
+        The client must authenticate with the `auth` request message.
+      payload:
+        $ref: '#/components/schemas/authRequiredEvent'
+    auth:
+      summary: 🚀 Authenticate a connection.
+      description: |
+        Sent by the client right after establishing a connection, or after an `auth_required` request by the server.
+      payload:
+        $ref: '#/components/schemas/authRequestMsg'
+      x-response:
+        $ref: '#/components/messages/authentication'
+    authentication:
+      summary: 🚀 Authentication response.
+      description: |
+        The authentication result is provided in the `code` attribute:
+        - `200`: success, API can be used and message requests are accepted.
+        - `401`: authentication failed, the provided API-key is not valid. The server will close the connection.
+      payload:
+        $ref: '#/components/schemas/authResponseMsg'
+    ping:
+      summary: 🚀 Application level based ping to determine whether connection is alive.
+      description: |
+        Client can ping the server to determine whether connection is alive. Server responds with pong.
+        
+        This is an application level ping as opposed to the standard WebSocket ping frames. This is only required if a
+        client framework doesn't support WebSocket ping frames!  
+      payload:
+        $ref: '#/components/schemas/ping'
+      x-response:
+        $ref: '#/components/messages/pong'
+    pong:
+      summary: 🚀 Pong is a response to ping message.
+      description: |
+        Server pong response to a ping to determine whether connection is alive.
+        This is an application level pong as opposed to default pong in websockets standard which is sent by client in
+        response to a ping.
+      payload:
+        $ref: '#/components/schemas/pong'
+
+    # =========================================================================
+    # DOCK-API MESSAGES
+    # =========================================================================
+
+    command:
+      summary: 🧪 Perform a system command.
+      description: |
+        The following system commands can be executed:
+        
+        - `ir_receive_on`: Enables IR learning.  
+           Learned codes are sent in the `ir_receive` event message. Learning mode can be retrieved with `get_sysinfo`. 
+        - `ir_receive_off`: Stops IR learning.
+        - `remote_charged`: Set status LED to normal operation (LED off)
+        - `remote_lowbattery`: Set status LED to low battery mode (blink twice every 4 seconds).
+        - `remote_normal`: Set status LED to normal operation (LED off, turn on when charging).
+        - `identify`: Docking station identification, blink status LED green, amber, blue and red.
+        - `reboot`: Reboot the device.
+        - `reset`: Factory reset the device.  
+          ❗️ All configuration data is erased and the device is put in setup mode.
+        
+        The server will respond with a `result` message and a status code of the request.
+        
+        ❗️ For `reboot` and `reset` commands there might be no response message. The dock will reboot after the command is processed.
+      payload:
+        $ref: '#/components/schemas/systemCmdMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_sysinfo:
+      summary: 🚀 Get system information. 🔓
+      description: |
+        Get hardware and software information about the device like serial number, model number, connection status and
+        installed firmware version.
+        
+        This message does not require authentication.
+      payload:
+        $ref: '#/components/schemas/getSystemInfoMsg'
+      x-response:
+        $ref: '#/components/messages/sysinfo'
+    sysinfo:
+      summary: 🧪 System information response.
+      payload:
+        $ref: '#/components/schemas/systemInfoMsg'
+    ir_send:
+      summary: 🧪 Send an IR code.
+      description: |
+        Send an IR code on the given output(s), either in HEX or PRONTO HEX format.
+      payload:
+        $ref: '#/components/schemas/irSendMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    ir_receive:
+      summary: 🧪 IR learning event.
+      description: |
+        Sent whenever an IR code was learned in IR learning mode.
+      payload:
+        $ref: '#/components/schemas/irReceiveEvent'
+
+    set_config:
+      summary: 🧪 Configure the dock.
+      description: |
+        Configure the dock with a custom friendly name, change the API access token and set the WiFi connection.  
+        
+        Notes:
+        - One or multiple settings can be configured at once.
+        - For the WiFi configuration both `ssid` and `wifi_password` fields must be specified.
+        - The dock will be restarted if the WiFi configuration is specified.
+        - Ethernet has precedence over WiFi connection. If the ethernet connection has a link, WiFi won't be activated.
+        - The friendly name will be announced over mDNS and returned in `get_sysinfo`.
+      payload:
+        $ref: '#/components/schemas/setConfigMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    set_brightness:
+      summary: 🚀 Set status LED brightness.
+      description: |
+        Set the maximum brightness of the status LED and ethernet indicator LED.
+      payload:
+        $ref: '#/components/schemas/setBrightnessMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    set_logging:
+      summary: 🧪 Configure logging parameters.
+      description: |
+        Set log level and an optional syslog server. Levels:
+        - `0`: EMERGENCY, system is unusable
+        - `1`: ALERT, action must be taken immediately
+        - `2`: CRITICAL, critical conditions
+        - `3`: ERROR, error conditions
+        - `4`: WARNING, warning conditions
+        - `5`: NOTICE, normal but significant condition
+        - `6`: INFO, informational
+        - `7`: DEBUG, debug-level messages
+      payload:
+        $ref: '#/components/schemas/setLogging'
+      x-response:
+        $ref: '#/components/messages/result'
+
+  # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  schemas:
+    # =========================================================================
+    # Common message schemas
+    # =========================================================================
+    commonReq:
+      description: Common request message properties.
+      type: object
+      properties:
+        type:
+          description: Request message type.
+          type: string
+          enum:
+            - dock
+            - auth
+        id:
+          $ref: '#/components/schemas/msgId'
+        command:
+          $ref: '#/components/schemas/command'
+      required:
+        - type
+        - command
+    commonResp:
+      description: Common response message properties.
+      type: object
+      properties:
+        type:
+          description: Response message type.
+          type: string
+          enum:
+            - dock
+            - auth
+        req_id:
+          $ref: '#/components/schemas/msgId'
+        msg:
+          $ref: '#/components/schemas/command'
+        code:
+          description: Response code of the operation according to HTTP status codes.
+          type: integer
+          default: 200
+        reboot:
+          description: "Optional flag: the device will restart after this message."
+          type: boolean
+      required:
+        - type
+        - msg
+        - code
+    commonEvent:
+      description: Common event message properties.
+      type: object
+      properties:
+        type:
+          description: Event message identifier.
+          type: string
+          const: event
+      required:
+        - type
+    authRequiredEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          const: auth_required
+        model:
+          description: Dock model
+          type: string
+        revision:
+          description: Dock revision
+          type: string
+        version:
+          description: Dock firmware version
+          type: string
+      required:
+        - type
+      examples:
+      - type: auth_required
+        model: UCD2
+        revision: "5.3"
+        version: "0.4.0"
+    authRequestMsg:
+      type: object
+      properties:
+        type:
+          type: string
+          const: auth
+        token:
+          $ref: '#/components/schemas/token'
+      required:
+        - type
+        - token
+      examples:
+      - type: auth
+        token: "1234"
+    authResponseMsg:
+      type: object
+      properties:
+        type:
+          type: string
+          const: auth
+        msg:
+          type: string
+          const: authentication
+        code:
+          description: Response code of the operation according to HTTP status codes.
+          type: integer
+          default: 200
+      required:
+        - type
+        - msg
+        - code
+
+    # =========================================================================
+    # Dock message schemas
+    # =========================================================================
+    systemCmdMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              enum:
+                - ir_receive_on
+                - ir_receive_off
+                - remote_charged
+                - remote_lowbattery
+                - remote_normal
+                - identify
+                - reboot
+                - reset
+          required:
+            - type
+            - command
+    getSystemInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: get_sysinfo
+          required:
+            - type
+            - command
+    systemInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            type:
+              type: string
+              const: dock
+            msg:
+              type: string
+              const: get_sysinfo
+            name:
+              type: string
+            hostname:
+              type: string
+            model:
+              type: string
+            revision:
+              type: string
+            version:
+              type: string
+            serial:
+              type: string
+            ir_learning:
+              type: boolean
+            ethernet:
+              type: boolean
+            wifi:
+              type: boolean
+            ssid:
+              type: string
+            uptime:
+              type: string
+          required:
+            - type
+            - msg
+            - name
+            - hostname
+            - model
+            - revision
+            - version
+            - serial
+            - ir_learning
+      examples:
+      - type: dock
+        req_id: 2
+        msg: get_sysinfo
+        code: 200
+        name: My dock
+        hostname: UC-Dock-1234
+        model: UCD2
+        revision: "5.4"
+        version: "0.4.0"
+        serial: "0042"
+        ir_learning: false
+    irSendMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: ir_send
+            code:
+              description: IR code, either in hex or PRONTO hex format. PRONTO code values must be separated by a comma.
+              type: string
+              format: "^(?:[\\d]{1,3};0x[a-fA-F0-9]{1,16};[\\d]{1,2};[\\d]{1,2}|[a-fA-F0-9]{1,4}(,[a-fA-F0-9]{1,4}){3,})$"
+            format:
+              $ref: '#/components/schemas/irFormat'
+            int_side:
+              description: Enable internal output at the bottom around the dock.
+              type: boolean
+            int_top:
+              description: Enable top output. This cannot be enabled together with `int_side`!
+              type: boolean
+              default: false
+            ext1:
+              description: Enable external output 1.
+              type: boolean
+            ext2:
+              description: Enable external output 2.
+              type: boolean
+          required:
+            - type
+            - command
+            - code
+            - format
+      examples:
+      - type: dock
+        id: 1
+        command: ir_send
+        code: "4;0x10;12;0"
+        format: "hex"
+        int_side: true
+      - type: dock
+        id: 2
+        command: ir_send
+        code: "0000,006c,0022,0002,015b,00ad,0016,0016,0016,0041,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0016,0016,0041,0016,0016,0016,0041,0016,0016,0016,0622,015b,0057,0016,0e6c"
+        format: "pronto"
+        ext1: true
+    irReceiveEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: ir_receive
+            ir_code:
+              description: Learned IR code
+              type: string
+            format:
+              $ref: '#/components/schemas/irFormat'
+          required:
+            - msg
+            - ir_code
+      examples:
+      - type: event
+        msg: ir_receive
+        ir_code: "4;0x10;12;0"
+
+    setConfigMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_config
+            friendly_name:
+              type: string
+              maxLength: 40
+            token:
+              $ref: '#/components/schemas/token'
+            ssid:
+              type: string
+              maxLength: 32
+            wifi_password:
+              type: string
+              maxLength: 63
+          required:
+            - type
+            - command
+      examples:
+      - type: dock
+        id: 1
+        command: set_config
+        friendly_name: My dock
+      - type: dock
+        id: 2
+        command: set_config
+        token: "1234"
+      - type: dock
+        id: 3
+        command: set_config
+        ssid: My WiFi
+        wifi_password: topsecret
+
+    setBrightnessMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_brightness
+            status_led:
+              type: integer
+              minimum: 0
+              maximum: 255
+            eth_led:
+              type: integer
+              minimum: 0
+              maximum: 255
+          required:
+            - type
+            - command
+    setLogging:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_logging
+            log_level:
+              type: integer
+              minimum: 0
+              maximum: 7
+            syslog_server:
+              type: string
+              maxLength: 64
+            syslog_port:
+              type: integer
+              minimum: 0
+              maximum: 65535
+              default: 514
+            syslog_enabled:
+              type: boolean
+          required:
+            - type
+            - command
+    ping:
+      type: object
+      properties:
+        type:
+          type: string
+          const: dock
+        msg:
+          type: string
+          const: ping
+      required:
+        - type
+        - msg
+    pong:
+      type: object
+      properties:
+        type:
+          type: string
+          const: dock
+        msg:
+          type: string
+          const: pong
+      required:
+        - type
+        - msg
+
+    # =========================================================================
+    # Common schemas
+    # =========================================================================
+
+    msgId:
+      description: Request message ID which is reflected in response message.
+      type: integer
+      minimum: 0
+
+    command:
+      description: One of the defined API message commands.
+      type: string
+      minLength: 1
+      maxLength: 32
+
+    irFormat:
+      type: string
+      enum:
+        - hex
+        - pronto
+      default: hex
+
+    token:
+      type: string
+      minLength: 4
+      maxLength: 40

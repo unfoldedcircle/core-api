@@ -1,12 +1,11 @@
-# WebSocket Integration API
+# WebSocket Dock API
 
-- [AsyncAPI YAML definition](asyncapi.yaml).
-
-- See [/doc folder](../doc/README.md) for the API documentation and further information.
+- [Dock API AsyncAPI YAML definition](UCD2-asyncapi.yaml).
+- See [changelog](CHANGELOG.md) for changes in the API specification.
 
 ## API HTML documentation
 
-- View with [AsyncAPI Studio online tool](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/integration-api/asyncapi.yaml).  
+- View with [AsyncAPI Studio online tool](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/dock-api/dock-api/UCD2-asyncapi.yaml).  
   The link will directly load the yaml definition file from GitHub and display it together with the HTML documentation in
 the browser.
 
@@ -19,4 +18,3 @@ The provided Bash wrapper script [`create-html-docker.sh`](create-html-docker.sh
 `./html` sub folder.
 
 ℹ️ We will look into using GitHub Pages for publishing the html documentation.
-
