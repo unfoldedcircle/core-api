@@ -3,12 +3,14 @@ name: AsyncAPI
 on:
   push:
     paths:
+      - 'dock-api/**'
       - 'websocket-api/**'
       - 'integration-api/**'
       - '.github/workflows/asyncapi.yml'
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
+      - 'dock-api/**'
       - 'websocket-api/**'
       - 'integration-api/**'
       - '.github/workflows/asyncapi.yml'
@@ -22,37 +24,55 @@ jobs:
         uses: actions/checkout@v3
 
 #      - name: Validate websocket-api
-#        uses: WaleedAshraf/asyncapi-github-action@v0.0.6
+#        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
 #        with:
 #          filepath: './websocket-api/asyncapi.yaml'
 
       - name: Validate integration-api
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.6
+        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
         with:
           filepath: './integration-api/asyncapi.yaml'
 
+      - name: Validate dock-api
+        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
+        with:
+          filepath: './dock-api/UCD2-asyncapi.yaml'
+
       - name: Prepare AsyncAPI html output
         run: |
-          mkdir -p ./static/api/ws ./static/api/integration
+          mkdir -p ./static/api/ws ./static/api/integration ./static/api/dock
 
 #      - name: Generate core AsyncAPI HTML doc
-#        uses: docker://asyncapi/github-action-for-generator:2.0.2
+#        uses: docker://asyncapi/github-action-for-generator:2.0.3
 #        with:
-#          template: '@asyncapi/html-template@0.23'
+#          template: '@asyncapi/html-template@0.25'
 #          filepath: ./websocket-api/asyncapi.yaml
 #          output: ./static/api/ws
 
       - name: Generate integration AsyncAPI HTML doc
-        uses: docker://asyncapi/github-action-for-generator:2.0.2
+        uses: docker://asyncapi/github-action-for-generator:2.0.3
         with:
-          template: '@asyncapi/html-template@0.23'
+          template: '@asyncapi/html-template@0.25'
           filepath: ./integration-api/asyncapi.yaml
           output: ./static/api/integration
 
-# TODO publish to GitHub pages: https://pages.github.com
-      - name: Deploy GH page
+      - name: Generate dock AsyncAPI HTML doc
+        uses: docker://asyncapi/github-action-for-generator:2.0.3
+        with:
+          template: '@asyncapi/html-template@0.25'
+          filepath: ./dock-api/UCD2-asyncapi.yaml
+          output: ./static/api/dock
+
+      - name: Deploy integration API GH page
         uses: JamesIves/github-pages-deploy-action@v4.3.0
         with:
           branch: gh-pages
           folder: ./static/api/integration
           target-folder: ./integration
+
+      - name: Deploy dock API GH page
+        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        with:
+          branch: gh-pages
+          folder: ./static/api/dock
+          target-folder: ./dock

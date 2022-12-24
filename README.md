@@ -13,7 +13,7 @@ API definitions:
 - [WebSocket Integration API](./integration-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/).
 - WebSocket Core API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
 - REST Core API defined with [OpenAPI](https://www.openapis.org/) - _not yet published_
-- WebSocket Dock API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
+- [WebSocket Dock API](./dock-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/)
 
 Integration driver documentation:
 
@@ -85,7 +85,7 @@ In the short term we will publish the following APIs and additional repositories
 - [ ] Open Source integration for Home Assistant written in Rust (Mozilla Public License 2.0)
 - [ ] remote-core simulator for Linux & macOS to start developing integrations without a Remote Two device
 - [ ] Open Source remote-ui application
-- [ ] Dock API for sending & learning IR codes
+- [x] Dock API for sending & learning IR codes
 
 More detailed information about open issues can be found and tracked in the GitHub
 [Issues](https://github.com/unfoldedcircle/core-api/issues) tab.
@@ -102,7 +102,10 @@ I.e. backward compatibility for minor releases is not yet established, anything 
 ## Recent changes
 
 The major changes found in each new release of our API specifications are listed in the [changelog](./CHANGELOG.md) and
-under the GitHub [releases](https://github.com/unfoldedcircle/core-api/releases). 
+under the GitHub [releases](https://github.com/unfoldedcircle/core-api/releases).
+
+The Dock-API follows an independent release process. The Dock-API changes are listed in the
+[Dock-API changelog](./dock-api/CHANGELOG.md).
 
 ## Contributions
 
