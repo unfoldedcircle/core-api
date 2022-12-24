@@ -43,23 +43,23 @@ jobs:
           mkdir -p ./static/api/ws ./static/api/integration ./static/api/dock
 
 #      - name: Generate core AsyncAPI HTML doc
-#        uses: docker://asyncapi/github-action-for-generator:2.1.8
+#        uses: docker://asyncapi/github-action-for-generator:2.0.3
 #        with:
-#          template: '@asyncapi/html-template@0.23'
+#          template: '@asyncapi/html-template@0.25'
 #          filepath: ./websocket-api/asyncapi.yaml
 #          output: ./static/api/ws
 
       - name: Generate integration AsyncAPI HTML doc
         uses: docker://asyncapi/github-action-for-generator:2.0.3
         with:
-          template: '@asyncapi/html-template@0.28'
+          template: '@asyncapi/html-template@0.25'
           filepath: ./integration-api/asyncapi.yaml
           output: ./static/api/integration
 
       - name: Generate dock AsyncAPI HTML doc
         uses: docker://asyncapi/github-action-for-generator:2.0.3
         with:
-          template: '@asyncapi/html-template@0.28'
+          template: '@asyncapi/html-template@0.25'
           filepath: ./dock-api/UCD2-asyncapi.yaml
           output: ./static/api/dock
 
