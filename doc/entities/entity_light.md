@@ -123,11 +123,9 @@ Request with setting color temperature:
     "entity_type": "light",
     "entity_id": "light-1",
     "cmd_id": "on",
-    "params": [
-      {
-        "color_temperature": 70
-      }
-    ]
+    "params": {
+      "color_temperature": 70
+    }
   }
 }
 ```
@@ -142,12 +140,10 @@ Request with setting light color:
     "entity_type": "light",
     "entity_id": "light-1",
     "cmd_id": "on",
-    "params": [
-      {
-        "hue": 180,
-        "saturation": 200
-      }
-    ]
+    "params": {
+      "hue": 180,
+      "saturation": 200
+    }
   }
 }
 ```
