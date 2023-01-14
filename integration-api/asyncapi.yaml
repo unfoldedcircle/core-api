@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.6.1-alpha'
+  version: '0.6.2-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -560,16 +560,6 @@ components:
         - name: metadata
       payload:
         $ref: '#/components/schemas/supportedEntityTypesMsg'
-      examples:
-        - payload:
-            kind: resp
-            req_id: 123
-            msg: supported_entity_types
-            msg_data:
-              - button
-              - switch
-              - light
-              - cover
     get_configured_entities:
       summary: 🔍 Retrieve configured entities from this integration.
       description: |
@@ -2266,6 +2256,7 @@ components:
       description: |
         Additional text for information purpose between other settings. The text provided in the `label` property acts
         as a read only text field. Long text will be wrapped.
+      type: object
       properties:
         type:
           type: string
