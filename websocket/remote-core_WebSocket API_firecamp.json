@@ -1,6 +1,6 @@
 {
     "meta": {
-        "__export_time": 1657452491278,
+        "__export_time": 1676966736697,
         "__export_app": "firecamp_v2.6.1 ",
         "__export_version": 1
     },
@@ -39,7 +39,8 @@
                 "username": "",
                 "origin": "ws://{{server}}",
                 "href": "ws://{{server}}/ws",
-                "query_params": []
+                "query_params": [],
+                "path_params": []
             },
             "config": {
                 "protocols": [],
@@ -61,14 +62,20 @@
                         {
                             "key": "API-KEY",
                             "value": "BtlCEne.OWU2YzBhZjMyNmI2NDQ5YWI3N2NmMGExYWU5ZTNlNDEuZmIzOTNkM2FhOGY2NDA1N2FjNzQzNDdlOWE1YTU0OTc",
-                            "disable": false,
+                            "disable": true,
+                            "type": "text"
+                        },
+                        {
+                            "key": "Authorization",
+                            "value": "Basic YWRtaW46cmVtb3RlMg==",
+                            "disable": true,
                             "type": "text"
                         }
                     ],
                     "query_params": [],
                     "config": {
                         "ping": false,
-                        "ping_interval": 3000
+                        "ping_interval": 45000
                     },
                     "is_default": true
                 },
@@ -871,14 +878,6 @@
                             }
                         },
                         {
-                            "name": "get_device_cfg",
-                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_device_cfg\"\n}",
-                            "meta": {
-                                "type": "json",
-                                "envelope": ""
-                            }
-                        },
-                        {
                             "name": "set_device_cfg",
                             "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_device_cfg\",\n  \"msg_data\": {\n        \"name\": \"Test device\"\n  }\n}",
                             "meta": {
@@ -897,6 +896,14 @@
                         {
                             "name": "get_localization_countries",
                             "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_localization_countries\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_device_cfg",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_device_cfg\"\n}",
                             "meta": {
                                 "type": "json",
                                 "envelope": ""
@@ -963,6 +970,296 @@
                                 "type": "json",
                                 "envelope": ""
                             }
+                        },
+                        {
+                            "name": "set_api_access",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"set_api_access\",\n  \"msg_data\": {\n    \"web_configurator\": {\n      \"enabled\": true,\n      \"pin\": \"1234\",\n      \"valid_to\": \"2023-08-24T12:00:00Z\"\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_api_access",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_api_access\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Entities - remote",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_entities",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 200,\n    \"msg\": \"get_entities\",\n    \"msg_data\": {\n        \"filter\": {\n            \"entity_type\": \"remote\",\n            \"integration_id\": \"uc.main\"\n        },\n        \"paging\": {\n            \"limit\": 100,\n            \"page\": 1\n        }\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command on",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"on\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command UP",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"send\",\n    \"params\": {\n      \"command\":  \"CURSOR_UP\"\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command ENTER",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"CURSOR_ENTER\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command DOWN",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"send\",\n    \"params\": {\n      \"cmd_id\":  \"CURSOR_DOWN\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command RIGHT",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"send\",\n    \"params\": {\n      \"command\":  \"CURSOR_RIGHT\"\n    }\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"send\",\n    \"params\": {}\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "execute_entity_command LEFT",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"execute_entity_command\",\n  \"msg_data\": {\n    \"entity_id\": \"836485d3-9cd5-4552-9031-c56fa5b47bb2\",\n    \"cmd_id\":  \"CURSOR_LEFT\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_entity_commands remote",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 200,\n  \"msg\": \"get_entity_commands\",\n  \"msg_data\": {\n    \"entity_type\": \"remote\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "wifi",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "get_wifi_status",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 1,\n    \"msg\": \"get_wifi_status\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "wifi_scan_stop",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 8,\n    \"msg\": \"wifi_scan_stop\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "add_wifi_network Open",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 11,\n    \"msg\": \"add_wifi_network\",\n    \"msg_data\": {\n      \"ssid\": \"Guest\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "wifi_scan_start",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 7,\n    \"msg\": \"wifi_scan_start\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "del_all_wifi_networks",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 13,\n    \"msg\": \"del_all_wifi_networks\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_wifi_scan_status",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 9,\n    \"msg\": \"get_wifi_scan_status\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "ENABLE",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 16,\n    \"msg\": \"wifi_network_command\",\n    \"msg_data\": {\n      \"id\": 0,\n      \"cmd\": \"ENABLE\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "add_wifi_network",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 12,\n    \"msg\": \"add_wifi_network\",\n    \"msg_data\": {\n      \"ssid\": \"My Network\",\n      \"password\": \"Secret1234\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_all_wifi_networks",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 10,\n    \"msg\": \"get_all_wifi_networks\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "ENABLE_ALL_NETWORKS",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 5,\n    \"msg\": \"wifi_command\",\n    \"msg_data\": {\n      \"cmd\": \"ENABLE_ALL_NETWORKS\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "DISABLE",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 17,\n    \"msg\": \"wifi_network_command\",\n    \"msg_data\": {\n      \"id\": 0,\n      \"cmd\": \"DISABLE\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "DISABLE_ALL_NETWORKS",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 6,\n    \"msg\": \"wifi_command\",\n    \"msg_data\": {\n      \"cmd\": \"DISABLE_ALL_NETWORKS\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "RECONNECT",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 3,\n    \"msg\": \"wifi_command\",\n    \"msg_data\": {\n      \"cmd\": \"RECONNECT\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_wifi_network",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 14,\n    \"msg\": \"get_wifi_network\",\n    \"msg_data\": {\n      \"id\": 0\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_wifi_network",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 15,\n    \"msg\": \"update_wifi_network\",\n    \"msg_data\": {\n      \"password\": \"Secret0000\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "REASSOCIATE",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 4,\n    \"msg\": \"wifi_command\",\n    \"msg_data\": {\n      \"cmd\": \"REASSOCIATE\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "SELECT",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 17,\n    \"msg\": \"wifi_network_command\",\n    \"msg_data\": {\n      \"id\": 0,\n      \"cmd\": \"SELECT\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "del_wifi_network",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 19,\n    \"msg\": \"del_wifi_network\",\n    \"msg_data\": {\n      \"id\": 0\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "DISCONNECT",
+                            "body": "{\n    \"kind\": \"req\",\n    \"id\": 2,\n    \"msg\": \"wifi_command\",\n    \"msg_data\": {\n      \"cmd\": \"DISCONNECT\"\n    }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "ota",
+                    "meta": {},
+                    "children": [
+                        {
+                            "name": "check_system_update",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"check_system_update\"\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "get_system_update_progress",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"get_system_update_progress\",\n  \"msg_data\": {\n    \"update_id\": \"uc_v_rev1_lite-v0.4.0-979\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "check_system_update force",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"check_system_update\",\n  \"msg_data\": {\n    \"force_update\": true\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
+                        },
+                        {
+                            "name": "update_system",
+                            "body": "{\n  \"kind\": \"req\",\n  \"id\": 0,\n  \"msg\": \"update_system\",\n  \"msg_data\": {\n    \"update_id\": \"uc_v_rev1_lite-v0.4.0-979\"\n  }\n}",
+                            "meta": {
+                                "type": "json",
+                                "envelope": ""
+                            }
                         }
                     ]
                 },
@@ -1005,12 +1302,14 @@
         {
             "name": "Production",
             "variables": {
-                "server": "remote-two:9001"
+                "server": "remotetwo.local"
             }
         },
         {
             "name": "Staging",
-            "variables": {}
+            "variables": {
+                "server": "unfolded-simulator.local:8080"
+            }
         },
         {
             "name": "Development",

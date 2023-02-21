@@ -8,7 +8,10 @@ favorite IDE with OpenAPI support (e.g. IntelliJ).
 ## Postman Collection
 
 For explorative API testing the `remote-core_rest-api.postman_collection.json` collection can be imported into
-[Postman](https://www.postman.com/).
+[Postman](https://www.postman.com/). It contains pre-defined requests and some helper scripts to propagate generated
+identifier keys to simplify common tasks.
+
+Postman also supports [importing OpenAPI definitions](https://learning.postman.com/docs/integrations/available-integrations/working-with-openAPI/).  
 
 ### Configuration
 

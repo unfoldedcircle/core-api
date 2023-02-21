@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.12.2-alpha'
+  version: '0.15.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -49,7 +49,6 @@ info:
     
     - Software update checks, download & installation
     - Integration setup flow
-    - Docking station integration
     - Infrared code management
     - Activity management    
     
@@ -121,6 +120,10 @@ tags:
     description: Representation of a controllable device or thing
   - name: profile
     description: User profile handling to group and organize entities in the UI
+  - name: dock
+    description: Docking station management, discovery and infrared testing functions
+  - name: wifi
+    description: WiFi network management
 
 channels:
   /ws:
@@ -144,8 +147,9 @@ channels:
           - $ref: '#/components/messages/factory_reset'
           - $ref: '#/components/messages/set_api_access'
           - $ref: '#/components/messages/get_api_access'
-#          - $ref: '#/components/messages/check_updates'
-#          - $ref: '#/components/messages/update'
+          - $ref: '#/components/messages/check_system_update'
+          - $ref: '#/components/messages/update_system'
+          - $ref: '#/components/messages/get_system_update_progress'
           # --- configuration handling
           - $ref: '#/components/messages/reset_configuration'
           - $ref: '#/components/messages/get_configuration'
@@ -191,13 +195,49 @@ channels:
           - $ref: '#/components/messages/delete_entity'
           - $ref: '#/components/messages/delete_all_entities'
 
-          # --- IR / dock handling
+          # --- Dock handling
+          - $ref: '#/components/messages/get_dock_count'
+          - $ref: '#/components/messages/get_docks'
+          - $ref: '#/components/messages/create_dock'
+          - $ref: '#/components/messages/delete_all_docks'
+          - $ref: '#/components/messages/get_dock'
+          - $ref: '#/components/messages/update_dock'
+          - $ref: '#/components/messages/dock_connection_command'
+          - $ref: '#/components/messages/delete_dock'
+          - $ref: '#/components/messages/dock_command'
+          - $ref: '#/components/messages/get_dock_discovery_status'
+          - $ref: '#/components/messages/start_dock_discovery'
+          - $ref: '#/components/messages/stop_dock_discovery'
+          - $ref: '#/components/messages/get_dock_discovery_device'
+          - $ref: '#/components/messages/exec_cmd_on_discovered_dock'
+          - $ref: '#/components/messages/get_dock_setup_processes'
+          - $ref: '#/components/messages/create_dock_setup'
+          - $ref: '#/components/messages/stop_all_dock_setups'
+          - $ref: '#/components/messages/get_dock_setup_status'
+          - $ref: '#/components/messages/start_dock_setup'
+          - $ref: '#/components/messages/stop_dock_setup'
+
+          # --- IR handling
 #          - $ref: '#/components/messages/ir_send'
 #          - $ref: '#/components/messages/ir_learn'
 #          - $ref: '#/components/messages/ir_get_commands'
 #          - $ref: '#/components/messages/ir_add_cmd'
 #          - $ref: '#/components/messages/ir_update_cmd'
 #          - $ref: '#/components/messages/ir_remove_cmd'
+
+          # --- WiFi handling
+          - $ref: '#/components/messages/get_wifi_status'
+          - $ref: '#/components/messages/wifi_command'
+          - $ref: '#/components/messages/wifi_scan_start'
+          - $ref: '#/components/messages/wifi_scan_stop'
+          - $ref: '#/components/messages/get_wifi_scan_status'
+          - $ref: '#/components/messages/get_all_wifi_networks'
+          - $ref: '#/components/messages/add_wifi_network'
+          - $ref: '#/components/messages/del_all_wifi_networks'
+          - $ref: '#/components/messages/get_wifi_network'
+          - $ref: '#/components/messages/update_wifi_network'
+          - $ref: '#/components/messages/wifi_network_command'
+          - $ref: '#/components/messages/del_wifi_network'
 
     subscribe:
       description: Core-API for clients to receive messages from the remote.
@@ -216,8 +256,8 @@ channels:
           - $ref: '#/components/messages/system_info'
           - $ref: '#/components/messages/factory_reset_token'
           - $ref: '#/components/messages/api_access'
-#          - $ref: '#/components/messages/available_updates'
-#          # --- configuration handling
+          - $ref: '#/components/messages/system_update_info'
+          # --- configuration handling
           - $ref: '#/components/messages/configuration'
           - $ref: '#/components/messages/button_cfg'
           - $ref: '#/components/messages/device_cfg'
@@ -245,9 +285,25 @@ channels:
           - $ref: '#/components/messages/entity_commands'
           - $ref: '#/components/messages/entity'
 
-          # --- IR / dock handling
+          # --- Dock handling
+          - $ref: '#/components/messages/dock_count'
+          - $ref: '#/components/messages/docks'
+          - $ref: '#/components/messages/dock'
+          - $ref: '#/components/messages/dock_discovery_status'
+          - $ref: '#/components/messages/dock_discovery_device'
+          - $ref: '#/components/messages/dock_system_info'
+          - $ref: '#/components/messages/dock_setup_processes'
+          - $ref: '#/components/messages/dock_setup_status'
+
+          # --- IR handling
 #          - $ref: '#/components/messages/ir_learned_code'
 #          - $ref: '#/components/messages/ir_commands'
+
+          # --- WiFi handling
+          - $ref: '#/components/messages/wifi_status'
+          - $ref: '#/components/messages/wifi_scan_status'
+          - $ref: '#/components/messages/wifi_networks'
+          - $ref: '#/components/messages/wifi_network'
 
   /intg:
     publish:
@@ -402,13 +458,15 @@ channels:
           - $ref: '#/components/messages/integration_state'
           - $ref: '#/components/messages/profile_change'
           - $ref: '#/components/messages/configuration_change'
-          # ---
           - $ref: '#/components/messages/ir_learning'
+          - $ref: '#/components/messages/dock_change'
+          - $ref: '#/components/messages/dock_state'
           - $ref: '#/components/messages/dock_discovery'
           - $ref: '#/components/messages/dock_setup_change'
           - $ref: '#/components/messages/dock_update_change'
           - $ref: '#/components/messages/integration_discovery'
           - $ref: '#/components/messages/integration_setup_change'
+          - $ref: '#/components/messages/software_update'
 
           # TODO define all events and response messages
 #          - $ref: '#/components/messages/battery_status'
@@ -417,10 +475,6 @@ channels:
 #          - $ref: '#/components/messages/log_cfg_change'
 #          - $ref: '#/components/messages/ui_cfg_change'
 #          # - $ref: '#/components/messages/ui_event'
-#          - $ref: '#/components/messages/sw_upd_available'
-#          - $ref: '#/components/messages/sw_upd_started'
-#          - $ref: '#/components/messages/sw_upd_progress'
-#          - $ref: '#/components/messages/sw_upd_finished'
 
 components:
   securitySchemes:
@@ -605,6 +659,42 @@ components:
       summary: API access status response.
       payload:
         $ref: '#/components/schemas/apiAccessMsg'
+
+    check_system_update:
+      summary: 🔍 Check if system update is available.
+      description: |
+        Returns the known available system updates.
+
+        System update checks are run automatically (if not disabled in settings). Use the `force_update` flag to force
+        an update check.
+      payload:
+        $ref: '#/components/schemas/checkSystemUpdateMsg'
+      x-response:
+        $ref: '#/components/messages/system_update_info'
+    system_update_info:
+      summary: 🔍 Available system update response.
+      payload:
+        $ref: '#/components/schemas/systemUpdateInfoMsg'
+    update_system:
+      summary: 🔍 Perform system update.
+      description: |
+        Start a system update with the given `update_idd` parameter. Use `latest` to use the latest available system update.
+      payload:
+        $ref: '#/components/schemas/updateSystemMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    get_system_update_progress:
+      summary: 🔍 Get system update progress.
+      description: |
+        This is a manual request for the update progress if the system update event messages cannot be used.
+      payload:
+        $ref: '#/components/schemas/getSystemUpdateProgressMsg'
+      x-response:
+        $ref: '#/components/messages/system_update_progress'
+    system_update_progress:
+      summary: 🔍 System update progress response.
+      payload:
+        $ref: '#/components/schemas/systemUpdateProgressMsg'
 
     reset_configuration:
       summary: 👷 Reset all settings to default values.
@@ -988,6 +1078,529 @@ components:
         - name: entity
       payload:
         $ref: '#/components/schemas/deleteAllEntitiesMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    # --- Dock handling
+
+    get_dock_count:
+      summary: 🧪 Get total number of configured docks.
+      description: |
+        By default only active docks are counted. This can be changed with the `active` query parameter.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDockCountMsg'
+      x-response:
+        $ref: '#/components/messages/dock_count'
+    dock_count:
+      summary: 🧪 Total number of configured docks response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockCountMsg'
+    get_docks:
+      summary: 🧪 List configured docks and their connection state.
+      description: |
+        Returns all dock configuration with paging. The configuration data is enriched with current connection information.
+        Use the `get_dock_count` operation to retrieve the total number of defined docking stations.
+
+        By default only active docks are returned. This can be changed with the `active` query parameter.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDocksMsg'
+      x-response:
+        $ref: '#/components/messages/docks'
+    docks:
+      summary: 🧪 Configured docks and their connection state response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/docksMsg'
+    create_dock:
+      summary: 🧪 Create a new dock configuration.
+      description: |
+        Manually create and persist a new dock configuration. This is a low-level operation without configuring and setting
+        up the dock as with the `setup` operations! To establish a session to the dock, the connect operation must be
+        called afterwards.  
+        - Error `422` is returned if the given service name in `dock_id` already exists.
+        - If `custom_ws_url` is not specified, the dock address is resolved through an mDNS service name lookup in `dock_id`.   
+        - The `active` flag specifies if the dock will react to connection requests.
+        - Non-active docks will not auto-connect and must be enabled first to be used.
+        - Non-active docks won't be visible in the web-configurator.
+        - If no `token` is provided the default token is used! The token is used to authenticate the WebSocket
+          connection once a connection to the dock is established.
+        - If `model` is provided it must be one of the known dock model identifiers: `UCD2` or `YIO1DOCK`.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/createDockMsg'
+      x-response:
+        $ref: '#/components/messages/dock'
+    dock:
+      summary: 🧪 Configured dock response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockMsg'
+    delete_all_docks:
+      summary: 🧪 Delete all dock configurations.
+      description: |
+        ⚠️ All defined dock configurations will be irrevocably deleted!
+
+        Active dock sessions will be disconnected and the persisted dock configurations removed.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/deleteAllDocksMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    get_dock:
+      summary: 🧪 Get dock configuration.
+      description: |
+        Returns the dock configuration, enriched with the current session information if a dock connection is established.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDockMsg'
+      x-response:
+        $ref: '#/components/messages/dock'
+    update_dock:
+      summary: 🧪 Change dock configuration like auto-connect or access token.
+      description: |
+        Update one or more dock fields.
+
+        - If the dock is in an `active` connection state, then the `name`, `token` and `wifi` values are persisted in the
+          dock if provided in the request. The request fails with `503` service unavailable if the configuration can't be
+          set in the docking station.
+        - If the dock is not active, the values are only stored in the remote. A changed `token` will be used for the next
+          connection attempt.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/updateDockMsg'
+      x-response:
+        $ref: '#/components/messages/dock'
+    dock_connection_command:
+      summary: 🧪 Start or stop a dock connection.
+      description: |
+        Establish or stop a session to a specific or all active docks.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockConnectionCommandMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    delete_dock:
+      summary: 🧪 Delete dock configuration.
+      description: |
+        ⚠️ The dock configuration will be irrevocably deleted!
+
+        An active dock session will be disconnected and the persisted dock configuration removed.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/deleteDockMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    dock_command:
+      summary: 🧪 Send a dock command.
+      description: |
+        The following `command` values are defined:
+        - `SET_LED_BRIGHTNESS`: set the maximum brightness of the front indicator LED. Set the `0..100` percentage as
+           string parameter in the `value` field.  
+        - `IDENTIFY`: identify the dock with blinking the indicator LED.
+        - `REMOTE_LOW_BATTERY`: trigger the low battery status indicator on the dock.
+        - `REMOTE_CHARGED`: trigger the remote charged indicator on the dock.
+        - `REMOTE_NORMAL`: trigger the normal remote operation mode on the dock.
+        - `REBOOT`: reboot the dock.
+        - `RESET`: ⚠️ factory reset the dock. Requires administrator privileges.  
+           The dock configuration will be deleted from the remote.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockCommandMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    get_dock_discovery_status:
+      summary: 🧪 Get docking station discovery status.
+      description: |
+        Returns the current discovery status and any discovered docks.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDockDiscoveryStatusMsg'
+      x-response:
+        $ref: '#/components/messages/dock_discovery_status'
+    dock_discovery_status:
+      summary: 🧪 Docking station discovery status response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockDiscoveryStatusMsg'
+    start_dock_discovery:
+      summary: 🧪 Start discovery of new docking stations.
+      description: |
+        Start device discovery over Bluetooth and mDNS. Bluetooth or network discovery can be disabled with a query
+        parameter. By default the discovery automatically stops after 30 seconds. Use the `get_dock_discovery_status`
+        status request to check on discovered devices or `stop_dock_discovery` to stop discovery.
+
+        By default only new network devices are returned. If a dock is already configured it will be omitted from the
+        results, unless the query parameter `new=false` is set. Docks with Bluetooth enabled are always returned, since
+        this usually means that the dock needs to be re-configured.
+
+        - Emits the WebSocket event `dock_discovery` with `event_type: START` when discovery starts.
+        - For each discovered device the WebSocket event `dock_discovery` with `event_type: DISCOVER` is emitted.
+        - This operation clears any old discovered devices and won't be accessible anymore with the GET operation.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/startDockDiscoveryMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    stop_dock_discovery:
+      summary: 🧪 Stop discovery of new docking stations.
+      description: |
+        Stops the device discovery. The current discovery status is returned in the response. Already discovered devices
+        won't be returned and can still be retrieved with the `get_dock_discovery_status` operation.
+
+        Emits the WebSocket event `dock_discovery` with `event_type: STOP`.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/stopDockDiscoveryMsg'
+      x-response:
+        $ref: '#/components/messages/dock_discovery_status'
+    get_dock_discovery_device:
+      summary: 🧪 Get docking station discovery device status.
+      description: |
+        Returns the discovered docking station device.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDockDiscoveryDeviceMsg'
+      x-response:
+        $ref: '#/components/messages/dock_discovery_device'
+    dock_discovery_device:
+      summary: 🧪 Docking station discovery device status response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockDiscoveryDeviceMsg'
+    exec_cmd_on_discovered_dock:
+      summary: 🧪 Execute command on a discovered docking station.
+      description: |
+        Perform a WebSocket connection test with a discovered docking station. If the dock requires an API token, it must
+        be specified in the request body.  
+        The `IDENTIFY` command also blinks the status LED on the dock.
+
+        Response status codes:
+        - `200`: successful operation: the connection test was successful and docking station metadata could be retrieved.
+        - `404`: discovered dock with `dock_id` not found. Check if the discovery result is still available and has not
+                 been deleted. This can happen after a timeout since the discovery, or if the discovery result has been
+                 cleared with `DELETE /docks/discover`.
+        - `503`: docking station connection could not be established.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/execCmdOnDiscoveredDockMsg'
+      x-response:
+        $ref: '#/components/messages/dock_system_info'
+    dock_system_info:
+      summary: 🧪 Dock system information response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockSystemInfoMsg'
+    get_dock_setup_processes:
+      summary: 🧪 Get current dock setup processes.
+      description: |
+        Return a list of all active setup process identifiers.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDockSetupProcessesMsg'
+      x-response:
+        $ref: '#/components/messages/dock_setup_processes'
+    dock_setup_processes:
+      summary: 🧪 Current dock setup processes response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockSetupProcessesMsg'
+    create_dock_setup:
+      summary: 🧪 Start setting up a new docking station.
+      description: |
+        Create a new setup process from a discovered dock or from a manually provided dock address.
+
+        - If there's already a setup process running for the given dock id, status code `409` is returned.
+        - Emits the WebSocket event `dock_setup_change` with `event_type: START` when this operation returns `201`.
+
+        Start setup from dock discovery:
+        - The required request data can be obtained from the `/api/docks/discover` endpoints when searching for docking
+          stations over Bluetooth or Ethernet. Simply provide the returned `DockDiscovery` data object (which is a super
+          set of the required data to start a setup process).
+        - The returned `id` in the `DockSetupInfo` response will be the identifier for the next `PUT /docks/setup/:id`
+          call to provide additional data.
+
+        Manual setup:
+        - A dock identifier will automatically be created and returned in `DockSetupInfo`.
+        - The dock must be reachable on the network with the provided `custom_ws_url` and optional `token`. Otherwise,
+          status code `503` is returned.
+        - The setup process is automatically started after a successful POST request, no call to `PUT /docks/setup/:id`
+          is required.
+
+        Response status codes:
+        - `201`: setup process successfully started. Use `GET /docks/setup/:id` to poll for status updates, or listen to
+           WebSocket `dock_setup_change` event messages.
+        - `400`: invalid data in request body.
+        - `409`: a setup process is already running. Either wait until finished, or abort it.
+        - `503`: service not available to setup docking station.  
+           E.g. Bluetooth is disabled and therefore the docking station cannot be setup over Bluetooth. Either enable
+           Bluetooth or setup the dock over Ethernet.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/createDockSetupMsg'
+      x-response:
+        $ref: '#/components/messages/dock_setup_status'
+    dock_setup_status:
+      summary: 🧪 Dock setup information response.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/dockSetupStatusMsg'
+    stop_all_dock_setups:
+      summary: 🧪 Abort and remove all setup processes.
+      description: |
+        Stop all setup processes at the next possible operation and remove all setup process information.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/stopAllDockSetupsMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    get_dock_setup_status:
+      summary: 🧪 Get docking station setup status.
+      description: |
+        Poll operation to retrieve the current docking station setup state. See the `state` and `error` fields in the
+        response message. There are also WebSocket `dock_setup_change` event messages for state changes to avoid polling.
+
+        Defined setup states:
+        - `NEW`: setup has not yet been started. Use the `PUT` operation to provide the required data and to start setting up the dock.
+        - `CONFIGURING`: setup data is currently being transferred to the dock.
+        - `RESTARTING`: dock has been configured and is restarting to integrate into the network.
+        - `OK`: setup process has been completed successfully, the dock can now be used.
+        - `ERROR`: the setup process failed. Check the `error` field for more information.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/getDockSetupStatusMsg'
+      x-response:
+        $ref: '#/components/messages/dock_setup_status'
+    start_dock_setup:
+      summary: 🧪 Setup docking station.
+      description: |
+        Set required data to start the setup process and configure the docking station.
+        When using Bluetooth the WiFi network name and credentials must be provided to connect the dock to the WiFi network.
+
+        The `state` field in the response message indicate the current state of the setup process. Use the `GET` operation
+        to poll for state updates or listen to the corresponding WebSocket `dock_setup_change` event messages with
+        `event_type: SETUP`.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/startDockSetupMsg'
+      x-response:
+        $ref: '#/components/messages/dock_setup_status'
+    stop_dock_setup:
+      summary: 🧪 Abort the dock setup process.
+      description: |
+        Stop the setup process at the next possible operation and remove the setup process information.  
+        To start a new setup process, use the `POST /docks/setup` operation again.
+        
+        Emits the WebSocket event `dock_setup_change` with `event_type: STOP`.
+      tags:
+        - name: dock
+      payload:
+        $ref: '#/components/schemas/stopDockSetupMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    # --- WiFi handling
+
+    get_wifi_status:
+      summary: 🧪 Get WiFi status.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiGetStatusMsg'
+      x-response:
+        $ref: '#/components/messages/wifi_status'
+    wifi_status:
+      summary: 🧪 WiFi status.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiStatusMsg'
+
+    wifi_command:
+      summary: 🧪 WiFi connection handling.
+      description: |
+        Perform one of the following commands on the WLAN interface:
+
+        - `DISCONNECT`: Disconnect and wait for `REASSOCIATE` or `RECONNECT` command before connecting again.
+        - `RECONNECT`: Connect if disconnected (i.e. like `REASSOCIATE`, but only connect if in disconnected state).
+        - `REASSOCIATE`: Force reassociation.
+        - `ENABLE_ALL_NETWORKS`: Enable all network connections and start connecting to a network if in disconnected state.
+        - `DISABLE_ALL_NETWORKS`: Disable all network connections and disconnect if in connected state.
+
+        ⚠️Attention: `ENABLE_ALL_NETWORKS` and `DISABLE_ALL_NETWORKS` will persist the state! I.e. if all networks are 
+        disabled and the device is restarted afterwards, no WiFi connection will be established.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiCommandMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    wifi_scan_start:
+      summary: 🧪 Start discovery of WiFi access points.
+      description: |
+        Request a new BSS scan. A scan usually takes a few seconds and the current state is returned with the
+        `get_wifi_scan_status` operation, together with the already found access points.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiScanStartMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    wifi_scan_stop:
+      summary: 🧪 Stop discovery of WiFi access points.
+      description: |
+        Stops the access point discovery. The current discovery status is returned in the response.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiScanStopMsg'
+      x-response:
+        $ref: '#/components/messages/wifi_scan_status'
+
+    get_wifi_scan_status:
+      summary: 🧪 Get discovered WiFi access points.
+      description: |
+        Returns the current discovery status and any discovered access points.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiGetScanStatusMsg'
+      x-response:
+        $ref: '#/components/messages/wifi_scan_status'
+    wifi_scan_status:
+      summary: 🧪 Discovered WiFi access points.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiScanStatusMsg'
+
+    get_all_wifi_networks:
+      summary: 🧪 Get configured WiFi networks.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiGetAllNetworksMsg'
+      x-response:
+        $ref: '#/components/messages/wifi_networks'
+    wifi_networks:
+      summary: 🧪 Configured WiFi networks.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiNetworksMsg'
+
+    add_wifi_network:
+      summary: 🧪 Create a new WiFi network configuration.
+      description: |
+        Add a new network configuration for the given SSID.  
+        For an open network without password the `password` field must be omitted (do not send an empty password value).
+
+        ⚠️ Only WPA-PSK (pre shared keys) and open networks are supported!
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiAddNetworkMsg'
+      x-response:
+        $ref: '#/components/messages/wifi_network'
+
+    del_all_wifi_networks:
+      summary: 🧪 Delete all configured WiFi networks.
+      description: |
+        Disconnects the WiFi network and removes all network configurations.
+
+        ⚠️ Attention: the network configuration is automatically persisted and the network configuration cannot
+        be retrieved anymore!
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiDelAllNetworksMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_wifi_network:
+      summary: 🧪 Get WiFi network configuration.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiGetNetworkMsg'
+      x-response:
+        $ref: '#/components/messages/wifi_network'
+    wifi_network:
+      summary: 🧪 WiFi network configuration.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiNetworkMsg'
+
+    update_wifi_network:
+      summary: 🧪 Change WiFi network configuration.
+      description: |
+        Set a new WiFi network password.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiUpdateNetworkMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    wifi_network_command:
+      summary: 🧪WiFi network connection handling.
+      description: |
+        Perform one of the following commands on a network configuration:
+        - `ENABLE`: Enable a network. If no network is connected, it will be tried to connect to this network.
+        - `DISABLE`: Disable a network. If the network is currently connected it will be disconnected.
+        - `SELECT`: Select the given network and disable all others.
+
+        ⚠️ Attention: all network changes (enabled or disabled) are persisted!
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiNetworkCommandMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    del_wifi_network:
+      summary: 🧪 Delete a configured WiFi network.
+      description: |
+        The given network is removed from the configuration and disconnected if currently connected.
+
+        ⚠️ Attention: the network configuration is automatically persisted and the removed network configuration cannot
+        be retrieved anymore!
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/wifiDelNetworkMsg'
       x-response:
         $ref: '#/components/messages/result'
 
@@ -1577,6 +2190,23 @@ components:
       payload:
         $ref: '#/components/schemas/irLearningEventMsg'
 
+    dock_change:
+      summary: 🔍 Dock change event.
+      description: |
+        Emitted if a dock configuration has changed.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/dockChangeEventMsg'
+    dock_state:
+      summary: 🔍 Dock state event.
+      description: |
+        Emitted if the connection state of a dock has changed.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/dockStateEventMsg'
+
     dock_discovery:
       summary: Docking station discovery event.
       description: |
@@ -1621,6 +2251,15 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/integrationSetupChangeEventMsg'
+
+    software_update:
+      summary: Software update event.
+      description: |
+        Emitted during a system update to receive start, stop and progress events.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/softwareUpdateEventMsg'
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -1668,14 +2307,13 @@ components:
           type: integer
           default: 200
         msg_data:
-          description: Wrapper for response data object.
+          description: Wrapper for response data object. Not returned for error responses with code != 200.
           type: object
       required:
         - kind
         - req_id
         - msg
         - code
-        - msg_data
     commonEvent:
       description: Common event message properties.
       type: object
@@ -1783,7 +2421,6 @@ components:
               $ref: '#/components/schemas/versionInfo'
           required:
             - msg
-            - msg_data
 
     systemCmdMsg:
       type: object
@@ -1829,7 +2466,6 @@ components:
               $ref: '#/components/schemas/systemInfo'
           required:
             - msg
-            - msg_data
 
     getFactoryResetTokenMsg:
       type: object
@@ -1858,7 +2494,6 @@ components:
                 - token
           required:
             - msg
-            - msg_data
     factoryResetMsg:
       type: object
       allOf:
@@ -1949,6 +2584,84 @@ components:
           required: # msg_data is not required to reply with error code for invalid request
             - msg
 
+    checkSystemUpdateMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: check_system_update
+            msg_data:
+              type: object
+              properties:
+                force_update:
+                  type: boolean
+          required:
+            - msg
+    systemUpdateInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: system_update_info
+            msg_data:
+              $ref: '#/components/schemas/AvailableSystemUpdateResponse'
+          required:
+            - msg
+    updateSystemMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_system
+            msg_data:
+              type: object
+              properties:
+                update_id:
+                  description: Update image identification
+                  type: string
+              required:
+                - update_id
+          required:
+            - msg
+            - msg_data
+    getSystemUpdateProgressMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_system_update_progress
+            msg_data:
+              type: object
+              properties:
+                update_id:
+                  description: Update image identification
+                  type: string
+              required:
+                - update_id
+          required:
+            - msg
+            - msg_data
+    systemUpdateProgressMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: system_update_progress
+            msg_data:
+              $ref: '#/components/schemas/SystemUpdateProgress'
+          required:
+            - msg
+
     resetConfigurationMsg:
       type: object
       allOf:
@@ -1982,7 +2695,6 @@ components:
               $ref: '#/components/schemas/configuration'
           required:
             - msg
-            - msg_data
 
     getButtonCfgMsg:
       type: object
@@ -2021,7 +2733,6 @@ components:
               $ref: '#/components/schemas/cfgButton'
           required:
             - msg
-            - msg_data
 
     getDeviceCfgMsg:
       type: object
@@ -2060,7 +2771,6 @@ components:
               $ref: '#/components/schemas/cfgDevice'
           required:
             - msg
-            - msg_data
 
     getDisplayCfgMsg:
       type: object
@@ -2099,7 +2809,6 @@ components:
               $ref: '#/components/schemas/cfgDisplay'
           required:
             - msg
-            - msg_data
 
     getHapticCfgMsg:
       type: object
@@ -2138,7 +2847,6 @@ components:
               $ref: '#/components/schemas/cfgHaptic'
           required:
             - msg
-            - msg_data
 
     getLocalizationCfgMsg:
       type: object
@@ -2177,7 +2885,6 @@ components:
               $ref: '#/components/schemas/cfgLocalization'
           required:
             - msg
-            - msg_data
     getTimezoneNamesMsg:
       type: object
       allOf:
@@ -2202,7 +2909,6 @@ components:
                 type: string
           required:
             - msg
-            - msg_data
     getLocalizationCountriesMsg:
       type: object
       allOf:
@@ -2236,7 +2942,6 @@ components:
                   - name_en
           required:
             - msg
-            - msg_data
     getLocalizationLanguagesMsg:
       type: object
       allOf:
@@ -2274,7 +2979,6 @@ components:
                 - translations
           required:
             - msg
-            - msg_data
     getNetworkCfgMsg:
       type: object
       allOf:
@@ -2351,7 +3055,6 @@ components:
               $ref: '#/components/schemas/cfgSoftwareUpdate'
           required:
             - msg
-            - msg_data
 
     getPowerSavingCfgMsg:
       type: object
@@ -2390,7 +3093,6 @@ components:
               $ref: '#/components/schemas/cfgPowerSaving'
           required:
             - msg
-            - msg_data
 
     getSoundCfgMsg:
       type: object
@@ -2429,7 +3131,6 @@ components:
               $ref: '#/components/schemas/cfgSound'
           required:
             - msg
-            - msg_data
 
     getVoiceControlCfgMsg:
       type: object
@@ -2468,7 +3169,6 @@ components:
               $ref: '#/components/schemas/cfgVoiceControl'
           required:
             - msg
-            - msg_data
     getVoiceAssistantsMsg:
       type: object
       allOf:
@@ -2493,7 +3193,6 @@ components:
                 type: string
           required:
             - msg
-            - msg_data
 
     # --- Entity handling
 
@@ -2521,7 +3220,6 @@ components:
                 type: string
           required:
             - msg
-            - msg_data
     getEntityMsg:
       type: object
       allOf:
@@ -2580,7 +3278,6 @@ components:
                 - entities
           required:
             - msg
-            - msg_data
     getAvailableEntitiesMsg:
       description: |
         Retrieve the available entities provided by the integration instance.
@@ -2626,7 +3323,6 @@ components:
                 - available_entities
           required:
             - msg
-            - msg_data
     getEntityCommandsMsg:
       type: object
       allOf:
@@ -2668,7 +3364,6 @@ components:
                 - commands
           required:
             - msg
-            - msg_data
     executeEntityCommandMsg:
       type: object
       allOf:
@@ -2706,7 +3401,6 @@ components:
               $ref: '#/components/schemas/entity'
           required:
             - msg
-            - msg_data
     entityChangeEventMsg:
       type: object
       allOf:
@@ -2765,6 +3459,697 @@ components:
           required:
             - msg
 
+    # --- Dock handling
+
+    getDockCountMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_dock_count
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/dockFilter'
+          required:
+            - msg
+    dockCountMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock_count
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/dockFilter'
+                count:
+                  type: integer
+              required:
+                - count
+          required:
+            - msg
+    getDocksMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_docks
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/dockFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+          required:
+            - msg
+    docksMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: docks
+            msg_data:
+              type: object
+              properties:
+                filter:
+                  $ref: '#/components/schemas/dockFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+                docks:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/dockConfiguration'
+              required:
+                - paging
+                - docks
+          required:
+            - msg
+    createDockMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: create_dock
+            msg_data:
+              $ref: '#/components/schemas/dockConfigurationRequest'
+          required:
+            - msg
+            - msg_data
+    dockMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock
+          required:
+            - msg
+    deleteAllDocksMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_all_docks
+          required:
+            - msg
+    getDockMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_dock
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+              required:
+                - dock_id
+          required:
+            - msg
+            - msg_data
+    updateDockMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_dock
+            msg_data:
+              $ref: '#/components/schemas/dockUpdateRequest'
+          required:
+            - msg
+            - msg_data
+    dockConnectionCommandMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: dock_connection_command
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  description: Optional dock_id, if omitted the command is applied to all docks.
+                  type: string
+                cmd:
+                  type: string
+                  enum:
+                    - CONNECT
+                    - DISCONNECT
+              required:
+                - cmd
+          required:
+            - msg
+            - msg_data
+    deleteDockMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_dock
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+              required:
+                - dock_id
+          required:
+            - msg
+            - msg_data
+    dockCommandMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: dock_command
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+                command:
+                  type: string
+                  enum:
+                    - SET_LED_BRIGHTNESS
+                    - IDENTIFY
+                    - REMOTE_LOW_BATTERY
+                    - REMOTE_CHARGED
+                    - REMOTE_NORMAL
+                    - REBOOT
+                    - RESET
+                value:
+                  description: Command parameter value. Required for `SET_LED_BRIGHTNESS`.
+                  type: string
+                token:
+                  description: Optional token if dock uses a custom password.
+                  type: string
+              required:
+                - dock_id
+                - command
+          required:
+            - msg
+            - msg_data
+    getDockDiscoveryStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_dock_discovery_status
+          required:
+            - msg
+    dockDiscoveryStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock_discovery_status
+          required:
+            - msg
+    startDockDiscoveryMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: start_dock_discovery
+            msg_data:
+              type: object
+              properties:
+                timeout:
+                  description: Timeout in seconds.
+                  type: integer
+                  format: int32
+                  default: 30
+                  minimum: 1
+                  maximum: 300
+                bt:
+                  description: Use Bluetooth to discover new docks.
+                  type: boolean
+                  default: true
+                net:
+                  description: Query network to discover new docks.
+                  type: boolean
+                  default: true
+                new:
+                  description: Only return new devices, filter out already configured docks.
+                  type: boolean
+                  default: true
+          required:
+            - msg
+    stopDockDiscoveryMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: stop_dock_discovery
+          required:
+            - msg
+    getDockDiscoveryDeviceMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_dock_discovery_device
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+              required:
+                - dock_id
+          required:
+            - msg
+            - msg_data
+    dockDiscoveryDeviceMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock_discovery_device
+          required:
+            - msg
+    execCmdOnDiscoveredDockMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: exec_cmd_on_discovered_dock
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+                cmd:
+                  description: Command to execute.
+                  type: string
+                  enum:
+                    - CONNECTION_TEST
+                    - IDENTIFY
+                timeout:
+                  description: Timeout in seconds.
+                  type: integer
+                  format: int32
+                  default: 30
+                  minimum: 1
+                  maximum: 300
+                token:
+                  description: Optional token if dock uses a custom password.
+                  type: string
+              required:
+                - dock_id
+                - cmd
+          required:
+            - msg
+            - msg_data
+    dockSystemInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock_system_info
+            msg_data:
+              $ref: '#/components/schemas/dockSystemInfo'
+          required:
+            - msg
+    getDockSetupProcessesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_dock_setup_processes
+          required:
+            - msg
+    dockSetupProcessesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock_setup_processes
+            msg_data:
+              type: object
+              properties:
+                sessions:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - sessions
+          required:
+            - msg
+    createDockSetupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: create_dock_setup
+            msg_data:
+              $ref: '#/components/schemas/createDockSetup'
+          required:
+            - msg
+            - msg_data
+    dockSetupStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: dock_setup_status
+            msg_data:
+              $ref: '#/components/schemas/dockSetupInfo'
+          required:
+            - msg
+    stopAllDockSetupsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: stop_all_dock_setups
+          required:
+            - msg
+    getDockSetupStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_dock_setup_status
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+          required:
+            - msg
+            - msg_data
+    startDockSetupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: start_dock_setup
+            msg_data:
+              $ref: '#/components/schemas/dockSetup'
+          required:
+            - msg
+            - msg_data
+    stopDockSetupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: stop_dock_setup
+            msg_data:
+              type: object
+              properties:
+                dock_id:
+                  type: string
+          required:
+            - msg
+            - msg_data
+
+    # --- WiFi handling
+
+    wifiGetStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_wifi_status
+          required:
+            - msg
+    wifiStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: wifi_status
+            msg_data:
+              $ref: '#/components/schemas/WifiStatus'
+          required:
+            - msg
+
+    wifiCommandMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: wifi_command
+            msg_data:
+              type: object
+              properties:
+                cmd:
+                  $ref: '#/components/schemas/WifiCmd'
+              required:
+                - cmd
+          required:
+            - msg
+            - msg_data
+
+    wifiScanStartMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: wifi_scan_start
+          required:
+            - msg
+
+    wifiScanStopMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: wifi_scan_stop
+          required:
+            - msg
+
+    wifiGetScanStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_wifi_scan_status
+          required:
+            - msg
+    wifiScanStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: wifi_scan_status
+            msg_data:
+              $ref: '#/components/schemas/ApScanStatus'
+          required:
+            - msg
+
+    wifiGetAllNetworksMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_all_wifi_networks
+          required:
+            - msg
+    wifiNetworksMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: wifi_networks
+            msg_data:
+              $ref: '#/components/schemas/SavedNetworks'
+          required:
+            - msg
+
+    wifiAddNetworkMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: add_wifi_network
+            msg_data:
+              $ref: '#/components/schemas/CreateWifiNetwork'
+          required:
+            - msg
+            - msg_data
+
+    wifiDelAllNetworksMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: del_all_wifi_networks
+          required:
+            - msg
+
+    wifiGetNetworkMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_wifi_network
+            msg_data:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  minimum: 0
+              required:
+                - id
+          required:
+            - msg
+            - msg_data
+    wifiNetworkMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: wifi_network
+            msg_data:
+              $ref: '#/components/schemas/SavedNetwork'
+          required:
+            - msg
+
+    wifiUpdateNetworkMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_wifi_network
+            msg_data:
+              $ref: '#/components/schemas/ModifyWifiNetwork'
+          required:
+            - msg
+            - msg_data
+
+    wifiNetworkCommandMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: wifi_network_command
+            msg_data:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  minimum: 0
+                cmd:
+                  $ref: '#/components/schemas/WifiNetworkCmd'
+              required:
+                - id
+                - cmd
+          required:
+            - msg
+            - msg_data
+
+    wifiDelNetworkMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: del_wifi_network
+            msg_data:
+              type: object
+              properties:
+                id:
+                  type: integer
+                  minimum: 0
+              required:
+                - id
+          required:
+            - msg
+            - msg_data
+
     # --- Profile handling
 
     getProfilesMsg:
@@ -2789,7 +4174,6 @@ components:
               $ref: '#/components/schemas/profiles'
           required:
             - msg
-            - msg_data
     getProfileMsg:
       type: object
       allOf:
@@ -2819,7 +4203,6 @@ components:
               $ref: '#/components/schemas/profile'
           required:
             - msg
-            - msg_data
     getActiveProfileMsg:
       type: object
       allOf:
@@ -2959,7 +4342,6 @@ components:
               $ref: '#/components/schemas/pages'
           required:
             - msg
-            - msg_data
     getPageMsg:
       type: object
       allOf:
@@ -2992,7 +4374,6 @@ components:
               $ref: '#/components/schemas/page'
           required:
             - msg
-            - msg_data
     addPageMsg:
       type: object
       allOf:
@@ -3097,7 +4478,6 @@ components:
               $ref: '#/components/schemas/groups'
           required:
             - msg
-            - msg_data
     getGroupMsg:
       type: object
       allOf:
@@ -3131,7 +4511,6 @@ components:
               $ref: '#/components/schemas/group'
           required:
             - msg
-            - msg_data
     addGroupMsg:
       type: object
       allOf:
@@ -3243,7 +4622,6 @@ components:
                 - drivers
           required:
             - msg
-            - msg_data
 
     integrationCmdMsg:
       type: object
@@ -3326,7 +4704,6 @@ components:
                 - count
           required:
             - msg
-            - msg_data
 
     getIntegrationDriversMsg:
       type: object
@@ -3366,7 +4743,6 @@ components:
                 - drivers
           required:
             - msg
-            - msg_data
 
     registerIntegrationDriverMsg:
       type: object
@@ -3412,7 +4788,6 @@ components:
               $ref: '#/components/schemas/integrationDriver'
           required:
             - msg
-            - msg_data
 
     updateIntegrationDriverMsg:
       type: object
@@ -3481,7 +4856,6 @@ components:
                 - count
           required:
             - msg
-            - msg_data
 
     getIntegrationsMsg:
       type: object
@@ -3523,7 +4897,6 @@ components:
                 - integrations
           required:
             - msg
-            - msg_data
 
     createIntegrationMsg:
       type: object
@@ -3662,7 +5035,6 @@ components:
                 - events
           required:
             - msg
-            - msg_data
     subscribeEventsMsg:
       type: object
       allOf:
@@ -3732,7 +5104,6 @@ components:
                 - events
           required:
             - msg
-            - msg_data
     eventChannel:
       type: string
       description: The name of the event channel.
@@ -3744,14 +5115,14 @@ components:
             - integrations
             - profiles
             - emitters
+            - docks
+            - software_update
             # TODO define all event channels. Suggestions:
 #            - cfg_log
 #            - cfg_ui
 #            - battery_status
 #            - log
 #            - notification
-#            - sw_upd_available
-#            - sw_upd_progress
 #            - gui
 #            - wifi
         - {}  # extensible enum: there might be more event channels than defined above
@@ -3800,7 +5171,7 @@ components:
               type: string
               const: DEVICE
             msg_data:
-              $ref: '#/components/schemas/integrationState'
+              $ref: '#/components/schemas/integrationStateData'
           required:
             - msg
             - msg_data
@@ -3835,6 +5206,39 @@ components:
               const: DEVICE
             msg_data:
               $ref: '#/components/schemas/irLearning'
+          required:
+            - msg
+            - msg_data
+
+    dockChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: dock_change
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/dockChangeData'
+          required:
+            - msg
+            - msg_data
+    dockStateEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: dock_state
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/dockStateData'
           required:
             - msg
             - msg_data
@@ -3920,6 +5324,23 @@ components:
               const: DEVICE
             msg_data:
               $ref: '#/components/schemas/integrationSetupChange'
+          required:
+            - msg
+            - msg_data
+
+    softwareUpdateEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: software_update
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/softwareUpdateEvent'
           required:
             - msg
             - msg_data
@@ -4483,7 +5904,7 @@ components:
         driver_state:
           $ref: '#/components/schemas/driverState'
         state:
-          type: string
+          $ref: '#/components/schemas/integrationState'
         enabled:
           type: boolean
 
@@ -4504,6 +5925,19 @@ components:
         - CONNECTING
         - ACTIVE
         - RECONNECTING
+        - ERROR
+
+    integrationState:
+      type: string
+      enum:
+        - NOT_CONFIGURED
+        - UNKNOWN
+        - IDLE
+        - CONNECTING
+        - CONNECTED
+        - DISCONNECTED
+        - RECONNECTING
+        - ACTIVE
         - ERROR
 
     integrationDriverType:
@@ -4848,7 +6282,7 @@ components:
         - event_type
         - integration_id
 
-    integrationState:
+    integrationStateData:
       type: object
       properties:
         driver_id:
@@ -4908,6 +6342,188 @@ components:
       required:
         - format
         - value
+
+    dockId:
+      type: string
+      format: "^[a-zA-Z0-9\\-\\.]+$"
+      minLength: 1
+      maxLength: 64
+      description: Dock identifier
+
+    dockName:
+      type: string
+      minLength: 1
+      maxLength: 40
+      description: User assignable friendly name to use instead of dock_id (service name).
+
+    dockUrl:
+      type: string
+      minLength: 6
+      maxLength: 64
+      description: Dock WebSocket URL to override auto-discovery from the service name in `dock_id`.
+
+    dockToken:
+      type: string
+      format: password
+      minLength: 1
+      maxLength: 40
+      description: Access token
+
+    dockFilter:
+      description: Optional filters
+      type: object
+      properties:
+        active:
+          type: boolean
+
+    dockChangeData:
+      type: object
+      description: |
+        The `new_state` property is omitted for `event_type` = `delete`.
+      properties:
+        event_type:
+          $ref: '#/components/schemas/defaultChangeEventType'
+        dock_id:
+          $ref: '#/components/schemas/entityId'
+        new_state:
+          $ref: '#/components/schemas/dockConfiguration'
+      required:
+        - event_type
+        - dock_id
+
+    dockConfiguration:
+      type: object
+      properties:
+        dock_id:
+          type: string
+        name:
+          type: string
+        custom_ws_url:
+          type: string
+        active:
+          type: boolean
+          description: |
+            Enable flag: active docks are automatically connected when network is available.
+        model:
+          type: string
+          description: Dock model number.
+        connection_type:
+          type: string
+          description: |
+            Network connection of the dock: `Ethernet` or `WiFi`.
+        version:
+          type: string
+        state:
+          $ref: '#/components/schemas/dockState'
+        learning_active:
+          type: boolean
+          description: Dock is in IR learning mode.
+        description:
+          $ref: '#/components/schemas/description'
+      required:
+        - dock_id
+        - active
+
+    dockConfigurationRequest: # from OpenAPI
+      type: object
+      properties:
+        dock_id:
+          $ref: '#/components/schemas/dockId'
+        name:
+          $ref: '#/components/schemas/dockName'
+        custom_ws_url:
+          $ref: '#/components/schemas/dockUrl'
+        token:
+          $ref: '#/components/schemas/dockToken'
+        active:
+          type: boolean
+          description: |
+            Enable flag: active docks are automatically connected when network is available.
+        model:
+          type: string
+          description: Dock model number.
+        description:
+          $ref: '#/components/schemas/description'
+      required:
+        - dock_id
+        - active
+
+    dockUpdateRequest:
+      type: object
+      properties:
+        dock_id:
+          $ref: '#/components/schemas/dockId'
+        name:
+          type: string
+          maxLength: 40
+          description: User assignable friendly name to use instead of dock_id (service name).
+        custom_ws_url:
+          $ref: '#/components/schemas/dockUrl'
+        token:
+          type: string
+          maxLength: 40
+          description: Access token to connect to the dock.
+        active:
+          type: boolean
+          description: Auto connect to dock when network is available.
+        description:
+          type: string
+          description: Optional description.
+        wifi:
+          type: object
+          properties:
+            ssid:
+              type: string
+              maxLength: 32
+            password:
+              type: string
+              maxLength: 63
+      required:
+        - dock_id
+
+    dockSystemInfo:
+      type: object
+      properties:
+        name:
+          type: string
+        hostname:
+          type: string
+        model:
+          type: string
+        revision:
+          type: string
+        version:
+          type: string
+        serial:
+          type: string
+        ir_learning:
+          type: boolean
+        ethernet:
+          type: boolean
+        wifi:
+          type: boolean
+        ssid:
+          type: string
+
+    dockStateData:
+      type: object
+      properties:
+        dock_id:
+          type: string
+        state:
+          $ref: '#/components/schemas/dockState'
+      required:
+        - dock_id
+        - state
+
+    dockState:
+      type: string
+      enum:
+        - IDLE
+        - CONNECTING
+        - ACTIVE
+        - RECONNECTING
+        - ERROR
 
     dockDiscovery:
       type: object
@@ -4977,6 +6593,92 @@ components:
         - BT
         - NET
 
+    createDockSetup:
+      type: object
+      oneOf:
+        - type: object
+          properties:
+            discovery:
+              $ref: "#/components/schemas/dockSetupFromDiscovery"
+          required:
+            - discovery
+        - type: object
+          properties:
+            manually:
+              $ref: "#/components/schemas/dockSetup"
+          required:
+            - manual
+
+    dockSetup:
+      type: object
+      description: Dock setup data
+      properties:
+        dock_id:
+          $ref: "#/components/schemas/dockId"
+        name:
+          $ref: '#/components/schemas/dockName'
+        token:
+          $ref: '#/components/schemas/dockToken'
+        custom_ws_url:
+          $ref: '#/components/schemas/dockUrl'
+        description:
+          $ref: '#/components/schemas/description'
+        wifi:
+          description: |
+            Optional WiFi information if the dock should connect to (or be prepared for) WiFi instead of Ethernet.
+          type: object
+          properties:
+            ssid:
+              type: string
+            password:
+              type: string
+              format: password
+          required:
+            - ssid
+            - password
+      required:
+        - name
+
+    dockSetupFromDiscovery: # subset of DockDiscovery
+      type: object
+      properties:
+        id:
+          $ref: "#/components/schemas/dockId"
+        friendly_name:
+          $ref: "#/components/schemas/dockName"
+        address:
+          description: Resolved device network address.
+          type: string
+        model:
+          description: Detected dock model.
+          type: string
+        version:
+          description: Detected firmware version.
+          type: string
+        discovery_type:
+          $ref: "#/components/schemas/discoveryType"
+      required:
+        - id
+        - discovery_type
+
+    dockSetupInfo:
+      type: object
+      description: Dock setup state
+      properties:
+        id:
+          type: string
+        name:
+          $ref: "#/components/schemas/dockName"
+        discovery_type:
+          $ref: "#/components/schemas/discoveryType"
+        state:
+          $ref: "#/components/schemas/dockSetupState"
+        error:
+          $ref: "#/components/schemas/dockSetupError"
+      required:
+        - id
+        - state
+
     dockSetupChange:
       type: object
       properties:
@@ -5012,9 +6714,12 @@ components:
       enum:
         - NONE
         - NOT_FOUND
+        - CONNECTION_ERROR
         - CONNECTION_REFUSED
         - AUTHORIZATION_ERROR
         - TIMEOUT
+        - ABORT
+        - PERSISTENCE_ERROR
         - OTHER
 
     dockUpdateChange:
@@ -5048,6 +6753,120 @@ components:
         - event_type
         - dock_id
         - state
+
+    AvailableSystemUpdateResponse:
+      type: object
+      properties:
+        update_in_progress:
+          type: boolean
+        last_check_date:
+          description: Last update check timestamp.
+          type: string
+          format: date-time
+        update_check_enabled:
+          type: boolean
+        installed_version:
+          description: Installed system version.
+          type: string
+        available:
+          type: array
+          items:
+            $ref: '#/components/schemas/AvailableSystemUpdate'
+      required:
+        - update_check_enabled
+        - installed_version
+        - available
+
+    AvailableSystemUpdate:
+      type: object
+      properties:
+        id:
+          description: Update identifier
+          type: string
+        title:
+          type: string
+        description:
+          $ref: '#/components/schemas/languageText'
+        version:
+          type: string
+        channel:
+          $ref: '#/components/schemas/UpdateChannel'
+        release_date:
+          type: string
+          format: date
+        size:
+          type: integer
+          format: int64
+      required:
+        - id
+        - title
+        - description
+        - version
+        - release_date
+        - size
+
+    UpdateChannel:
+      type: string
+      enum:
+        - STABLE
+        - TESTING
+        - DEVELOPMENT
+
+    softwareUpdateEvent:
+      type: object
+      properties:
+        event_type:
+          type: string
+          enum:
+            - START
+            - PROGRESS
+            - STOP
+        update_id:
+          description: Update identifier
+          type: string
+        progress:
+          $ref: '#/components/schemas/SystemUpdateProgress'
+      required:
+        - event_type
+        - update_id
+
+    SystemUpdateProgress:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+            - IDLE
+            - START
+            - RUN
+            - SUCCESS
+            - FAILURE
+            - DOWNLOAD
+            - DONE
+            - SUB_PROCESS
+            - PROGRESS
+        update_id:
+          description: Update identifier
+          type: string
+        download_percent:
+          description: Percent of download
+          type: integer
+        download_bytes:
+          description: Total of bytes to be downloaded
+          type: integer
+          format: int64
+        total_steps:
+          description: Total number of update steps
+          type: integer
+        current_step:
+          description: Current installation step index
+          type: integer
+        current_percent:
+          description: Percent in current step
+          type: integer
+      required:
+        - state
+        - update_id
 
     integrationDiscovery:
       type: object
@@ -5641,3 +7460,159 @@ components:
       enum:
         - HEADER
         - MESSAGE
+
+    # --- OpenApi Wifi.yaml
+
+    ApScanStatus:
+      type: object
+      properties:
+        active:
+          type: boolean
+        scan:
+          type: array
+          items:
+            $ref: '#/components/schemas/AccessPointScan'
+      required:
+        - active
+        - scan
+
+    AccessPointScan:
+      type: object
+      properties:
+        bssid:
+          type: string
+        frequency:
+          type: string
+        signal_level:
+          type: integer
+        auth:
+          type: string
+        ssid:
+          type: string
+      required:
+        - bssid
+        - ssid
+
+    WifiStatus:
+      type: object
+      properties:
+        wpa_state:
+          $ref: '#/components/schemas/WpaState'
+        id:
+          type: integer
+        bssid:
+          type: string
+        ssid:
+          type: string
+        freq:
+          type: integer
+        address:
+          type: string
+        pairwise_cipher:
+          type: string
+        group_cipher:
+          type: string
+        key_mgmt:
+          type: string
+        ip_address:
+          type: string
+        noise:
+          type: integer
+        rssi:
+          type: integer
+        avg_rssi:
+          type: integer
+        est_throughput:
+          type: integer
+        snr:
+          type: integer
+        linkspeed:
+          type: integer
+      required:
+        - wpa_state
+
+    CreateWifiNetwork:
+      type: object
+      properties:
+        ssid:
+          type: string
+          minLength: 1
+          maxLength: 32
+        password:
+          type: string
+          minLength: 1
+          maxLength: 63
+      required:
+        - ssid
+
+    # change to OpenAPI: enhanced with id
+    ModifyWifiNetwork:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 0
+        password:
+          type: string
+          minLength: 1
+          maxLength: 63
+      required:
+        - id
+        - password
+
+    SavedNetworks:
+      type: array
+      items:
+        $ref: '#/components/schemas/SavedNetwork'
+
+    SavedNetwork:
+      type: object
+      properties:
+        id:
+          type: integer
+        ssid:
+          type: string
+        state:
+          $ref: '#/components/schemas/NetworkState'
+      required:
+        - id
+        - ssid
+
+    WpaState:
+      type: string
+      enum:
+        - UNKNOWN
+        - ERROR
+        - DISCONNECTED
+        - INTERFACE_DISABLED
+        - INACTIVE
+        - SCANNING
+        - AUTHENTICATED
+        - ASSOCIATING
+        - ASSOCIATED
+        - FOUR_WAY_HANDSHAKE
+        - GROUP_HANDSHAKE
+        - COMPLETED
+
+    WifiCmd:
+      type: string
+      enum:
+        - DISCONNECT
+        - RECONNECT
+        - REASSOCIATE
+        - ENABLE_ALL_NETWORKS
+        - DISABLE_ALL_NETWORKS
+
+    WifiNetworkCmd:
+      type: string
+      enum:
+        - ENABLE
+        - DISABLE
+        - SELECT
+
+    NetworkState:
+      type: string
+      enum:
+        - CONNECTED
+        - DISABLED
+        - TEMPORARY_DISABLED

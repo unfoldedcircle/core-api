@@ -123,7 +123,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"username\": \"web-configurator\",\n    \"password\": \"{{apiPassword}}\"\n}",
+							"raw": "{\n    \"username\": \"{{apiUsername}}\",\n    \"password\": \"{{apiPassword}}\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -517,7 +517,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"active\": true\n}",
+							"raw": "{\n  \"active\": true,\n  \"valid_to\": \"2023-02-20T13:38:45+01:00\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2642,13 +2642,49 @@
 									"response": []
 								},
 								{
+									"name": "RemoteNormal",
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"command\": \"REMOTE_NORMAL\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/devices/:dock_id/command",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"devices",
+												":dock_id",
+												"command"
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{dock_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
 									"name": "SetFriendlyName",
 									"request": {
 										"method": "POST",
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"Ethernet dock\"\n}",
+											"raw": "{\n    \"command\": \"SET_FRIENDLY_NAME\",\n    \"value\": \"Ethernet dock 5.3\"\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -3410,7 +3446,7 @@
 								"header": [],
 								"body": {
 									"mode": "raw",
-									"raw": "{\n    \"friendly_name\": \"YIO-Dock-246F283FCDCC\",\n    \"custom_ws_url\": \"ws://172.16.16.176:946\",\n    \"active\": true,\n    \"description\": \"testing3\"\n}\n",
+									"raw": "{\n    \"name\": \"UC-Dock-246F283FCDCC\",\n    \"custom_ws_url\": \"ws://172.16.16.176:946\",\n    \"active\": true,\n    \"description\": \"testing3\"\n}\n",
 									"options": {
 										"raw": {
 											"language": "json"
@@ -3540,6 +3576,223 @@
 					"name": "discover",
 					"item": [
 						{
+							"name": "device",
+							"item": [
+								{
+									"name": "getDiscoveredDevice",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/docks/discover/:dock_id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"discover",
+												":dock_id"
+											],
+											"query": [
+												{
+													"key": "timeout",
+													"value": "5",
+													"disabled": true
+												},
+												{
+													"key": "bt",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "net",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "new",
+													"value": "false",
+													"disabled": true
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{discovered_dock_device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "discoveredDockConnectionTest",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"token\": \"0000\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/discover/:dock_id?cmd=CONNECTION_TEST",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"discover",
+												":dock_id"
+											],
+											"query": [
+												{
+													"key": "timeout",
+													"value": "5",
+													"disabled": true
+												},
+												{
+													"key": "bt",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "net",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "new",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "cmd",
+													"value": "CONNECTION_TEST"
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{discovered_dock_device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "discoveredDockIdentify",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"token\": \"0000\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/docks/discover/:dock_id?cmd=IDENTIFY",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"docks",
+												"discover",
+												":dock_id"
+											],
+											"query": [
+												{
+													"key": "timeout",
+													"value": "5",
+													"disabled": true
+												},
+												{
+													"key": "bt",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "net",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "new",
+													"value": "false",
+													"disabled": true
+												},
+												{
+													"key": "cmd",
+													"value": "IDENTIFY"
+												}
+											],
+											"variable": [
+												{
+													"key": "dock_id",
+													"value": "{{discovered_dock_device_id}}"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
 							"name": "getDockDiscoveryStatus",
 							"event": [
 								{
@@ -3553,6 +3806,7 @@
 											"const responseJson = pm.response.json();",
 											"if (responseJson.docks && responseJson.docks[0]) {",
 											"    postman.setEnvironmentVariable(\"discovered_dock_device\", JSON.stringify(responseJson.docks[0]));",
+											"    postman.setEnvironmentVariable(\"discovered_dock_device_id\", responseJson.docks[0].id);",
 											"}",
 											""
 										],
@@ -3739,7 +3993,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n  \"name\": \"Living room\",\n  \"token\": \"123\",\n  \"custom_ws_url2\": \"ws://test-station.local:1946\",\n  \"description\": \"Setup test\",\n  \"wifi\": {\n    \"ssid\": \"My Network\",\n    \"password\": \"0123456789\"\n  }\n}",
+											"raw": "{\n  \"name\": \"Living room\",\n  \"token\": \"1234\",\n  \"custom_ws_url2\": \"ws://test-station.local:1946\",\n  \"description\": \"Setup test\",\n  \"wifi\": {\n    \"ssid\": \"My Network\",\n    \"password\": \"0123456789\"\n  }\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -4177,7 +4431,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"dock_id\": \"test\",\n    \"custom_ws_url\": \"ws://172.16.16.106:946\",\n    \"token\": \"123\",\n    \"active\": true,\n    \"description\": \"Golden sample\"\n}\n",
+							"raw": "{\n    \"dock_id\": \"manual-test.1\",\n    \"custom_ws_url\": \"ws://172.16.16.106:946\",\n    \"token\": \"0000\",\n    \"active\": true,\n    \"description\": \"Testing only\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6221,7 +6475,7 @@
 									"variable": [
 										{
 											"key": "intgId",
-											"value": "test.integration:1"
+											"value": "hass.main"
 										}
 									]
 								}
@@ -6231,7 +6485,7 @@
 					]
 				},
 				{
-					"name": "getIntegrationStatuskCount",
+					"name": "getIntegrationStatusCount",
 					"request": {
 						"method": "HEAD",
 						"header": [],
@@ -8180,60 +8434,6 @@
 						},
 						{
 							"name": "addRemoteIrCode",
-							"event": [
-								{
-									"listen": "test",
-									"script": {
-										"exec": [
-											"pm.test(\"Status code is 200\", function () {",
-											"    pm.response.to.have.status(200);",
-											"});",
-											""
-										],
-										"type": "text/javascript"
-									}
-								}
-							],
-							"request": {
-								"method": "POST",
-								"header": [],
-								"body": {
-									"mode": "raw",
-									"raw": "{\n    \"value\": \"0000,006e,0022,0002,0155,00ac,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0041,0015,0041,0015,0015,0015,0015,0015,0015,0015,0041,0015,0015,0015,0015,0015,05e4,0155,0055,0015,0e40\",\n    \"format\": \"PRONTO\"\n}",
-									"options": {
-										"raw": {
-											"language": "json"
-										}
-									}
-								},
-								"url": {
-									"raw": "{{SERVER}}/api/remotes/:entityId/ir/:cmdId",
-									"host": [
-										"{{SERVER}}"
-									],
-									"path": [
-										"api",
-										"remotes",
-										":entityId",
-										"ir",
-										":cmdId"
-									],
-									"variable": [
-										{
-											"key": "entityId",
-											"value": "{{remote_id}}"
-										},
-										{
-											"key": "cmdId",
-											"value": "TEST"
-										}
-									]
-								}
-							},
-							"response": []
-						},
-						{
-							"name": "addRemoteIrCode Copy",
 							"event": [
 								{
 									"listen": "test",
@@ -12045,6 +12245,689 @@
 			"name": "system",
 			"item": [
 				{
+					"name": "wifi",
+					"item": [
+						{
+							"name": "scan",
+							"item": [
+								{
+									"name": "getScan",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/scan",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"scan"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "startScan",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "PUT",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/scan",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"scan"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "stopScan",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/scan",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"scan"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "networks",
+							"item": [
+								{
+									"name": "id",
+									"item": [
+										{
+											"name": "getWifiNetwork",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "GET",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/system/wifi/networks/:id",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"system",
+														"wifi",
+														"networks",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "0"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "wifiNetworkCommand",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PUT",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/system/wifi/networks/:id?cmd=ENABLE",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"system",
+														"wifi",
+														"networks",
+														":id"
+													],
+													"query": [
+														{
+															"key": "cmd",
+															"value": "ENABLE"
+														}
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "0"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "modifyWifiNetwork",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "PATCH",
+												"header": [],
+												"body": {
+													"mode": "raw",
+													"raw": "{\n    \"password\": \"123\"\n}",
+													"options": {
+														"raw": {
+															"language": "json"
+														}
+													}
+												},
+												"url": {
+													"raw": "{{SERVER}}/api/system/wifi/networks/:id",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"system",
+														"wifi",
+														"networks",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "0"
+														}
+													]
+												}
+											},
+											"response": []
+										},
+										{
+											"name": "deleteWifiNetwork",
+											"event": [
+												{
+													"listen": "test",
+													"script": {
+														"exec": [
+															"pm.test(\"Status code is 200\", function () {",
+															"    pm.response.to.have.status(200);",
+															"});",
+															""
+														],
+														"type": "text/javascript"
+													}
+												}
+											],
+											"request": {
+												"method": "DELETE",
+												"header": [],
+												"url": {
+													"raw": "{{SERVER}}/api/system/wifi/networks/:id",
+													"host": [
+														"{{SERVER}}"
+													],
+													"path": [
+														"api",
+														"system",
+														"wifi",
+														"networks",
+														":id"
+													],
+													"variable": [
+														{
+															"key": "id",
+															"value": "0"
+														}
+													]
+												}
+											},
+											"response": []
+										}
+									]
+								},
+								{
+									"name": "getAllWifiNetworks",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/networks",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"networks"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "addWifiNetwork",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ssid\": \"My network\",\n    \"password\": \"secret1234\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/networks",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"networks"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "addWifiNetwork Guest",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 201\", function () {",
+													"    pm.response.to.have.status(201);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"body": {
+											"mode": "raw",
+											"raw": "{\n    \"ssid\": \"Guest\"\n}",
+											"options": {
+												"raw": {
+													"language": "json"
+												}
+											}
+										},
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/networks",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"networks"
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "deleteAllWifiNetworks",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "DELETE",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/wifi/networks",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"wifi",
+												"networks"
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "getWifiStatus",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/system/wifi",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"system",
+										"wifi"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "wifiCommand",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/system/wifi?cmd=ENABLE_ALL_NETWORKS",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"system",
+										"wifi"
+									],
+									"query": [
+										{
+											"key": "cmd",
+											"value": "ENABLE_ALL_NETWORKS"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "image",
+							"item": [
+								{
+									"name": "updateSystem",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "POST",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/update/:id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"update",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "ucr2_rev1-v0.5.0-13-g95540365"
+												}
+											]
+										}
+									},
+									"response": []
+								},
+								{
+									"name": "getUpdateProgress",
+									"event": [
+										{
+											"listen": "test",
+											"script": {
+												"exec": [
+													"pm.test(\"Status code is 200\", function () {",
+													"    pm.response.to.have.status(200);",
+													"});",
+													""
+												],
+												"type": "text/javascript"
+											}
+										}
+									],
+									"request": {
+										"method": "GET",
+										"header": [],
+										"url": {
+											"raw": "{{SERVER}}/api/system/update/:id",
+											"host": [
+												"{{SERVER}}"
+											],
+											"path": [
+												"api",
+												"system",
+												"update",
+												":id"
+											],
+											"variable": [
+												{
+													"key": "id",
+													"value": "ucr2_rev1-v0.5.0-13-g95540365"
+												}
+											]
+										}
+									},
+									"response": []
+								}
+							]
+						},
+						{
+							"name": "checkSystemUpdate",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/system/update",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"system",
+										"update"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "forceSystemUpdateCheck",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Status code is 200\", function () {",
+											"    pm.response.to.have.status(200);",
+											"});",
+											""
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"url": {
+									"raw": "{{SERVER}}/api/system/update",
+									"host": [
+										"{{SERVER}}"
+									],
+									"path": [
+										"api",
+										"system",
+										"update"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
 					"name": "getSystemInformation",
 					"event": [
 						{
@@ -12428,7 +13311,7 @@
 										"header": [],
 										"body": {
 											"mode": "raw",
-											"raw": "{\n    \"manufacturer\": \"Denon\",\n    \"device\": \"AVR-X2700\",\n    \"device_type\": \"receiver2\",\n    \"code_format\": \"PRONTO\",\n    \"codes\": [\n        {\n            \"key\": \"POWER_ON\",\n            \"value\": \"0000 006d 0000 0024 0157 00ac 0015,0015,0015,0015,0015,0040,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0040,0015,0040,0015,0015,0015,0040,0015,0040,0015,0040,0015,0040,0015,0040,0015,0015,0015,0015,0015,0040,0015,0015,0015,0015,0015,0015,0015,0040,0015,0040,0015,0040,0015,0040,0015,0015,0015,0040,0015,0040,0015,0040,0015,0015,0015,0015,0015,0689,0157,0056,0015,0e94\"\n        },\n        {\n            \"key\": \"POWER_OFF\",\n            \"value\": \"0000,006d,0000,0024,0157,00ab,0015,0015,0016,0015,0016,003f,0016,0015,0015,0016,0015,0015,0016,0015,0016,0015,0015,0040,0015,0040,0015,0015,0016,003f,0016,003f,0016,003f,0016,003f,0016,003f,0016,003f,0016,0015,0016,003f,0016,0015,0015,0015,0016,0015,0016,003f,0016,003f,0016,0015,0015,0040,0015,0015,0016,003f,0016,003f,0016,003f,0016,0015,0016,0015,0015,05fd,0156,0055,0016,0ee1\"\n        },\n        {\n            \"key\": \"VOLUME_UP\",\n            \"value\": \"0000,006c,0022,0002,015b,00ad,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,05f7,015b,0057,0016,0e6c\"\n        },\n        {\n            \"key\": \"VOLUME_DOWN\",\n            \"value\": \"0000,006c,0022,0002,015b,00ad,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,05f7,015b,0057,0016,0e6c\"\n        }\n    ]\n}",
+											"raw": "{\n    \"manufacturer\": \"Denon\",\n    \"device\": \"AVR-X2700\",\n    \"device_type\": \"receiver\",\n    \"code_format\": \"PRONTO\",\n    \"codes\": [\n        {\n            \"key\": \"POWER_ON\",\n            \"value\": \"0000 006d 0000 0024 0157 00ac 0015,0015,0015,0015,0015,0040,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0015,0040,0015,0040,0015,0015,0015,0040,0015,0040,0015,0040,0015,0040,0015,0040,0015,0015,0015,0015,0015,0040,0015,0015,0015,0015,0015,0015,0015,0040,0015,0040,0015,0040,0015,0040,0015,0015,0015,0040,0015,0040,0015,0040,0015,0015,0015,0015,0015,0689,0157,0056,0015,0e94\"\n        },\n        {\n            \"key\": \"POWER_OFF\",\n            \"value\": \"0000,006d,0000,0024,0157,00ab,0015,0015,0016,0015,0016,003f,0016,0015,0015,0016,0015,0015,0016,0015,0016,0015,0015,0040,0015,0040,0015,0015,0016,003f,0016,003f,0016,003f,0016,003f,0016,003f,0016,003f,0016,0015,0016,003f,0016,0015,0015,0015,0016,0015,0016,003f,0016,003f,0016,0015,0015,0040,0015,0015,0016,003f,0016,003f,0016,003f,0016,0015,0016,0015,0015,05fd,0156,0055,0016,0ee1\"\n        },\n        {\n            \"key\": \"VOLUME_UP\",\n            \"value\": \"0000,006c,0022,0002,015b,00ad,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,05f7,015b,0057,0016,0e6c\"\n        },\n        {\n            \"key\": \"VOLUME_DOWN\",\n            \"value\": \"0000,006c,0022,0002,015b,00ad,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,05f7,015b,0057,0016,0e6c\"\n        }\n    ]\n}",
 											"options": {
 												"raw": {
 													"language": "json"
@@ -13287,7 +14170,7 @@
 										},
 										{
 											"key": "page",
-											"value": "3",
+											"value": "2",
 											"disabled": true
 										},
 										{
@@ -13396,6 +14279,11 @@
 		{
 			"key": "externalSystem",
 			"value": "homeassistant"
+		},
+		{
+			"key": "apiUsername",
+			"value": "admin",
+			"type": "string"
 		},
 		{
 			"key": "apiPassword",
