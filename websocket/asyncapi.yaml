@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.15.1-alpha'
+  version: '0.16.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -45,12 +45,16 @@ info:
     
     **This API is a preview version and does not yet contain all functionality.**
     
-    The following features will be continuously added:
+    The following features will be continuously added (in no particular order):
     
-    - Software update checks, download & installation
+    - Battery status events
+    - Matching features of the REST Core-API (except file up & download):
+      - Activity management    
+      - Infrared code management
     - Integration setup flow
-    - Infrared code management
-    - Activity management    
+    - Static network configuration
+    
+    Please check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. 
     
     ## API Versioning
     
@@ -60,22 +64,36 @@ info:
     
     **Any major version zero (`0.y.z`) is for initial development and may change at any time!**  
     I.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!
+    We try avoiding it, but it might still happen...
 
     ## WebSocket Connection
     
     ### Authentication
 
-    Interaction with the API requires an API-key or a session cookie (see login operation in REST Core-API).
+    Interaction with the API requires an API-key, user account or a session cookie (see login operation in the
+    REST Core-API).
     
     If the session cookie is sent with the WebSocket upgrade request, the connection is automatically authenticated.
+    This is recommended when using a web browser as client.
 
+    #### Basic authentication
+    
+    A user account can be used with [basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication)
+    in the WebSocket upgrade.
+    
+    - Header name: `Authentication`.
+    - Value: `Basic ` + _base64 encoded value of ${username}:${password}_
+    
     #### API-key authentication
 
     If the session based login is not possible or the client needs to use an API-key, then the preferred way to
     establish an authenticated WebSocket connection is to provide the API-key in the header of the WebSocket
     connection.
 
-    Header name: `API-KEY`.
+    - Header name: `API-KEY`.
+    - Value: _API key_
+    
+    API keys can be created with the REST API and the `auth/api_keys` endpoints.
 
     #### Message based authentication 
 
@@ -85,7 +103,7 @@ info:
     - The client must reply with the `auth` message containing the API-key.
 
       - All other messages will be ignored, until the client successfully authenticates itself.
-      - The server will close the connection after a timeout.
+      - The server will close an unauthenticated connection after a timeout of 15 seconds.
 
     - The server replies with the `authentication` event including the result code of the authentication.
 
@@ -99,19 +117,21 @@ defaultContentType: application/json
 
 servers:
   test:
-    url: localhost:9001
+    url: localhost:8080
     protocol: ws
     description: |
       Local test server.
     security:
       - token: []
+      - basic: []
   test-wss:
-    url: localhost:9443
+    url: localhost:8443
     protocol: wss
     description: |
       Local test server.
     security:
       - token: []
+      - basic: []
 # TODO enhance tags with `externalDocs` and url links once API is hosted in public repo
 tags:
   - name: integration
@@ -178,9 +198,6 @@ channels:
           - $ref: '#/components/messages/get_voice_control_cfg'
           - $ref: '#/components/messages/set_voice_control_cfg'
           - $ref: '#/components/messages/get_voice_assistants'
-
-#          - $ref: '#/components/messages/get_locales'   # TODO required? ISO code should be enough
-#          - $ref: '#/components/messages/get_languages' # TODO required? ISO code should be enough
 
 #          - $ref: '#/components/messages/get_log_cfg'
 #          - $ref: '#/components/messages/set_log_cfg'
@@ -275,8 +292,6 @@ channels:
           - $ref: '#/components/messages/voice_control_cfg'
           - $ref: '#/components/messages/voice_assistants'
 
-#          - $ref: '#/components/messages/languages' # TODO see request msg about ISO code
-#          - $ref: '#/components/messages/locales'   # TODO see request msg about ISO code
 #          - $ref: '#/components/messages/log_cfg'
           # --- entity handling
           - $ref: '#/components/messages/entity_types'
@@ -443,11 +458,6 @@ channels:
         - name: events
       message:
         oneOf:
-# Only required if we decide to use multiple WS endpoints:
-#          - $ref: '#/components/messages/auth_required'
-#          - $ref: '#/components/messages/authentication'
-#          - $ref: '#/components/messages/response'
-
           # --- event channels
           - $ref: '#/components/messages/event_channels'
           - $ref: '#/components/messages/event_subscriptions'
@@ -486,6 +496,13 @@ components:
       type: httpApiKey
       in: header
       name: API-KEY
+    basic:
+      description: |
+        To login with a user account, basic authentication can be used for the WebSocket upgrade. As an alternative,
+        a session based login with the REST API can be performed. The session cookie will automatically authenticate
+        the Websocket connection.
+      type: http
+      scheme: basic
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   messages:
@@ -498,18 +515,18 @@ components:
       payload:
         $ref: '#/components/schemas/commonResp'
     event:
-      summary: 🧪 Generic event message of a subscribed channel.
+      summary: 🚀 Generic event message of a subscribed channel.
       payload:
         $ref: '#/components/schemas/commonEvent'
     auth_required:
-      summary: 🔍 Authentication request event after connection is established.
+      summary: 🧪 Authentication request event after connection is established.
       description: |
         This event is only sent if the client didn't provide authentication during connection setup.  
         The client must then authenticate with the `auth` request message.
       payload:
         $ref: '#/components/schemas/authRequiredEvent'
     auth:
-      summary: 🔍 Authenticate a connection.
+      summary: 🧪 Authenticate a connection.
       description: |
         Sent by the client right after establishing a connection if header authentication cannot be used, or after an 
         `auth_required` request by the server.
@@ -518,7 +535,7 @@ components:
       x-response:
         $ref: '#/components/messages/authentication'
     authentication:
-      summary: 🔍 Authentication response.
+      summary: 🧪 Authentication response.
       description: |
         The authentication result is provided in the `code` attribute:
         - `200`: success, API can be used and message requests are accepted.
@@ -571,36 +588,38 @@ components:
     # =========================================================================
 
     version:
-      summary: 🔍 Get version information.
+      summary: 🚀 Get version information.
       payload:
         $ref: '#/components/schemas/versionMsg'
       x-response:
         $ref: '#/components/messages/version_info'
     version_info:
-      summary: 🔍 Version information response.
+      summary: 🧪 Version information response.
       payload:
         $ref: '#/components/schemas/versionInfoMsg'
 
     system:
-      summary: 👷 Get system information.
+      summary: 🚀 Get system information.
       description: Get hardware information about the device like serial number, model number and hardware revision.
       payload:
         $ref: '#/components/schemas/getSystemInfoMsg'
       x-response:
         $ref: '#/components/messages/result'
     system_info:
-      summary: 👷 System information response.
+      summary: 🧪 System information response.
       payload:
         $ref: '#/components/schemas/systemInfoMsg'
     system_cmd:
-      summary: 👷 Perform a system command like reboot or power-off.
+      summary: 🧪 Perform a system command like reboot or power-off.
       description: |
         The following system commands can be executed:
         
         - `STANDBY`: Put the device into standby mode.
         - `REBOOT`: Reboot the device.
         - `POWER_OFF`: Switch off the device
-        - `RESTART`: Restart the application.  
+        - `RESTART`: Restart all applications.
+        - `RESTART_UI`: Restart the ui application.
+        - `RESTART_CORE`: Restart the core service application.
         
         The server will respond with a `result` message and a status code of the request.  
         For status code 200 the WebSocket connection will be closed and the command executed.
@@ -661,7 +680,7 @@ components:
         $ref: '#/components/schemas/apiAccessMsg'
 
     check_system_update:
-      summary: 🔍 Check if system update is available.
+      summary: 🧪 Check if system update is available.
       description: |
         Returns the known available system updates.
 
@@ -672,7 +691,7 @@ components:
       x-response:
         $ref: '#/components/messages/system_update_info'
     system_update_info:
-      summary: 🔍 Available system update response.
+      summary: 🧪 Available system update response.
       payload:
         $ref: '#/components/schemas/systemUpdateInfoMsg'
     update_system:
@@ -697,7 +716,7 @@ components:
         $ref: '#/components/schemas/systemUpdateProgressMsg'
 
     reset_configuration:
-      summary: 👷 Reset all settings to default values.
+      summary: 🧪 Reset all settings to default values.
       payload:
         $ref: '#/components/schemas/resetConfigurationMsg'
       x-response:
@@ -732,19 +751,19 @@ components:
         $ref: '#/components/schemas/buttonCfgMsg'
 
     get_device_cfg:
-      summary: 🔍 Get remote device settings.
+      summary: 🧪 Get remote device settings.
       payload:
         $ref: '#/components/schemas/getDeviceCfgMsg'
       x-response:
         $ref: '#/components/messages/device_cfg'
     set_device_cfg:
-      summary: 🔍 Modify remote device settings.
+      summary: 🧪 Modify remote device settings.
       payload:
         $ref: '#/components/schemas/setDeviceCfgMsg'
       x-response:
         $ref: '#/components/messages/device_cfg'
     device_cfg:
-      summary: 🔍 Remote device settings response.
+      summary: 🧪 Remote device settings response.
       payload:
         $ref: '#/components/schemas/deviceCfgMsg'
 
@@ -839,7 +858,7 @@ components:
         $ref: '#/components/schemas/localizationLanguagesMsg'
 
     get_network_cfg:
-      summary: 🔍 Get network settings.
+      summary: 🧪 Get network settings.
       payload:
         $ref: '#/components/schemas/getNetworkCfgMsg'
       x-response:
@@ -1029,7 +1048,7 @@ components:
       payload:
         $ref: '#/components/schemas/entityMsg'
     entity_change:
-      summary: 🔍 Entity change event.
+      summary: 🧪 Entity change event.
       description: |
         Emitted if an entity has changed, a new entity has been added or a configured entity has been deleted.
         
@@ -1698,7 +1717,7 @@ components:
         $ref: '#/components/messages/result'
 
     profile_change:
-      summary: 🔍 Profile change event.
+      summary: 🧪 Profile change event.
       description: |
         Emitted if a profile configuration, related profile page or group has been changed, added or deleted.
       tags:
@@ -2170,7 +2189,7 @@ components:
         $ref: '#/components/schemas/integrationStateEventMsg'
 
     configuration_change:
-      summary: 🔍 System configuration change event.
+      summary: 🧪 System configuration change event.
       description: |
         Emitted if a system setting has changed.
         
@@ -2182,7 +2201,7 @@ components:
         $ref: '#/components/schemas/configurationChangeEventMsg'
 
     ir_learning:
-      summary: IR code learn event.
+      summary: 🧪 IR code learn event.
       description: |
         Emitted if learning mode is started, stopped or a new IR code was learned from an IR emitter device.
       tags:
@@ -2191,7 +2210,7 @@ components:
         $ref: '#/components/schemas/irLearningEventMsg'
 
     dock_change:
-      summary: 🔍 Dock change event.
+      summary: 🧪 Dock change event.
       description: |
         Emitted if a dock configuration has changed.
       tags:
@@ -2199,7 +2218,7 @@ components:
       payload:
         $ref: '#/components/schemas/dockChangeEventMsg'
     dock_state:
-      summary: 🔍 Dock state event.
+      summary: 🧪 Dock state event.
       description: |
         Emitted if the connection state of a dock has changed.
       tags:
@@ -2208,7 +2227,7 @@ components:
         $ref: '#/components/schemas/dockStateEventMsg'
 
     dock_discovery:
-      summary: Docking station discovery event.
+      summary: 🧪 Docking station discovery event.
       description: |
         Emitted if dock discovery is started, stopped or a new dock was discovered on the network or via Bluetooth.
       tags:
@@ -2217,7 +2236,7 @@ components:
         $ref: '#/components/schemas/dockDiscoveryEventMsg'
 
     dock_setup_change:
-      summary: Docking station setup state change event.
+      summary: 🧪 Docking station setup state change event.
       description: |
         Emitted for all dock setup flow state changes.
       tags:
@@ -2226,7 +2245,7 @@ components:
         $ref: '#/components/schemas/dockSetupChangeEventMsg'
 
     dock_update_change:
-      summary: Docking station firmware update change event.
+      summary: 🧪 Docking station firmware update change event.
       description: |
         Emitted for firmware update and progress state changes.
       tags:
@@ -2235,7 +2254,7 @@ components:
         $ref: '#/components/schemas/dockUpdateChangeEventMsg'
 
     integration_discovery:
-      summary: Integration discovery event.
+      summary: 🔍 Integration discovery event.
       description: |
         Emitted if integration discovery is started, stopped or a new integration was discovered on the network.
       tags:
@@ -2244,7 +2263,7 @@ components:
         $ref: '#/components/schemas/integrationDiscoveryEventMsg'
 
     integration_setup_change:
-      summary: Integration setup state change event.
+      summary: 🔍 Integration setup state change event.
       description: |
         Emitted for all integration setup flow state changes.
       tags:
@@ -2253,7 +2272,7 @@ components:
         $ref: '#/components/schemas/integrationSetupChangeEventMsg'
 
     software_update:
-      summary: Software update event.
+      summary: 🧪 Software update event.
       description: |
         Emitted during a system update to receive start, stop and progress events.
       tags:
@@ -2439,6 +2458,8 @@ components:
                     - REBOOT
                     - POWER_OFF
                     - RESTART
+                    - RESTART_UI
+                    - RESTART_CORE
               required:
                 - command
           required:

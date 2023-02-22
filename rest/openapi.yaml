@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.19.1
+  version: 0.20.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added:\n\n- Configuration import & export\n- Bulk import of custom IR datasets\n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Upload custom web-configurator\n- Upload custom remote-ui app\n- Configuration import & export\n- Bulk import of custom IR datasets\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -7177,6 +7177,8 @@ paths:
         - `REBOOT`: Reboot the device.
         - `POWER_OFF`: Switch off the device
         - `RESTART`: Restart the application.
+        - `RESTART_UI`: Restart the ui application.
+        - `RESTART_CORE`: Restart the core service application.
       operationId: systemCommand
       parameters:
         - name: cmd
@@ -7190,6 +7192,8 @@ paths:
               - REBOOT
               - POWER_OFF
               - RESTART
+              - RESTART_UI
+              - RESTART_CORE
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -10887,41 +10891,6 @@ components:
       minLength: 1
       maxLength: 36
       description: Permission scope name
-    ServiceInstances:
-      type: array
-      items:
-        $ref: '#/components/schemas/ServiceInstance'
-    ServiceInstance:
-      type: object
-      properties:
-        service_type:
-          type: string
-        name:
-          type: string
-          description: Instance name
-        hostname:
-          type: string
-        port:
-          type: integer
-          minimum: 1
-          maximum: 65535
-        addr_v4:
-          type: array
-          items:
-            type: string
-        addr_v6:
-          type: array
-          items:
-            type: string
-        txt:
-          type: object
-          additionalProperties:
-            type: string
-      required:
-        - service_type
-        - name
-        - hostname
-        - port
     SimpleId:
       type: string
       format: '^[a-zA-Z0-9\-_\.]+$'
