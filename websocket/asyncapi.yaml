@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.16.0-alpha'
+  version: '0.16.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1034,7 +1034,7 @@ components:
     execute_entity_command:
       summary: 🧪 Execute an entity command.
       description: |
-        Optional command data can be provided in attribute `parameter`.
+        Optional command data can be provided in attribute `params`.
       tags:
         - name: entity
       payload:

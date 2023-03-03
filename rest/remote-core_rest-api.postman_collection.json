@@ -6541,54 +6541,6 @@
 						}
 					},
 					"response": []
-				},
-				{
-					"name": "connectAll",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg?cmd=CONNECT",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg"
-							],
-							"query": [
-								{
-									"key": "cmd",
-									"value": "CONNECT"
-								}
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "disconnectAll",
-					"request": {
-						"method": "PUT",
-						"header": [],
-						"url": {
-							"raw": "{{SERVER}}/api/intg?cmd=DISCONNECT",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"intg"
-							],
-							"query": [
-								{
-									"key": "cmd",
-									"value": "DISCONNECT"
-								}
-							]
-						}
-					},
-					"response": []
 				}
 			]
 		},
@@ -6749,13 +6701,13 @@
 					"response": []
 				},
 				{
-					"name": "updateEntity Copy",
+					"name": "executeEntityCommand",
 					"request": {
-						"method": "PATCH",
+						"method": "PUT",
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"name\": { \"en\": \"light {{$randomProductAdjective}}\" },\n    \"icon\": \"uc:{{$randomProductMaterial}}\",\n    \"features\": [\"{{$randomProductAdjective}}\"],\n    \"description\": { \"en\": \"{{$randomLoremSentence}}\"}\n}",
+							"raw": "{\n  \"cmd_id\": \"toggle\"\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -6763,14 +6715,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{SERVER}}/api/entities/:entityId",
+							"raw": "{{SERVER}}/api/entities/:entityId/command",
 							"host": [
 								"{{SERVER}}"
 							],
 							"path": [
 								"api",
 								"entities",
-								":entityId"
+								":entityId",
+								"command"
 							],
 							"variable": [
 								{
@@ -7979,50 +7932,6 @@
 						"body": {
 							"mode": "raw",
 							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} comes home\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"options\": {\n        \"entity_ids\": [ \"88567410-e60a-496d-9e2f-53abd2eba81e\" ]\n    }\n}\n",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{SERVER}}/api/macros",
-							"host": [
-								"{{SERVER}}"
-							],
-							"path": [
-								"api",
-								"macros"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "createMacro clone",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Successful POST request\", function () {",
-									"    pm.expect(pm.response.code).to.be.oneOf([201, 202]);",
-									"});",
-									"",
-									"const responseJson = pm.response.json();",
-									"postman.setEnvironmentVariable(\"macro_id\", responseJson.entity_id);",
-									""
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n    \"name\": {\n        \"en\": \"{{$randomFirstName}} comes home\"\n    },\n    \"icon\": \"uc:{{$randomColor}}\",\n    \"description\": {\n        \"en\": \"{{$randomCatchPhrase}}\"\n    },\n    \"clone_from\": \"88567410-e60a-496d-9e2f-53abd2eba81e\"\n}\n",
 							"options": {
 								"raw": {
 									"language": "json"
