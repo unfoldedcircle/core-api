@@ -249,20 +249,10 @@ sequenceDiagram
     User->>+C: setup new integration
     C->>-R:  enable integration instance
 
-    R-)+I:  [connect] 
-    I->>I:  authentication & version check etc
-    opt
-        I-->>-D:  connect / initialize
+    critical Establish a connection. See normal operation.
+        R-)I: connect
     end
 
-    opt
-        I-)+R:  get_version
-        R--)-I: version
-
-        I-)+R:  get_localization_cfg
-        R--)-I: localization_cfg
-    end
-    
     R-)+I:   get_driver_version
     I--)-R:  driver_version
     
@@ -290,7 +280,8 @@ See [Multi Device Instance Driver](multi-device-driver.md) for preliminary infor
 
 During normal operation there are only a few different message exchanged between the Remote and the integration driver:
 
-- `subscribe_events`: after the WebSocket connection is established
+- `authentication`: sent by the driver after WebSocket connection is established
+- `subscribe_events`: sent by the Remote after the WebSocket connection is authenticated
 - `entity_command`: instruct the driver to perform an action on an entity
 - `entity_change`: inform the Remote that an entity changed
 - `get_device_state`: request the device state from the driver
@@ -306,13 +297,30 @@ sequenceDiagram
 
     R->>R:  startup: lookup enabled integration
 
-    R-)+I:  [connect] 
+    R-)+I:  [WS connection] 
     I->>I:  authentication & version check etc
-    opt
-        I-->>-D:  connect / initialize
+    I--)-R:  authentication
+
+    R-)+I:  connect
+    loop until connected
+      opt
+          I-->>D:  connect / initialize
+      end
+      I--)-R:  device_state
     end
 
+    opt
+        I-)+R:  get_version
+        R--)-I: version
+
+        I-)+R:  get_localization_cfg
+        R--)-I: localization_cfg
+    end
+    
+
     R-)I:   subscribe_events
+
+    R-)I:   get_entity_states
 
     D-->>I:  external state change
     I--)+R:  entity_change 
