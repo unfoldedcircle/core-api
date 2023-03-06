@@ -18,6 +18,8 @@ is also the platform of the former YIO Remote.
 4. Choose which [entities and features](../entities/README.md) the driver should expose.
 5. Implement the required WebSockets text messages in the [WebSocket Integration API](../../integration-api/asyncapi.yaml).
 
+ℹ️ See [NodeJS API wrapper](https://github.com/unfoldedcircle/integration-node-library) for a quick start in JavaScript.
+
 ### Integration Driver Types
 
 There are two different driver types one can implement: either a simple single device driver or a multi device instance
