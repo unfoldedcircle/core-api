@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.6.2-alpha'
+  version: '0.6.3-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -601,10 +601,22 @@ components:
         $ref: '#/components/schemas/localizationMsg'
 
     get_entity_states:
-      summary: 🚀 🍕 Get the current state of the entities.
+      summary: 🚀 🍕 Get the current state of the configured entities.
       description: |
         Called by the Remote Two when it needs to synchronize the dynamic entity attributes, e.g. after connection setup
         or waking up from standby.
+        
+        The integration should only send the state of the configured entities to reduce communication overhead,
+        especially if there are many available entities, from which only a few are getting configured on the remote.  
+        Any additional data will be ignored.
+        
+        Furthermore, the integration driver is free to decide which entity states it wants to send back. It's even
+        advisable to use dirty flags in the integration driver if there are a lot of entities, and only return the
+        changed data.
+        
+        ⚠️ Future change announcement: this request will be enhanced with a `force` flag (or the like) to signal that
+        all entity states are required, and no data should be suppressed. This will happen for example after the
+        remote is restarted.
       tags:
         - name: entity
         - name: required
