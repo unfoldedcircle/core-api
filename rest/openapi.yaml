@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.20.0
+  version: 0.20.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1005,7 +1005,7 @@ paths:
       description: |
         Returns the current discovery status and the discovered integration drivers.
 
-        Use the DELETE operation to clear the discovered devices and PUT to start a new discovery.
+        Use the DELETE operation to stop an active discovery and PUT to start a new discovery.
       operationId: getIntegrationDiscoveryStatus
       responses:
         '200':
@@ -1088,7 +1088,7 @@ paths:
     get:
       tags:
         - integrations
-      summary: Get integration driver discovery status.
+      summary: Get integration driver discovery information.
       description: |
         Returns the discovered integration driver.
       operationId: getDiscoveredIntegrationDriver
@@ -1110,7 +1110,7 @@ paths:
     put:
       tags:
         - integrations
-      summary: Execute connection test command on discovered integration driver.
+      summary: "\U0001F477 Execute connection test and fetch metadata from discovered integration driver."
       description: |
         Perform a driver connection test with a discovered driver. If the driver requires a token, it must be specified in
         the request body.
@@ -1119,9 +1119,9 @@ paths:
         - `200`: successful operation: the connection test was successful and driver metadata could be retrieved.
         - `404`: discovered driver with `driver_id` not found. Check if the discovery result is still available and has not
                  been deleted. This can happen after a timeout since the discovery, or if the discovery result has been
-                 cleared with `DELETE /intg/discover`.
+                 cleared with starting a new discovery.
         - `503`: integration driver connection could not be established.
-      operationId: executeCommandOnDiscoveredIntgDriver
+      operationId: getDiscoveredIntgDriverMetadata
       parameters:
         - $ref: '#/components/parameters/driver_id'
         - name: cmd
@@ -1307,7 +1307,7 @@ paths:
         The returned `id` in the `IntegrationSetupInfo` response will be the identifier for the further setup operations
         with the `/intg/setup/:driver_id` endpoints. Once the setup process is successfully finished, an integration instance is
         created. A setup process can be simple and fully automatic, but may also require user interaction and further
-        communication with the returned `/intg/setup/:driver_id` endpoint.
+        communication with the `/intg/setup/:driver_id` endpoint.
 
         Emits the WebSocket event `integration_setup_change` with `event_type: START`.
 
@@ -1781,7 +1781,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IntegrationRequest'
+              $ref: '#/components/schemas/IntegrationUpdate'
         required: true
       responses:
         '201':
@@ -1953,7 +1953,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/IntegrationRequest'
+              $ref: '#/components/schemas/IntegrationUpdate'
         required: true
       responses:
         '201':
@@ -7764,13 +7764,6 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/AccessTokenId'
-    ui_id:
-      name: uiId
-      in: path
-      description: User interface identification.
-      required: true
-      schema:
-        $ref: '#/components/schemas/EntityId'
     wifi_id:
       name: wifiId
       in: path
@@ -8228,7 +8221,7 @@ components:
       minLength: 1
       maxLength: 36
       description: |
-        Entity identifier used in an integration driver (= available entities).  
+        Entity identifier used in an integration driver (= available entities).
     ButtonId:
       type: string
       format: '^[A-Z0-9_]+$'
@@ -9624,7 +9617,7 @@ components:
           $ref: '#/components/schemas/DriverId'
         configured:
           description: |
-            Integration configuration flag for this remote:
+            Integration configuration flag:
             - true: driver has already been configured
             - false: driver has not yet been configured
           type: boolean
@@ -9888,7 +9881,7 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Integration'
-    IntegrationRequest:
+    IntegrationUpdate:
       type: object
       description: |
         Integration instance update model. This model corresponds to the `Integration` model except there are no required

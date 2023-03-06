@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.16.1-alpha'
+  version: '0.17.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -51,7 +51,6 @@ info:
     - Matching features of the REST Core-API (except file up & download):
       - Activity management    
       - Infrared code management
-    - Integration setup flow
     - Static network configuration
     
     Please check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. 
@@ -354,6 +353,22 @@ channels:
 
           - $ref: '#/components/messages/configure_entity_from_integration'
 
+          # --- integration discovery
+          - $ref: '#/components/messages/get_integration_discovery_status'
+          - $ref: '#/components/messages/start_integration_discovery'
+          - $ref: '#/components/messages/stop_integration_discovery'
+          - $ref: '#/components/messages/get_discovered_integration_driver'
+          - $ref: '#/components/messages/get_discovered_integration_driver_metadata'
+          - $ref: '#/components/messages/configure_discovered_integration_driver'
+
+          # --- integration setup
+          - $ref: '#/components/messages/get_integration_setup_processes'
+          - $ref: '#/components/messages/setup_integration'
+          - $ref: '#/components/messages/stop_all_integration_setups'
+          - $ref: '#/components/messages/get_integration_setup_status'
+          - $ref: '#/components/messages/set_integration_user_data'
+          - $ref: '#/components/messages/stop_integration_setup'
+  
     subscribe:
       description: |
         ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of all
@@ -372,6 +387,12 @@ channels:
           - $ref: '#/components/messages/integration_count'
           - $ref: '#/components/messages/integrations'
           - $ref: '#/components/messages/integration'
+
+          # --- integration discovery and setup
+          - $ref: '#/components/messages/integration_discovery_status'
+          - $ref: '#/components/messages/discovered_integration_driver'
+          - $ref: '#/components/messages/integration_setup_processes'
+          - $ref: '#/components/messages/integration_setup_info'
 
   /profiles:
     publish:
@@ -2096,6 +2117,254 @@ components:
         $ref: '#/components/schemas/configureEntityFromIntegrationMsg'
       x-response:
         $ref: '#/components/messages/entity'
+
+    get_integration_discovery_status:
+      summary: 🧪 Get external integration driver discovery status.
+      description: |
+        Returns the current discovery status and the discovered integration drivers.
+        
+        Use `start_integration_discovery` to clear old results and start a new discovery.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationDiscoveryStatusMsg'
+      x-response:
+        $ref: '#/components/messages/integration_discovery_status'
+    integration_discovery_status:
+      summary: 🧪 External integration driver discovery status response.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationDiscoveryStatusMsg'
+
+    start_integration_discovery:
+      summary: 🧪 Start discovery of external integration drivers.
+      description: |
+        Start integration driver discovery on the network with mDNS. By default the discovery automatically stops after
+        30 seconds. Use the `get_integration_discovery_status` request to check on discovered devices or
+        `stop_integration_discovery` to stop discovery.
+
+        By default only new integration drivers are returned. If a driver is already configured it will be omitted from the
+        results, unless the query parameter `new=false` is set.
+
+        - Previously discovered integrations are removed, only newly discovered integrations will be returned.
+        - Emits the WebSocket event `integration_discovery` with `event_type: START` when discovery starts.
+        - For each discovered driver the WebSocket event `integration_discovery` with `event_type: DISCOVER` is emitted.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/startIntegrationDiscoveryMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    stop_integration_discovery:
+      summary: 🧪 Stop discovery of external integration drivers.
+      description: |
+        Stops the driver discovery and returns the current discovery status in the response.
+
+        Emits the WebSocket event `integration_discovery` with `event_type: STOP`.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/stopIntegrationDiscoveryMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_discovered_integration_driver:
+      summary: 🧪 Get integration driver discovery information.
+      description: |
+        Returns the discovered integration driver.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getDiscoveredIntegrationDriverMsg'
+      x-response:
+        $ref: '#/components/messages/discovered_integration_driver'
+    discovered_integration_driver:
+      summary: 🧪 Integration driver discovery information.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/discoveredIntegrationDriverMsg'
+
+    get_discovered_integration_driver_metadata:
+      summary: 👷 Execute connection test and fetch metadata from discovered integration driver.
+      description: |
+        Perform a driver connection test with a discovered driver. If the driver requires a token, it must be specified in
+        the request data.
+
+        Response status codes:
+        - `200`: successful operation: the connection test was successful and driver metadata could be retrieved.
+        - `404`: discovered driver with `driver_id` not found. Check if the discovery result is still available and has not
+                 been deleted. This can happen after a timeout since the discovery, or if the discovery result has been
+                 cleared with starting a new discovery.
+        - `503`: integration driver connection could not be established.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getDiscoveredIntgDriverMetadataMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver'
+
+    configure_discovered_integration_driver:
+      summary: 🧪 Register a discovered integration driver.
+      description: |
+        Register a discovered integration driver:
+        - establish communication with the driver.
+          - if the driver requires a password, it must be provided in the request.
+          - the discovered driver name and url can be overridden.
+        - fetch metadata from the driver.
+        - check compatability.
+        - register the driver and connection parameters in the remote.
+
+        After a successful registration the setup process of the driver can be started to configure the integration.
+        The required setup data is described in the returned `setup_data_schema` and the provided values by the user must
+        be passed to the `setup_integration` request.
+
+        Response status codes:
+        - `400`: invalid data in request body.
+        - `404`: no discovered driver found for given `driver_id`.
+        - `409`: integration driver is already registered.
+        - `503`: integration driver communication error. Either driver is not reachable or communication failed.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/configureDiscoveredIntegrationDriverMsg'
+      x-response:
+        $ref: '#/components/messages/integration_driver'
+
+    get_integration_setup_processes:
+      summary: 🧪 Get current integration setup processes.
+      description: |
+        Return a list of all active setup process identifiers. The returned ids can be used with the
+        `set_integration_user_data` and `stop_integration_setup` messages to continue or abort a setup process.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationSetupProcessesMsg'
+      x-response:
+        $ref: '#/components/messages/integration_setup_processes'
+    integration_setup_processes:
+      summary: 🧪 Current integration setup processes response.
+      description: |
+        Return a list of all active setup process identifiers.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationSetupProcessesMsg'
+
+    setup_integration:
+      summary: 🧪 Start setting up a new integration driver.
+      description: |
+        Start a new setup process for the given integration driver and provided setup data.
+
+        - This operation immediately starts the driver communication and setup process.
+        - There may only be one active setup process per driver, otherwise status code `409` is returned.
+
+        The returned `id` in the `IntegrationSetupInfo` response will be the identifier for the further setup operations
+        with the `set_integration_user_data` and `stop_integration_setup` requests. Once the setup process is
+        successfully finished, an integration instance is created. A setup process can be simple and fully automatic,
+        but may also require user interaction and further communication with the `set_integration_user_data` message.
+
+        Emits the WebSocket event `integration_setup_change` with `event_type: START`.
+
+        Request body:
+        - `name`: optional integration name. If not specified the name of the integration driver is used.
+        - `setup_data`: optional driver setting values corresponding to the driver's `setup_data_schema` object.
+
+        Response status codes:
+        - `400`: invalid data in request body.
+        - `404`: specified `driver_id` in request body does not exist.
+        - `409`: a setup process for the given `driver_id` already exists. Either continue or abort existing process.
+        - `422`: the setup process cannot be used: either the integration is already configured or doesn't allow to be
+                 set up again.  
+                 ⚠️ At the moment the setup process is only implemented for new integration setups. This will be extended
+                    to re-run the setup process of an already configured integration.
+        - `503`: integration driver communication error. Either driver is not reachable or communication failed.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/setupIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/integration_setup_info'
+    integration_setup_info:
+      summary: 🧪 Integration setup information response.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/integrationSetupInfoMsg'
+
+    stop_all_integration_setups:
+      summary: 🧪 Abort and remove all setup processes.
+      description: |
+        Stop all setup processes at the next possible operation and remove all setup process information.  
+        Depending on the integration driver, a started setup process cannot be aborted.
+
+        ⚠️ This stops all setup processes, not just for the current session!
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/stopAllIntegrationSetupsMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_integration_setup_status:
+      summary: 🧪 Get integration driver setup status.
+      description: |
+        Poll operation to retrieve the current integration driver setup state. See the `state` and `error` fields in the
+        response message. There are also WebSocket `integration_setup_change` event messages for state changes to avoid
+        polling.
+
+        Defined setup states:
+        - `SETUP`: setup is running and configuring the integration. 
+        - `WAIT_USER_ACTION`: user input is required to continue the setup process. See `require_user_action` in response
+           for the required user input. Provide the requested data with the `PUT` operation.
+        - `OK`: setup process has been completed successfully, the integration driver can now be used.
+        - `ERROR`: the setup process failed. Check the `error` field for more information.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/getIntegrationSetupStatusMsg'
+      x-response:
+        $ref: '#/components/messages/integration_setup_info'
+
+    set_integration_user_data:
+      summary: 🧪 Provide requested integration setup data.
+      description: |
+        Set required data to configure the integration driver or continue the setup process.
+
+        Defined user actions to set in the request body `action` field:
+        - `input_values`: if the user was requested to enter settings, e.g. connection or credential parameters to a device
+          or service.
+        - `confirm`: response to the user action `confirmation`. Set to `true` if the user had to perform an action like
+          pressing a button on a device and then confirms the action with continuing the setup process.  
+          The `false` value is prepared for yes / no choices.
+
+        The `state` field in the response message indicate the current state of the setup process. Use the
+        `get_integration_setup_status` message to poll for state updates or listen to the corresponding WebSocket
+        `integration_setup_change` event messages with `event_type: SETUP`.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/setIntegrationUserDataMsg'
+      x-response:
+        $ref: '#/components/messages/integration_setup_info'
+
+    stop_integration_setup:
+      summary: 🧪 Abort the integration driver setup process.
+      description: |
+        Stop the setup process at the next possible operation and remove the setup process information.  
+        To start a new setup process, use the `setup_integration` request again.
+
+        Depending on the integration driver, a started setup process cannot be aborted.
+
+        Emits the WebSocket event `integration_setup_change` with `event_type: STOP`.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/stopIntegrationSetupMsg'
+      x-response:
+        $ref: '#/components/messages/result'
 
     # =========================================================================
     # NOTIFICATIONS API MESSAGES
@@ -4804,7 +5073,7 @@ components:
         - properties:
             msg:
               type: string
-              const: integration_drivers
+              const: integration_driver
             msg_data:
               $ref: '#/components/schemas/integrationDriver'
           required:
@@ -4935,11 +5204,11 @@ components:
     integrationMsg:
       type: object
       allOf:
-        - $ref: '#/components/schemas/commonReq'
+        - $ref: '#/components/schemas/commonResp'
         - properties:
             msg:
               type: string
-              const: create_integration
+              const: integration
             msg_data:
               $ref: '#/components/schemas/integration'
           required:
@@ -5023,6 +5292,300 @@ components:
               required:
                 - integration_id
                 - entity_id
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationDiscoveryStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_discovery_status
+          required:
+            - msg
+    integrationDiscoveryStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_discovery_status
+            msg_data:
+              $ref: '#/components/schemas/IntegrationDiscoveryStatus'
+          required:
+            - msg
+            - msg_data
+
+    startIntegrationDiscoveryMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: start_integration_discovery
+            msg_data:
+              type: object
+              properties:
+                timeout:
+                  description: Timeout in seconds.
+                  type: integer
+                  format: int32
+                  default: 30
+                  minimum: 1
+                  maximum: 300
+                new:
+                  description: Only return new devices, filter out already configured integrations.
+                  type: boolean
+                  default: true
+          required:
+            - msg
+
+    stopIntegrationDiscoveryMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: stop_integration_discovery
+          required:
+            - msg
+
+    getDiscoveredIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_discovered_integration_driver
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  type: string
+              required:
+                - driver_id
+          required:
+            - msg
+            - msg_data
+    discoveredIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: discovered_integration_driver
+            msg_data:
+              $ref: '#/components/schemas/integrationDiscoveryInformation'
+          required:
+            - msg
+            - msg_data
+
+    getDiscoveredIntgDriverMetadataMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_discovered_integration_driver_metadata
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  type: string
+                timeout:
+                  description: Timeout in seconds.
+                  type: integer
+                  format: int32
+                  default: 5
+                  minimum: 3
+                  maximum: 60
+                connection:
+                  type: object
+                  properties:
+                    driver_url:
+                      type: string
+                    token:
+                      description: |
+                        Optional driver authentication token.
+                      type: string
+                      maxLength: 2048
+              required:
+                - driver_id
+          required:
+            - msg
+            - msg_data
+
+    configureDiscoveredIntegrationDriverMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: configure_discovered_integration_driver
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  type: string
+                name:
+                  $ref: '#/components/schemas/languageText'
+                driver_url:
+                  description: Custom WebSocket URL of the driver, otherwise the discovered driver address is used.
+                  type: string
+                  format: uri
+                  maxLength: 2048
+                token:
+                  description: |
+                    Optional driver authentication token.
+                  type: string
+                  maxLength: 2048
+              required:
+                - driver_id
+          required:
+            - msg
+            - msg_data
+
+    getIntegrationSetupProcessesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_setup_processes
+          required:
+            - msg
+    integrationSetupProcessesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_setup_processes
+            msg_data:
+              type: array
+              items:
+                type: string
+          required:
+            - msg
+            - msg_data
+
+    setupIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: setup_integration
+            msg_data:
+              $ref: '#/components/schemas/CreateIntegrationSetup'
+          required:
+            - msg
+            - msg_data
+    integrationSetupInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: integration_setup_info
+            msg_data:
+              $ref: '#/components/schemas/IntegrationSetupInfo'
+          required:
+            - msg
+            - msg_data
+
+    stopAllIntegrationSetupsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: stop_all_integration_setups
+          required:
+            - msg
+
+    getIntegrationSetupStatusMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_integration_setup_status
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  type: string
+              required:
+                - driver_id
+          required:
+            - msg
+            - msg_data
+
+    setIntegrationUserDataMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_integration_user_data
+            msg_data:
+              type: object
+              oneOf:
+                - type: object
+                  properties:
+                    driver_id:
+                      type: string
+                    input_values:
+                      $ref: '#/components/schemas/SettingsValues'
+                  required:
+                    - driver_id
+                    - input_values
+                - type: object
+                  properties:
+                    driver_id:
+                      type: string
+                    confirm:
+                      type: boolean
+                  required:
+                    - driver_id
+                    - confirm
+          required:
+            - msg
+            - msg_data
+
+    stopIntegrationSetupMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: stop_integration_setup
+            msg_data:
+              type: object
+              properties:
+                driver_id:
+                  type: string
+              required:
+                - driver_id
           required:
             - msg
             - msg_data
@@ -5327,7 +5890,7 @@ components:
               type: string
               const: DEVICE
             msg_data:
-              $ref: '#/components/schemas/integrationDiscovery'
+              $ref: '#/components/schemas/integrationDiscoveryEvent'
           required:
             - msg
             - msg_data
@@ -6230,6 +6793,64 @@ components:
       required:
         - integration_id
 
+    IntegrationDiscoveryStatus:
+      type: object
+      properties:
+        active:
+          description: |
+            Integration discovery still active or not.
+          type: boolean
+        integrations:
+          type: array
+          items:
+            $ref: "#/components/schemas/integrationDiscoveryInformation"
+      required:
+        - discovery_active
+        - integrations
+
+    CreateIntegrationSetup:
+      type: object
+      properties:
+        driver_id:
+          $ref: '#/components/schemas/driverId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        setup_data:
+          $ref: '#/components/schemas/SettingsValues'
+      required:
+        - driver_id
+
+    IntegrationSetupInfo:
+      type: object
+      description: Integration setup state
+      properties:
+        id:
+          type: string
+        state:
+          $ref: '#/components/schemas/integrationSetupState'
+        error:
+          $ref: '#/components/schemas/integrationSetupError'
+        require_user_action:
+          description: If set, the setup process waits for the specified user action.
+          oneOf:
+            - type: object
+              properties:
+                input:
+                  type: object
+                  $ref: '#/components/schemas/SettingsPage'
+              required:
+                - input
+            - type: object
+              properties:
+                confirmation:
+                  type: object
+                  $ref: '#/components/schemas/ConfirmationPage'
+              required:
+                - confirmation
+      required:
+        - id
+        - state
+
     entityChange:
       type: object
       description: |
@@ -6889,7 +7510,7 @@ components:
         - state
         - update_id
 
-    integrationDiscovery:
+    integrationDiscoveryEvent:
       type: object
       properties:
         event_type:
@@ -6909,6 +7530,10 @@ components:
         id:
           type: string
         configured:
+          description: |
+            Integration configuration flag:
+            - true: driver has already been configured
+            - false: driver has not yet been configured
           type: boolean
         name:
           type: string
@@ -6919,6 +7544,9 @@ components:
         driver_url:
           description: Resolved driver url.
           type: string
+        pwd_protected:
+          description: Driver requires a connection password.
+          type: boolean
         version:
           description: Detected driver version.
           type: string
