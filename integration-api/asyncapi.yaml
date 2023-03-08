@@ -170,8 +170,8 @@ components:
   securitySchemes:
     token:
       description: |
-        The API token is either provided in the `API-KEY` header while upgrading to a WebSocket connection, or with an
-        authentication message.
+        The API token is either provided in the `auth-token` header while upgrading to a WebSocket connection,
+        or with an authentication message.
         - If the integration driver doesn't support header based authentication, it must send the `auth_required`
           message event after the WebSocket connection is established. The Remote Two will then authenticate with the
           `auth` request message.
@@ -179,7 +179,7 @@ components:
           with `code: 200` and `req_id: 0` after the WebSocket connection has been established by the Remote Two.
       type: httpApiKey
       in: header
-      name: API-KEY
+      name: auth-token
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   messages:

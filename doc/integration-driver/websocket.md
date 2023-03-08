@@ -16,7 +16,7 @@ An integration driver may require a token for authentication, or no authenticati
 #### Header Authentication
 
 If header based authentication has been specified for the integration driver in the remote configuration, the remote
-will send the token in the `API-KEY` header field while establishing the connection.
+will send the token in the `auth-token` header field while establishing the connection.
 
 The WebSocket connection should then only be established by the driver if the token matches. Otherwise, the integration
 driver (which is the WebSocket server) must respond with http status code `401 Unauthorized` and not upgrading the
