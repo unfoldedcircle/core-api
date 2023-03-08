@@ -54,6 +54,7 @@ how to develop an integration driver for the Remote Two.
 #### Examples
 
 - [API models in Rust](https://github.com/unfoldedcircle/api-model-rs)
+- [NodeJS API wrapper for the UC Integration API](https://github.com/unfoldedcircle/integration-node-library)
 
 ℹ️ _The following examples will be published shortly:_
 
@@ -80,10 +81,10 @@ It is up to the client to reconnect again.
 In the short term we will publish the following APIs and additional repositories: 
 
 - [x] WebSocket integration API
-- [ ] REST Core API, WebSocket Core API
+- [x] REST Core API, WebSocket Core API
 - [x] [API models in Rust](https://github.com/unfoldedcircle/api-model-rs) (Apache License 2.0)
 - [ ] Open Source integration for Home Assistant written in Rust (Mozilla Public License 2.0)
-- [ ] remote-core simulator for Linux & macOS to start developing integrations without a Remote Two device
+- [x] [remote-core simulator](https://github.com/unfoldedcircle/core-simulator) to start developing integrations without a Remote Two device
 - [ ] Open Source remote-ui application
 - [x] Dock API for sending & learning IR codes
 
