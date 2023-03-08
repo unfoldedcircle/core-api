@@ -5,9 +5,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+
+_Changes in the next release_
+
+### Added
+- Initial Dock-API release.
+- Driver metadata retrieval with `get_driver_metadata`.
+- Integration Driver mDNS advertisement documentation.
+
 ### Changed
 - Replace `localization.unit_system_metric` & `.temperature_celsius` with `measurement_unit` enum (METRIC, US, UK). 
 - Change `localization.languageCode` separator from dash to underscore. New: `en_UK`, `en_US` etc.
+
+### Fixed
+- `inputTypeLabel` definition.
+- The API token header field is called `AUTH-TOKEN`.
 
 ## 0.6.1-alpha - 2022-06-12
 ### Added

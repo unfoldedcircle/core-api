@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.6.3-alpha'
+  version: '0.7.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -108,6 +108,7 @@ channels:
           # --- common
           - $ref: '#/components/messages/auth'
           - $ref: '#/components/messages/get_driver_version'
+          - $ref: '#/components/messages/get_driver_metadata'
           # --- device & discovery handling
           - $ref: '#/components/messages/connect'
           - $ref: '#/components/messages/disconnect'
@@ -144,6 +145,7 @@ channels:
           - $ref: '#/components/messages/result'
           # --- system commands
           - $ref: '#/components/messages/driver_version'
+          - $ref: '#/components/messages/driver_metadata'
           # --- registration handling
           #          - $ref: '#/components/messages/deregister' ?
           # --- device & discovery handling
@@ -249,6 +251,9 @@ components:
         
         If the driver doesn't support or require authentication, it still needs to send the `authentication` message
         with `code: 200` and `req_id: 0` after the WebSocket connection has been established by the Remote Two.
+        
+        It's recommended to send the optional driver version object in the the msg_data payload to avoid eventual
+        additional message exchanges.
       payload:
         $ref: '#/components/schemas/authMsg'
       tags:
@@ -272,6 +277,26 @@ components:
         $ref: '#/components/schemas/driverVersionMsg'
       tags:
         - name: required
+
+    get_driver_metadata:
+      summary: 🧪🍕 Retrieve the integration driver metadata.
+      description: |
+        The metadata is used to setup the driver in the remote / web-configurator and start the setup flow.
+      tags:
+        - name: metadata
+        - name: required
+      payload:
+        $ref: '#/components/schemas/getDriverMetadataMsg'
+      x-response:
+        $ref: '#/components/messages/driver_metadata'
+    driver_metadata:
+      summary: 🧪🍕 Integration driver metadata response.
+      tags:
+        - name: metadata
+        - name: required
+      payload:
+        $ref: '#/components/schemas/driverMetadataMsg'
+
     enter_standby:
       summary: 🔍 Remote Two goes into standby event.
       description: |
@@ -281,6 +306,7 @@ components:
         - name: entity
       payload:
         $ref: '#/components/schemas/enterStandbyEvent'
+
     exit_standby:
       summary: 🔍 Remote Two leaves standby event.
       description: |
@@ -886,6 +912,8 @@ components:
             msg:
               type: string
               const: authentication
+            msg_data:
+              $ref: '#/components/schemas/driverVersion'
           required:
             - msg
 
@@ -915,6 +943,31 @@ components:
           required:
             - msg
             - msg_data
+
+    getDriverMetadataMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_driver_metadata
+          required:
+            - msg
+    driverMetadataMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: driver_metadata
+            msg_data:
+              $ref: '#/components/schemas/driverMetadata'
+          required:
+            - msg
+            - msg_data
+
     getVersionMsg:
       type: object
       allOf:
@@ -1558,6 +1611,90 @@ components:
               type: string
             driver:
               type: string
+
+    driverMetadata:
+      description: |
+        Integration driver metadata.
+      type: object
+      properties:
+        driver_id:
+          type: string
+        name:
+          $ref: '#/components/schemas/languageText'
+        driver_url:
+          description: Optional WebSocket URL of the driver to override mDNS information.
+          type: string
+          format: uri
+          maxLength: 2048
+        auth_method:
+          $ref: '#/components/schemas/intgAuthMethod'
+        version:
+          description: Driver version, [SemVer](https://semver.org/) preferred.
+          type: string
+          maxLength: 20
+        min_core_api:
+          description: |
+            Optional version check: minimum required Core-API version in the remote.
+          type: string
+          maxLength: 20
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        description:
+          $ref: '#/components/schemas/languageText'
+        developer:
+          $ref: '#/components/schemas/driverDeveloper'
+        home_page:
+          description: Optional home page url for more information.
+          type: string
+          format: uri
+          maxLength: 255
+        device_discovery:
+          description: Driver supports multi-device discovery. **Not yet supported**.
+          type: boolean
+        setup_data_schema:
+          description: |
+            Driver configuration metadata describing configuration parameters for the web-configurator.
+
+            **Not yet finalized**.
+          type: object
+          #$ref: '#/components/schemas/settingsPage'
+        release_date:
+          description: Release date of the driver.
+          type: string
+          format: date
+      required:
+        - driver_id
+        - name
+        - version
+
+    driverDeveloper:
+      type: object
+      description: Optional information about the integration developer.
+      properties:
+        name:
+          description: Optional developer information to display in UI / web-configurator.
+          type: string
+          maxLength: 50
+        url:
+          description: Optional developer home page.
+          type: string
+          format: uri
+          maxLength: 255
+        email:
+          description: Optional developer contact email.
+          type: string
+          format: email
+          maxLength: 100
+
+    intgAuthMethod:
+      type: string
+      description: |
+        Integration driver authentication method if a token is required.
+
+        The JSON `auth` message is used if a token is configured but no authentication method is set.
+      enum:
+        - HEADER
+        - MESSAGE
 
     deviceState:
       type: object
