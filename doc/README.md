@@ -10,4 +10,4 @@
 - [How to write an integration driver](integration-driver/write-integration-driver.md)
 - [WebSockets handling](integration-driver/websocket.md)
 - [Driver registration](integration-driver/driver-registration.md)
-- [Multi-device instance driver](integration-driver/multi-device-driver.md)
+- [Driver setup](integration-driver/driver-setup.md)

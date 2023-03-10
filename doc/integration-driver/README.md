@@ -6,4 +6,4 @@
 - [WebSockets handling](websocket.md)
 - [Driver mDNS advertisement](driver-advertisement.md)
 - [Driver registration](driver-registration.md)
-- [Multi Device Instance Driver](multi-device-driver.md)
+- [Driver setup](driver-setup.md)

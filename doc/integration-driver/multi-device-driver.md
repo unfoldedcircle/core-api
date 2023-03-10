@@ -1,6 +1,6 @@
 ### Multi Device Instance Driver
 
-**TODO review, not yet finalized!**
+⚠️ **This feature might not be implemented anymore or be integrated with the new driver setup in the future!**
 
 _TODO add introduction_
 

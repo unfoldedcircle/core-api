@@ -220,6 +220,39 @@ The basic message flow between an integration and the remote is as follows:
 - The remote announces when it goes into and out of standby, so the integration driver can act accordingly.   
   Note: the WebSocket connection might get disconnected during remote standby!
 
+#### Establish Connection
+
+```mermaid
+sequenceDiagram
+    participant I as Integration
+    participant R as Remote
+
+    R-)+R:     create integration driver session
+
+    critical Establish WS connection
+      R-)+I:     connect         
+      alt header token
+        I->>I:    authentication & version check etc
+        I--)R:    authentication (OK)
+      else message based auth
+        I--)R:    auth_required
+        R-)I:   auth
+        I--)R:    authentication (OK)
+      end
+      Note over I,R: Authenticated WS session
+      R-)R:    wait for messages
+      Note over I,R: Message exchange until disconnected
+      R-->-I:     disconnect
+    option Authentication timeout
+      R-->I:     disconnect
+    option Credentials rejected
+      I--)R:    authentication (401)
+      R-->I:     disconnect
+    end
+    
+```
+
+
 #### Integration Setup
 
 ##### Single Device Instance Driver Setup
@@ -271,12 +304,6 @@ sequenceDiagram
         R-)-I:   subscribe_events
     end
 ```
-
-##### Multi Device Instance Driver Setup
-
-⚠️ This feature is currently being finalized and not yet available!
-
-See [Multi Device Instance Driver](multi-device-driver.md) for preliminary information.
 
 #### Normal Operation
 
