@@ -105,14 +105,14 @@ sequenceDiagram
     User->>C: Provide settings value
 
     C-)+R:   setup_integration
-    R->>R:   verify setup session not running
+    R->>R:   verify setup session not running & driver connected
+    R--)C:   event: integration_setup_change<br>START (SETUP)
     R->>R:   create new setup session
     R--)C:   integration_setup_info (SETUP)
-    R--)C:   event: integration_setup_change<br>START (SETUP)
-    R--)C:   event: integration_setup_change<br>SETUP (SETUP)
 
     R-)+I:    setup_driver
     I--)R:    result (OK)
+    R--)C:   event: integration_setup_change<br>SETUP (SETUP)
     Note right of I: setup started, updates with `driver_setup_change`
     loop
       alt setup progress

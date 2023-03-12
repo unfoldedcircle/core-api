@@ -963,7 +963,7 @@ components:
             - msg_data
 
     setupDriverMsg:
-      description: TODO define payload
+      description: TODO review payload
       type: object
       allOf:
         - $ref: '#/components/schemas/commonReq'
@@ -974,10 +974,10 @@ components:
             msg_data:
               type: object
               properties:
-                device_id:
-                  type: string
-                todo: # key values from setup_schema
-                  type: boolean
+                setup_data:
+                  $ref: '#/components/schemas/SettingsValues'
+              required:
+                - setup_data
           required:
             - msg
             - msg_data
