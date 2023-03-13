@@ -1013,13 +1013,10 @@ components:
             msg_data:
               type: object
               properties:
-                req_id:
-                  $ref: '#/components/schemas/msgId'
-                device_id:
-                  type: string
+                error:
+                  $ref: '#/components/schemas/integrationSetupError'
               required:
-                - req_id
-                - device_id
+                - error
           required:
             - msg
             - msg_data
