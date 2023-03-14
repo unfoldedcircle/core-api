@@ -393,6 +393,7 @@ components:
         Default setup timeouts:
         - Setup progress (watchdog): 60 seconds. If no setup message is received within that time, the setup process
           is aborted.
+        - User action timeout: 3 minutes. If there's no user response within that time, the setup process is aborted.
         - Overall setup timeout: 5 minutes. If the setup process is automatically aborted if it is still running after
           that time.
 
