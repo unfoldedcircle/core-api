@@ -1,7 +1,5 @@
 ## Driver Setup
 
-⚠️ **work in progress!**
-
 An integration driver can support a settings page and an interactive setup flow with the Remote Two app or
 web-configurator to configure the driver. 
 

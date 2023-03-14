@@ -273,7 +273,7 @@ components:
         - name: required
 
     get_driver_metadata:
-      summary: 🧪🍕 Retrieve the integration driver metadata.
+      summary: 🚀 🍕 Retrieve the integration driver metadata.
       description: |
         The metadata is used to setup the driver in the remote / web-configurator and start the setup flow.
       tags:
@@ -284,7 +284,7 @@ components:
       x-response:
         $ref: '#/components/messages/driver_metadata'
     driver_metadata:
-      summary: 🧪🍕 Integration driver metadata response.
+      summary: 🧪 🍕 Integration driver metadata response.
       tags:
         - name: metadata
         - name: required
@@ -344,7 +344,7 @@ components:
       payload:
         $ref: '#/components/schemas/disconnectEvent'
     get_device_state:
-      summary: 🧪 🍕 Get the current integration driver or device state.
+      summary: 🚀 🍕 Get the current integration driver or device state.
       description: |        
         Called by the Remote Two when it needs to synchronize the device state, e.g. after waking up from standby, or if
         it doesn't receive regular `device_state` events.
@@ -360,7 +360,7 @@ components:
       x-response:
         $ref: '#/components/messages/device_state'
     device_state:
-      summary: 🧪 🍕 Current integration driver or device state event.
+      summary: 🚀 🍕 Current integration driver or device state event.
       description: |
         If there's a device communication issue or other error, this state will inform the user with a UI notification
         about the issue.
@@ -373,16 +373,34 @@ components:
       payload:
         $ref: '#/components/schemas/deviceStateEventMsg'
     setup_driver:
-      summary: 👷 Start driver setup.
+      summary: 🧪 Start driver setup.
       description: |
-        If no setup is needed, the integration simply has to respond with a `driver_setup_change` event message.
+        If a driver includes a `setup_data_schema` object in it's driver metadata, it enables the dynamic driver setup
+        process. The setup process can be a simple "start-confirm-done" between the Remote Two and the integration
+        driver, or a fully dynamic, multi-step process with user interactions, where the user has to provide additional
+        data or select different options.
+
+        After confirmation the `setup_driver` request, the integration driver has to send `driver_setup_change` events:
         
-        If the setup process takes more than a few seconds, the integration should send `driver_setup_change` events
-        with `state: SETUP` to the Remote Two to show a setup progress to the user.  
-        Devices requiring user interaction, the integration can send the `driver_setup_change` event with
-        `state: WAIT_USER_ACTION` to the Remote Two.
-        
-        Once the setup is finished, the integration needs to send the `driver_setup_change` event with `event_type: STOP`.
+        - `event_type: SETUP` with `state: SETUP` is a progress event to keep the process running, see below.
+        - `event_type: SETUP` with `state: WAIT_USER_ACTION` can be sent to the Remote Two to request a user
+          interaction: either a confirmation to press next to continue the process, or input values.
+        - `event_type: STOP` with `event: OK` finishes the setup process and the Remote Two creates an integration instance.
+        - `event_type: STOP` with `event: ERROR` aborts the setup process.
+
+        ⚠️ If the setup process takes more than a few seconds, the integration should send `driver_setup_change` events
+        with `state: SETUP` to the Remote Two to show a setup progress to the user and prevent an inactivity timeout.  
+        Default setup timeouts:
+        - Setup progress (watchdog): 60 seconds. If no setup message is received within that time, the setup process
+          is aborted.
+        - Overall setup timeout: 5 minutes. If the setup process is automatically aborted if it is still running after
+          that time.
+
+        If no setup is needed, but the integration driver requires to show additional information to the user before
+        the integration is setup (e.g. terms & conditions, further help information or web links, etc.), it can define
+        an "information settings page" with text labels in `setup_data_schema` without any input fields. In this case
+        the integration simply has to respond with a `driver_setup_change` event message with
+        `event_type: STOP` and `state: OK` after confirming the `setup_driver` request message.
       tags:
         - name: setup
       payload:
@@ -390,7 +408,7 @@ components:
       x-response:
         $ref: '#/components/messages/result'
     abort_driver_setup:
-      summary: 👷 Abort a driver setup.
+      summary: 🚀 Abort a driver setup.
       description: |
         If the user aborts the setup process, the Remote Two sends this event. Further messages from the integration
         from the setup process will be ignored afterwards.
@@ -400,31 +418,31 @@ components:
       payload:
         $ref: '#/components/schemas/abortDriverSetupEvent'
     driver_setup_change:
-      summary: 👷Driver setup state change event
+      summary: 🧪 Driver setup state change event.
       description: |
         Emitted for all driver setup flow state changes.
         
-        TODO different change events:
-        - PROGRESS
-        - WAIT_USER_ACTION
-        - OK
-        - ERROR
+        Different change events:
+        - `SETUP`: send progress, setup is still running 
+        - `WAIT_USER_ACTION`: integration driver requires user input
+        - `OK`: integration setup successfully completed
+        - `ERROR`: integration setup failed
       tags:
         - name: setup
         - name: event
       payload:
         $ref: '#/components/schemas/driverSetupChangeEvent'
     set_driver_user_data:
-      summary: 👷 Provide requested driver setup data.
+      summary: 🧪 Provide requested driver setup data.
       description: |
         Set required data to configure the integration driver or continue the setup process.
         
         Defined user actions to set in the request body `action` field:
-        - `input_values`: if the user was requested to enter settings, e.g. connection or credential parameters to a device
-          or service.
+        - `input_values`: if the user was requested to enter settings, e.g. connection or credential parameters to a
+          device or service.
         - `confirm`: response to the user action `confirmation`. Set to `true` if the user had to perform an action like
           pressing a button on a device and then confirms the action with continuing the setup process.  
-          The `false` value is prepared for yes / no choices.
+          ⚠️ The `false` value is not yet used but might be used in the future for yes / no choices.
 
         The `state` field in the response message indicate the current state of the setup process.
       tags:
@@ -436,7 +454,7 @@ components:
 
     # --- entity handling
     get_available_entities:
-      summary: 🧪 🍕 Retrieve the available entities from the integration driver.
+      summary: 🚀 🍕 Retrieve the available entities from the integration driver.
       description: |
         Called while configuring profiles and assigning entities to pages or groups in the web-configurator or the
         embedded editor of the remote UI.
@@ -450,7 +468,7 @@ components:
       x-response:
         $ref: '#/components/messages/available_entities'
     available_entities:
-      summary: 🧪 🍕 Available entities response.
+      summary: 🚀 🍕 Available entities response.
       description: |
         This message contains the available entities from the integration driver the Remote Two can configure.
         
@@ -522,6 +540,8 @@ components:
     get_configured_entities:
       summary: 🔍 Retrieve configured entities from this integration.
       description: |
+        ⚠️ not yet implemented in the remote-core!
+
         Request the configured entities in the Remote Two originating from this integration. These are all the entities
         which are being used in the Remote Two and assigned in a profile.
         
@@ -534,11 +554,13 @@ components:
       x-response:
         $ref: '#/components/messages/configured_entities'
     configured_entities:
-      summary: 👷 Configured entities response.
+      summary: 🔍 Configured entities response.
       description: |
-        TODO define message
+        ⚠️ not yet implemented in the remote-core!
       tags:
         - name: entity
+      payload:
+        $ref: '#/components/schemas/configuredEntitiesMsg'
     get_localization_cfg:
       summary: 🔍 Retrieve the localization settings of the Remote Two.
       description: |
@@ -584,7 +606,7 @@ components:
       x-response:
         $ref: '#/components/messages/entity_states'
     entity_states:
-      summary: 🧪 🍕 Current state of the entities.
+      summary: 🚀 🍕 Current state of the entities.
       description: |
         Response message of the `get_entity_states` request. Contains the dynamic attributes of all entities.
       tags:
@@ -963,7 +985,6 @@ components:
             - msg_data
 
     setupDriverMsg:
-      description: TODO review payload
       type: object
       allOf:
         - $ref: '#/components/schemas/commonReq'
@@ -1173,6 +1194,22 @@ components:
               const: get_configured_entities
           required:
             - msg
+    configuredEntitiesMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: configured_entities
+            msg_data:
+              description: Array of configured entity IDs.
+              type: array
+              items:
+                type: string
+          required:
+            - msg
+            - msg_data
 
     getLocalizationMsg:
       type: object
@@ -1499,12 +1536,7 @@ components:
           description: Driver supports multi-device discovery. **Not yet supported**.
           type: boolean
         setup_data_schema:
-          description: |
-            Driver configuration metadata describing configuration parameters for the web-configurator.
-
-            **Not yet finalized**.
-          type: object
-          #$ref: '#/components/schemas/settingsPage'
+          $ref: '#/components/schemas/SettingsPage'
         release_date:
           description: Release date of the driver.
           type: string

@@ -11,11 +11,14 @@ _Changes in the next release_
 ### Added
 - Initial Dock-API release.
 - Driver metadata retrieval with `get_driver_metadata`.
-- Integration Driver mDNS advertisement documentation.
+- Integration driver mDNS advertisement documentation.
+- Integration driver setup flow API messages and documentation.
 
 ### Changed
 - Replace `localization.unit_system_metric` & `.temperature_celsius` with `measurement_unit` enum (METRIC, US, UK). 
 - Change `localization.languageCode` separator from dash to underscore. New: `en_UK`, `en_US` etc.
+- Removed multi-device setup messages in API and replaced it with the driver setup messages.  
+  They might be added later or be integrated into the driver setup.
 
 ### Fixed
 - `inputTypeLabel` definition.
