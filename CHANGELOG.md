@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Changes in the next release_
 
+---
+
+## 0.7.0-alpha - 2023-03-14
 ### Added
 - Initial Dock-API release.
 - Driver metadata retrieval with `get_driver_metadata`.
