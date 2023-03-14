@@ -43,7 +43,7 @@ E.g. if smart WiFi light bulbs can be discovered by the driver and then each bul
 
 #### Multi Device Instance Driver
 
-⚠️ This feature is currently being finalized and not yet available!
+⚠️ This feature is not yet available!
 
 The multi device instance driver is an advanced driver capable of discovering physical devices and delegating the
 setup or configuration to the Remote / web-configurator.
@@ -79,6 +79,9 @@ See [WebSocket authentication](websocket.md#authentication) for more information
     within a certain time frame. The driver may also send ping frames to check if the connection is still alive.
 
 ### Driver Registration
+
+An integration driver should advertise itself over mDNS for auto-discovery and allow user configuration with the
+web-configurator. See [mDNS advertisement](driver-advertisement.md) for more information.
 
 An integration driver can optionally register itself at a remote and provide its authentication token.
 
@@ -220,12 +223,49 @@ The basic message flow between an integration and the remote is as follows:
 - The remote announces when it goes into and out of standby, so the integration driver can act accordingly.   
   Note: the WebSocket connection might get disconnected during remote standby!
 
-#### Integration Setup
+#### Establish Connection
 
-##### Single Device Instance Driver Setup
+```mermaid
+sequenceDiagram
+    participant I as Integration
+    participant R as Remote
 
-The integration setup process consists of requesting all available entities from the driver and subscribing to entity
-events of the chosen entities by the user.
+    R-)+R:     create integration driver session
+
+    critical Establish WS connection
+      R-)+I:     connect         
+      alt header token
+        I->>I:    authentication & version check etc
+        I--)R:    authentication (OK)
+      else message based auth
+        I--)R:    auth_required
+        R-)I:   auth
+        I--)R:    authentication (OK)
+      end
+      Note over I,R: Authenticated WS session
+      R-)R:    wait for messages
+      Note over I,R: Message exchange until disconnected
+      R-->-I:     disconnect
+    option Authentication timeout
+      R-->I:     disconnect
+    option Credentials rejected
+      I--)R:    authentication (401)
+      R-->I:     disconnect
+    end
+    
+```
+
+
+#### Integration Driver Setup
+
+See [driver setup](driver-setup.md).
+
+#### Integration Instance Configuration
+
+After the driver has been registered and configured, the provided entities can be configured in the Remote Two.
+
+This consists of requesting all available entities from the driver and subscribing to entity events of the chosen
+entities by the user.
 
 - The `subscribe_events` message is only sent for entities which are configured in the Remote. I.e. only for entities
   which are used in a profile and placed on a page or group.
@@ -271,12 +311,6 @@ sequenceDiagram
         R-)-I:   subscribe_events
     end
 ```
-
-##### Multi Device Instance Driver Setup
-
-⚠️ This feature is currently being finalized and not yet available!
-
-See [Multi Device Instance Driver](multi-device-driver.md) for preliminary information.
 
 #### Normal Operation
 

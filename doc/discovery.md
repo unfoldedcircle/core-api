@@ -11,18 +11,16 @@ and API version of the remote.
 | ver_api    | API version number                                    |
 | model      | Model number                                          |
 | https_port | HTTPS port if enabled                                 |
-| simulator  | Set if it's a core simulator and not an actual device |
-
-_TODO: finalize TXT record and values._
 
 ### Model numbers
 
-The `model` key specifies the physical device:
+The `model` key specifies the physical device or the [core-simulator](https://github.com/unfoldedcircle/core-simulator):
 
-| Model | Description |
-|-------|-------------|
-| UCR2  | Remote Two  |
-| YIO1  | YIO Remote  |
+| Model          | Description           |
+|----------------|-----------------------|
+| UCR2           | Remote Two            |
+| UCR2-simulator | Remote Core simulator |
+| YIO1           | YIO Remote            |
 
 ### Examples
 

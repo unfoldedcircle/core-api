@@ -4,5 +4,6 @@
 - [Remote Two entities](../entities/README.md)
 - [How to write an integration driver](write-integration-driver.md)
 - [WebSockets handling](websocket.md)
+- [Driver mDNS advertisement](driver-advertisement.md)
 - [Driver registration](driver-registration.md)
-- [Multi Device Instance Driver](multi-device-driver.md)
+- [Driver setup](driver-setup.md)
