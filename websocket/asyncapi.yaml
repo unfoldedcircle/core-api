@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.17.0-alpha'
+  version: '0.18.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -358,7 +358,7 @@ channels:
           - $ref: '#/components/messages/start_integration_discovery'
           - $ref: '#/components/messages/stop_integration_discovery'
           - $ref: '#/components/messages/get_discovered_integration_driver'
-          - $ref: '#/components/messages/get_discovered_integration_driver_metadata'
+          - $ref: '#/components/messages/get_discovered_intg_driver_metadata'
           - $ref: '#/components/messages/configure_discovered_integration_driver'
 
           # --- integration setup
@@ -1040,6 +1040,13 @@ components:
         The commands can either be retrieved from a specific entity or from an entity type:
         - `entity_id`: only available commands for the given entity are returned. This depends on the entity's features.
         - `entity_type`: all commands for the given entity type are returned.
+        
+        The returned command identifiers are **not** the standard command identifiers like `on` or `off`, but _mapping_
+        identifiers like `light.on` and `light.color_temperature` for the command structure information returned with
+        `GET /api/cfg/entity/commands`.  
+        ℹ️ An equivalent WebSocket message will be provided later.
+        
+        This then allows to build a full command request `execute_entity_command` message with or without parameters.
       tags:
         - name: entity
       payload:
@@ -2187,7 +2194,7 @@ components:
       payload:
         $ref: '#/components/schemas/discoveredIntegrationDriverMsg'
 
-    get_discovered_integration_driver_metadata:
+    get_discovered_intg_driver_metadata:
       summary: 👷 Execute connection test and fetch metadata from discovered integration driver.
       description: |
         Perform a driver connection test with a discovered driver. If the driver requires a token, it must be specified in
@@ -2348,7 +2355,7 @@ components:
       payload:
         $ref: '#/components/schemas/setIntegrationUserDataMsg'
       x-response:
-        $ref: '#/components/messages/integration_setup_info'
+        $ref: '#/components/messages/integration_setup_info' # TODO just result?
 
     stop_integration_setup:
       summary: 🧪 Abort the integration driver setup process.
@@ -5548,25 +5555,27 @@ components:
               const: set_integration_user_data
             msg_data:
               type: object
-              oneOf:
-                - type: object
-                  properties:
-                    driver_id:
-                      type: string
-                    input_values:
-                      $ref: '#/components/schemas/SettingsValues'
-                  required:
-                    - driver_id
-                    - input_values
-                - type: object
-                  properties:
-                    driver_id:
-                      type: string
-                    confirm:
-                      type: boolean
-                  required:
-                    - driver_id
-                    - confirm
+              properties: 
+                driver_id:
+                  type: string
+                data:
+                  type: object
+                  oneOf:
+                    - type: object
+                      properties:
+                        input_values:
+                          $ref: '#/components/schemas/SettingsValues'
+                      required:
+                        - input_values
+                    - type: object
+                      properties:
+                        confirm:
+                          type: boolean
+                      required:
+                        - confirm
+              required:
+                - driver_id
+                - data
           required:
             - msg
             - msg_data
@@ -6583,7 +6592,7 @@ components:
         driver_type:
           $ref: '#/components/schemas/integrationDriverType'
         driver_url:
-          description: WebSocket URL of the driver
+          description: WebSocket URL of the driver. Only optional for integration driver metadata.
           type: string
           format: uri
           maxLength: 2048
@@ -6640,7 +6649,6 @@ components:
       required:
         - driver_id
         - name
-        - driver_url
         - version
 
     driverDeveloper:
@@ -7565,6 +7573,11 @@ components:
       type: object
       properties:
         event_type:
+          description: |
+            - `START`: setup started
+            - `SETUP`: setup in progress. See `state` enum for current setup state.
+            - `STOP`: setup finished, either with: `state: OK` for successful setup, or `state: ERROR` if setup 
+                      didn't completed successfully.
           type: string
           enum:
             - START
@@ -7600,6 +7613,11 @@ components:
         - state
 
     integrationSetupState:
+      description: |
+        - `SETUP`: setup in progress
+        - `WAIT_USER_ACTION`: setup flow is waiting for user input. See `require_user_action` for requested input.
+        - `OK`: setup finished successfully
+        - `ERROR`: setup error
       type: string
       enum:
         - SETUP
@@ -7608,6 +7626,8 @@ components:
         - ERROR
 
     integrationSetupError:
+      description: |
+        More detailed error reason for `state: ERROR` condition.
       type: string
       enum:
         - NONE
