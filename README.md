@@ -11,9 +11,11 @@ This repository contains API specifications of [Unfolded Circle Remote Two](http
 API definitions:
 
 - [WebSocket Integration API](./integration-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/).
-- WebSocket Core API defined with [AsyncAPI](https://www.asyncapi.com/) - _not yet published_
-- REST Core API defined with [OpenAPI](https://www.openapis.org/) - _not yet published_
+- [WebSocket Core API](https://github.com/unfoldedcircle/core-simulator/tree/main/core-api) defined with [AsyncAPI](https://www.asyncapi.com/)
+- [REST Core API](https://github.com/unfoldedcircle/core-simulator/tree/main/core-api) defined with [OpenAPI](https://www.openapis.org/)
 - [WebSocket Dock API](./dock-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/)
+
+ℹ️  The Core-APIs will be migrated to this repository soon.
 
 Integration driver documentation:
 
