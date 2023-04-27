@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.18.0-alpha'
+  version: '0.19.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -47,7 +47,6 @@ info:
     
     The following features will be continuously added (in no particular order):
     
-    - Battery status events
     - Matching features of the REST Core-API (except file up & download):
       - Activity management    
       - Infrared code management
@@ -169,6 +168,8 @@ channels:
           - $ref: '#/components/messages/check_system_update'
           - $ref: '#/components/messages/update_system'
           - $ref: '#/components/messages/get_system_update_progress'
+          - $ref: '#/components/messages/get_power_mode'
+          - $ref: '#/components/messages/set_power_mode'
           # --- configuration handling
           - $ref: '#/components/messages/reset_configuration'
           - $ref: '#/components/messages/get_configuration'
@@ -273,6 +274,8 @@ channels:
           - $ref: '#/components/messages/factory_reset_token'
           - $ref: '#/components/messages/api_access'
           - $ref: '#/components/messages/system_update_info'
+          - $ref: '#/components/messages/get_power_mode'
+          - $ref: '#/components/messages/get_ambient_light'
           # --- configuration handling
           - $ref: '#/components/messages/configuration'
           - $ref: '#/components/messages/button_cfg'
@@ -483,6 +486,7 @@ channels:
           - $ref: '#/components/messages/event_channels'
           - $ref: '#/components/messages/event_subscriptions'
           # --- event notifications
+          - $ref: '#/components/messages/warning'
           - $ref: '#/components/messages/entity_change'
           - $ref: '#/components/messages/integration_driver_change'
           - $ref: '#/components/messages/integration_change'
@@ -498,9 +502,11 @@ channels:
           - $ref: '#/components/messages/integration_discovery'
           - $ref: '#/components/messages/integration_setup_change'
           - $ref: '#/components/messages/software_update'
+          - $ref: '#/components/messages/power_mode_change'
+          - $ref: '#/components/messages/battery_status'
+          - $ref: '#/components/messages/ambient_light_change'
 
           # TODO define all events and response messages
-#          - $ref: '#/components/messages/battery_status'
 #          - $ref: '#/components/messages/log_event'
 #          - $ref: '#/components/messages/ui_notification'
 #          - $ref: '#/components/messages/log_cfg_change'
@@ -718,11 +724,34 @@ components:
     update_system:
       summary: 🔍 Perform system update.
       description: |
-        Start a system update with the given `update_idd` parameter. Use `latest` to use the latest available system update.
+        Start a system update with the given `update_id` parameter. Use `latest` to use the latest available system update.
+
+        The system update will be started if:
+        - the system update has been downloaded already (`download` state is `DOWNLOADED`).
+        - the device has at least 50% battery charge.
+
+        If the system update is started, the response message contains `state: START`. In case there's not enough battery,
+        `503 service unavailable` is returned. 
+        It is recommended to perform the update while the remote is charging in the docking station.
+
+        The progress of the system update can be retrieved with the `get_system_update_progress` message, or by 
+        listening to the `software_update` event messages.
+
+        If the system update hasn't been downloaded yet (`download` state is `PENDING` or `ERROR`), this operation will only
+        start the download and return `state: DOWNLOAD`. Once successfully downloaded, it can be installed by this
+        message again.
+
+        ⚠️ Download progress events are not yet implemented!
       payload:
         $ref: '#/components/schemas/updateSystemMsg'
       x-response:
-        $ref: '#/components/messages/result'
+        $ref: '#/components/messages/update_system_result'
+    update_system_result:
+      summary: 🔍 System update response.
+      description: |
+        Returns the state of the system update request.
+      payload:
+        $ref: '#/components/schemas/updateSystemResultMsg'
     get_system_update_progress:
       summary: 🔍 Get system update progress.
       description: |
@@ -735,6 +764,34 @@ components:
       summary: 🔍 System update progress response.
       payload:
         $ref: '#/components/schemas/systemUpdateProgressMsg'
+
+    get_power_mode:
+      summary: 🔍 Get current power mode and battery information.
+      payload:
+        $ref: '#/components/schemas/getPowerModeMsg'
+      x-response:
+        $ref: '#/components/messages/power_mode'
+    power_mode:
+      summary: 🔍 Current power mode response.
+      payload:
+        $ref: '#/components/schemas/powerModeMsg'
+    set_power_mode:
+      summary: 🔍 Change the current power mode.
+      payload:
+        $ref: '#/components/schemas/setPowerModeMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_ambient_light:
+      summary: 🔍 Get current ambient light intensity.
+      payload:
+        $ref: '#/components/schemas/getAmbientLightMsg'
+      x-response:
+        $ref: '#/components/messages/ambient_light'
+    ambient_light:
+      summary: 🔍 Current ambient light response.
+      payload:
+        $ref: '#/components/schemas/ambientLightMsg'
 
     reset_configuration:
       summary: 🧪 Reset all settings to default values.
@@ -2434,6 +2491,15 @@ components:
       payload:
         $ref: '#/components/schemas/eventSubscriptionsMsg'
 
+    warning:
+      summary: 🔍 System warning event.
+      description: |
+        Emitted for important system events like low battery or shutdown events.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/warningEventMsg'
+
     integration_driver_change:
       summary: 🔍 Integration driver change event.
       description: |
@@ -2555,6 +2621,33 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/softwareUpdateEventMsg'
+
+    power_mode_change:
+      summary: 🔍 Power mode change event.
+      description: |
+        Emitted when the power saving mode changes.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/powerModeChangeEventMsg'
+
+    battery_status:
+      summary: 🔍 Battery status event.
+      description: |
+        Emitted when the battery status changes.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/batteryStatusEventMsg'
+
+    ambient_light_change:
+      summary: 🔍 Ambient light change event.
+      description: |
+        Emitted when the ambient light changes during normal power mode.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/ambientLightChangeEventMsg'
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -2927,6 +3020,19 @@ components:
           required:
             - msg
             - msg_data
+    updateSystemResultMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: update_system_result
+            msg_data:
+              $ref: '#/components/schemas/SystemUpdateResponse'
+          required:
+            - msg
+            - msg_data
     getSystemUpdateProgressMsg:
       type: object
       allOf:
@@ -2958,6 +3064,79 @@ components:
               $ref: '#/components/schemas/SystemUpdateProgress'
           required:
             - msg
+
+    getPowerModeMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_power_mode
+          required:
+            - msg
+    powerModeMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: power_mode
+            msg_data:
+              type: object
+              properties:
+                mode:
+                  $ref: '#/components/schemas/PowerMode'
+                battery:
+                  $ref: '#/components/schemas/batteryStatus'
+              required:
+                - mode
+          required:
+            - msg
+            - msg_data
+    setPowerModeMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_power_mode
+            msg_data:
+              type: object
+              properties:
+                mode:
+                  $ref: '#/components/schemas/PowerMode'
+              required:
+                - mode
+          required:
+            - msg
+            - msg_data
+
+    getAmbientLightMsg:
+      type: object
+      allOf:
+          - $ref: '#/components/schemas/commonReq'
+          - properties:
+              msg:
+                type: string
+                const: get_ambient_light
+            required:
+              - msg
+    ambientLightMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: ambient_light
+            msg_data:
+              $ref: '#/components/schemas/AmbientLight'
+          required:
+            - msg
+            - msg_data
 
     resetConfigurationMsg:
       type: object
@@ -5710,15 +5889,33 @@ components:
             - emitters
             - docks
             - software_update
+            - battery_status
+            - ambient_light
             # TODO define all event channels. Suggestions:
 #            - cfg_log
 #            - cfg_ui
-#            - battery_status
 #            - log
 #            - notification
 #            - gui
 #            - wifi
         - {}  # extensible enum: there might be more event channels than defined above
+
+    warningEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: warning
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/warningEvent'
+          required:
+            - msg
+            - msg_data
 
     integrationDriverChangeEventMsg:
       type: object
@@ -5938,6 +6135,57 @@ components:
             - msg
             - msg_data
 
+    powerModeChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: power_mode_change
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/powerModeChangeEvent'
+          required:
+            - msg
+            - msg_data
+
+    batteryStatusEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: battery_status
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/batteryStatus'
+          required:
+            - msg
+            - msg_data
+
+    ambientLightChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: ambient_light_change
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/AmbientLight'
+          required:
+            - msg
+            - msg_data
+
     # =========================================================================
     # Event message schemas
     # =========================================================================
@@ -5977,6 +6225,36 @@ components:
           required:
             - msg
 
+    warningEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: warning
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              type: object
+              properties:
+                event:
+                  type: string
+                  enum:
+                    - LOW_BATTERY
+                    - OPEN_CASE
+                shutdown:
+                  description: System initiated forced shutdown
+                  type: boolean
+                message:
+                  description: debug message
+                  type: string
+              required:
+                - event
+          required:
+            - msg
+            - msg_data
 
     # =========================================================================
     # Common schemas
@@ -6405,7 +6683,7 @@ components:
       type: object
       properties:
         wakeup_sensitivity:
-          description: Amount of movement needed to wake up the remote. 0 = disabled.
+          description: Amount of movement needed to wake up the remote. 0 = disabled, 1 = min, 2 = medium, 3 = max.
           type: integer
           minimum: 0
           maximum: 3
@@ -7447,6 +7725,11 @@ components:
         size:
           type: integer
           format: int64
+        release_notes_url:
+          type: string
+          format: uri
+        download:
+          $ref: '#/components/schemas/UpdateDownloadState'
       required:
         - id
         - title
@@ -7461,6 +7744,32 @@ components:
         - STABLE
         - TESTING
         - DEVELOPMENT
+
+    UpdateDownloadState:
+      description: |
+        Download status:
+        - `PENDING`: update is scheduled to download
+        - `DOWNLOADING`: update is currently downloading
+        - `DOWNLOADED`: update has been downloaded and is ready to be installed
+        - `ERROR`: download failed
+      type: string
+      enum:
+        - PENDING
+        - DOWNLOADING
+        - DOWNLOADED
+        - ERROR
+
+    SystemUpdateResponse:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/SystemUpdateState'
+        update_id:
+          description: Update identifier
+          type: string
+      required:
+        - state
+        - update_id
 
     softwareUpdateEvent:
       type: object
@@ -7480,21 +7789,33 @@ components:
         - event_type
         - update_id
 
+    powerModeChangeEvent:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/PowerMode'
+      required:
+        - mode
+
+    batteryStatus:
+      type: object
+      properties:
+        capacity:
+          description: Current battery charge in %
+          type: integer
+          minimum: 0
+          maximum: 100
+        status:
+          $ref: '#/components/schemas/PowerStatus'
+      required:
+        - capacity
+        - status
+
     SystemUpdateProgress:
       type: object
       properties:
         state:
-          type: string
-          enum:
-            - IDLE
-            - START
-            - RUN
-            - SUCCESS
-            - FAILURE
-            - DOWNLOAD
-            - DONE
-            - SUB_PROCESS
-            - PROGRESS
+          $ref: '#/components/schemas/SystemUpdateState'
         update_id:
           description: Update identifier
           type: string
@@ -7517,6 +7838,19 @@ components:
       required:
         - state
         - update_id
+
+    SystemUpdateState:
+      type: string
+      enum:
+        - IDLE
+        - START
+        - RUN
+        - SUCCESS
+        - FAILURE
+        - DOWNLOAD
+        - DONE
+        - SUB_PROCESS
+        - PROGRESS
 
     integrationDiscoveryEvent:
       type: object
@@ -7686,7 +8020,7 @@ components:
         id:
           description: Unique identifier of the setting to be returned with the entered value.
           type: string
-          maximum: 50
+          maxLength: 50
         label:
           $ref: '#/components/schemas/languageText'
         field:
@@ -8285,3 +8619,36 @@ components:
         - CONNECTED
         - DISABLED
         - TEMPORARY_DISABLED
+
+    # --- OpenAPI PowerMode.yaml
+
+    PowerMode:
+      type: string
+      enum:
+        - NORMAL
+        - IDLE
+        - LOW_POWER
+        - SUSPEND
+
+    # --- OpenAPI Battery.yaml
+
+    PowerStatus:
+      type: string
+      enum:
+        - CHARGING
+        - DISCHARGING
+        - NOT_CHARGING
+        - FULL
+
+    # --- OpenAPI AmbientLight.yaml
+
+    AmbientLight:
+      type: object
+      properties:
+        intensity:
+          documentation: Light intensity. 0 = pitch black, 65535 = very bright.
+          type: integer
+          minimum: 0
+          maximum: 65535
+      required:
+        - intensity
