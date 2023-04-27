@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.20.1
+  version: 0.21.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1117,6 +1117,8 @@ paths:
 
         Response status codes:
         - `200`: successful operation: the connection test was successful and driver metadata could be retrieved.
+        - `401` / `403`: driver authentication failed. Either the driver requires a token and it was not provided, or the 
+                 provided token was not valid.
         - `404`: discovered driver with `driver_id` not found. Check if the discovery result is still available and has not
                  been deleted. This can happen after a timeout since the discovery, or if the discovery result has been
                  cleared with starting a new discovery.
@@ -1124,14 +1126,6 @@ paths:
       operationId: getDiscoveredIntgDriverMetadata
       parameters:
         - $ref: '#/components/parameters/driver_id'
-        - name: cmd
-          in: query
-          description: Command to execute.
-          required: true
-          schema:
-            type: string
-            enum:
-              - CONNECTION_TEST
         - name: timeout
           in: query
           description: Timeout in seconds.
@@ -1155,6 +1149,8 @@ paths:
                   type: object
                   properties:
                     driver_url:
+                      description: |
+                        Custom URL to connect to driver. If not specified the mDNS connection information is used.
                       type: string
                     token:
                       description: |
@@ -1213,6 +1209,8 @@ paths:
 
         Response status codes:
         - `400`: invalid data in request body.
+        - `401` / `403`: driver authentication failed. Either the driver requires a token and it was not provided, or the 
+                 provided token was not valid.
         - `404`: no discovered driver found for given `driver_id`.
         - `409`: integration driver is already registered.
         - `503`: integration driver communication error. Either driver is not reachable or communication failed.
@@ -3801,23 +3799,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  device_id:
-                    description: IR emitter device identifier.
-                    type: string
-                  learning_active:
-                    description: |
-                      Device is in IR learning mode. Usually an emitter can't send IR commands while it is in learning mode.
-                    type: boolean
-                  codes:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/LearnedIrCode'
-                required:
-                  - device_id
-                  - learning_active
-                  - codes
+                $ref: '#/components/schemas/IrEmitterLearnStatus'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -3881,7 +3863,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1ir~1emitters~1%7BemitterId%7D~1learn/get/responses/200/content/application~1json/schema'
+                $ref: '#/components/schemas/IrEmitterLearnStatus'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -6948,6 +6930,35 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - dock
+      summary: Force dock firmware update check.
+      description: |
+        Check if there is an update available for the dock.
+
+        This operation will contact the software update cloud service to check for available updates.    
+        The returned `update_check_enabled` flag indicates if the online update check is enabled or not.
+
+        If `update_id` is set then an update is currently in progress and can be monitored either with listening to the
+        WebSocket `dock_update_change` event messages or polling the status with the
+        `GET /docks/devices/{dockId}/update/{id}` operation.
+      operationId: forceCheckDockFirmwareUpdate
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DockUpdateCheck'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
     post:
       tags:
         - dock
@@ -7255,6 +7266,81 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /system/power:
+    get:
+      tags:
+        - system
+      summary: Get current system power mode.
+      operationId: getPowerMode
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PowerModeResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    put:
+      tags:
+        - system
+      summary: Set a power mode
+      description: |
+        Setting `SUSPEND` will put the system immediately into suspend mode!
+      operationId: setPowerMode
+      parameters:
+        - $ref: '#/components/parameters/power_mode'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  /system/power/battery:
+    get:
+      tags:
+        - system
+      summary: Get battery status.
+      operationId: getBatteryStatus
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryStatusResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  /system/sensors/ambient_light:
+    get:
+      tags:
+        - system
+      summary: Get current ambient light reading from light sensor.
+      operationId: getAmbientLight
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AmbientLightResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   /system/update:
     get:
       tags:
@@ -7306,6 +7392,23 @@ paths:
       summary: Perform system update.
       description: |
         Start a system update with the given `updateId` parameter. Use `latest` to use the latest available system update.
+
+        The system update will be started if:
+        - the system update has been downloaded already (`download` state is `DOWNLOADED`).
+        - the device has at least 50% battery charge.
+
+        If the system update is started, the response message contains `state: START`. In case there's not enough battery,
+        `503 service unavailable` is returned. 
+        It is recommended to perform the update while the remote is charging in the docking station.
+
+        The progress of the system update can be retrieved with the `GET` operation, or by listening to the WebSocket 
+        `software_update` event messages.
+
+        If the system update hasn't been downloaded yet (`download` state is `PENDING` or `ERROR`), this operation will only
+        start the download and return `state: DOWNLOAD`. Once successfully downloaded, it can be installed by calling this
+        operation again.
+
+        ⚠️ Download progress events are not yet implemented!
       operationId: updateSystem
       parameters:
         - name: updateId
@@ -7317,7 +7420,11 @@ paths:
             default: latest
       responses:
         '201':
-          $ref: '#/components/responses/SuccessMessage'
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemUpdateResponse'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -7840,6 +7947,13 @@ components:
         format: int32
         default: 1
         minimum: 1
+    power_mode:
+      name: power_mode
+      in: query
+      description: Power mode
+      required: true
+      schema:
+        $ref: '#/components/schemas/PowerMode'
     limit:
       name: limit
       in: query
@@ -8062,6 +8176,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfaceItem'
+    AmbientLight:
+      type: object
+      properties:
+        intensity:
+          description: 'Light intensity. 0 = pitch black, 65535 = very bright.'
+          type: integer
+          minimum: 0
+          maximum: 65535
+      required:
+        - intensity
+    AmbientLightResponse:
+      type: object
+      properties:
+        intensity:
+          description: 'Light intensity. 0 = pitch black, 65535 = very bright.'
+          type: integer
+          minimum: 0
+          maximum: 65535
+      required:
+        - intensity
     ApiKey:
       type: object
       properties:
@@ -8222,6 +8356,26 @@ components:
       maxLength: 36
       description: |
         Entity identifier used in an integration driver (= available entities).
+    BatteryStatusResponse:
+      type: object
+      properties:
+        capacity:
+          description: Current battery charge in %
+          type: integer
+          minimum: 0
+          maximum: 100
+        status:
+          $ref: '#/components/schemas/PowerStatus'
+      required:
+        - capacity
+        - status
+    PowerStatus:
+      type: string
+      enum:
+        - CHARGING
+        - DISCHARGING
+        - NOT_CHARGING
+        - FULL
     ButtonId:
       type: string
       format: '^[A-Z0-9_]+$'
@@ -8323,7 +8477,7 @@ components:
       type: object
       properties:
         wakeup_sensitivity:
-          description: Amount of movement needed to wake up the remote. 0 = disabled.
+          description: 'Amount of movement needed to wake up the remote. 0 = disabled, 1 = min, 2 = medium, 3 = max.'
           type: integer
           minimum: 0
           maximum: 3
@@ -9679,7 +9833,7 @@ components:
         driver_type:
           $ref: '#/components/schemas/IntegrationDriverType'
         driver_url:
-          description: WebSocket URL of the driver.
+          description: WebSocket URL of the driver. Only optional for integration driver metadata.
           type: string
           format: uri
           maxLength: 2048
@@ -9734,7 +9888,6 @@ components:
       required:
         - driver_id
         - name
-        - driver_url
         - version
     IntegrationDriverInfo:
       type: object
@@ -10023,6 +10176,24 @@ components:
         - name
         - active
         - ports
+    IrEmitterLearnStatus:
+      type: object
+      properties:
+        device_id:
+          description: IR emitter device identifier.
+          type: string
+        learning_active:
+          description: |
+            Device is in IR learning mode. Usually an emitter can't send IR commands while it is in learning mode.
+          type: boolean
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnedIrCode'
+      required:
+        - device_id
+        - learning_active
+        - codes
     IrEmitterLearningCapability:
       type: object
       description: Emitter can also be used for learning IR codes.
@@ -10334,6 +10505,20 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Page'
+    PowerMode:
+      type: string
+      enum:
+        - NORMAL
+        - IDLE
+        - LOW_POWER
+        - SUSPEND
+    PowerModeResponse:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/PowerMode'
+      required:
+        - mode
     Profile:
       type: object
       properties:
@@ -11036,6 +11221,11 @@ components:
         size:
           type: integer
           format: int64
+        release_notes_url:
+          type: string
+          format: uri
+        download:
+          $ref: '#/components/schemas/UpdateDownloadState'
       required:
         - id
         - title
@@ -11049,6 +11239,19 @@ components:
         - STABLE
         - TESTING
         - DEVELOPMENT
+    UpdateDownloadState:
+      description: |
+        Download status:
+        - `PENDING`: update is scheduled to download
+        - `DOWNLOADING`: update is currently downloading
+        - `DOWNLOADED`: update has been downloaded and is ready to be installed
+        - `ERROR`: download failed
+      type: string
+      enum:
+        - PENDING
+        - DOWNLOADING
+        - DOWNLOADED
+        - ERROR
     UploadSystemImageResponse:
       type: object
       properties:
@@ -11057,21 +11260,22 @@ components:
           type: string
       required:
         - id
+    SystemUpdateResponse:
+      type: object
+      properties:
+        state:
+          $ref: '#/components/schemas/SystemUpdateState'
+        update_id:
+          description: Update identifier
+          type: string
+      required:
+        - state
+        - update_id
     SystemUpdateProgress:
       type: object
       properties:
         state:
-          type: string
-          enum:
-            - IDLE
-            - START
-            - RUN
-            - SUCCESS
-            - FAILURE
-            - DOWNLOAD
-            - DONE
-            - SUB_PROCESS
-            - PROGRESS
+          $ref: '#/components/schemas/SystemUpdateState'
         update_id:
           description: Update identifier
           type: string
@@ -11094,6 +11298,18 @@ components:
       required:
         - state
         - update_id
+    SystemUpdateState:
+      type: string
+      enum:
+        - IDLE
+        - START
+        - RUN
+        - SUCCESS
+        - FAILURE
+        - DOWNLOAD
+        - DONE
+        - SUB_PROCESS
+        - PROGRESS
     ValidationErrorResponse:
       type: object
       properties:
