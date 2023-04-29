@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.21.0
+  version: 0.21.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7409,6 +7409,12 @@ paths:
         operation again.
 
         ⚠️ Download progress events are not yet implemented!
+
+        Error codes:
+        - `404`: updateId does not exist
+        - `409`: download or update is already running
+        - `422`: for download request: update is already downloaded
+        - `503`: update service is currently not available
       operationId: updateSystem
       parameters:
         - name: updateId
@@ -7433,6 +7439,10 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
     get:
