@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.21.1
+  version: 0.21.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -5949,7 +5949,7 @@ paths:
         - cfg
       summary: Get software update settings.
       description: |
-        Software update configuration.
+        Software update configuration. See PATCH operation and data model description for more information.
       operationId: getSoftwareUpdateSettings
       parameters:
         - name: default
@@ -5974,12 +5974,46 @@ paths:
       summary: Modify software update settings.
       description: |
         Change one or multiple software update settings.
+
+        If `check_for_updates` is enabled:
+        - the device automatically checks for new updates daily. The check happens during a random time within the 
+          OTA window time frame `ota_window_start` - `ota_window_end`.
+        - if a new update is available, the update metadata is immediately downloaded and the firmware update file is
+          scheduled to download.
+        - the firmware file will only download if the remote has at least 50% battery charge.
+        - if the remote is not in the dock and suspended, the remote will not automatically wake up and the check
+          will be skipped.
+
+        If `auto_update` is enabled:
+        - once the firmware file is downloaded it will be automatically installed in the next OTA check window.
+        - the installation will only start if the remote has at least 50% battery charge.
+
+        OTA window fields:
+        - the stored values are used if omitted. 
+        - default values are set if not configured.
+        - the time of day corresponds to the configured timezone.
+        - for changing the update window, both start and end times are required, otherwise a default will be used.
+        - if the end time is before the start time, the window will spawn over midnight, e.g. `23:00:00` - `01:00:00`.
+
+        Optional software update channel & token:
+        - the default release channel is used if not configured.
+        - the stored values are used if omitted. 
+        - changing the update channel is intended for closed user groups only.  
+          ⚠️ High chance of breaking changes, bugs and loosing data!
+        - other channels than `default` might require an access token in `channel_token`.
+        - ⚠️ Changing the update channel or token requires a device restart, otherwise the automated updates will not use
+             the new channel!
       operationId: updateSoftwareUpdateSettings
       requestBody:
         content:
           application/json:
             schema:
               $ref: '#/components/schemas/CfgSoftwareUpdate'
+            example:
+              check_for_updates: true
+              auto_update: false
+              ota_window_start: '02:15:00'
+              ota_window_end: '05:00:00'
         required: true
       responses:
         '200':
@@ -8415,6 +8449,9 @@ components:
           $ref: '#/components/schemas/CfgSound'
         voice_control:
           $ref: '#/components/schemas/CfgVoiceControl'
+        restart_required:
+          description: A configuration change requires a restart.
+          type: boolean
     CfgButtons:
       type: object
       properties:
@@ -8522,11 +8559,59 @@ components:
           description: |
             Automatically check for updates. If `auto_update` is enabled, the updates are automatically installed,
             otherwise the user is only notified about the updates.
+
+            The time window when to check for new updates can be specified in `ota_window_start` and `ota_window_end`.
+            Update checks are performed daily.
           type: boolean
         auto_update:
           description: |
             Automatically update the remote when new software is available. Requires `check_for_updates` to be enabled.
+
+            Auto-installation of new firmwares will usually happen over 2 update checks: the first check finds a new
+            update, downloads the metadata and schedules the firmware file to be downloaded. The next check will find the
+            downloaded firmware file and installs it.
           type: boolean
+        ota_window_start:
+          description: |
+            OTA update window start time: automatic update checks will only be performed during this time window.  
+            Furthermore, the remote needs to be in the docking station and have enough battery charge.
+
+            Format: time of day - as defined by `partial-time` in RFC3339
+          type: string
+          pattern: '^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$'
+        ota_window_end:
+          description: |
+            OTA update window end time.
+
+            - If the end time is before the start time, the window will spawn over midnight, e.g. `23:00:00` - `01:00:00`.
+            - Both start and end times are required, otherwise a default will be used.
+          type: string
+          pattern: '^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$'
+        channel:
+          description: |
+            Software update channels:
+            - `default`: release channel
+            - `testing`: new test and beta versions which might become the next release if successfully tested.
+            - `development`: untested alpha versions from the developers.  
+               ⚠️ High chance of breaking changes, bugs and loosing data!
+
+            Other channels than `default` might require an access token in `channel_token`, since they are intended for
+            a closed user group.
+          type: string
+          anyOf:
+            - enum:
+                - default
+                - testing
+                - development
+            - {}
+        channel_token:
+          description: |
+            Optional access token which might be required for non-default software update channels.
+            - This token is write only and cannot be retrieved anymore.
+            - If omitted when updating settings: the stored token will be used.
+            - If the `default` channel is selected when updating settings: the token will be ignored.
+          type: string
+          pattern: '^[-a-zA-Z0-9._~+/]{1,256}=?$'
       required:
         - check_for_updates
         - auto_update
@@ -11196,6 +11281,10 @@ components:
           type: boolean
         last_check_date:
           description: Last update check timestamp.
+          type: string
+          format: date-time
+        next_check_date:
+          description: Next scheduled update check timestamp.
           type: string
           format: date-time
         update_check_enabled:
