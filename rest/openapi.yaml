@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.21.2
+  version: 0.21.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7221,7 +7221,7 @@ paths:
         - `STANDBY`: Put the device into standby mode.
         - `REBOOT`: Reboot the device.
         - `POWER_OFF`: Switch off the device
-        - `RESTART`: Restart the application.
+        - `RESTART`: Restart all applications.
         - `RESTART_UI`: Restart the ui application.
         - `RESTART_CORE`: Restart the core service application.
       operationId: systemCommand
@@ -8984,6 +8984,7 @@ components:
           type: object
           properties:
             ssid:
+              description: Network name (Service Set IDentifier)
               type: string
               maxLength: 32
             password:
@@ -9099,6 +9100,7 @@ components:
         wifi:
           type: boolean
         ssid:
+          description: Network name (Service Set IDentifier)
           type: string
     CreateDockSetup:
       type: object
@@ -9133,6 +9135,7 @@ components:
           type: object
           properties:
             ssid:
+              description: Network name (Service Set IDentifier)
               type: string
             password:
               type: string
@@ -10207,7 +10210,7 @@ components:
     IrCodeKey:
       description: IR command key identifier
       type: string
-      format: '^[A-Z0-9\-_\.]{1,50}$'
+      format: '^[a-zA-Z0-9\-_\.]{1,50}$'
     IrCodeSetType:
       description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
       type: string
@@ -11495,14 +11498,19 @@ components:
       type: object
       properties:
         bssid:
+          description: MAC physical address of the access point (basic service set identifier)
           type: string
         frequency:
+          description: 'Frequency of the channel in MHz (e.g., 2412 = channel 1)'
           type: string
         signal_level:
+          description: Signal level (dBm)
           type: integer
         auth:
+          description: Authentication method
           type: string
         ssid:
+          description: Network name (service set identifier)
           type: string
       required:
         - bssid
@@ -11513,14 +11521,19 @@ components:
         wpa_state:
           $ref: '#/components/schemas/WpaState'
         id:
+          description: Network identifier
           type: integer
         bssid:
+          description: MAC physical address of the access point (basic service set identifier)
           type: string
         ssid:
+          description: Network name (service set identifier)
           type: string
         freq:
+          description: 'Frequency of the channel in MHz (e.g., 2412 = channel 1)'
           type: integer
         address:
+          description: MAC physical address of the WiFi adapter
           type: string
         pairwise_cipher:
           type: string
@@ -11529,18 +11542,25 @@ components:
         key_mgmt:
           type: string
         ip_address:
+          description: Client IP address
           type: string
         noise:
+          description: Noise level (dBm)
           type: integer
         rssi:
+          description: Signal level (dBm)
           type: integer
         avg_rssi:
+          description: Average RSSI (dBm)
           type: integer
         est_throughput:
+          description: Estimated throughput in kbps
           type: integer
         snr:
+          description: Signal-to-noise ratio in dB
           type: integer
         linkspeed:
+          description: Link speed (Mbps)
           type: integer
       required:
         - wpa_state
@@ -11548,6 +11568,7 @@ components:
       type: object
       properties:
         ssid:
+          description: Network name (service set identifier)
           type: string
           minLength: 1
           maxLength: 32
@@ -11571,22 +11592,43 @@ components:
       items:
         $ref: '#/components/schemas/SavedNetwork'
     SavedNetwork:
+      description: A saved network configuration (known network)
       type: object
       properties:
         id:
+          description: 'Network identification, used for further operations on this network'
           type: integer
         ssid:
+          description: Network name (service set identifier)
           type: string
+        secured:
+          description: Secured or unsecured network
+          type: boolean
         state:
           type: string
           enum:
             - CONNECTED
+            - OUT_OF_RANGE
             - DISABLED
             - TEMPORARY_DISABLED
       required:
         - id
         - ssid
+        - secured
     WpaState:
+      description: |
+        - `UNKNOWN`: Unknown state. The driver returned a state which could not be handled.
+        - `ERROR`: Error retrieving state information.
+        - `DISCONNECTED`: This state indicates that client is not associated, but is likely to start looking for an access point. This state is entered when a connection is lost.
+        - `INTERFACE_DISABLED`: This state is entered if the network interface is disabled. The driver refuses any new operations that would use the radio until the interface has been enabled.
+        - `INACTIVE`: This state is entered if there are no enabled networks in the configuration. The driver is not trying to associate with a new network and external interaction (e.g. add or enable a network) is needed to start association.
+        - `SCANNING`: Scanning for a network.
+        - `AUTHENTICATED`: Trying to authenticate with a BSS/SSID.
+        - `ASSOCIATING`: Trying to associate with a BSS/SSID.
+        - `ASSOCIATED`: Association completed.
+        - `FOUR_WAY_HANDSHAKE`: WPA 4-Way Key Handshake in progress.
+        - `GROUP_HANDSHAKE`: WPA Group Key Handshake in progress.
+        - `COMPLETED`: All authentication completed.
       type: string
       enum:
         - UNKNOWN

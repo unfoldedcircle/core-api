@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.19.1-alpha'
+  version: '0.20.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -488,6 +488,7 @@ channels:
           # --- event notifications
           - $ref: '#/components/messages/warning'
           - $ref: '#/components/messages/entity_change'
+          - $ref: '#/components/messages/wifi_change'
           - $ref: '#/components/messages/integration_driver_change'
           - $ref: '#/components/messages/integration_change'
           - $ref: '#/components/messages/integration_state'
@@ -1738,6 +1739,16 @@ components:
         $ref: '#/components/schemas/wifiDelNetworkMsg'
       x-response:
         $ref: '#/components/messages/result'
+
+    wifi_change:
+      summary: 🧪 WiFi change event.
+      description: |
+        Emitted if the WiFi status changed, e.g. connected or disconnected to an access point, or if a WiFi network
+        scan finished.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/wifiChangeEventMsg'
 
     # --- Profile handling
 
@@ -4657,6 +4668,23 @@ components:
             - msg
             - msg_data
 
+    wifiChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: wifi_change
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/WifiChange'
+          required:
+            - msg
+            - msg_data
+
     # --- Profile handling
 
     getProfilesMsg:
@@ -7483,6 +7511,7 @@ components:
           type: object
           properties:
             ssid:
+              description: Network name (service set identifier)
               type: string
               maxLength: 32
             password:
@@ -7513,6 +7542,7 @@ components:
         wifi:
           type: boolean
         ssid:
+          description: Network name (service set identifier)
           type: string
 
     dockStateData:
@@ -7639,6 +7669,7 @@ components:
           type: object
           properties:
             ssid:
+              description: Network name (service set identifier)
               type: string
             password:
               type: string
@@ -8569,14 +8600,19 @@ components:
       type: object
       properties:
         bssid:
+          description: MAC physical address of the access point (basic service set identifier)
           type: string
         frequency:
+          description: Frequency of the channel in MHz (e.g., 2412 = channel 1)
           type: string
         signal_level:
+          description: Signal level (dBm)
           type: integer
         auth:
+          description: Authentication method
           type: string
         ssid:
+          description: Network name (service set identifier)
           type: string
       required:
         - bssid
@@ -8588,14 +8624,19 @@ components:
         wpa_state:
           $ref: '#/components/schemas/WpaState'
         id:
+          description: Network identifier
           type: integer
         bssid:
+          description: MAC physical address of the access point (basic service set identifier)
           type: string
         ssid:
+          description: Network name (service set identifier)
           type: string
         freq:
+          description: Frequency of the channel in MHz (e.g., 2412 = channel 1)
           type: integer
         address:
+          description: MAC physical address of the WiFi adapter
           type: string
         pairwise_cipher:
           type: string
@@ -8604,18 +8645,25 @@ components:
         key_mgmt:
           type: string
         ip_address:
+          description: Client IP address
           type: string
         noise:
+          description: Noise level (dBm)
           type: integer
         rssi:
+          description: Signal level (dBm)
           type: integer
         avg_rssi:
+          description: Average RSSI (dBm)
           type: integer
         est_throughput:
+          description: Estimated throughput in kbps
           type: integer
         snr:
+          description: Signal-to-noise ratio in dB
           type: integer
         linkspeed:
+          description: Link speed (Mbps)
           type: integer
       required:
         - wpa_state
@@ -8624,6 +8672,7 @@ components:
       type: object
       properties:
         ssid:
+          description: Network name (service set identifier)
           type: string
           minLength: 1
           maxLength: 32
@@ -8655,19 +8704,41 @@ components:
         $ref: '#/components/schemas/SavedNetwork'
 
     SavedNetwork:
+      description: A saved network configuration (known network)
       type: object
       properties:
         id:
+          description: Network identification, used for further operations on this network
           type: integer
         ssid:
+          description: Network name (service set identifier)
           type: string
+        secured:
+          description: Secured or unsecured network
+          type: boolean
+        signal_level:
+          type: integer
         state:
           $ref: '#/components/schemas/NetworkState'
       required:
         - id
         - ssid
+        - secured
 
     WpaState:
+      description: |
+        - `UNKNOWN`: Unknown state. The driver returned a state which could not be handled.
+        - `ERROR`: Error retrieving state information.
+        - `DISCONNECTED`: This state indicates that client is not associated, but is likely to start looking for an access point. This state is entered when a connection is lost.
+        - `INTERFACE_DISABLED`: This state is entered if the network interface is disabled. The driver refuses any new operations that would use the radio until the interface has been enabled.
+        - `INACTIVE`: This state is entered if there are no enabled networks in the configuration. The driver is not trying to associate with a new network and external interaction (e.g. add or enable a network) is needed to start association.
+        - `SCANNING`: Scanning for a network.
+        - `AUTHENTICATED`: Trying to authenticate with a BSS/SSID.
+        - `ASSOCIATING`: Trying to associate with a BSS/SSID.
+        - `ASSOCIATED`: Association completed.
+        - `FOUR_WAY_HANDSHAKE`: WPA 4-Way Key Handshake in progress.
+        - `GROUP_HANDSHAKE`: WPA Group Key Handshake in progress.
+        - `COMPLETED`: All authentication completed.
       type: string
       enum:
         - UNKNOWN
@@ -8703,8 +8774,39 @@ components:
       type: string
       enum:
         - CONNECTED
+        - OUT_OF_RANGE
         - DISABLED
         - TEMPORARY_DISABLED
+
+    WifiChange:
+      type: object
+      properties:
+        event:
+          $ref: '#/components/schemas/WifiEvent'
+
+    WifiEvent:
+      description: |
+        WiFi event:
+        - `CONNECTED`: Authentication completed successfully and data connection enabled.
+        - `DISCONNECTED`: Disconnected from access point and data connection not available.
+        - `SCAN_STARTED`: Network scan started.
+        - `SCAN_COMPLETED`: New network scan results available.
+        - `SCAN_FAILED`: Network scanning failed.
+        - `NETWORK_NOT_FOUND`: No suitable network was found.
+        - `WRONG_KEY`: Authentication failure due to an invalid pre-shared key.
+        - `NETWORK_ADDED`: A new network profile was added.
+        - `NETWORK_REMOVED`: A network profile was removed.
+      type: string
+      enum:
+        - CONNECTED
+        - DISCONNECTED
+        - SCAN_STARTED
+        - SCAN_COMPLETED
+        - SCAN_FAILED
+        - NETWORK_NOT_FOUND
+        - WRONG_KEY
+        - NETWORK_ADDED
+        - NETWORK_REMOVED
 
     # --- OpenAPI PowerMode.yaml
 
