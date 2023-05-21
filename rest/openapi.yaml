@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.21.4
+  version: 0.22.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Upload custom web-configurator\n- Upload custom remote-ui app\n- Configuration import & export\n- Bulk import of custom IR datasets\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Upload custom web-configurator\n- Upload custom remote-ui app\n- Configuration import & export\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -3491,6 +3491,97 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+    post:
+      tags:
+        - infrared
+      summary: Bulk upload infrared codes with a CSV file.
+      description: |
+        Upload multiple IR codes from a CSV file into an existing code set.
+
+        CSV file format:
+        - delimiter character is `,` (comma). This can be overwritten with the query parameter `delimiter`.
+        - character set: plain ASCII or UTF-8.
+        - the first line must contain a header row.
+        - required header columns:
+          - `key`: Key / button of the IR code.
+            - Valid character RegEx: `^[a-zA-Z0-9\-_\.]{1,50}$`
+            - Invalid characters will be replaced with an underscore.
+          - `code`: IR code
+          - ⚠️`key` and `code` must be lower-case, otherwise a validation error will be returned.
+        - optional header column:
+          - `format`: IR code format: `PRONTO` or `HEX`. Default if missing: `PRONTO`
+        - order of the header columns is not relevant, additional columns will be ignored.
+        - rows with an empty `key` or `code` value are ignored.
+        - duplicate `key` values are not allowed.
+          - The optional `overwrite` query parameter applies to existing keys only.
+        - max size: 10 MB
+
+        Minimal example:
+        ```csv
+        key,code
+        POWER_ON,0000 006d 0000 0020 000a
+        POWER_OFF,0000 006d 0000 0020 000b
+        ```
+
+        Notes:    
+        - If multiple files are specified in the form-data, only the first one will be processed.
+        - Header and values are automatically trimmed from leading and trailing whitespace.
+        - ⚠️ In case there's an invalid record in the CSV file, all previous valid records will be added to the data set.
+      operationId: uploadCustomIrDeviceCodeSet
+      parameters:
+        - name: codeSetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: overwrite
+          in: query
+          description: Overwrite existing IR codes with the same key. Otherwise only new codes are added.
+          schema:
+            type: boolean
+            default: false
+        - name: delimiter
+          in: query
+          description: CSV delimiter character
+          schema:
+            type: string
+            default: ','
+            minLength: 1
+            maxLength: 1
+        - name: comment
+          in: query
+          description: |
+            The comment character at the start of a line to use when parsing CSV. No comment character is set by default.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 1
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: IR code file to upload. File ending must be `.csv`.
+                  type: string
+                  format: binary
+        required: true
+      responses:
+        '200':
+          description: Successful CSV import
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodeSetUploadResult'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
     delete:
       tags:
         - infrared
@@ -3607,7 +3698,7 @@ paths:
     delete:
       tags:
         - infrared
-      summary: Delete and entry in a custom infrared code set.
+      summary: Delete an entry in a custom infrared code set.
       description: |
         ⚠️ The key in the custom infrared device code set will be irrevocably deleted!
       operationId: deleteKeyInCustomIrDeviceCodeSet
@@ -8651,91 +8742,6 @@ components:
         - microphone
         - enabled
         - voice_assistant
-    CodeSet:
-      type: object
-      properties:
-        manufacturer_id:
-          type: string
-        manufacturer:
-          type: string
-        device_id:
-          type: string
-        device:
-          type: string
-        device_type:
-          type: string
-        codes:
-          type: array
-          items:
-            $ref: '#/components/schemas/IrCode'
-      required:
-        - manufacturer
-        - manufacturer_id
-        - device_id
-        - device
-        - device_type
-        - codes
-    CodeSetCreate:
-      type: object
-      properties:
-        manufacturer:
-          description: |
-            Optional manufacturer name. If not specified: the codeset will be linked to the custom manufacturer entry
-            for self learned codes.
-          type: string
-          minLength: 1
-          maxLength: 100
-        device:
-          type: string
-          minLength: 1
-          maxLength: 100
-        device_type:
-          $ref: '#/components/schemas/DeviceType'
-        code_format:
-          $ref: '#/components/schemas/IrCodeFormat'
-        codes:
-          type: array
-          items:
-            type: object
-            properties:
-              key:
-                $ref: '#/components/schemas/IrCodeKey'
-              value:
-                $ref: '#/components/schemas/IrCodeValue'
-            required:
-              - key
-              - value
-      required:
-        - device
-        - device_type
-    CodeSetInfo:
-      type: object
-      properties:
-        manufacturer_id:
-          type: string
-        manufacturer:
-          type: string
-        device_id:
-          type: string
-        device:
-          type: string
-        device_type:
-          type: string
-      required:
-        - manufacturer_id
-        - manufacturer
-        - device_id
-        - device
-        - device_type
-    CodeSetUpdate:
-      type: object
-      properties:
-        device:
-          type: string
-          minLength: 1
-          maxLength: 100
-        device_type:
-          $ref: '#/components/schemas/DeviceType'
     CommandSequence:
       description: Sequence of commands to execute.
       type: array
@@ -10186,6 +10192,92 @@ components:
       required:
         - name
         - driver_type
+    CodeSet:
+      type: object
+      properties:
+        manufacturer_id:
+          type: string
+        manufacturer:
+          type: string
+        device_id:
+          type: string
+        device:
+          type: string
+        device_type:
+          type: string
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IrCode'
+      required:
+        - manufacturer
+        - manufacturer_id
+        - device_id
+        - device
+        - device_type
+        - codes
+    CodeSetCreate:
+      type: object
+      properties:
+        manufacturer:
+          description: |
+            Optional manufacturer name. If not specified: the codeset will be linked to the custom manufacturer entry
+            for self learned codes.
+          type: string
+          minLength: 1
+          maxLength: 100
+        device:
+          type: string
+          minLength: 1
+          maxLength: 100
+        device_type:
+          $ref: '#/components/schemas/DeviceType'
+        code_format:
+          $ref: '#/components/schemas/IrCodeFormat'
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/IrCodeCreate'
+      required:
+        - device
+        - device_type
+    CodeSetInfo:
+      type: object
+      properties:
+        manufacturer_id:
+          type: string
+        manufacturer:
+          type: string
+        device_id:
+          type: string
+        device:
+          type: string
+        device_type:
+          type: string
+      required:
+        - manufacturer_id
+        - manufacturer
+        - device_id
+        - device
+        - device_type
+    CodeSetUpdate:
+      type: object
+      properties:
+        device:
+          type: string
+          minLength: 1
+          maxLength: 100
+        device_type:
+          $ref: '#/components/schemas/DeviceType'
+    CodeSetUploadResult:
+      type: object
+      properties:
+        processed:
+          type: integer
+        added:
+          type: integer
+        updated:
+          type: integer
     IrCode:
       type: object
       properties:
@@ -10200,7 +10292,15 @@ components:
         - format
         - value
     IrCodeCreate:
-      $ref: '#/components/schemas/IrCode'
+      type: object
+      properties:
+        key:
+          $ref: '#/components/schemas/IrCodeKey'
+        value:
+          $ref: '#/components/schemas/IrCodeValue'
+      required:
+        - key
+        - value
     IrCodeFormat:
       description: Supported IR code formats
       type: string
