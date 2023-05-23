@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.22.0
+  version: 0.22.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -139,15 +139,11 @@ paths:
                 type: object
                 properties:
                   db:
-                    type: string
-                    enum:
-                      - Healthy
-                      - Degraded
-                      - Unhealthy
+                    $ref: '#/components/schemas/HealthStatus'
                   ui:
-                    $ref: '#/paths/~1pub~1health_check/get/responses/200/content/application~1json/schema/properties/db'
+                    $ref: '#/components/schemas/HealthStatus'
                   storage:
-                    $ref: '#/paths/~1pub~1health_check/get/responses/200/content/application~1json/schema/properties/db'
+                    $ref: '#/components/schemas/HealthStatus'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
       security: []
@@ -3126,7 +3122,7 @@ paths:
       summary: Search supported infrared device manufacturers.
       description: |
         Device manufacturer search. The returned manufacturer identification will be used for the manufacturer specific IR
-        code set search with `/ir/codes/manufacturers/{manufacturerId}`.
+        code set search with `GET /ir/codes/manufacturers/{manufacturerId}`.
       operationId: searchIrDeviceManufacturers
       parameters:
         - name: q
@@ -3168,6 +3164,9 @@ paths:
                     name:
                       description: Manufacturer name
                       type: string
+                    custom:
+                      description: Flag indicating if this manufacturer was created by the user
+                      type: boolean
                   required:
                     - id
                     - name
@@ -3184,7 +3183,7 @@ paths:
         - infrared
       summary: Search for infrared device code sets by manufacturer to create a remote entity.
       description: |
-        Searching without the optional device query will return the generic manufacturer IR code sets.
+        Searching without the optional device query will only return the generic manufacturer IR code sets.
       operationId: searchInfraredDevice
       parameters:
         - name: manufacturerId
@@ -3195,10 +3194,11 @@ paths:
             type: string
         - name: q
           in: query
-          description: Device or category
+          description: Device name query for fulltext search. At least two characters are required.
           required: false
           schema:
             type: string
+            minLength: 2
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -3230,20 +3230,28 @@ paths:
                     name:
                       description: Device name
                       type: string
+                    custom:
+                      description: Flag indicating if this manufacturer was created by the user
+                      type: boolean
                   required:
                     - id
                     - name
               example:
                 - id: '1'
                   name: Generic TV 1
+                  custom: false
                 - id: '2'
                   name: Generic TV 2
+                  custom: false
                 - id: '3'
                   name: Generic TV 3
+                  custom: false
                 - id: '4'
                   name: Generic Projector
+                  custom: false
                 - id: '5'
-                  name: Generic BluRay Player
+                  name: My BluRay Player
+                  custom: true
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -6875,6 +6883,7 @@ paths:
         - If the dock is in an `active` connection state, then the `name`, `token` and `wifi` values are persisted in the
           dock if provided in the request. The request fails with `503` service unavailable if the configuration can't be
           set in the docking station.
+        - An empty `custom_ws_url` value will remove the custom URL.
         - If the dock is not active, the values are only stored in the remote. A changed `token` will be used for the next
           connection attempt.
       operationId: updateDock
@@ -9280,7 +9289,6 @@ components:
         - state
     DockUrl:
       type: string
-      minLength: 6
       maxLength: 64
       description: Dock WebSocket URL to override auto-discovery from the service name in `dock_id`.
     DriverDeveloper:
@@ -9715,6 +9723,12 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Group'
+    HealthStatus:
+      type: string
+      enum:
+        - Healthy
+        - Degraded
+        - Unhealthy
     IconIdentifier:
       type: string
       format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
@@ -9847,14 +9861,12 @@ components:
             - type: object
               properties:
                 input:
-                  type: object
                   $ref: '#/components/schemas/SettingsPage'
               required:
                 - input
             - type: object
               properties:
                 confirmation:
-                  type: object
                   $ref: '#/components/schemas/ConfirmationPage'
               required:
                 - confirmation
@@ -10310,7 +10322,7 @@ components:
     IrCodeKey:
       description: IR command key identifier
       type: string
-      format: '^[a-zA-Z0-9\-_\.]{1,50}$'
+      format: '^[a-zA-Z0-9\-_\.:+#*°@%/()?]{1,50}$'
     IrCodeSetType:
       description: 'Type of codeset, either a manufacturer codeset or a custom codeset.'
       type: string

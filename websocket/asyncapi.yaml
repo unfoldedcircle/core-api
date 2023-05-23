@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.20.0-alpha'
+  version: '0.20.1-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1310,6 +1310,7 @@ components:
         - If the dock is in an `active` connection state, then the `name`, `token` and `wifi` values are persisted in the
           dock if provided in the request. The request fails with `503` service unavailable if the configuration can't be
           set in the docking station.
+        - An empty `custom_ws_url` value will remove the custom URL.
         - If the dock is not active, the values are only stored in the remote. A changed `token` will be used for the next
           connection attempt.
       tags:
@@ -7396,7 +7397,6 @@ components:
 
     dockUrl:
       type: string
-      minLength: 6
       maxLength: 64
       description: Dock WebSocket URL to override auto-discovery from the service name in `dock_id`.
 
