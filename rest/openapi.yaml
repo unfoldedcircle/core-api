@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.22.2
+  version: 0.22.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3341,28 +3341,42 @@ paths:
     get:
       tags:
         - infrared
-      summary: Get all custom infrared code sets.
+      summary: Get all custom infrared code sets or export as CSV.
       description: |
-        Retrieve all custom infrared code set with paging. Use `GET /ir/codes/custom/{codeSetId}` to access the IR code
-        definitions.
+        Depending on the `Content-Type` header, the custom infrared code sets are either returned as JSON objects
+        or exported as a CSV file.
+
+        - `Content-Type: application/json` or none: retrieve all custom infrared code set with paging.  
+          Use `GET /ir/codes/custom/{codeSetId}` to access the IR code definitions of a codeset.
+
+        - `Content-Type: text/csv`: retrieve all custom codes as CSV export (without paging).  
+          Query parameters `page` and `limit` are ignored.
       operationId: getCustomIrDeviceCodes
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - name: delimiter
+          in: query
+          description: CSV delimiter character. Only for CSV export.
+          schema:
+            type: string
+            default: ','
+            minLength: 1
+            maxLength: 1
       responses:
         '200':
-          description: Successful operation
+          description: 'Successful operation, either with paginated JSON or CSV response.'
           headers:
             Pagination-Count:
-              description: Total number of items.
+              description: Total number of code sets.
               schema:
                 type: integer
             Pagination-Limit:
-              description: Number of returned items.
+              description: Number of returned items. Only for json response.
               schema:
                 type: integer
             Pagination-Page:
-              description: Current page number. 1-based.
+              description: Current page number. 1-based. Only for json response.
               schema:
                 type: integer
           content:
@@ -3371,6 +3385,18 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CodeSetInfo'
+            text/csv:
+              schema:
+                type: string
+              example: |
+                manufacturer,device,key,format,code
+                custom,My AVR,CURSOR_DOWN,HEX,3;0x20F0827D;32;0
+                custom,My AVR,CURSER_ENTER,HEX,3;0x20F022DD;32;0
+                custom,My AVR,CURSOR_LEFT,HEX,3;0x20F0E01F;32;0
+                custom,My AVR,CURSOR_RIGHT,HEX,3;0x20F0609F;32;0
+                custom,My AVR,CURSOR_UP,HEX,3;0x20F002FD;32;0
+                Foobar,TV,POWER_ON,PRONTO,0000 006d 0000 0024 0157 00ac 0015 0015 0015 0015 0015 0040 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0015 0040 0015 0040 0015 0015 0015 0040 0015 0040 0015 0040 0015 0040 0015 0040 0015 0015 0015 0015 0015 0040 0015 0015 0015 0015 0015 0015 0015 0040 0015 0040 0015 0040 0015 0040 0015 0015 0015 0040 0015 0040 0015 0040 0015 0015 0015 0015 0015 0689 0157 0056 0015 0e94
+                Foobar,TV,POWER_OFF,PRONTO,0000 006d 0000 0024 0157 00ab 0015 0015 0016 0015 0016 003f 0016 0015 0015 0016 0015 0015 0016 0015 0016 0015 0015 0040 0015 0040 0015 0015 0016 003f 0016 003f 0016 003f 0016 003f 0016 003f 0016 003f 0016 0015 0016 003f 0016 0015 0015 0015 0016 0015 0016 003f 0016 003f 0016 0015 0015 0040 0015 0015 0016 003f 0016 003f 0016 003f 0016 0015 0016 0015 0015 05fd 0156 0055 0016 0ee1
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -3427,9 +3453,13 @@ paths:
     get:
       tags:
         - infrared
-      summary: Get custom infrared code set.
+      summary: Get custom infrared code set or export as CSV.
       description: |
-        Retrieve the full definition of an infrared code set including the IR codes.
+        Depending on the `Content-Type` header, the full definition of a custom infrared code set including the IR codes is
+        returned as JSON or exported as a CSV file.
+
+        - `Content-Type: application/json` or none: retrieve infrared code set as JSON.
+        - `Content-Type: text/csv`: export codeset as CSV.
       operationId: getCustomIrDeviceCodeSet
       parameters:
         - name: codeSetId
@@ -3437,26 +3467,44 @@ paths:
           required: true
           schema:
             type: string
+        - name: delimiter
+          in: query
+          description: CSV delimiter character. Only for CSV export.
+          schema:
+            type: string
+            default: ','
+            minLength: 1
+            maxLength: 1
       responses:
         '200':
-          description: Successful operation
+          description: 'Successful operation, either with paginated JSON or CSV response.'
           headers:
             Pagination-Count:
               description: Total number of items.
               schema:
                 type: integer
             Pagination-Limit:
-              description: Number of returned items.
+              description: Number of returned items. Only for json response.
               schema:
                 type: integer
             Pagination-Page:
-              description: Current page number. 1-based.
+              description: Current page number. 1-based. Only for json response.
               schema:
                 type: integer
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/CodeSet'
+            text/csv:
+              schema:
+                type: string
+              example: |
+                key,format,code
+                CURSOR_DOWN,HEX,3;0x20F0827D;32;0
+                CURSER_ENTER,HEX,3;0x20F022DD;32;0
+                CURSOR_LEFT,HEX,3;0x20F0E01F;32;0
+                CURSOR_RIGHT,HEX,3;0x20F0609F;32;0
+                CURSOR_UP,HEX,3;0x20F002FD;32;0
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -6445,6 +6493,7 @@ paths:
         results, unless the query parameter `new=false` is set. Docks with Bluetooth enabled are always returned, since
         this usually means that the dock needs to be re-configured.
 
+        - If BT is disabled in the remote, the query parameter `bt` is ignored.
         - Emits the WebSocket event `dock_discovery` with `event_type: START` when discovery starts.
         - For each discovered device the WebSocket event `dock_discovery` with `event_type: DISCOVER` is emitted.
         - This operation clears any old discovered devices and won't be accessible anymore with the GET operation.
