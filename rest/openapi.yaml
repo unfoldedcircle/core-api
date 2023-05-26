@@ -4891,9 +4891,11 @@ paths:
         - profiles
       summary: Create a new profile.
       description: |
-        The `profile_id` property is optional and auto-generated if not specified. Otherwise it needs to be a unique profile
-        identifier.  
-        If a `pin` is specified the profile will be protected. A protected profile can only be accessed with the profile specific pin code.
+        - the `profile_id` property is optional and auto-generated if not specified. Otherwise it needs to be a unique
+          profile identifier.
+        - if the first profile is added, it is automatically set as the active profile.
+        - if a `pin` is specified the profile will be protected. A protected profile can only be accessed with the profile
+          specific pin code.
       operationId: createProfile
       requestBody:
         description: Profile data
@@ -4961,6 +4963,8 @@ paths:
       tags:
         - profiles
       summary: Get all profiles or the active profile.
+      description: |
+        If the active profile is requested and no profile exists, or set active, 404 is returned.
       operationId: getProfiles
       parameters:
         - $ref: '#/components/parameters/active'
@@ -4975,6 +4979,8 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
     delete:
       tags:
         - profiles

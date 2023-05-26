@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.20.1-alpha'
+  version: '0.20.2-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1387,6 +1387,7 @@ components:
         results, unless the query parameter `new=false` is set. Docks with Bluetooth enabled are always returned, since
         this usually means that the dock needs to be re-configured.
 
+        - If BT is disabled in the remote, the `bt` parameter is ignored.
         - Emits the WebSocket event `dock_discovery` with `event_type: START` when discovery starts.
         - For each discovered device the WebSocket event `dock_discovery` with `event_type: DISCOVER` is emitted.
         - This operation clears any old discovered devices and won't be accessible anymore with the GET operation.
@@ -1783,6 +1784,8 @@ components:
         $ref: '#/components/schemas/profileMsg'
     get_active_profile:
       summary: 🧪 Retrieve the active profile.
+      description: |
+        If no profile exists, or no profile is set active, 404 is returned.
       tags:
         - name: profile
       payload:
@@ -1803,6 +1806,7 @@ components:
         - `profile_id` is optional and auto-generated if not specified. Otherwise it needs to be a unique profile identifier.
         - `name` is mandatory and must be unique.
         - `pin` is an optional numeric pin code to lock the profile. A protected profile can only be accessed with the profile specific pin code.
+        - if the first profile is added, it is automatically set as the active profile.
       tags:
         - name: profile
       payload:
