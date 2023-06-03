@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.22.3
+  version: 0.22.6
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8565,6 +8565,9 @@ components:
           maximum: 100
         status:
           $ref: '#/components/schemas/PowerStatus'
+        power_supply:
+          description: Power supply online
+          type: boolean
       required:
         - capacity
         - status
@@ -8672,6 +8675,13 @@ components:
         wifi_enabled:
           description: Enable WiFi.
           type: boolean
+        bt:
+          description: Temporary read-only Bluetooth information until dedicated BT management endpoint is provided.
+          type: object
+          properties:
+            address:
+              description: Bluetooth MAC address
+              type: string
       required:
         - bt_enabled
         - wifi_enabled
