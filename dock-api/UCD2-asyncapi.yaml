@@ -2,7 +2,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:dock'
 info:
   title: Remote Two WebSocket Dock-API
-  version: '0.5.0-beta'
+  version: '0.6.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -95,6 +95,7 @@ channels:
           - $ref: '#/components/messages/command'
           - $ref: '#/components/messages/get_sysinfo'
           - $ref: '#/components/messages/ir_send'
+          - $ref: '#/components/messages/ir_stop'
           - $ref: '#/components/messages/set_config'
           - $ref: '#/components/messages/set_brightness'
           - $ref: '#/components/messages/set_logging'
@@ -185,15 +186,17 @@ components:
         The following system commands can be executed:
         
         - `ir_receive_on`: Enables IR learning.  
-           Learned codes are sent in the `ir_receive` event message. Learning mode can be retrieved with `get_sysinfo`. 
+           - Learned codes are broadcasted with the `ir_receive` event message.
+           - Learning mode status can be retrieved with the `get_sysinfo` request.
+           - While learning mode is activated, no IR codes can be transmitted.
         - `ir_receive_off`: Stops IR learning.
         - `remote_charged`: Set status LED to normal operation (LED off)
         - `remote_lowbattery`: Set status LED to low battery mode (blink twice every 4 seconds).
         - `remote_normal`: Set status LED to normal operation (LED off, turn on when charging).
         - `identify`: Docking station identification, blink status LED green, amber, blue and red.
         - `reboot`: Reboot the device.
-        - `reset`: Factory reset the device.  
-          ❗️ All configuration data is erased and the device is put in setup mode.
+        - `reset`: Factory reset the device.
+          - ❗️ All configuration data is erased and the device is put in setup mode.
         
         The server will respond with a `result` message and a status code of the request.
         
@@ -204,7 +207,7 @@ components:
         $ref: '#/components/messages/result'
 
     get_sysinfo:
-      summary: 🚀 Get system information. 🔓
+      summary: 🚀 Get system information.
       description: |
         Get hardware and software information about the device like serial number, model number, connection status and
         installed firmware version.
@@ -219,11 +222,90 @@ components:
       payload:
         $ref: '#/components/schemas/systemInfoMsg'
     ir_send:
-      summary: 🧪 Send an IR code.
+      summary: 🧪 Send an IR code or continue repeating a previous code.
       description: |
-        Send an IR code on the given output(s), either in HEX or PRONTO HEX format.
+        Send an IR code on the given output(s), either in Unfolded Circle or PRONTO HEX format.
+
+        - If multiple outputs are specified, the IR signal is transmitted in parallel on the given outputs.
+        - Only one IR code can be transmitted at the same time.  
+          It is not possible to send different codes on individual outputs at the same time.
+        - IR transmission is blocked while the device is in learning mode.
+
+        The IR transmission begins after the full message has been received, parsed and validated.
+        Depending on the state of the IR device, different actions are taken:
+        
+        - Device is idle: a single code is transmitted and status code `200` returned after completion.
+        - Transmitting the same IR code with the `repeat` field set: return status code `202` and continue repeating
+          the IR code.
+        - Transmitting another IR code: return error code `429`.
+
+        See _Result codes_ below for all status codes.
+
+        ### Continuous IR repeat
+        This feature allows to repeat an IR signal autonomously by the dock for a specified number of times.
+
+        The repeated IR signal is usually a special IR command to tell the receiving device, that a button on a remote
+        control is hold for a longer time. Depending on the device, a repeat signal can either simply execute the same
+        action as if someone would rapidly press the same button, or it can adjust the command to a different function.
+        One common example is to progressively increase the volume steps, e.g. start slowly with 0.1 dBA steps, then
+        after a short time increase to 0.5 or 1 dBA steps.  
+        Please note that not all devices or IR formats / commands support this feature. This is manufacturer specific.
+
+        The continuous IR repeat feature is activated with the optional `repeat` field in the `ir_send` command.
+        - The IR repeat signal will automatically be sent the number of times specified in the repeat field.
+        - If the next `ir_send` request contains the same `command` value, the repeat count will be reset and therefore
+          the repeat signal prolonged.
+        - An `ir_stop` request will stop the remaining repeat commands.
+        - Depending on the IR `format`, a repeat value might be already part of the `code`.
+          - ⚠️ The `repeat` value will override the embedded repeat information.
+          - See _IR formats_ below.
+
+        If not specified (or set to zero):
+        - The provided `code` is sent as is, with the contained repeat information (depending on IR format).
+        - Continuous IR repeat is not activated:
+          - every `ir_send` command will send the full IR command.
+          - ⚠️ the `ir_stop` command will have no effect!
+
+        ### IR formats
+        - `pronto`: PRONTO HEX format:
+          - The PRONTO HEX format does not include a dedicated repeat count field, but an optional 2nd burst
+            pair sequence used for repeats.
+            - The third number in the PRONTO code specifies the number of burst pairs in the 1st sequence.
+            - The fourth number in the PRONTO code specifies the number of burst pairs in the 2nd sequence.
+            - If the fourth number is 0, then there's no repeat sequence.
+            - Note that either sequence is optional. Also there might be both sequences defined, or only the
+              1st or 2nd one.
+          - If the `repeat` field is set (> 0), the 2nd burst pair sequence of the PRONTO code is repeated.
+            - If the PRONTO code doesn't contain a 2nd burst pair sequence, then the repeat value is ignored.
+        - `hex`: Unfolded Circle format:
+          - The repeat count is part of the code and might be required for certain protocols.
+            - E.g. Sony needs to send the same command two or three times so it's recognized as a single
+              command by a device.
+          - If the `repeat` field is set (> 0), this will override the repeat count in `code`!
+          - The actual emitted IR repeat signal depends on the IR protocols.
+            - E.g. Denon will simply repeat the full command, whereas LG has a mandatory repeat-specific code
+              sent after the command. This is all handled by the dock firmware, when sending the IR code.
+
+
+        ### Result codes
+        - `200`: IR command has been sent. Either a single command, or after an IR repeat has finished.
+        - `202`: IR repeat command accepted.
+        - `400`: Cannot send command: invalid data or format.
+        - `429`: Cannot send command: last IR command is still being sent.
+        - `503`: IR sending not possible because learning is active.
+
       payload:
         $ref: '#/components/schemas/irSendMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    ir_stop:
+      summary: 🔍 Stop an active IR repeat transmission.
+      description: |
+        This command stops an active IR repeat transmission at the end of the current repeat signal.
+
+        Status 200 is always returned, even if there's no active IR transmission.
+      payload:
+        $ref: '#/components/schemas/irStopMsg'
       x-response:
         $ref: '#/components/messages/result'
     ir_receive:
@@ -310,7 +392,14 @@ components:
         msg:
           $ref: '#/components/schemas/command'
         code:
-          description: Response code of the operation according to HTTP status codes.
+          description: |
+            Response code of the operation according to HTTP status codes.
+
+            Commonly used status codes are:
+            - `200`: request successful
+            - `400`: bad request, data in request is not valid
+            - `429`: too many requests, try again later. E.g. IR sending is still active
+            - `503`: service not available. E.g. IR sending not possible because learning is active
           type: integer
           default: 200
         reboot:
@@ -350,8 +439,8 @@ components:
       examples:
       - type: auth_required
         model: UCD2
-        revision: "5.3"
-        version: "0.4.0"
+        revision: "5.4"
+        version: "0.6.0"
     authRequestMsg:
       type: object
       properties:
@@ -490,11 +579,19 @@ components:
               type: string
               const: ir_send
             code:
-              description: IR code, either in hex or PRONTO hex format. PRONTO code values must be separated by a comma.
+              description: |
+                IR code, either in Unfolded Circle or PRONTO hex format.  
+                PRONTO code values must be separated by a space or comma (and the separator may not be mixed).
               type: string
-              format: "^(?:[\\d]{1,3};0x[a-fA-F0-9]{1,16};[\\d]{1,2};[\\d]{1,2}|[a-fA-F0-9]{1,4}(,[a-fA-F0-9]{1,4}){3,})$"
+              format: "^(?:[\\d]{1,3};0x[a-fA-F0-9]{1,16};[\\d]{1,2};[\\d]{1,2}|[0]{1,4}(?:(?: [a-fA-F0-9]{1,4}){5,}|(?:,[a-fA-F0-9]{1,4}){5,}))$"
             format:
               $ref: '#/components/schemas/irFormat'
+            repeat:
+              description: |
+                Optional repeat value for sending continuous IR repeat signals (depending on IR protocol).  
+              type: integer
+              minimum: 0
+              maximum: 20
             int_side:
               description: Enable internal output at the bottom around the dock.
               type: boolean
@@ -514,18 +611,43 @@ components:
             - code
             - format
       examples:
-      - type: dock
-        id: 1
-        command: ir_send
-        code: "4;0x10;12;0"
-        format: "hex"
-        int_side: true
-      - type: dock
-        id: 2
-        command: ir_send
-        code: "0000,006c,0022,0002,015b,00ad,0016,0016,0016,0041,0016,0041,0016,0041,0016,0016,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0041,0016,0016,0016,0016,0016,0041,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0016,0041,0016,0016,0016,0041,0016,0016,0016,0041,0016,0016,0016,0622,015b,0057,0016,0e6c"
-        format: "pronto"
-        ext1: true
+        - type: dock
+          id: 1
+          command: ir_send
+          code: "4;0x10;12;0"
+          format: "hex"
+          int_side: true
+        - type: dock
+          id: 2
+          command: ir_send
+          code: "0000 006c 0022 0002 015b 00ad 0016 0016 0016 0041 0016 0041 0016 0041 0016 0016 0016 0041 0016 0041 0016 0041 0016 0041 0016 0041 0016 0041 0016 0016 0016 0016 0016 0016 0016 0016 0016 0041 0016 0041 0016 0016 0016 0016 0016 0041 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0041 0016 0016 0016 0041 0016 0016 0016 0041 0016 0016 0016 0622 015b 0057 0016 0e6c"
+          format: "pronto"
+          ext1: true
+        - type: dock
+          id: 3
+          command: ir_send
+          code: "4;0x10;12;1"
+          format: "hex"
+          repeat: "3"
+          int_side: true
+        - type: dock
+          id: 4
+          command: ir_send
+          code: "0000 006c 0022 0002 015b 00ad 0016 0016 0016 0041 0016 0041 0016 0041 0016 0016 0016 0041 0016 0041 0016 0041 0016 0041 0016 0041 0016 0041 0016 0016 0016 0016 0016 0016 0016 0016 0016 0041 0016 0041 0016 0016 0016 0016 0016 0041 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0016 0041 0016 0016 0016 0041 0016 0016 0016 0041 0016 0016 0016 0622 015b 0057 0016 0e6c"
+          format: "pronto"
+          repeat: 3
+          ext1: true
+    irStopMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: ir_stop
     irReceiveEvent:
       type: object
       allOf:
@@ -678,6 +800,14 @@ components:
       maxLength: 32
 
     irFormat:
+      description: |
+        IR format:
+        - `hex`: Unfolded Circle format: `<protocol>;<hex-ir-code>;<bits>;<repeat-count>` e.g. "4;0x640C;15;0"
+          - Maximum repeat count is 20.
+          - Protocol and code are based on [IRremoteESP8266](https://github.com/crankyoldgit/IRremoteESP8266).
+        - `pronto`: PRONTO HEX format. Codes separated by space or comma.
+          - Only raw PRONTO codes are supported (first code must be `0000`).
+          - Codes may be shortened, e.g. `0000` can be specified as `0`, or `0010` as `10`.
       type: string
       enum:
         - hex
