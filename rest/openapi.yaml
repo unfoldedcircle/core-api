@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.22.7
+  version: 0.23.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2032,6 +2032,9 @@ paths:
 
         By default only the entities are returned which are not yet configured. Use the `filter` query to include all or
         only the already configured entities.
+
+        Available entities can be searched and filtered by one or multiple entity types. The text search searches in the
+        entity name, entity identifier and area.
       operationId: getAvailableEntitiesFromInstance
       parameters:
         - $ref: '#/components/parameters/integration_id'
@@ -2053,7 +2056,8 @@ paths:
               - NEW
               - CONFIGURED
               - ALL
-        - $ref: '#/components/parameters/entity_type'
+        - $ref: '#/components/parameters/entity_types'
+        - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -2086,6 +2090,53 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - integrations
+      summary: Configure multiple available entities.
+      description: |
+        Configure multiple new Remote Two entities from available integration entities. Once configured, the entities will
+        no longer show up as an available entity (unless the `filter=ALL` query parameter is set).
+
+        An empty request body array will configure all available entities.
+
+        Use endpoint `/intg/instances/{intgId}/entities/{entityId}` to configure a single entity and optionally rename it
+        or change its icon.
+
+        This is a best effort operation:
+        - if an entity is already configured, it is ignored and not returned in the response.
+        - unknown entity identifiers are ignored, no error is returned
+
+        Every newly configured entity will trigger an `entity_change` event.
+      operationId: configureEntitiesFromIntegration
+      parameters:
+        - $ref: '#/components/parameters/integration_id'
+      requestBody:
+        description: Entity identifiers.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: string
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the configured entity identifiers in the response.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   '/intg/instances/{intgId}/entities/{entityId}':
     post:
       tags:
@@ -2093,7 +2144,7 @@ paths:
       summary: Configure an available entity.
       description: |
         Configure a new Remote Two entity from an available integration entity. Once configured, the entity will no longer
-        show up as available entity (unless the `all` filter is set).
+        show up as available entity (unless the `filter=ALL` query parameter is set).
 
         The entity `name`, `icon` and `description` fields may be changed. If not specified in the request the values from
         the available entity are used.
@@ -2106,7 +2157,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EntityRequest'
+              $ref: '#/components/schemas/EntityUpdateRequest'
         required: true
       responses:
         '201':
@@ -2132,8 +2183,8 @@ paths:
       summary: Get total number of configured entities.
       operationId: getEntityCount
       parameters:
-        - $ref: '#/components/parameters/entity_type'
-        - $ref: '#/components/parameters/intg_id'
+        - $ref: '#/components/parameters/entity_types'
+        - $ref: '#/components/parameters/intg_ids'
       responses:
         '200':
           description: Successful operation.
@@ -2151,14 +2202,17 @@ paths:
     get:
       tags:
         - entities
-      summary: Get configured entities.
+      summary: Search and retrieve configured entities.
       description: |
-        Returns all configured and loaded entities.  
-        Entities can be filtered by type and integration.
+        Returns all configured and loaded entities.
+
+        Entities can be searched and filtered by one or multiple types and integrations. The text search searches in the
+        entity name, entity identifier and integration name.
       operationId: getEntities
       parameters:
-        - $ref: '#/components/parameters/entity_type'
-        - $ref: '#/components/parameters/intg_id'
+        - $ref: '#/components/parameters/entity_types'
+        - $ref: '#/components/parameters/intg_ids'
+        - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -2181,6 +2235,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Entities'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    delete:
+      tags:
+        - entities
+      summary: Remove configured entities.
+      description: |
+        Unloads and deletes multiple configured entities, either by integration identifier or by entity identifiers.
+        If a deleted entity is still provided from an integration, it can be reused and will show up again as
+        available entity from its integration.
+
+        ⚠️ An empty `entity_ids` array will delete all configured entities!
+
+        All references to the configured entities will be removed from profile pages and groups.
+
+        This is a best effort operation:
+        - unknown entity identifiers are ignored, no error is returned
+
+        Deleted entities will trigger an `entity_change` event with `event_type: DELETE`. If a large amount of entities
+        are deleted, a single, generic `entity_change` event might be sent instead (without an `entity_id` field).
+      operationId: deleteEntities
+      requestBody:
+        description: Integration or entity identifiers.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityDeleteRequest'
+            examples:
+              by integration:
+                value:
+                  integration_id: hass.main
+              by entity identifiers:
+                value:
+                  entity_ids:
+                    - hass.main.sensor.1
+                    - hass.main.sensor.2
+                    - hass.main.light.1
+              all entities:
+                value:
+                  entity_ids: []
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -2220,7 +2324,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EntityRequest'
+              $ref: '#/components/schemas/EntityUpdateRequest'
         required: true
       responses:
         '201':
@@ -2245,7 +2349,7 @@ paths:
       summary: Remove a configured entity.
       description: |
         Unloads and deletes a configured entity. If the entity is still provided from an integration it can be reused and
-        will show up again in the available entity group.
+        will show up again as available entity from its integration.
 
         All references to the configured entity will be removed from profile pages and groups.
       operationId: deleteEntity
@@ -8100,13 +8204,13 @@ components:
       required: false
       schema:
         type: boolean
-    entity_type:
-      name: entity_type
+    entity_types:
+      name: entity_types
       in: query
-      description: Filter by entity type.
+      description: 'Filter by multiple entity types, separated by comma.'
       required: false
       schema:
-        $ref: '#/components/schemas/EntityType'
+        type: string
     has_instances:
       name: has_instances
       in: query
@@ -8130,13 +8234,22 @@ components:
       required: false
       schema:
         type: boolean
-    intg_id:
-      name: intg_id
+    intg_ids:
+      name: intg_ids
       in: query
-      description: Filter by integration.
+      description: 'Filter by multiple integration identifiers, separated by comma.'
       required: false
       schema:
-        $ref: '#/components/schemas/IntegrationId'
+        type: string
+    query:
+      name: q
+      in: query
+      description: Text search
+      required: false
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 50
     resource_type_query:
       name: type
       in: query
@@ -9578,7 +9691,7 @@ components:
         - id
         - cmd_id
         - name
-    EntityRequest:
+    EntityUpdateRequest:
       type: object
       description: |
         Update model for an entity.
@@ -9592,6 +9705,17 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         description:
           $ref: '#/components/schemas/LanguageText'
+    EntityDeleteRequest:
+      type: object
+      description: |
+        Delete request model for multiple entities. Either specify `integration_id` or `entity_ids`.
+      properties:
+        integration_id:
+          type: string
+        entity_ids:
+          type: array
+          items:
+            type: string
     EntityType:
       type: string
       description: Entity type

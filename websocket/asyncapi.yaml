@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.20.5-alpha'
+  version: '0.21.2-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -210,7 +210,7 @@ channels:
           - $ref: '#/components/messages/execute_entity_command'
           - $ref: '#/components/messages/update_entity'
           - $ref: '#/components/messages/delete_entity'
-          - $ref: '#/components/messages/delete_all_entities'
+          - $ref: '#/components/messages/delete_entities'
 
           # --- Dock handling
           - $ref: '#/components/messages/get_dock_count'
@@ -355,6 +355,7 @@ channels:
           - $ref: '#/components/messages/delete_integration'
 
           - $ref: '#/components/messages/configure_entity_from_integration'
+          - $ref: '#/components/messages/configure_entities_from_integration'
 
           # --- integration discovery
           - $ref: '#/components/messages/get_integration_discovery_status'
@@ -1097,9 +1098,11 @@ components:
       x-response:
         $ref: '#/components/messages/entity'
     get_entities:
-      summary: 🧪 Retrieve configured entities.
+      summary: 🧪 Search and retrieve configured entities.
       description: |
-        Returns all configured entities, optionally filtered by entity type or integration.
+        Returns all configured entities, optionally filtered by one or multiple entity types or integrations.
+        
+        The text search searches in the entity name, entity identifier and integration name.
         
         Attention: pagination is active and can be parameterized to return more items per page if required.
       tags:
@@ -1115,10 +1118,13 @@ components:
       payload:
         $ref: '#/components/schemas/entitiesMsg'
     get_available_entities:
-      summary: 🧪 Retrieve the available entities provided by integrations.
+      summary: 🧪 Retrieve the available entities provided by an integration.
       description: |
-        TODO core implementation: retrieve available entities from all integrations.
-        --> **`filter.integration_id` must be specified at the moment!**
+        ⚠️ At the moment it's only possible to retrieve available entities from one integration at a time.
+        
+        - **`filter.integration_id` must be specified!**
+        - available entities can be filtered by one or multiple entity types.
+        - the text search searches in the entity name, entity identifier and area.
         
         Attention: pagination is active and can be parameterized to return more items per page if required.
       tags:
@@ -1177,7 +1183,7 @@ components:
     entity_change:
       summary: 🧪 Entity change event.
       description: |
-        Emitted if an entity has changed, a new entity has been added or a configured entity has been deleted.
+        Emitted if an entity has changed, a new entity has been added or a configured entity has been deleted.  
         
         If an entity state or dynamic attribute has changed (through notification of an integration driver), then only
         the `attributes` object is included within `new_state`. This happens after an `entity_command` or if the entity
@@ -1188,6 +1194,9 @@ components:
         
         If a complete integration is removed then only an `integration_change` event is sent, i.e. there won't be
         individual `entity_change` events for every removed entity!
+        
+        ⚠️ This event is also used to indicate the client to reload all entities. This is the case if only
+        `event_type: change` is set and the `entity_id` field is missing.
       tags:
         - name: entity
         - name: event
@@ -1207,7 +1216,7 @@ components:
       x-response:
         $ref: '#/components/messages/entity'
     delete_entity:
-      summary: 🧪 Delete an entity.
+      summary: 🧪 Remove a configured entity.
       description: |
         Delete the configured entity and remove it from all profile pages and groups.
       tags:
@@ -1216,14 +1225,26 @@ components:
         $ref: '#/components/schemas/deleteEntityMsg'
       x-response:
         $ref: '#/components/messages/result'
-    delete_all_entities:
-      summary: 🧪 Delete all entities.
+    delete_entities:
+      summary: 🧪 Remove configured entities.
       description: |
-        Warning: all configured entities in all profiles are deleted. All profile pages and groups will be empty afterwards! 
+        Unloads and deletes multiple configured entities, either by integration identifier or by entity identifiers.
+        If a deleted entity is still provided from an integration, it can be reused and will show up again as
+        available entity from its integration.
+    
+        ⚠️ An empty request body array will delete all configured entities!
+    
+        All references to the configured entities will be removed from profile pages and groups.
+        
+        This is a best effort operation:
+        - unknown entity identifiers are ignored, no error is returned
+
+        Deleted entities will trigger an `entity_change` event with `event_type: DELETE`. If a large amount of entities
+        are deleted, a single, generic `entity_change` event might be sent instead (without an `entity_id` field).
       tags:
         - name: entity
       payload:
-        $ref: '#/components/schemas/deleteAllEntitiesMsg'
+        $ref: '#/components/schemas/deleteEntitiesMsg'
       x-response:
         $ref: '#/components/messages/result'
 
@@ -2238,6 +2259,29 @@ components:
         $ref: '#/components/schemas/configureEntityFromIntegrationMsg'
       x-response:
         $ref: '#/components/messages/entity'
+
+    configure_entities_from_integration:
+      summary: 🧪 Configure multiple available entities.
+      description: |
+        Configure multiple new Remote Two entities from available integration entities. Once configured, the entities will
+        no longer show up as an available entity (unless the `filter=ALL` query parameter is set).
+        
+        If `entity_ids` is not provided or is empty, all entities from the integration are configured.
+  
+        Use message `configure_entity_from_integration` to configure a single entity and optionally rename it
+        or change its icon.
+        
+        This is a best effort operation:
+        - if an entity is already configured, it is ignored and not returned in the response.
+        - unknown entity identifiers are ignored, no error is returned.
+
+        Every newly configured entity will trigger an `entity_change` event.
+      tags:
+        - name: integration
+      payload:
+        $ref: '#/components/schemas/configureEntitiesFromIntegrationMsg'
+      x-response:
+        $ref: '#/components/messages/result'
 
     get_integration_discovery_status:
       summary: 🧪 Get external integration driver discovery status.
@@ -3981,16 +4025,26 @@ components:
           required:
             - msg
             - msg_data
-    deleteAllEntitiesMsg:
+    deleteEntitiesMsg:
       type: object
       allOf:
         - $ref: '#/components/schemas/commonReq'
         - properties:
             msg:
               type: string
-              const: delete_all_entities
+              const: delete_entities
+            msg_data:
+              type: object
+              properties:
+                integration_id:
+                  type: string
+                entity_ids:
+                  type: array
+                  items:
+                    type: string
           required:
             - msg
+            - msg_data
 
     # --- Dock handling
 
@@ -5556,6 +5610,31 @@ components:
             - msg
             - msg_data
 
+    configureEntitiesFromIntegrationMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: configure_entities_from_integration
+            msg_data:
+              type: object
+              properties:
+                integration_id:
+                  type: string
+                entity_ids:
+                  description: |
+                    Entity identifiers from integration. Omitted or an empty array will configure all entities.
+                  type: array
+                  items:
+                    type: string
+              required:
+                - integration_id
+          required:
+            - msg
+            - msg_data
+
     getIntegrationDiscoveryStatusMsg:
       type: object
       allOf:
@@ -6458,10 +6537,16 @@ components:
       properties:
         integration_id:
           $ref: '#/components/schemas/integrationId'
-        entity_type:
-          $ref: '#/components/schemas/entityType'
+        entity_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/entityType'
         entities:
           $ref: '#/components/schemas/availEntitiesFilter'
+        text_search:
+          type: string
+          minLength: 1
+          maxLength: 50
 
     availEntitiesFilter:
       description: Filter available entities
@@ -6474,10 +6559,18 @@ components:
       description: Optional filters
       type: object
       properties:
-        integration_id:
-          $ref: '#/components/schemas/integrationId'
-        entity_type:
-          $ref: '#/components/schemas/entityType'
+        integration_ids:
+          type: array
+          items:
+            $ref: '#/components/schemas/integrationId'
+        entity_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/entityType'
+        text_search:
+          type: string
+          minLength: 1
+          maxLength: 50
 
     entity: # YIO v1: loaded_entity
       description: |
@@ -7283,7 +7376,8 @@ components:
     entityChange:
       type: object
       description: |
-        The `new_state` property is omitted for `event_type` = `delete`.
+        The `new_state` property is omitted for `event_type` = `delete`.  
+        If only `event_type` is present then the client should reload all entity data.
       properties:
         event_type:
           $ref: '#/components/schemas/defaultChangeEventType'
@@ -7295,7 +7389,6 @@ components:
           $ref: '#/components/schemas/entityUpdate'
       required:
         - event_type
-        - entity_id
 
     profileChange:
       type: object
