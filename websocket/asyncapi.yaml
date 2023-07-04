@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.20.4-alpha'
+  version: '0.20.5-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -944,6 +944,16 @@ components:
         $ref: '#/components/messages/network_cfg'
     set_network_cfg:
       summary: 🔍 Modify network settings.
+      description: |
+        Change one or multiple network settings.
+
+        ⚠️ The `ws` configuration object is an expert setting intended for support issues. Those settings may not be
+        exposed in a user frontend.
+        - The `ws` object is only returned, after it has been set manually.
+        - Settings stay persisted for PATCH requests not containing the `ws` key.
+        - Return and apply current system settings: send a PATCH request with an empty object: `"ws": {}".
+        - The `ws` settings can only be removed with a configuration reset: `DELETE /cfg`
+        - Modifying any `ws` settings requires a system reboot.
       payload:
         $ref: '#/components/schemas/setNetworkCfgMsg'
       x-response:
@@ -6749,6 +6759,17 @@ components:
             address:
               description: Bluetooth MAC address
               type: string
+        ws:
+          description: |
+            Optional expert settings for WebSocket (re-)connection handling.  
+            These settings are only intended for support issues and might change any time. Changed values are not supported
+            and might make the system unstable!
+          type: object
+          properties:
+            dock:
+              type: object
+            integration:
+              type: object
       required:
         - bt_enabled
         - wifi_enabled
