@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This section contains unreleased changed which will be part of an upcoming release. 
 
 ---
+## 0.6.0-beta - 2023-06-29
+### Added
+- Continuous IR repeat feature
+### Changed
+- PRONTO code values can also be separated by a space (either a comma or a space, but not mixed)
 
 ## 0.5.0-beta - 2022-12-24
 ### Added
