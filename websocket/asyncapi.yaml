@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.21.2-alpha'
+  version: '0.21.3-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7563,6 +7563,10 @@ components:
           type: string
         custom_ws_url:
           type: string
+        resolved_ws_url:
+          type: string
+          maxLength: 64
+          description: Resolved WebSocket URL from the service name in `dock_id` if no `custom_ws_url` is used.
         active:
           type: boolean
           description: |
@@ -7570,12 +7574,19 @@ components:
         model:
           type: string
           description: Dock model number.
+        revision:
+          type: string
+          description: Dock revision.
+        serial:
+          type: string
+          description: Dock serial number.
         connection_type:
           type: string
           description: |
             Network connection of the dock: `Ethernet` or `WiFi`.
         version:
           type: string
+          description: Firmware version
         state:
           $ref: '#/components/schemas/dockState'
         learning_active:

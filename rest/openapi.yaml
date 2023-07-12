@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.23.2
+  version: 0.23.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7244,6 +7244,9 @@ paths:
         If `update_id` is set then an update is currently in progress and can be monitored either with listening to the
         WebSocket `dock_update_change` event messages or polling the status with the
         `GET /docks/devices/{dockId}/update/{id}` operation.
+
+        New updates will automatically downloaded. The download state can be retrieved with the GET operation and is
+        shown in the `firmware_update.download` enum field.
       operationId: forceCheckDockFirmwareUpdate
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -7298,7 +7301,7 @@ paths:
     delete:
       tags:
         - dock
-      summary: Abort the dock firmware update.
+      summary: "\U0001F6A7 Abort the dock firmware update."
       description: |
         Stop the firmware update process at the next possible operation and remove the update process information.
 
@@ -9130,12 +9133,19 @@ components:
         model:
           type: string
           description: Dock model number.
+        revision:
+          type: string
+          description: Dock revision.
+        serial:
+          type: string
+          description: Dock serial number.
         connection_type:
           type: string
           description: |
             Network connection of the dock: `Ethernet` or `WiFi`.
         version:
           type: string
+          description: Firmware version
         state:
           $ref: '#/components/schemas/DockState'
         learning_active:
@@ -9270,14 +9280,26 @@ components:
         model:
           description: Dock model
           type: string
+        description:
+          $ref: '#/components/schemas/LanguageText'
         version:
-          description: Firmware version
           type: string
+        channel:
+          $ref: '#/components/schemas/UpdateChannel'
+        release_date:
+          type: string
+          format: date
+        size:
+          type: integer
+          format: int64
         release_notes_url:
           type: string
           format: uri
+        download:
+          $ref: '#/components/schemas/UpdateDownloadState'
       required:
         - model
+        - description
         - version
     DockId:
       type: string
@@ -9445,7 +9467,7 @@ components:
           type: boolean
         update_check_enabled:
           description: |
-            Whether or not the online update check is enabled or not. If disabled, `update_available` will always be false. 
+            Whether or not the online update check is enabled or not. If disabled, `update_available` will always be false.
           type: boolean
         firmware_update:
           $ref: '#/components/schemas/DockFirmwareUpdate'
