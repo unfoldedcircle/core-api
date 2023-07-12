@@ -207,6 +207,7 @@ channels:
           - $ref: '#/components/messages/get_entities'
           - $ref: '#/components/messages/get_available_entities'
           - $ref: '#/components/messages/get_entity_commands'
+          - $ref: '#/components/messages/get_entity_command_metadata'
           - $ref: '#/components/messages/execute_entity_command'
           - $ref: '#/components/messages/update_entity'
           - $ref: '#/components/messages/delete_entity'
@@ -1148,8 +1149,7 @@ components:
         
         The returned command identifiers are **not** the standard command identifiers like `on` or `off`, but _mapping_
         identifiers like `light.on` and `light.color_temperature` for the command structure information returned with
-        `GET /api/cfg/entity/commands`.  
-        ℹ️ An equivalent WebSocket message will be provided later.
+        `get_entity_command_metadata` or `GET /api/cfg/entity/commands`.  
         
         This then allows to build a full command request `execute_entity_command` message with or without parameters.
       tags:
@@ -1164,6 +1164,23 @@ components:
         - name: entity
       payload:
         $ref: '#/components/schemas/entityCommandsMsg'
+    get_entity_command_metadata:
+      summary: 🔍 Get entity command definitions.
+      description: |
+        Meta-information about the entity commands.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/getEntityCommandMetadataMsg'
+      x-response:
+        $ref: '#/components/messages/entity_command_metadata'
+    entity_command_metadata:
+      summary: 🔍 Entity command definitions.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/entityCommandMetadataMsg'
+
     execute_entity_command:
       summary: 🧪 Execute an entity command.
       description: |
@@ -3941,6 +3958,32 @@ components:
                 - commands
           required:
             - msg
+    getEntityCommandMetadataMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_entity_command_metadata
+          required:
+            - msg
+    entityCommandMetadataMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: entity_command_metadata
+            msg_data:
+              type: array
+              description: See REST API for EntityCommandMetadata object definition
+              items:
+                type: object
+          required:
+            - msg
+            - msg_data
     executeEntityCommandMsg:
       type: object
       allOf:

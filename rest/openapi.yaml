@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.23.3
+  version: 0.23.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3962,7 +3962,57 @@ paths:
         - infrared
       summary: Send IR command.
       description: |
-        Send an IR command from the specified command set or a learned code on the given emitter and output port.
+        Send an IR command from the specified command set or a learned / custom code on the given emitter and output port.
+
+        ### Continuous IR repeat
+        If supported by the emitter, this feature allows to repeat an IR signal autonomously by the emitting device for
+        a specified number of times.
+
+        ⚠️ Supported on the UnfoldedCircle Dock with firmware version 0.9.0 or newer. 
+
+        The repeated IR signal is usually a special IR command to tell the receiving device, that a button on a remote
+        control is hold for a longer time. Depending on the device, a repeat signal can either simply execute the same
+        action as if someone would rapidly press the same button, or it can adjust the command to a different function.
+        One common example is to progressively increase the volume steps, e.g. start slowly with 0.1 dBA steps, then
+        after a short time increase to 0.5 or 1 dBA steps.  
+        Please note that not all devices or IR formats / commands support this feature. This is manufacturer specific.
+
+        The continuous IR repeat feature is activated with the optional `repeat` field in the request.
+        - The IR repeat signal will automatically be sent the number of times specified in the repeat field.
+        - If the next request contains the same IR command, the repeat count will be reset in the dock and therefore
+          the repeat signal prolonged.
+        - A 'PUT /ir/emitters/{emitterId}/stopsend' request will stop the remaining repeat commands.
+        - Depending on the IR `format`, a repeat value might be already part of the `code`.
+          - ⚠️ The `repeat` value will override the embedded repeat information.
+          - See _IR formats_ below.
+
+        If `repeat` is not specified (or set to zero):
+        - The stored IR code in the `codeset_id` or provided `code` is sent as is, with the contained repeat information
+          (depending on IR format).
+        - Continuous IR repeat is not activated:
+          - every IR send request will send the full IR command.
+          - ⚠️ the 'PUT /ir/emitters/{emitterId}/stopsend' command will have no effect!
+
+        ### IR formats
+        - `PRONTO`: PRONTO HEX format:
+          - The PRONTO HEX format does not include a dedicated repeat count field, but an optional 2nd burst
+            pair sequence used for repeats.
+            - The third number in the PRONTO code specifies the number of burst pairs in the 1st sequence.
+            - The fourth number in the PRONTO code specifies the number of burst pairs in the 2nd sequence.
+            - If the fourth number is 0, then there's no repeat sequence.
+            - Note that either sequence is optional. Also there might be both sequences defined, or only the
+              1st or 2nd one.
+          - If the `repeat` field is set (> 0), the 2nd burst pair sequence of the PRONTO code is repeated.
+            - If the PRONTO code doesn't contain a 2nd burst pair sequence, then the repeat value is ignored.
+        - `HEX`: Unfolded Circle format:
+          - The repeat count is part of the code and might be required for certain protocols.
+            - E.g. Sony needs to send the same command two or three times so it's recognized as a single
+              command by a device.
+          - If the `repeat` field is set (> 0), this will override the repeat count in `code` (and not multiply the total
+            repeat count)!
+          - The actual emitted IR repeat signal depends on the IR protocols.
+            - E.g. Denon will simply repeat the full command, whereas LG has a mandatory repeat-specific code
+              sent after the command. This is all handled by the dock, when sending the IR code.
       operationId: sendCommandOnEmitter
       parameters:
         - $ref: '#/components/parameters/emitter_id'
@@ -3981,6 +4031,12 @@ paths:
                     cmd_id:
                       description: Command identifier in the codeset.
                       type: string
+                    repeat:
+                      description: |
+                        Optional repeat value for sending continuous IR repeat signals (depending on IR protocol).
+                      type: integer
+                      minimum: 0
+                      maximum: 20
                     port_id:
                       description: Optional output port identifier. The default output will be used if omitted.
                       type: string
@@ -3998,6 +4054,12 @@ paths:
                     port_id:
                       description: Optional output port identifier. The default output will be used if omitted.
                       type: string
+                    repeat:
+                      description: |
+                        Optional repeat value for sending continuous IR repeat signals (depending on IR protocol).
+                      type: integer
+                      minimum: 0
+                      maximum: 20
                   required:
                     - code
                     - format
@@ -4006,6 +4068,11 @@ paths:
                 value:
                   codeset_id: ir.manufacturer.123
                   cmd_id: CHANNEL_DOWN
+              Command from a codeset on default output and repeat count:
+                value:
+                  codeset_id: ir.manufacturer.123
+                  cmd_id: VOLUME_DOWN
+                  repeat: 4
               Command from a codeset on specific output:
                 value:
                   codeset_id: ir.manufacturer.123
@@ -4015,11 +4082,51 @@ paths:
                 value:
                   code: '0000,0068,0000,0010,0060,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0018,0018,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0318'
                   format: PRONTO
+              Learned PRONTO code on default output and repeat count:
+                value:
+                  code: 0000 0068 0000 0010 0060 0018 0030 0018 0018 0018 0030 0018 0018 0018 0018 0018 0030 0018 0018 0018 0030 0018 0030 0018 0030 0018 0018 0018 0030 0018 0018 0018 0018 0018 0030 0318
+                  format: PRONTO
+                  repeat: 4
               Learned HEX code on specific output:
                 value:
                   code: 3;0x20F0A956;32;0
                   format: HEX
                   port_id: '4'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  '/ir/emitters/{emitterId}/stop_send':
+    put:
+      tags:
+        - infrared
+      summary: Stop sending an IR command.
+      description: |
+        Stop an active IR repeat transmission.
+      operationId: stopSendOnEmitter
+      parameters:
+        - $ref: '#/components/parameters/emitter_id'
+      requestBody:
+        description: IR stop command
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                port_id:
+                  description: |
+                    Optional output port identifier. Requires support by IR emitter device.
+                    Not supported by Unfolded Circle dock
+                  type: string
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -7357,7 +7464,7 @@ paths:
         - dock
       summary: "\U0001F477 Test IR command."
       description: |
-        **Work in progress.**
+        ⚠️ This is for testing only. Please use the `/ir/emitters/` endpoints for sending IR codes.
 
         Test function for sending IR commands. The IR code can either be in Pronto format or Hex.
         If no output is specified, the code will only be emitted from the dock.
@@ -7398,6 +7505,14 @@ paths:
           schema:
             type: string
             pattern: '^[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}$'
+        - name: repeat
+          in: query
+          description: |
+            Optional repeat value for sending continuous IR repeat signals (depending on IR protocol).
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 20
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -7414,14 +7529,15 @@ paths:
         - dock
       summary: "\U0001F477 Send IR command."
       description: |
-        **Work in progress.**
+        ⚠️ This is for testing only. Please use the `/ir/emitters/` endpoints for sending IR codes.
 
         Send an IR command, either in Pronto or [IRremoteESP8266 Hex](https://github.com/crankyoldgit/IRremoteESP8266) format.
 
-        Hex format: `<protocol>,<hex-ir-code>,<bits>,<repeat-count>`
+        Hex format: `<protocol>;<hex-ir-code>;<bits>;<repeat-count>`
         - protocol: numeric value from supported and enabled protocols. See: [decode_type_t](https://github.com/crankyoldgit/IRremoteESP8266/blob/v2.8.0/src/IRremoteESP8266.h#L866)
         - hex-ir-code: HEX value prefixed with `0x`
         - bits: number of bits in hex value
+        - repeat-count: number of repeats
       operationId: sendIr
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -7452,6 +7568,12 @@ paths:
                   description: Hex IR code
                   type: string
                   pattern: '^[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}$'
+                repeat:
+                  description: |
+                    Optional repeat value for sending continuous IR repeat signals (depending on IR protocol).
+                  type: integer
+                  minimum: 0
+                  maximum: 20
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
