@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.21.3-alpha'
+  version: '0.22.0-alpha'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -193,6 +193,8 @@ channels:
           - $ref: '#/components/messages/set_software_update_cfg'
           - $ref: '#/components/messages/get_power_saving_cfg'
           - $ref: '#/components/messages/set_power_saving_cfg'
+          - $ref: '#/components/messages/get_profile_cfg'
+          - $ref: '#/components/messages/set_profile_cfg'
           - $ref: '#/components/messages/get_sound_cfg'
           - $ref: '#/components/messages/set_sound_cfg'
           - $ref: '#/components/messages/get_voice_control_cfg'
@@ -291,6 +293,7 @@ channels:
           - $ref: '#/components/messages/network_cfg'
           - $ref: '#/components/messages/software_update_cfg'
           - $ref: '#/components/messages/power_saving_cfg'
+          - $ref: '#/components/messages/profile_cfg'
           - $ref: '#/components/messages/sound_cfg'
           - $ref: '#/components/messages/voice_control_cfg'
           - $ref: '#/components/messages/voice_assistants'
@@ -1029,6 +1032,23 @@ components:
       summary: 🧪 Power saving settings response.
       payload:
         $ref: '#/components/schemas/powerSavingCfgMsg'
+
+    get_profile_cfg:
+      summary: 🧪 Get profile settings.
+      payload:
+        $ref: '#/components/schemas/getProfileCfgMsg'
+      x-response:
+        $ref: '#/components/messages/profile_cfg'
+    set_profile_cfg:
+      summary: 🧪 Modify profile settings.
+      payload:
+        $ref: '#/components/schemas/setProfileCfgMsg'
+      x-response:
+        $ref: '#/components/messages/profile_cfg'
+    profile_cfg:
+      summary: 🧪 Profile settings response.
+      payload:
+        $ref: '#/components/schemas/profileCfgMsg'
 
     get_sound_cfg:
       summary: 🧪 Get sound settings.
@@ -1842,6 +1862,9 @@ components:
         $ref: '#/components/messages/profile'
     switch_profile:
       summary: 🧪 Switch active profile.
+      description: |
+        The administrator PIN in `admin_pin` is required to switch from a restricted to a normal profile.
+        If the current profile is a restricted profile and the pin is missing, error `401` is returned.
       tags:
         - name: profile
       payload:
@@ -1851,9 +1874,20 @@ components:
     add_profile:
       summary: 🧪 Add a new profile.
       description: |
+        There are two different types of profiles:
+
+        - Normal profile (default): can do anything, change settings, add pages, entities, integrations, etc.
+        - Restricted profile: intended for guests or children, who can only use the remote, but cannot change settings.
+      
+        The admin PIN is required to switch from a restricted to a normal profile. It can be defined in settings.
+    
+        - Switching away from a restricted profile will prompt the user to enter the admin PIN.
+        - Switching to a restricted profile can be done without entering the admin PIN.
+    
+        Profile request object:
+        
         - `profile_id` is optional and auto-generated if not specified. Otherwise it needs to be a unique profile identifier.
         - `name` is mandatory and must be unique.
-        - `pin` is an optional numeric pin code to lock the profile. A protected profile can only be accessed with the profile specific pin code.
         - if the first profile is added, it is automatically set as the active profile.
       tags:
         - name: profile
@@ -1867,7 +1901,6 @@ components:
         Update one or multiple properties of a profile. A missing property will not update its current value.  
         - `profile_id` is mandatory and can't be changed.
         - an empty `icon` value removes an existing icon identifier.
-        - an empty `pin` value removes an existing pin code.
         - a missing `pages` property will not change the page order.
         - ⚠️ an empty `pages` array removes all pages and groups in the profile!
         - ⚠️ missing page identifiers in the `pages` array will remove the page configuration!
@@ -3688,6 +3721,42 @@ components:
           required:
             - msg
 
+    getProfileCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_profile_cfg
+          required:
+            - msg
+    setProfileCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_profile_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgProfileUpdate'
+          required:
+            - msg
+            - msg_data
+    profileCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: profile_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgProfile'
+          required:
+            - msg
+
     getSoundCfgMsg:
       type: object
       allOf:
@@ -4873,9 +4942,9 @@ components:
               properties:
                 profile_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
+                admin_pin:
                   type: string
-                  description: Optional pin to access locked pages with a non-admin account.
+                  description: Optional administrator pin to switch away from a restricted profile.
               required:
                 - profile_id
           required:
@@ -4920,9 +4989,6 @@ components:
               properties:
                 profile_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - profile_id
           required:
@@ -4969,9 +5035,6 @@ components:
               properties:
                 profile_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - profile_id
           required:
@@ -5001,9 +5064,6 @@ components:
               properties:
                 page_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - page_id
           required:
@@ -5060,9 +5120,6 @@ components:
               properties:
                 page_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - page_id
           required:
@@ -5081,9 +5138,6 @@ components:
               properties:
                 profile_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - profile_id
           required:
@@ -5105,9 +5159,6 @@ components:
               properties:
                 profile_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - profile_id
           required:
@@ -5138,9 +5189,6 @@ components:
               properties:
                 group_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - group_id
           required:
@@ -5197,9 +5245,6 @@ components:
               properties:
                 group_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - group_id
           required:
@@ -5218,9 +5263,6 @@ components:
               properties:
                 profile_id:
                   $ref: '#/components/schemas/simpleId'
-                pin:
-                  type: string
-                  description: Optional pin to access locked pages with a non-admin account.
               required:
                 - profile_id
           required:
@@ -6791,6 +6833,8 @@ components:
           $ref: '#/components/schemas/cfgNetwork'
         power_saving:
           $ref: '#/components/schemas/cfgPowerSaving'
+        profile:
+          $ref: '#/components/schemas/cfgProfile'
         software_update:
           $ref: '#/components/schemas/cfgSoftwareUpdate'
         sound:
@@ -6932,6 +6976,21 @@ components:
         - wakeup_sensitivity
         - display_off_sec
         - standby_sec
+
+    cfgProfile:
+      type: object
+      properties:
+        has_admin_pin:
+          description: An administrator pin has been set to use restricted profiles.
+          type: boolean
+      required:
+        - has_admin_pin
+
+    cfgProfileUpdate:
+      type: object
+      properties:
+        admin_pin:
+          $ref: '#/components/schemas/adminPin'
 
     cfgSoftwareUpdate:
       type: object
@@ -8534,9 +8593,6 @@ components:
           $ref: '#/components/schemas/simpleId'
         profile_id:
           $ref: '#/components/schemas/simpleId'
-        pin:
-          type: string
-          description: Optional pin to access locked pages with a non-admin account.
         name:
           $ref: '#/components/schemas/name'
           description: Group name
@@ -8642,9 +8698,6 @@ components:
           $ref: '#/components/schemas/simpleId'
         profile_id:
           $ref: '#/components/schemas/simpleId'
-        pin:
-          type: string
-          description: Optional pin to access locked pages with a non-admin account.
         name:
           $ref: '#/components/schemas/name'
           description: Page name
@@ -8677,9 +8730,9 @@ components:
           $ref: '#/components/schemas/name'
         icon:
           $ref: '#/components/schemas/iconIdentifier'
-        protected:
+        restricted:
+          description: A restricted profile cannot change settings. Switching profiles requires the admin pin.
           type: boolean
-          description: A protected profile can only be accessed with the profile specific pin code
         description:
           $ref: '#/components/schemas/description'
       required:
@@ -8688,7 +8741,8 @@ components:
         - protected
 
     profileData:
-      description: Profile data to create or modify an existing profile.
+      description: |
+        Profile data to create or modify a profile. Missing properties are not updated when modifying an existing profile.
       type: object
       properties:
         profile_id:
@@ -8697,10 +8751,9 @@ components:
           $ref: '#/components/schemas/name'
         icon:
           $ref: '#/components/schemas/iconIdentifier'
-        pin:
-          $ref: '#/components/schemas/profilePin'
-        new_pin:
-          $ref: '#/components/schemas/profilePin'
+        restricted:
+          description: A restricted profile cannot change settings. Switching profiles requires the admin pin.
+          type: boolean
         description:
           $ref: '#/components/schemas/description'
         pages:
@@ -8711,11 +8764,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/simpleId'
+      required:
+        - profile_id
 
-    profilePin:
+    adminPin:
       type: string
       maxLength: 20
-      description: Optional profile pin.
+      description: Optional administrator pin.
 
     simpleId:
       type: string

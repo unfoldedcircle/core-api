@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.23.4
+  version: 0.24.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -5102,11 +5102,20 @@ paths:
         - profiles
       summary: Create a new profile.
       description: |
-        - the `profile_id` property is optional and auto-generated if not specified. Otherwise it needs to be a unique
-          profile identifier.
+        There are two different types of profiles:
+
+        - Normal profile (default): can do anything, change settings, add pages, entities, integrations, etc.
+        - Restricted profile: intended for guests or children, who can only use the remote, but cannot change settings.
+
+        The admin PIN is required to switch from a restricted to a normal profile. It can be defined in settings.  
+
+        - Switching away from a restricted profile will prompt the user to enter the admin PIN.
+        - Switching to a restricted profile can be done without entering the admin PIN.
+
+        Profile request object:    
+        - `profile_id` is optional and auto-generated if not specified. Otherwise it needs to be a unique profile identifier.
+        - `name` is mandatory and must be unique.
         - if the first profile is added, it is automatically set as the active profile.
-        - if a `pin` is specified the profile will be protected. A protected profile can only be accessed with the profile
-          specific pin code.
       operationId: createProfile
       requestBody:
         description: Profile data
@@ -5122,11 +5131,11 @@ paths:
                 value:
                   name: My profile
                   icon: 'uc:star'
-              Profile with a pin:
+              Restricted profile:
                 value:
-                  name: My secure profile
-                  icon: 'uc:star'
-                  pin: 1234
+                  name: Guests
+                  icon: 'uc:lock'
+                  restricted: true
         required: true
       responses:
         '201':
@@ -5147,6 +5156,9 @@ paths:
       tags:
         - profiles
       summary: Switch active profile.
+      description: |
+        The administrator PIN in `admin_pin` is required to switch from a restricted to a normal profile.
+        If the current profile is a restricted profile and the pin is missing, error `401` is returned.
       operationId: switchProfile
       parameters:
         - name: active_profile_id
@@ -5155,6 +5167,16 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        description: Optional administrator pin
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin_pin:
+                  $ref: '#/components/schemas/AdminPin'
+        required: false
       responses:
         '200':
           description: Successful operation
@@ -5216,7 +5238,6 @@ paths:
       operationId: getProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation.
@@ -5240,14 +5261,12 @@ paths:
         Update one or multiple properties of a profile. A missing property will not update its current value.  
         - `profile_id` is mandatory and can't be changed.
         - an empty `icon` value removes an existing icon identifier.
-        - an empty `pin` value removes an existing pin code.
         - a missing `pages` property will not change the page order.
         - ⚠️ an empty `pages` array removes all pages and groups in the profile!
         - ⚠️ missing page identifiers in the `pages` array will remove the page configuration!
       operationId: updateProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       requestBody:
         description: Properties to update in the existing profile.
         content:
@@ -5277,7 +5296,6 @@ paths:
       operationId: deleteProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation
@@ -5299,7 +5317,6 @@ paths:
       operationId: createPage
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       requestBody:
         description: Profile data
         content:
@@ -5347,7 +5364,6 @@ paths:
       operationId: getPagesInProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation.
@@ -5370,7 +5386,6 @@ paths:
       operationId: deleteAllPagesInProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation
@@ -5393,7 +5408,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/profile_id'
         - $ref: '#/components/parameters/page_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation.
@@ -5417,7 +5431,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/profile_id'
         - $ref: '#/components/parameters/page_id'
-        - $ref: '#/components/parameters/profile_pin'
       requestBody:
         description: Properties to update in the existing page.
         content:
@@ -5459,7 +5472,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/profile_id'
         - $ref: '#/components/parameters/page_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation
@@ -5481,7 +5493,6 @@ paths:
       operationId: createGroup
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       requestBody:
         description: Profile data
         content:
@@ -5513,7 +5524,6 @@ paths:
       operationId: getGroupsInProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation.
@@ -5536,7 +5546,6 @@ paths:
       operationId: deleteAllGroupsInProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation
@@ -5559,7 +5568,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/profile_id'
         - $ref: '#/components/parameters/group_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation.
@@ -5583,7 +5591,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/profile_id'
         - $ref: '#/components/parameters/group_id'
-        - $ref: '#/components/parameters/profile_pin'
       requestBody:
         description: Properties to update in the existing group.
         content:
@@ -5614,7 +5621,6 @@ paths:
       parameters:
         - $ref: '#/components/parameters/profile_id'
         - $ref: '#/components/parameters/group_id'
-        - $ref: '#/components/parameters/profile_pin'
       responses:
         '200':
           description: Successful operation
@@ -6309,6 +6315,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CfgPowerSaving'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/profile:
+    get:
+      tags:
+        - cfg
+      summary: Get profile settings.
+      operationId: getProfileSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  has_admin_pin:
+                    description: An administrator pin has been set to use restricted profiles.
+                    type: boolean
+                required:
+                  - has_admin_pin
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: Modify profile settings.
+      description: |
+        Change profile administrator pin.
+
+        - an empty `admin_pin` value will remove the pin.
+      operationId: updateProfileSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                admin_pin:
+                  $ref: '#/components/schemas/AdminPin'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1cfg~1profile/get/responses/200/content/application~1json/schema'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -8411,13 +8471,6 @@ components:
         minimum: 10
         maximum: 100
         multipleOf: 10
-    profile_pin:
-      name: pin
-      in: query
-      description: Optional profile pin to access a protected profile with a non-admin account.
-      required: false
-      schema:
-        $ref: '#/components/schemas/ProfilePin'
     single_device:
       name: single_device
       in: query
@@ -8621,6 +8674,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfaceItem'
+    AdminPin:
+      type: string
+      maxLength: 20
+      description: Optional administrator pin
     AmbientLight:
       type: object
       properties:
@@ -8847,6 +8904,8 @@ components:
           $ref: '#/components/schemas/CfgNetwork'
         power_saving:
           $ref: '#/components/schemas/CfgPowerSaving'
+        profile:
+          $ref: '#/paths/~1cfg~1profile/get/responses/200/content/application~1json/schema'
         software_update:
           $ref: '#/components/schemas/CfgSoftwareUpdate'
         sound:
@@ -11090,19 +11149,15 @@ components:
           $ref: '#/components/schemas/Name'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
-        protected:
+        restricted:
+          description: A restricted profile cannot change settings and switching profiles requires the admin PIN.
           type: boolean
-          description: A protected profile can only be accessed with the profile specific pin code
         description:
           $ref: '#/components/schemas/Description'
       required:
         - profile_id
         - name
-        - protected
-    ProfilePin:
-      type: string
-      maxLength: 20
-      description: Optional profile pin
+        - restricted
     ProfileRequest:
       type: object
       properties:
@@ -11112,8 +11167,9 @@ components:
           $ref: '#/components/schemas/Name'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
-        pin:
-          $ref: '#/components/schemas/ProfilePin'
+        restricted:
+          description: Create a restricted profile which cannot change settings. Switching profiles requires the admin pin.
+          type: boolean
         description:
           $ref: '#/components/schemas/Description'
       required:
@@ -11125,15 +11181,9 @@ components:
           $ref: '#/components/schemas/Name'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
-        update_pin:
+        restricted:
+          description: A restricted profile cannot change settings. Switching profiles requires the admin pin.
           type: boolean
-          description: |
-            true: Update or remove the pin if the `pin` property is set
-            false: Don't change existing pin
-        pin:
-          type: string
-          description: |
-            Optional pin code for a protected profile. Only relevant if `update_pin: true`.
         description:
           $ref: '#/components/schemas/Description'
         pages:
@@ -11144,8 +11194,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimpleId'
-      required:
-        - update_pin
     Profiles:
       type: array
       items:
