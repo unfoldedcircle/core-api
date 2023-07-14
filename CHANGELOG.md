@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Changes in the next release_
 
+### Added
+- Media-player entity features:
+  - input source selection & sound mode selection
+  - new commands for navigation support, channel switching and color button functions
+
 ---
 
 ## 0.7.0-alpha - 2023-03-14

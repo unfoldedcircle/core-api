@@ -14,72 +14,77 @@ a stereo or a video player.
 
 ## Features
 
-| Name            | R   | W   | Description                                                           |
-|-----------------|-----|-----|-----------------------------------------------------------------------|
-| on_off          | ✅   | ✅   | The media player can be switched on and off.                          |
-| toggle          | ❌   | ✅   | The media player's power state can be toggled.                        |
-| volume          | ✅   | ✅   | The volume level can be set to a specific level.                      |
-| volume_up_down  | ❌   | ✅   | The volume can be adjusted up (louder) and down.                      |
-| mute_toggle     | ❌   | ✅   | The mute state can be toggled.                                        |
-| mute            | ✅   | ✅   | The volume can be muted.                                              |
-| unmute          | ✅   | ✅   | The volume can be un-muted.                                           |
-| play_pause      | ❌   | ✅   | The player supports starting and pausing media playback.              |
-| stop            | ❌   | ✅   | The player supports stopping media playback.                          |
-| next            | ❌   | ✅   | The player supports skipping to the next track.                       |
-| previous        | ❌   | ✅   | The player supports returning to the previous track.                  |
-| fast_forward    | ❌   | ✅   | The player supports fast-forwarding the current track.                |
-| rewind          | ❌   | ✅   | The player supports rewinding the current track.                      |
-| repeat          | ✅   | ✅   | The current track or playlist can be repeated.                        |
-| shuffle         | ✅   | ✅   | The player supports random playback / shuffling the current playlist. |
-| seek            | ❌   | ✅   | The player supports seeking the playback position.                    |
-| media_duration  | ✅   | ❌   | The player announces the duration of the current media being played.  |
-| media_position  | ✅   | ❌   | The player announces the current position of the media being played.  |
-| media_title     | ✅   | ❌   | The player announces the media title.                                 |
-| media_artist    | ✅   | ❌   | The player announces the media artist.                                |
-| media_album     | ✅   | ❌   | The player announces the media album if music is being played.        |
-| media_image_url | ✅   | ❌   | The player provides an image url of the media being played.           |
-| media_type      | ✅   | ❌   | The player announces the type of media being played.                  |
-| 🚧 source       | ✅   | ✅   | Media playback sources or inputs can be selected.                     |
-| 🚧 sound_mode   | ✅   | ✅   | Sound modes can be selected, e.g. stereo or surround.                 |
+| Name              | R | W | Description                                                                     |
+|-------------------|---|---|---------------------------------------------------------------------------------|
+| on_off            | ✅ | ✅ | The media player can be switched on and off.                                    |
+| toggle            | ❌ | ✅ | The media player's power state can be toggled.                                  |
+| volume            | ✅ | ✅ | The volume level can be set to a specific level.                                |
+| volume_up_down    | ❌ | ✅ | The volume can be adjusted up (louder) and down.                                |
+| mute_toggle       | ❌ | ✅ | The mute state can be toggled.                                                  |
+| mute              | ✅ | ✅ | The volume can be muted.                                                        |
+| unmute            | ✅ | ✅ | The volume can be un-muted.                                                     |
+| play_pause        | ❌ | ✅ | The player supports starting and pausing media playback.                        |
+| stop              | ❌ | ✅ | The player supports stopping media playback.                                    |
+| next              | ❌ | ✅ | The player supports skipping to the next track.                                 |
+| previous          | ❌ | ✅ | The player supports returning to the previous track.                            |
+| fast_forward      | ❌ | ✅ | The player supports fast-forwarding the current track.                          |
+| rewind            | ❌ | ✅ | The player supports rewinding the current track.                                |
+| repeat            | ✅ | ✅ | The current track or playlist can be repeated.                                  |
+| shuffle           | ✅ | ✅ | The player supports random playback / shuffling the current playlist.           |
+| seek              | ❌ | ✅ | The player supports seeking the playback position.                              |
+| media_duration    | ✅ | ❌ | The player announces the duration of the current media being played.            |
+| media_position    | ✅ | ❌ | The player announces the current position of the media being played.            |
+| media_title       | ✅ | ❌ | The player announces the media title.                                           |
+| media_artist      | ✅ | ❌ | The player announces the media artist.                                          |
+| media_album       | ✅ | ❌ | The player announces the media album if music is being played.                  |
+| media_image_url   | ✅ | ❌ | The player provides an image url of the media being played.                     |
+| media_type        | ✅ | ❌ | The player announces the type of media being played.                            |
+| dpad              | ❌ | ✅ | Directional pad navigation, provides up / down / left / right / enter commands. |
+| home              | ❌ | ✅ | Home navigation support with home & back commands.                              |
+| menu              | ❌ | ✅ | Menu navigation support with menu & back commands.                              |
+| color_buttons     | ❌ | ✅ | Color button support for red / green / yellow / blue function commands.         |
+| channel_switcher  | ❌ | ✅ | Channel zapping support with channel up and down commands.                      |
+| select_source     | ✅ | ✅ | Media playback sources or inputs can be selected.                               |
+| select_sound_mode | ✅ | ✅ | Sound modes can be selected, e.g. stereo or surround.                           |
 
-🚧 Planned feature. This also includes playlist handling, media browsing and searching.
+🚧 Planned features are playlist handling, media browsing and searching.
 
 ### Attributes
 
 Entity attributes are controlled by features. Multiple features can act on the same attribute.
 
-| Attribute          | Features                   | Type    | Values              | Description                                                                 |
-|--------------------|----------------------------|---------|---------------------|-----------------------------------------------------------------------------|
-| state              | on_off                     | enum    | [States](#states)   | State of the media player, influenced by the play and power commands.       |
-|                    | toggle                     |         |                     |                                                                             |
-|                    | play_pause, stop           |         |                     |                                                                             |
-| volume             | volume                     | number  | 0..100              | Current volume level.                                                       |
-|                    | volume_up_down             |         |                     |                                                                             |
-| muted              | mute_toggle                | boolean |                     | Flag if the volume is muted.                                                |
-|                    | mute, unmute               |         |                     |                                                                             |
-| media_duration     | media_duration             | number  |                     | Media duration in seconds.                                                  |
-| media_position     | media_position             | number  |                     | Current media position in seconds.                                          |
-|                    | play_pause, stop           |         |                     |                                                                             |
-|                    | fast_forward, rewind, seek |         |                     |                                                                             |
-| media_type         | media_type                 | enum    | _platform specific_ | The type of media being played.                                             |
-| media_image_url    | media_image_url            | string  |                     | URL to retrieve the album art or an image representing what's being played. |
-|                    | play_pause                 |         |                     |                                                                             |
-|                    | next, previous             |         |                     |                                                                             |
-| media_title        | media_title                | string  |                     | Currently playing media information.                                        |
-|                    | play_pause                 |         |                     |                                                                             |
-|                    | next, previous             |         |                     |                                                                             |
-| media_artist       | media_artist               | string  |                     | Currently playing media information.                                        |
-|                    | play_pause                 |         |                     |                                                                             |
-|                    | next, previous             |         |                     |                                                                             |
-| media_album        | media_album                | string  |                     | Currently playing media information.                                        |
-|                    | play_pause                 |         |                     |                                                                             |
-|                    | next, previous             |         |                     |                                                                             |
-| repeat             | repeat                     | enum    | `OFF`, `ALL`, `ONE` | Current repeat mode.                                                        |
-| shuffle            | shuffle                    | boolean |                     | Shuffle mode on or off.                                                     |
-| 🚧 source          |                            |         |                     | Currently selected media or input source.                                   |
-| 🚧 source_list     |                            |         |                     | Available media or input sources.                                           |
-| 🚧 sound_mode      |                            |         |                     | Currently selected sound mode.                                              |
-| 🚧 sound_mode_list |                            |         |                     | Available sound modes.                                                      |
+| Attribute       | Features                   | Type    | Values              | Description                                                                 |
+|-----------------|----------------------------|---------|---------------------|-----------------------------------------------------------------------------|
+| state           | on_off                     | enum    | [States](#states)   | State of the media player, influenced by the play and power commands.       |
+|                 | toggle                     |         |                     |                                                                             |
+|                 | play_pause, stop           |         |                     |                                                                             |
+| volume          | volume                     | number  | 0..100              | Current volume level.                                                       |
+|                 | volume_up_down             |         |                     |                                                                             |
+| muted           | mute_toggle                | boolean |                     | Flag if the volume is muted.                                                |
+|                 | mute, unmute               |         |                     |                                                                             |
+| media_duration  | media_duration             | number  |                     | Media duration in seconds.                                                  |
+| media_position  | media_position             | number  |                     | Current media position in seconds.                                          |
+|                 | play_pause, stop           |         |                     |                                                                             |
+|                 | fast_forward, rewind, seek |         |                     |                                                                             |
+| media_type      | media_type                 | enum    | _platform specific_ | The type of media being played.                                             |
+| media_image_url | media_image_url            | string  |                     | URL to retrieve the album art or an image representing what's being played. |
+|                 | play_pause                 |         |                     |                                                                             |
+|                 | next, previous             |         |                     |                                                                             |
+| media_title     | media_title                | string  |                     | Currently playing media information.                                        |
+|                 | play_pause                 |         |                     |                                                                             |
+|                 | next, previous             |         |                     |                                                                             |
+| media_artist    | media_artist               | string  |                     | Currently playing media information.                                        |
+|                 | play_pause                 |         |                     |                                                                             |
+|                 | next, previous             |         |                     |                                                                             |
+| media_album     | media_album                | string  |                     | Currently playing media information.                                        |
+|                 | play_pause                 |         |                     |                                                                             |
+|                 | next, previous             |         |                     |                                                                             |
+| repeat          | repeat                     | enum    | `OFF`, `ALL`, `ONE` | Current repeat mode.                                                        |
+| shuffle         | shuffle                    | boolean |                     | Shuffle mode on or off.                                                     |
+| source          | select_source              | string  |                     | Currently selected media or input source.                                   |
+| source_list     | select_source              | list    | _text items_        | Available media or input sources.                                           |
+| sound_mode      | select_sound_mode          | string  |                     | Currently selected sound mode.                                              |
+| sound_mode_list | select_sound_mode          | list    | _text items_        | Available sound modes.                                                      |
 
 ### States
 
@@ -117,29 +122,43 @@ the media player with a different icon, behaviour etc.
 The integration driver has to implement a handler for the `entity_command` message to process the following command
 requests in `msg_data.cmd_id`.
 
-| cmd_id        | Parameters     | Description                                                              |
-|---------------|----------------|--------------------------------------------------------------------------|
-| on            | -              | Switch on media player.                                                  |
-| off           | -              | Switch off media player.                                                 |
-| toggle        | -              | Toggle the current power state, either from on -> off or from off -> on. |
-| play_pause    | -              | Toggle play / pause.                                                     |
-| stop          | -              | Stop playback.                                                           |
-| previous      | -              | Go back to previous track.                                               |
-| next          | -              | Skip to next track.                                                      |
-| fast_forward  | -              | Fast forward current track.                                              |
-| rewind        | -              | Rewind current track.                                                    |
-| seek          | media_position | Seek to given position in current track. Position is given in seconds.   |
-| volume        | volume         | Set volume to given level.                                               |
-| volume_up     | -              | Increase volume.                                                         |
-| volume_down   | -              | Decrease volume.                                                         |
-| mute_toggle   | -              | Toggle mute state.                                                       |
-| mute          | -              | Mute volume.                                                             |
-| unmute        | -              | Unmute volume.                                                           |
-| repeat        | repeat         | Repeat track or playlist.                                                |
-| shuffle       | shuffle        | Shuffle playlist or start random playback.                               |
-| 🚧 source     |                |                                                                          |
-| 🚧 sound_mode |                |                                                                          |
-| 🚧 search     |                |                                                                          |
+| cmd_id            | Parameters     | Description                                                              |
+|-------------------|----------------|--------------------------------------------------------------------------|
+| on                | -              | Switch on media player.                                                  |
+| off               | -              | Switch off media player.                                                 |
+| toggle            | -              | Toggle the current power state, either from on -> off or from off -> on. |
+| play_pause        | -              | Toggle play / pause.                                                     |
+| stop              | -              | Stop playback.                                                           |
+| previous          | -              | Go back to previous track.                                               |
+| next              | -              | Skip to next track.                                                      |
+| fast_forward      | -              | Fast forward current track.                                              |
+| rewind            | -              | Rewind current track.                                                    |
+| seek              | media_position | Seek to given position in current track. Position is given in seconds.   |
+| volume            | volume         | Set volume to given level.                                               |
+| volume_up         | -              | Increase volume.                                                         |
+| volume_down       | -              | Decrease volume.                                                         |
+| mute_toggle       | -              | Toggle mute state.                                                       |
+| mute              | -              | Mute volume.                                                             |
+| unmute            | -              | Unmute volume.                                                           |
+| repeat            | repeat         | Repeat track or playlist.                                                |
+| shuffle           | shuffle        | Shuffle playlist or start random playback.                               |
+| channel_up        | -              | Channel up.                                                              |
+| channel_down      | -              | Channel down.                                                            |
+| cursor_up         | -              | Directional pad up.                                                      |
+| cursor_down       | -              | Directional pad down.                                                    |
+| cursor_left       | -              | Directional pad left.                                                    |
+| cursor_right      | -              | Directional pad right.                                                   |
+| cursor_enter      | -              | Directional pad enter.                                                   |
+| function_red      | -              | Function red.                                                            |
+| function_green    | -              | Function green.                                                          |
+| function_yellow   | -              | Function yellow.                                                         |
+| function_blue     | -              | Function blue.                                                           |
+| home              | -              | Home menu                                                                |
+| menu              | -              | Menu                                                                     |
+| back              | -              | Back / exit function for menu navigation.                                |
+| select_source     | source         | Select an input source from the available sources.                       |
+| select_sound_mode | sound_mode     | Select a sound mode from the available modes.                            |
+| 🚧 search         |                |                                                                          |
 
 ### Events
 
@@ -165,8 +184,10 @@ The following attributes are supported:
 | media_type             | Current media type.                                                                                                                                                                                  |
 | repeat                 | Current repeat mode.                                                                                                                                                                                 |
 | shuffle                | Current shuffle mode.                                                                                                                                                                                |
-| 🚧 source              |                                                                                                                                                                                                      |
-| 🚧 sound_mode          |                                                                                                                                                                                                      |
+| source                 | Selected source.                                                                                                                                                                                     |
+| source_list            | List of available media sources or inputs.                                                                                                                                                           |
+| sound_mode             | Selected sound mode.                                                                                                                                                                                 |
+| sound_mode_list        | Available sound modes.                                                                                                                                                                               |
 
 At least one attribute must be specified in the `entity_change` message. If the entity `state` and another attribute
 changed at the same time, for example if a new track starts playing, they may both be included in the same message.
