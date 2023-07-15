@@ -90,12 +90,14 @@ Entity attributes are controlled by features. Multiple features can act on the s
 
 The entity `state` attribute holds the following values:
 
-| Value   | Description                           |
-|---------|---------------------------------------|
-| ON      | The media player is switched on       |
-| OFF     | The media player is switched off      |
-| PLAYING | The media player is playing something |
-| PAUSED  | The media player is paused            |
+| Value     | Description                                             |
+|-----------|---------------------------------------------------------|
+| ON        | The media player is switched on                         |
+| OFF       | The media player is switched off                        |
+| PLAYING   | The media player is playing something                   |
+| PAUSED    | The media player is paused                              |
+| STANDBY   | The device is in low power state and accepting commands |
+| BUFFERING | The media player is buffering to start playback         |
 
 See also [common entity states](README.md#states).
 
@@ -104,10 +106,13 @@ See also [common entity states](README.md#states).
 Optional: the media player can be classified what kind of device it represents. This can be used by the UI to represent
 the media player with a different icon, behaviour etc.
 
-| Name     | Description                      |
-|----------|----------------------------------|
-| receiver | Audio-video receiver.            |
-| speaker  | Smart speakers or stereo device. |
+| Name          | Description                                           |
+|---------------|-------------------------------------------------------|
+| receiver      | Audio-video receiver.                                 |
+| set_top_box   | Set-top box for multichannel video and media playback |
+| speaker       | Smart speakers or stereo device.                      |
+| streaming_box | Device for media streaming services.                  |
+| tv            | Television device.                                    |
 
 ### Options
 
