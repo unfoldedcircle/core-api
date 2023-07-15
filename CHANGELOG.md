@@ -8,14 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Changes in the next release_
 
+---
+
+## 0.8.0-alpha - 2023-07-15
 ### Added
 - Media-player entity features:
   - new entity states: `STANDBY` and `BUFFERING`
   - new device classes: `set_top_box`, `streaming_box`, `tv`
   - input source selection & sound mode selection
   - new commands for navigation support, channel switching and color button functions
-
----
 
 ## 0.7.0-alpha - 2023-03-14
 ### Added
