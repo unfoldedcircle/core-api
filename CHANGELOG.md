@@ -10,6 +10,8 @@ _Changes in the next release_
 
 ### Added
 - Media-player entity features:
+  - new entity states: `STANDBY` and `BUFFERING`
+  - new device classes: `set_top_box`, `streaming_box`, `tv`
   - input source selection & sound mode selection
   - new commands for navigation support, channel switching and color button functions
 
