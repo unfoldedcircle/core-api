@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.24.0
+  version: 0.25.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Upload custom web-configurator\n- Upload custom remote-ui app\n- Configuration import & export\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Configuration import & export\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -7752,6 +7752,170 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /system/install:
+    get:
+      tags:
+        - system
+      summary: Get installed custom components.
+      description: |
+        Returns the installation status of custom system components like the user interface or web-configurator.
+      operationId: getInstalledCustomComponents
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomInstall'
+              example:
+                - component: ui
+                  installed: true
+                  active: true
+                  installation_date: 2023-07-24T07:57:33.000Z
+                  release:
+                    name:
+                      en: Remote UI
+                    version: 0.27.10
+                    description:
+                      en: Custom remote UI App for testing.
+                    developer:
+                      name: Unfolded Circle ApS
+                      url: 'https://www.unfoldedcircle.com'
+                      email: hello@unfoldedcircle.com
+                    home_page: 'https://www.unfoldedcircle.com'
+                    release_date: '2023-07-19'
+                    requirements:
+                      firmware_version: '>=0.13.0, <1.0.0'
+                - component: web_configurator
+                  installed: false
+                  active: false
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/system/install/{customComponent}':
+    get:
+      tags:
+        - system
+      summary: Get status of a custom component installation.
+      description: |
+        Returns the status of an installed custom component, as a custom UI app or web-configurator.
+
+        - Error response `400` might be returned, if the metadata of an installed custom component is no longer valid with
+          the current firmware.
+      operationId: getCustomComponentStatus
+      parameters:
+        - $ref: '#/components/parameters/custom_component'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomInstall'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    put:
+      tags:
+        - system
+      summary: Enable or disable a custom component.
+      description: "Switch between a default or an installed custom component.\n\nThis does not delete the custom installation and only switches between the default component and the installed\ncustom component.\n\nError response codes:\n- `400`: metadata of custom component is no longer valid with the current firmware. \n- `403`: user doesn't have administrator rights.\n- `404`: the custom component is not installed and cannot be enabled or disabled.\n- `409`: installed custom component is no longer compatible with the current firmware.\n\n\U0001F6A7 The web-configurator component is not yet implemented.\n"
+      operationId: enableCustomComponent
+      parameters:
+        - $ref: '#/components/parameters/custom_component'
+        - name: enable
+          in: query
+          description: Enable or disable component.
+          required: true
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomInstall'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+    delete:
+      tags:
+        - system
+      summary: Remove an installed custom component.
+      description: |
+        Deactivates the custom components and starts the default one. The custom component is removed afterwards from the
+        device.
+      operationId: removeCustomComponent
+      parameters:
+        - $ref: '#/components/parameters/custom_component'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - system
+      summary: Upload and install a custom component.
+      description: "☢️ VOIDS WARRANTY ☢️\n\nThe `void_warranty` query parameter is required the first time a custom component is installed:\n- The user has to agree and confirm, that the warranty will be voided by installing a custom component.\n- The confirmation will be recorded in a write-once location on the device and cannot be reverted!\n- The value of the parameter must be `yes`, otherwise the installation is aborted and `401` returned. \n\nError response codes:\n- `400`: invalid archive, missing data in archive or included metadata cannot be read.\n- `403`: user did not agree to void warranty, or user does not have administrator rights.\n- `409`: custom component is not compatible with the current firmware.\n- `507`: insufficient storage to upload and process installation archive.\n\n\U0001F6A7 The web-configurator component is not yet implemented.\n"
+      operationId: installCustomComponent
+      parameters:
+        - $ref: '#/components/parameters/custom_component'
+        - name: void_warranty
+          in: query
+          description: User confirmation that this action voids warranty.
+          required: false
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: TAR GZip Archive file with the custom component. File extension must be `.tar.gz` or `.tgz`.
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Custom component successfully installed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomInstall'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
   /system/power:
     get:
       tags:
@@ -8276,6 +8440,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/IrCodeKey'
+    custom_component:
+      name: customComponent
+      in: path
+      description: Custom system component.
+      required: true
+      schema:
+        $ref: '#/components/schemas/CustomComponent'
     dock_id:
       name: dockId
       in: path
@@ -9182,6 +9353,69 @@ components:
       description: 'Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).'
       type: string
       format: iso-3166
+    CustomInstall:
+      description: Information about an installed custom component. The `installed` flag reports if a custom installation
+      type: object
+      properties:
+        component:
+          $ref: '#/components/schemas/CustomComponent'
+        installed:
+          description: |
+            Custom component has been installed. When `installed: true` is set, more information is returned in `release`.
+          type: boolean
+        active:
+          description: Custom component is active and replacing the default component.
+          type: boolean
+        installation_date:
+          description: 'Installation date of the component. Only provided when `installed: true` is set.'
+          type: string
+          format: date-time
+        release:
+          $ref: '#/components/schemas/CustomRelease'
+      required:
+        - component
+        - installed
+        - active
+    CustomComponent:
+      description: Type of custom component.
+      type: string
+      enum:
+        - ui
+        - web_configurator
+    CustomRelease:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        version:
+          type: string
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        developer:
+          $ref: '#/components/schemas/DriverDeveloper'
+        home_page:
+          description: Optional home page url for more information.
+          type: string
+          format: uri
+          maxLength: 255
+        release_date:
+          description: Release date of the component.
+          type: string
+          format: date
+        requirements:
+          type: object
+          properties:
+            firmware_version:
+              description: |
+                [SemVer](https://semver.org/) version requirement, describing the intersection of some version comparators to
+                match the installed Remote Two firmware.
+
+                - `>=1.0`: requires at least version 1.0.0
+                - `>=0.9.0, <0.10.0`: only works with minor version 0.9.*   
+
+                Follows the Cargo's SemVer support documented in the [Specifying Dependencies](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html)
+                chapter of the Cargo reference.
+              type: string
     Description:
       type: string
       maxLength: 255
