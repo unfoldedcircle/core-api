@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.25.0
+  version: 0.26.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7916,6 +7916,145 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '409':
           $ref: '#/components/responses/Err409Conflict'
+  /system/logs:
+    get:
+      tags:
+        - system
+      summary: Retrieve and query log entries.
+      description: |
+        Retrieve log entries based on the query parameters.
+
+        Depending on the `Content-Type` header, the logs are either returned as JSON objects or exported as a text file.
+
+        - `Content-Type: application/json` or none: retrieve logs as json objects.
+        - `Content-Type: text/csv` or none: retrieve logs as text export.
+          - Field order: <timestamp> <service> <level> <message>
+          - Fields are separated by a tab.
+          - The message itself might contain tabs as well!
+          - The message might contain line breaks and use multiple lines.
+
+        Notes:    
+        - Number of log entries are limited to a maximum of 10'000 entries.
+        - Log entries are retrieved in reverse order.
+        - Not all services are using the priority logging yet and log all entries with priority 6 (info).  
+          They might even include their own log level in the message text.
+        - Text search is not case-sensitive. Wildcards or Regex is not supported.
+      parameters:
+        - name: priority
+          in: query
+          description: Minimum priority of log message.
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 8
+            default: 5
+        - name: services
+          in: query
+          description: 'One or more service identifiers, separated by comma'
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: Limit number of returned log entries
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 10000
+            default: 100
+        - name: from
+          in: query
+          description: Oldest log timestamp to consider
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Newest log timestamp to consider
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: text_search
+          in: query
+          description: Search text in log message
+          required: false
+          schema:
+            type: string
+        - name: boot_ids
+          in: query
+          description: 'One or more boot identifiers, separated by comma'
+          required: false
+          schema:
+            type: string
+      operationId: queryLogs
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            text/plain:
+              schema:
+                type: string
+              example: |
+                2023-07-27T09:11:44.584555+00:00  ui  WARN  A warning message
+                2023-07-27T08:52:54.609843+00:00  ui  INFO  An information message
+                2023-07-27T08:52:53.609143+00:00  ui  DEBUG Application is starting
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemLogEntry'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /system/logs/boots:
+    get:
+      tags:
+        - system
+      summary: Get boot identifiers for log access.
+      description: |
+        List system boots to retrieve boot identifiers for a specific boot.
+      operationId: getBootLogIdentifiers
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemLogBoot'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /system/logs/services:
+    get:
+      tags:
+        - system
+      summary: Get available services to retrieve log entries from.
+      description: |
+        List the available services which can be queried for log entries.
+      operationId: getLogServices
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SystemLogService'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /system/power:
     get:
       tags:
@@ -11994,6 +12133,48 @@ components:
         serial_number:
           type: string
         hw_revision:
+          type: string
+    SystemLogBoot:
+      type: object
+      properties:
+        index:
+          type: integer
+        boot_id:
+          description: Boot identifier usable for querying logs.
+          type: string
+        first_entry:
+          type: string
+          format: date-time
+        last_entry:
+          type: string
+          format: date-time
+    SystemLogService:
+      type: object
+      properties:
+        service:
+          description: Service identifier usable for querying logs.
+          type: string
+        active:
+          description: Service is active
+          type: boolean
+        name:
+          description: Human readable service name
+          type: string
+    SystemLogEntry:
+      type: object
+      properties:
+        ts:
+          description: Timestamp of log entry
+          type: string
+          format: date-time
+        service:
+          description: Service identifier
+          type: string
+        prio:
+          description: 'Priority, corresponds to [Syslog levels](https://en.wikipedia.org/wiki/Syslog#Severity_level)'
+          type: integer
+        msg:
+          description: Log message
           type: string
     UiId:
       type: string
