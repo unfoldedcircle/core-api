@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.22.0-alpha'
+  version: '0.22.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -6482,6 +6482,7 @@ components:
                   enum:
                     - LOW_BATTERY
                     - OPEN_CASE
+                    - BATTERY_UNDERVOLT
                 shutdown:
                   description: System initiated forced shutdown
                   type: boolean

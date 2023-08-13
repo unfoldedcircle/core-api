@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.26.0
+  version: 0.26.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7825,7 +7825,22 @@ paths:
       tags:
         - system
       summary: Enable or disable a custom component.
-      description: "Switch between a default or an installed custom component.\n\nThis does not delete the custom installation and only switches between the default component and the installed\ncustom component.\n\nError response codes:\n- `400`: metadata of custom component is no longer valid with the current firmware. \n- `403`: user doesn't have administrator rights.\n- `404`: the custom component is not installed and cannot be enabled or disabled.\n- `409`: installed custom component is no longer compatible with the current firmware.\n\n\U0001F6A7 The web-configurator component is not yet implemented.\n"
+      description: |
+        Switch between a default or an installed custom component.
+
+        This does not delete the custom installation and only switches between the default component and the installed
+        custom component.
+
+        Error response codes:
+        - `400`: metadata of custom component is no longer valid with the current firmware. 
+        - `403`: user doesn't have administrator rights.
+        - `404`: the custom component is not installed and cannot be enabled or disabled.
+        - `409`: installed custom component is no longer compatible with the current firmware.
+
+        ⚠️ Attention:
+        - Switching the web-configurator might disconnect the current request. Use a GET request to check for the current state.
+        - Switching the remote-ui will restart the application and the screen will go dark for a while.
+        - For certain error conditions, the device might restart.
       operationId: enableCustomComponent
       parameters:
         - $ref: '#/components/parameters/custom_component'
@@ -7859,6 +7874,11 @@ paths:
       description: |
         Deactivates the custom components and starts the default one. The custom component is removed afterwards from the
         device.
+
+        ⚠️ Attention:
+        - Deleting the web-configurator might disconnect the current request. Use a GET request to check for the current state.
+        - Deleting an active, custom remote-ui will restart the application and the screen will go dark for a while.
+        - For certain error conditions, the device might restart.
       operationId: removeCustomComponent
       parameters:
         - $ref: '#/components/parameters/custom_component'
@@ -7881,7 +7901,38 @@ paths:
       tags:
         - system
       summary: Upload and install a custom component.
-      description: "☢️ VOIDS WARRANTY ☢️\n\nThe `void_warranty` query parameter is required the first time a custom component is installed:\n- The user has to agree and confirm, that the warranty will be voided by installing a custom component.\n- The confirmation will be recorded in a write-once location on the device and cannot be reverted!\n- The value of the parameter must be `yes`, otherwise the installation is aborted and `401` returned. \n\nError response codes:\n- `400`: invalid archive, missing data in archive or included metadata cannot be read.\n- `403`: user did not agree to void warranty, or user does not have administrator rights.\n- `409`: custom component is not compatible with the current firmware.\n- `507`: insufficient storage to upload and process installation archive.\n\n\U0001F6A7 The web-configurator component is not yet implemented.\n"
+      description: |
+        ☢️ VOIDS WARRANTY ☢️
+
+        The `void_warranty` query parameter is required to install a custom component:
+        - The user has to agree and confirm, that the warranty will be voided by installing a custom component.
+        - The confirmation will be recorded in a write-once location on the device and cannot be reverted!
+        - The value of the parameter must be `yes`, otherwise the installation is aborted and `401` returned. 
+
+        Custom archive requirements:
+        - TAR GZip archive (either .tgz or .tar.gz file suffix).
+        - In the root of the archive, there must be a `release.json` file describing the custom version.  
+          See `CustomRelease` schema for the release.json format.
+        - No symlinks. They are automatically removed during the installation.
+        - UI:
+          - The UI binary must be named `remote-ui` in the `./bin` subdirectory.
+          - All application files must be in one of the following subdirectories, other locations are not accessible at runtime:
+            - `./bin`: application binary, usually only `remote-ui`.
+            - `./config`: configuration data. Path is accessible with `UC_CONFIG_HOME` environment variable.
+            - `./data`: application data. Path is accessible with `UC_DATA_HOME` environment variable.
+        - web-configurator:
+          - An `index.html` file must be in the root of the archive.
+
+        Error response codes:
+        - `400`: invalid archive, missing data in archive or included metadata cannot be read.
+        - `403`: user did not agree to void warranty, or user does not have administrator rights.
+        - `409`: custom component is not compatible with the current firmware.
+        - `507`: insufficient storage to upload and process installation archive.
+
+        ⚠️ Attention:
+        - Installing a custom web-configurator might disconnect the current request. Use a GET request to check for the current state.
+        - Installing a custom remote-ui will restart the application and the screen will go dark for a while.
+        - For certain error conditions, the device might restart.
       operationId: installCustomComponent
       parameters:
         - $ref: '#/components/parameters/custom_component'
