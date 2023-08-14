@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.26.1
+  version: 0.26.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7991,7 +7991,7 @@ paths:
           They might even include their own log level in the message text.
         - Text search is not case-sensitive. Wildcards or Regex is not supported.
       parameters:
-        - name: priority
+        - name: p
           in: query
           description: Minimum priority of log message.
           required: false
@@ -8000,7 +8000,7 @@ paths:
             minimum: 0
             maximum: 8
             default: 5
-        - name: services
+        - name: s
           in: query
           description: 'One or more service identifiers, separated by comma'
           required: false
@@ -8029,7 +8029,7 @@ paths:
           schema:
             type: string
             format: date-time
-        - name: text_search
+        - name: q
           in: query
           description: Search text in log message
           required: false
