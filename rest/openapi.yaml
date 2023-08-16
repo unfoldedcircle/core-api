@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.26.2
+  version: 0.26.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7978,7 +7978,7 @@ paths:
         Depending on the `Content-Type` header, the logs are either returned as JSON objects or exported as a text file.
 
         - `Content-Type: application/json` or none: retrieve logs as json objects.
-        - `Content-Type: text/csv` or none: retrieve logs as text export.
+        - `Content-Type: text/plain` or none: retrieve logs as text export.
           - Field order: <timestamp> <service> <level> <message>
           - Fields are separated by a tab.
           - The message itself might contain tabs as well!
