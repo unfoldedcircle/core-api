@@ -628,7 +628,7 @@ components:
           command: ir_send
           code: "4;0x10;12;1"
           format: "hex"
-          repeat: "3"
+          repeat: 3
           int_side: true
         - type: dock
           id: 4
