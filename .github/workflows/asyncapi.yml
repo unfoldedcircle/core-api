@@ -42,26 +42,22 @@ jobs:
         run: |
           mkdir -p ./static/api/ws ./static/api/integration ./static/api/dock
 
-#      - name: Generate core AsyncAPI HTML doc
-#        uses: docker://asyncapi/github-action-for-generator:2.0.3
-#        with:
-#          template: '@asyncapi/html-template@0.25'
-#          filepath: ./websocket-api/asyncapi.yaml
-#          output: ./static/api/ws
+      - name: Install AsyncAPI generator
+        run: |
+          if [[ ! -x "$(command -v ag)" ]]; then
+            echo "AsyncAPI generator (ag) not found, installing it with npm"
+            sudo npm install -g @asyncapi/html-template@0.28.4
+            sudo npm install -g @asyncapi/generator@1.10.14
+          fi;
+          ag --version
 
       - name: Generate integration AsyncAPI HTML doc
-        uses: docker://asyncapi/github-action-for-generator:2.0.3
-        with:
-          template: '@asyncapi/html-template@0.25'
-          filepath: ./integration-api/asyncapi.yaml
-          output: ./static/api/integration
+        run: |
+          ag ./integration-api/asyncapi.yaml @asyncapi/html-template -o ./static/api/integration --force-write
 
       - name: Generate dock AsyncAPI HTML doc
-        uses: docker://asyncapi/github-action-for-generator:2.0.3
-        with:
-          template: '@asyncapi/html-template@0.25'
-          filepath: ./dock-api/UCD2-asyncapi.yaml
-          output: ./static/api/dock
+        run: |
+          ag ./dock-api/UCD2-asyncapi.yaml @asyncapi/html-template -o ./static/api/dock --force-write
 
       - name: Deploy integration API GH page
         uses: JamesIves/github-pages-deploy-action@v4.3.0
