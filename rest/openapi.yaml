@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.26.3
+  version: 0.26.5
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -9579,6 +9579,7 @@ components:
           $ref: '#/components/schemas/LanguageText'
         version:
           type: string
+          maxLength: 30
         description:
           $ref: '#/components/schemas/LanguageText'
         developer:
@@ -10201,7 +10202,11 @@ components:
         entity_id:
           $ref: '#/components/schemas/EntityId'
         cmd_id:
-          description: Entity specific command.
+          description: |
+            Entity command identifier, as returned in the entity command metadata.
+
+            This identifier may change at any time and may not be used for logic decisions in a client!
+            If entity specific information is required, the entity object must be loaded from the `entity_id`.
           type: string
         params:
           description: |
@@ -10211,7 +10216,7 @@ components:
         - cmd_id
       example:
         entity_id: hass.main.light.living-room
-        cmd_id: 'on'
+        cmd_id: light.on
         params:
           hue: 180
           saturation: 90
@@ -10268,10 +10273,16 @@ components:
       type: object
       properties:
         id:
-          description: Entity command identifier
+          description: |
+            Entity command identifier to be used in activity and macro commands (button mappings, UI elements and sequences).
+
+            This identifier may change at any time and may not be used for logic decisions in a client!
+            If entity specific information is required, the entity object must be used.
           type: string
         cmd_id:
-          description: Entity command.
+          description: |
+            Entity command as specified in the [entity documentation](https://github.com/unfoldedcircle/core-api/tree/main/doc/entities).
+            This is the command identifier being sent to integration drivers.
           type: string
         name:
           $ref: '#/components/schemas/LanguageText'

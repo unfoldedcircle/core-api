@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.22.1-beta'
+  version: '0.22.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -6758,6 +6758,11 @@ components:
     entityFeature:
       type: string
     entityCommand:
+      description: |
+        Entity command identifier, as returned in the entity command metadata.
+        
+        This identifier may change at any time and may not be used for logic decisions in a client!
+        If entity specific information is required, the entity object must be loaded from the `entity_id`.
       type: string
     entityType:
       description: Entity type.
