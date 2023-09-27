@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.26.5
+  version: 0.26.6
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8882,6 +8882,9 @@ components:
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
+                prevent_sleep:
+                  description: Prevent the device to go to sleep while activity is is on.
+                  type: boolean
                 included_entities:
                   $ref: '#/components/schemas/IncludedEntities'
                 sequences:
@@ -8994,6 +8997,9 @@ components:
         options:
           type: object
           properties:
+            prevent_sleep:
+              description: Prevent the device to go to sleep while activity is is on.
+              type: boolean
             entity_ids:
               type: array
               items:
