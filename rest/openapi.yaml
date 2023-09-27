@@ -10234,6 +10234,8 @@ components:
       description: |
         Number value parameter with optional limits.   
       properties:
+        default:
+          description: 'Default value to use, e.g. in a UI editor.'
         min:
           description: Minimal allowed value (inclusive).
           type: number
@@ -10249,6 +10251,7 @@ components:
           description: Optional unit label of the value.
           type: string
       example:
+        default: 22
         min: 0
         max: 100
         step: 1
