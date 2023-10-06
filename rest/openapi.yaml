@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.26.6
+  version: 0.27.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2813,7 +2813,8 @@ paths:
         Append a new empty page to the user interface pages. The new page identifier is returned in the response.
 
         The payload fields are optional. A page name and the items of the page can be specified, or later be added with 
-        `PATCH /activities/{entityId}/ui/pages/{pageId}`.
+        `PATCH /activities/{entityId}/ui/pages/{pageId}`. If `grid` is not specified, the default grid size is used from
+        the screen metadata layout in `GET /cfg/device/screen_layout`
       operationId: createActivityUiPage
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -4037,6 +4038,12 @@ paths:
                       type: integer
                       minimum: 0
                       maximum: 20
+                    cmd_delay:
+                      description: |
+                        Optional delay between sending IR commands, if `cmd_id` refers to a command with multiple IR codes
+                        (e.g. Marantz AVR, MCE devices).
+                      type: integer
+                      minimum: 0
                     port_id:
                       description: Optional output port identifier. The default output will be used if omitted.
                       type: string
@@ -4044,22 +4051,30 @@ paths:
                     - codeset_id
                     - cmd_id
                 - type: object
-                  description: Learned IR code.
+                  description: IR code.
                   properties:
                     code:
-                      description: IR code. PRONTO codes can use a space or comma as separator.
+                      description: |
+                        IR code to send.
+                        - PRONTO codes can use a space or comma as separator.
+                        - Multiple codes can be separated by a pipe (`|`).
                       type: string
                     format:
                       $ref: '#/components/schemas/IrCodeFormat'
-                    port_id:
-                      description: Optional output port identifier. The default output will be used if omitted.
-                      type: string
                     repeat:
                       description: |
                         Optional repeat value for sending continuous IR repeat signals (depending on IR protocol).
                       type: integer
                       minimum: 0
                       maximum: 20
+                    cmd_delay:
+                      description: |
+                        Optional delay between sending commands if `code` contains more than one IR command.
+                      type: integer
+                      minimum: 0
+                    port_id:
+                      description: Optional output port identifier. The default output will be used if omitted.
+                      type: string
                   required:
                     - code
                     - format
@@ -4898,7 +4913,8 @@ paths:
         Append a new empty page to the user interface pages. The new page identifier is returned in the response.
 
         The payload fields are optional. A page name and the items of the page can be specified, or later be added with 
-        `PATCH /remotes/{entityId}/ui/pages/{pageId}`.
+        `PATCH /remotes/{entityId}/ui/pages/{pageId}`. If `grid` is not specified, the default grid size is used from
+        the screen metadata layout in `GET /cfg/device/screen_layout`
 
         ⚠️ If the user interface items with `command` objects are specified, then the `EntityCommand` structure may not
         contain an `entity_id` field. A remote-entity always operates on itself.
@@ -5820,6 +5836,27 @@ paths:
                 cool: uE91E
                 heat: uE91F
                 home: uE900
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/device/screen_layout:
+    get:
+      tags:
+        - cfg
+      summary: Get the screen layout of the device.
+      description: |
+        Meta-information about the screen grid size.
+      operationId: getRemoteDeviceScreenLayoutSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceScreenLayout'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -8883,7 +8920,7 @@ components:
                   type: boolean
                   default: true
                 prevent_sleep:
-                  description: Prevent the device to go to sleep while activity is is on.
+                  description: Prevent the device to go to sleep while activity is on.
                   type: boolean
                 included_entities:
                   $ref: '#/components/schemas/IncludedEntities'
@@ -8934,7 +8971,7 @@ components:
                   default: true
     ActivityRequest:
       description: |
-        Dedicated request object to create a new activity.  
+        Dedicated request object to create a new activity.
       type: object
       allOf:
         - properties:
@@ -8998,7 +9035,7 @@ components:
           type: object
           properties:
             prevent_sleep:
-              description: Prevent the device to go to sleep while activity is is on.
+              description: Prevent the device to go to sleep while activity is on.
               type: boolean
             entity_ids:
               type: array
@@ -9021,12 +9058,15 @@ components:
         name:
           description: Optional page name
           type: string
+        grid:
+          $ref: '#/components/schemas/DeviceButtonLayout/properties/grid'
         items:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfaceItem'
       required:
         - page_id
+        - grid
         - items
     ActivityUserInterfacePageUpdate:
       type: object
@@ -9034,6 +9074,8 @@ components:
         name:
           description: Optional page name
           type: string
+        grid:
+          $ref: '#/components/schemas/DeviceButtonLayout/properties/grid'
         items:
           description: |
             Updated user interface items. An empty array will REMOVE all items, if the property is omitted the existing
@@ -9666,6 +9708,25 @@ components:
         - type
         - grid
         - buttons
+    DeviceScreenLayout:
+      description: Screen layout definitions with usable grid sizes for custom UI pages.
+      type: object
+      properties:
+        grid:
+          type: object
+          properties:
+            default:
+              $ref: '#/components/schemas/DeviceButtonLayout/properties/grid'
+            min:
+              $ref: '#/components/schemas/DeviceButtonLayout/properties/grid'
+            max:
+              $ref: '#/components/schemas/DeviceButtonLayout/properties/grid'
+          required:
+            - default
+            - min
+            - max
+      required:
+        - grid
     DeviceButtonMapping:
       type: object
       properties:
@@ -11678,6 +11739,12 @@ components:
                     Infrared settings: codeset name und used infrared emitter to send commands.
                   type: object
                   properties:
+                    cmd_delay:
+                      description: |
+                        Delay in milliseconds between sending IR commands, if a command contains multiple IR codes,
+                        (e.g. Marantz AVR, MCE devices).
+                      type: integer
+                      minimum: 0
                     codeset:
                       description: "Read-only information about the infrared codeset. \U0001F477 **TODO** Use `/remotes/entities/:entityId/ir`\nendpoints to manage infrared codes.\n"
                       type: object
@@ -11812,6 +11879,12 @@ components:
             ir:
               type: object
               properties:
+                cmd_delay:
+                  description: |
+                    Delay in milliseconds between sending IR commands, if a command contains multiple IR codes,
+                    (e.g. Marantz AVR, MCE devices).
+                  type: integer
+                  minimum: 0
                 codeset:
                   type: object
                   properties:
@@ -12254,18 +12327,31 @@ components:
       maxLength: 36
       description: Unique user interface identifier.
     UserInterfaceItem:
+      description: |
+        A user interface item is either an icon, text or media information from a media-player entity.
+        - Icon and text items can be static or linked to a command specified in the `command` field.
+        - Default size is 1x1 if not specified.
       type: object
       properties:
         type:
+          description: |
+            Type of the user interface item:
+            - `icon`: show an icon, either a UC icon or a custom icon. Field `icon` must contain the icon identifier.
+            - `text`: show text only from field `text`.
+            - `media_player`: show media information from the specified media-player entity specified in `media_player_id`.  
+              The specified entity_id must be part of the included entities in the activity and of type media-player.
           type: string
           enum:
             - icon
             - text
             - numpad
+            - media_player
         icon:
           $ref: '#/components/schemas/IconIdentifier'
         text:
           type: string
+        media_player_id:
+          $ref: '#/components/schemas/EntityId'
         command:
           $ref: '#/components/schemas/EntityCommand'
         location:
