@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.27.2
+  version: 0.27.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -10332,6 +10332,9 @@ components:
           type: array
           items:
             type: string
+        default:
+          description: Default value for a new command. Must be a value defined in `values`
+          type: string
       required:
         - values
       example:
@@ -10339,6 +10342,34 @@ components:
           - Option 1
           - Option 2
           - Option 3
+        default: Option 1
+    EntityCmdParamSelection:
+      type: object
+      description: Text value parameter with a selection list from another entity field.
+      properties:
+        items:
+          description: Validation regex.
+          type: object
+          properties:
+            source:
+              description: Where to load the selection list from.
+              type: string
+              enum:
+                - attributes
+                - options
+            field:
+              description: |
+                Field name in the source object containing an array of strings for the parameter selection
+              type: string
+          required:
+            - source
+            - field
+      required:
+        - items
+      example:
+        items:
+          source: attributes
+          field: source_list
     EntityCommandMetadata:
       type: object
       properties:
@@ -10388,6 +10419,7 @@ components:
                   - $ref: '#/components/schemas/EntityCmdParamBool'
                   - $ref: '#/components/schemas/EntityCmdParamRegex'
                   - $ref: '#/components/schemas/EntityCmdParamEnum'
+                  - $ref: '#/components/schemas/EntityCmdParamSelection'
                 discriminator:
                   propertyName: type
                   mapping:
@@ -10395,6 +10427,7 @@ components:
                     bool: '#/components/schemas/EntityCmdParamBool'
                     regex: '#/components/schemas/EntityCmdParamRegex'
                     enum: '#/components/schemas/EntityCmdParamEnum'
+                    selection: '#/components/schemas/EntityCmdParamSelection'
       required:
         - id
         - cmd_id
