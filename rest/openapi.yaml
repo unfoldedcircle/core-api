@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.27.3
+  version: 0.27.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Configuration import & export\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -51,7 +51,7 @@ tags:
   - name: dock
     description: "\U0001F6F0 Docking station management, discovery and infrared testing functions"
   - name: system
-    description: "\U0001F477 System information and commands - **work in progress**"
+    description: ⚙️ System information and commands
 paths:
   /pub/version:
     get:
@@ -7737,6 +7737,297 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /system/backup/export:
+    get:
+      tags:
+        - system
+      summary: Create and export a device configuration backup.
+      description: |
+        Export the full Remote Two device configuration. This allows to restore the configuration after a factory reset
+        or to load the configuration onto another device.
+
+        - The backup archive is only returned to the client and not stored on the device. 
+        - The returned backup archive can be restored with `PUT /system/backup/restore`.
+        - It is recommended to perform the backup while the remote is in the docking station.
+        - Using the remote or the Core-API should be avoided while the backup is running.
+        - The backup should only take a few seconds. The backup will take longer:
+          - if integration drivers are busy and require more time to shutdown.
+          - if many custom resources (icons, background images, etc) are present.
+
+        ⚠️ Attention:
+        - The backup archive may contain personal information and access keys to external systems.
+          - The backup archive is not encrypted. Contained information can be extracted with little effort.
+          - For example the long-lived access token for Home Assistant is included, if that integration has been configured.
+        - All integrations and docks will be disconnected and stopped during backup.
+          - They are restarted after the backup is finished. This may take several seconds until all entities are available again.
+          - Restart the device, if an integration or entities are no longer working after a backup.
+        - The device must have enough free disk space to create the backup archive. At least 100 MB must be free to start the backup process.
+
+        The backup **does not include**:
+        - WiFi network configuration and passwords.
+        - Administrator pin.
+        - Web-configurator pin.
+        - Any API-keys created with the Core-API.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account may create a backup.
+        - `409`: conflict, a backup or restore process is already running.
+        - `507`: not enough disk space available.
+      operationId: exportBackup
+      responses:
+        '200':
+          description: Binary backup archive.
+          headers:
+            content-disposition:
+              description: Attachment filename.
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
+  /system/backup/restore:
+    put:
+      tags:
+        - system
+      summary: Upload and restore a device configuration backup.
+      description: |
+        Restore the Remote Two device configuration from the uploaded backup archive. The backup archive is only used
+        to restore the system and deleted after restore.
+
+        - It is highly recommended to perform the restore while the remote is in the docking station.
+        - Using the remote or the Core-API should be avoided while the restore is running.
+        - The restore should only take a few seconds. The restore will take longer:
+          - if integration drivers are busy and require more time to shutdown.
+          - if many custom resources (icons, background images, etc) are present.
+
+        ⚠️ Attention:
+        - The device will not automatically restart after a system restore.
+          - The device must be restarted after the restore to activate all changed settings.
+          - Certain setting changes like OTA require a system restart.
+        - WiFi configuration, administrator pin and web-configurator pin are not overwritten by a system restore.
+        - All integrations and docks will be disconnected and stopped during restore.
+        - The device must have enough free disk space to restore the backup. At least 100 MB must be free to start the restore process.
+
+        Error codes:
+        - `400`: bad request, back archive is invalid or corrupt. Check logs for further details.
+        - `403`: forbidden, only an administrator account may restore a backup.
+        - `409`: conflict, a backup or restore process is already running.
+        - `500`: internal server error, the backup archive could not be processed. Check logs for further details.
+        - `507`: not enough disk space available.
+      operationId: restoreBackup
+      parameters:
+        - $ref: '#/components/parameters/merge'
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BackupMetadata/properties/report'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
+  /system/backup/snapshots:
+    get:
+      tags:
+        - system
+      summary: "\U0001F477 Get information about available system backup snapshots."
+      description: |
+        _Work in progress, might still change!_
+
+        Retrieve all available device configuration backups stored on the device.
+      operationId: getBackupSnapshots
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BackupSnapshot'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    post:
+      tags:
+        - system
+      summary: "\U0001F477 Create a new system backup snapshot."
+      description: |
+        _Work in progress, might still change!_
+
+        Create a new device configuration backup and store it on the device.
+
+        Please see `GET /system/backup/export` operation about creating a backup.
+
+        Response codes:
+        - `403`: forbidden, only an administrator account may create a backup.
+        - `409`: conflict, a maximum of 50 backups can be stored on the device, or a backup or restore process is already running.
+        - `507`: a minimum of 100 MB free space on the device is required to create a new backup.
+      operationId: createBackupSnapshot
+      responses:
+        '201':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupSnapshot'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
+    delete:
+      tags:
+        - system
+      summary: "\U0001F477 Remove all system backups."
+      description: |
+        _Work in progress, might still change!_
+
+        Delete all device configuration backups stored on the device.
+      operationId: deleteAllBackupSnapshots
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/system/backup/snapshots/{id}':
+    get:
+      tags:
+        - system
+      summary: "\U0001F477 Get information about a system backup snapshot or download archive."
+      description: |
+        _Work in progress, might still change!_
+
+        Based on the request `Content-Type` header, either the JSON metadata information is returned or the binary
+        backup archive. If the header is missing, the binary archive is returned.
+
+        Response codes:
+        - `404`: system backup snapshot not found.
+      operationId: getBackupSnapshot
+      parameters:
+        - $ref: '#/components/parameters/backup_id'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            content-disposition:
+              description: |
+                Attachment filename for `content-type: application/octet-stream`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupMetadata'
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - system
+      summary: "\U0001F477 Restore a system backup snapshot."
+      description: |
+        _Work in progress, might still change!_
+
+        Please see `PUT /system/backup/restore` operation about restoring a backup.
+
+        Response codes:
+        - `403`: forbidden, only an administrator account may create a backup.
+        - `404`: system backup snapshot not found.
+        - `409`: conflict, a backup or restore process is already running.
+        - `500`: internal server error, the backup archive could not be processed. Check logs for further details.
+        - `507`: not enough disk space available.
+      operationId: restoreBackupSnapshot
+      parameters:
+        - $ref: '#/components/parameters/backup_id'
+        - $ref: '#/components/parameters/merge'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1system~1backup~1restore/put/responses/200/content/application~1json/schema'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
+    delete:
+      tags:
+        - system
+      summary: "\U0001F477 Remove a system backup snapshot."
+      description: |
+        _Work in progress, might still change!_
+      operationId: deleteBackupSnapshot
+      parameters:
+        - $ref: '#/components/parameters/backup_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /system/factory_reset:
     get:
       tags:
@@ -8653,6 +8944,13 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/ApiKeyId'
+    backup_id:
+      name: id
+      in: path
+      description: Backup snapshot identifier
+      required: true
+      schema:
+        type: string
     button_id:
       name: buttonId
       in: path
@@ -8824,6 +9122,13 @@ components:
       required: false
       schema:
         type: string
+    merge:
+      name: merge
+      in: query
+      description: Merge data.
+      required: false
+      schema:
+        type: boolean
     query:
       name: q
       in: query
@@ -9267,6 +9572,90 @@ components:
       maxLength: 36
       description: |
         Entity identifier used in an integration driver (= available entities).
+    BackupSnapshot:
+      type: object
+      properties:
+        id:
+          description: Backup identifier
+          type: string
+        creation_date:
+          description: Creation date of the backup snapshot
+          type: string
+          format: date-time
+        size:
+          description: Archive size in bytes
+          type: integer
+          format: int32
+      required:
+        - id
+        - creation_date
+        - size
+      example:
+        id: UCR2_2023-09-17_145305
+        creation_date: '2023-09-17T14:53:05+02:00'
+        size: 2370274
+    BackupMetadata:
+      type: object
+      properties:
+        id:
+          description: Backup identifier
+          type: string
+        creation_date:
+          description: Creation date of the backup snapshot
+          type: string
+          format: date-time
+        version:
+          $ref: '#/components/schemas/BackupMetadataVersion'
+        report:
+          type: object
+          properties:
+            item:
+              type: string
+              enum:
+                - db
+                - integration_driver
+                - integration
+                - activity
+                - macro
+                - remote
+                - profile
+                - dock
+                - resource
+            available:
+              type: integer
+              format: int32
+            ok:
+              type: integer
+              format: int32
+          required:
+            - item
+            - available
+            - ok
+      required:
+        - id
+        - creation_date
+        - version
+      example:
+        id: UCR2_2023-09-17_145305
+        creation_date: '2023-09-17T14:53:05+00:00'
+        version:
+          backup: 1.0.0
+          core: 0.34.5-beta
+          os: 1.2.0
+    BackupMetadataVersion:
+      type: object
+      properties:
+        backup:
+          description: 'Version of the backup data model in [SemVer](https://semver.org/) format.'
+          type: string
+        core:
+          description: Core app version
+          type: string
+        os:
+          description: Operating system version
+          type: string
+      required:
+        - backup
     BatteryStatusResponse:
       type: object
       properties:
