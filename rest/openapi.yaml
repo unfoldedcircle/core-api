@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.27.4
+  version: 0.28.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2409,6 +2409,19 @@ paths:
         The total number of available activities are returned in the `Pagination-Count` header. This allows to prepare the
         retrieval of the activities with the `GET` operation and paging parameters.
       operationId: getActivityCount
+      parameters:
+        - name: in_group
+          in: query
+          description: Only activities in any activity group
+          required: false
+          schema:
+            type: boolean
+        - name: group_id
+          in: query
+          description: Only activities in this activity group
+          required: false
+          schema:
+            $ref: '#/components/schemas/SimpleId'
       responses:
         '200':
           description: Successful operation
@@ -2435,6 +2448,18 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - name: in_group
+          in: query
+          description: Only activities in any activity group
+          required: false
+          schema:
+            type: boolean
+        - name: group_id
+          in: query
+          description: Only activities in this activity group
+          required: false
+          schema:
+            $ref: '#/components/schemas/SimpleId'
       responses:
         '200':
           description: Successful operation
@@ -3003,6 +3028,181 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/ActivityUserInterfacePage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /activity_groups:
+    head:
+      tags:
+        - activities
+      summary: Get total number of activity groups.
+      description: |
+        The total number of activity groups is returned in the `Pagination-Count` header. This allows to prepare the
+        retrieval of the groups with the `GET` operation and paging parameters.
+      operationId: getActivityGroupCount
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    get:
+      tags:
+        - activities
+      summary: Get activity groups overview with paging.
+      description: |
+        Returns an overview of all defined activity groups with the given paging parameters. Use the `HEAD` operation to retrieve
+        the total number of defined groups.
+
+        The overview information doesn't include all details of an activity group. The full group information is retrievable
+        with `/activity_group/{groupId}`.
+      operationId: getActivityGroups
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityGroups'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    post:
+      tags:
+        - activities
+      summary: Create a new activity group.
+      description: |
+        Create a new activity group.
+      operationId: createActivityGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityGroupUpdate'
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Activity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - activities
+      summary: Delete all activity groups.
+      description: |
+        ⚠️ All defined activity groups will be irrevocably deleted!
+      operationId: deleteAllActivityGroups
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/activity_groups/{groupId}':
+    get:
+      tags:
+        - activities
+      summary: Get an activity group by its group_id.
+      description: |
+        Returns all the information required to manage an existing activity group.
+      operationId: getActivityGroup
+      parameters:
+        - $ref: '#/components/parameters/group_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityGroup'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Update an activity group.
+      operationId: updateActivityGroup
+      description: |
+        Update one or multiple properties of an activity group. The omitted properties are ignored and not deleted.
+      parameters:
+        - $ref: '#/components/parameters/group_id'
+      requestBody:
+        description: Properties to update in the existing activity group.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityGroupUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityGroup'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - activities
+      summary: Delete an activity group.
+      description: |
+        ⚠️ The given activity group is irrevocably deleted.
+      operationId: deleteActivityGroup
+      parameters:
+        - $ref: '#/components/parameters/group_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -9224,6 +9424,20 @@ components:
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
+                activity_group:
+                  description: |
+                    Minimal activity group information to use in a user interface with it's friendly name and icon.
+                  type: object
+                  properties:
+                    group_id:
+                      $ref: '#/components/schemas/EntityId'
+                    name:
+                      $ref: '#/components/schemas/LanguageText'
+                    icon:
+                      $ref: '#/components/schemas/IconIdentifier'
+                  required:
+                    - group_id
+                    - name
                 prevent_sleep:
                   description: Prevent the device to go to sleep while activity is on.
                   type: boolean
@@ -9274,6 +9488,8 @@ components:
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
+                activity_group:
+                  $ref: '#/components/schemas/EntityId'
     ActivityRequest:
       description: |
         Dedicated request object to create a new activity.
@@ -9326,8 +9542,8 @@ components:
           This allows to edit the activity in multiple sessions without having to reselect the desired entities.
         - Every referenced entity in `sequences` must be included in `entity_ids`, otherwise the activity cannot be saved.
         - If the client removes a configured entity from the system which is included in an activity, it must make sure to
-          also remove all references in the activity. See `available` property in the included entities object when retrieving
-          a macro.
+          also remove all references in the activity. See `IncludedEntity.available` property in the included entities
+          object when retrieving an activity.
       type: object
       properties:
         name:
@@ -9388,6 +9604,116 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfaceItem'
+    ActivityGroup:
+      description: |
+        An activity group creates a dependency between multiple activities. Switching between activities will consider
+        the current state of the included entities and only turn-on or -off the required entities.
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/EntityId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          $ref: '#/components/schemas/ActivityGroupOptions'
+        activities:
+          description: Included activities in the group.
+          type: array
+          items:
+            $ref: '#/components/schemas/IncludedActivity'
+      required:
+        - group_id
+        - name
+        - options
+        - activities
+    ActivityGroups:
+      type: array
+      items:
+        $ref: '#/components/schemas/ActivityGroupOverview'
+    ActivityGroupOverview:
+      description: |
+        Minimal activity group object intended for an overview page, which is returned when retrieving all activities.
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/EntityId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        activity_count:
+          description: Number of included activities.
+          type: integer
+      required:
+        - group_id
+        - name
+        - activity_count
+    ActivityGroupUpdate:
+      description: |
+        Dedicated request object to update an existing activity group.  
+        All root properties are optional and only the provided objects are updated in the activity group. Omitted objects are
+        ignored and not deleted from the activity group.
+
+        Referenced activities must exist, an empty `activity_ids` array will remove all included activities from the group.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          $ref: '#/components/schemas/ActivityGroupOptions'
+        activity_ids:
+          description: Entity identifiers of included activities in group.
+          type: array
+          items:
+            $ref: '#/components/schemas/EntityId'
+    IncludedActivity:
+      description: |
+        Minimal activity object to show the activity in a user interface with it's friendly name and icon.
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/EntityId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+      required:
+        - group_id
+        - name
+    ActivityGroupOptions:
+      description: "\U0001F477Not yet finalized!\n\nActivity group specific options, e.g. how delays are handled when switching between activities.\n"
+      type: object
+      properties:
+        remove_turn_on_delays:
+          description: |
+            - `previous_cmd_skipped`: Only remove delay steps if the previous step is skipped, because the entity is in a
+               power-on state.
+            - `between_skipped_cmds`: Only remove delay steps if the previous and next power-on steps are skipped, because
+               the entity is already in a power-on state.
+            - `never`: Never remove delay steps in the on-sequence of the new activity.
+          type: string
+          enum:
+            - previous_cmd_skipped
+            - between_skipped_cmds
+            - never
+        turn_off_unused_entities:
+          description: |
+            - `always`: Always turn off unused entities in the previous activity.
+            - `in_off_sequence`: Only turn off unused entities which are included in the off-sequence of the previous activity.
+            - `never`: Never turn off entities in the previous activity.
+          type: string
+          enum:
+            - always
+            - in_off_sequence
+            - never
     AdminPin:
       type: string
       maxLength: 20
