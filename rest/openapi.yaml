@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.28.0
+  version: 0.28.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2185,6 +2185,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/entity_types'
         - $ref: '#/components/parameters/intg_ids'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation.
@@ -2408,6 +2409,8 @@ paths:
       description: |
         The total number of available activities are returned in the `Pagination-Count` header. This allows to prepare the
         retrieval of the activities with the `GET` operation and paging parameters.
+
+        The optional text search query searches in the activity name and activity identifier.
       operationId: getActivityCount
       parameters:
         - name: in_group
@@ -2422,6 +2425,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/SimpleId'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
@@ -2442,12 +2446,12 @@ paths:
         Returns an overview of all defined activities with the given paging parameters. Use the `HEAD` operation to retrieve
         the total number of defined activities.
 
+        The optional text search query searches in the activity name and activity identifier.
+            
         The overview information doesn't include all details of an activity. The full activity information is retrievable
         with `/activities/{entityId}`.
       operationId: getActivities
       parameters:
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
         - name: in_group
           in: query
           description: Only activities in any activity group
@@ -2460,6 +2464,9 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/SimpleId'
+        - $ref: '#/components/parameters/query'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
       responses:
         '200':
           description: Successful operation
@@ -3060,11 +3067,11 @@ paths:
         - activities
       summary: Get activity groups overview with paging.
       description: |
-        Returns an overview of all defined activity groups with the given paging parameters. Use the `HEAD` operation to retrieve
-        the total number of defined groups.
+        Returns an overview of all defined activity groups with the given paging parameters. Use the `HEAD` operation to
+        retrieve the total number of defined groups.
 
-        The overview information doesn't include all details of an activity group. The full group information is retrievable
-        with `/activity_group/{groupId}`.
+        The overview information doesn't include all details of an activity group. The full group information is
+        retrievable with `/activity_group/{groupId}`.
       operationId: getActivityGroups
       parameters:
         - $ref: '#/components/parameters/page'
@@ -9449,8 +9456,14 @@ components:
                   $ref: '#/components/schemas/DeviceButtonMappings'
                 user_interface:
                   $ref: '#/components/schemas/ActivityUserInterface'
+            attributes:
+              type: object
+              properties:
+                state:
+                  $ref: '#/components/schemas/SequenceState'
           required:
             - options
+            - attributes
     ActivityId:
       type: string
       format: '^[a-zA-Z0-9\-_]+$'
@@ -9634,6 +9647,18 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/ActivityGroupOverview'
+    ActivityGroupState:
+      description: |
+        - `OFF`: No included activity is running.
+        - `ACTIVE`: An included activity is running.
+        - `RUNNING`: An included activity is currently running, e.g. either switching activities, or turning off.
+        - `ERROR`: An included activity is in an error state.
+      type: string
+      enum:
+        - 'OFF'
+        - ACTIVE
+        - RUNNING
+        - ERROR
     ActivityGroupOverview:
       description: |
         Minimal activity group object intended for an overview page, which is returned when retrieving all activities.
@@ -9648,6 +9673,8 @@ components:
         activity_count:
           description: Number of included activities.
           type: integer
+        state:
+          $ref: '#/components/schemas/ActivityGroupState'
       required:
         - group_id
         - name
@@ -9685,9 +9712,30 @@ components:
           $ref: '#/components/schemas/LanguageText'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
+        state:
+          $ref: '#/components/schemas/SequenceState'
       required:
         - group_id
         - name
+    SequenceState:
+      description: |
+        State of an Activity or Macro sequence:
+        - `RUNNING`: Sequence is currently running
+        - `COMPLETED`: Final state for a macro
+        - `ON`: Final activity state for the `on` sequence
+        - `OFF`: Final activity state for the `off` sequence
+        - `STOPPED`: The sequence was aborted with a stop request
+        - `TIMEOUT`: The sequence timed out and was aborted
+        - `ERROR`: There was an error running the sequence and did not complete
+      type: string
+      enum:
+        - RUNNING
+        - COMPLETED
+        - 'ON'
+        - 'OFF'
+        - STOPPED
+        - TIMEOUT
+        - ERROR
     ActivityGroupOptions:
       description: "\U0001F477Not yet finalized!\n\nActivity group specific options, e.g. how delays are handled when switching between activities.\n"
       type: object
@@ -10936,6 +10984,8 @@ components:
       items:
         $ref: '#/components/schemas/Entity'
     Entity:
+      description: |
+        Configured entity in the remote to be used in one or more profiles.
       type: object
       properties:
         entity_id:
@@ -10965,6 +11015,11 @@ components:
           type: object
         description:
           $ref: '#/components/schemas/LanguageText'
+        attributes:
+          description: |
+            Dynamic entity attributes set by the integration driver. These are key/value pairs, see [integration entity
+            documentation](https://github.com/unfoldedcircle/core-api/tree/main/doc/entities) for detailed information.
+          type: object
       required:
         - entity_id
         - entity_type
