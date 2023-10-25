@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.28.1
+  version: 0.28.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -9706,7 +9706,7 @@ components:
         Minimal activity object to show the activity in a user interface with it's friendly name and icon.
       type: object
       properties:
-        group_id:
+        entity_id:
           $ref: '#/components/schemas/EntityId'
         name:
           $ref: '#/components/schemas/LanguageText'
@@ -9715,7 +9715,7 @@ components:
         state:
           $ref: '#/components/schemas/SequenceState'
       required:
-        - group_id
+        - entity_id
         - name
     SequenceState:
       description: |

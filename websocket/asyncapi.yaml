@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.22.2-beta'
+  version: '0.23.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -493,6 +493,7 @@ channels:
           # --- event notifications
           - $ref: '#/components/messages/warning'
           - $ref: '#/components/messages/entity_change'
+          - $ref: '#/components/messages/activity_group_change'
           - $ref: '#/components/messages/wifi_change'
           - $ref: '#/components/messages/integration_driver_change'
           - $ref: '#/components/messages/integration_change'
@@ -1239,6 +1240,18 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/entityChangeEventMsg'
+    activity_group_change:
+      summary: 🧪 Activity group change event.
+      description: |
+        Emitted if an activity group has changed, a new group has been added or a group has been deleted.  
+        
+        ⚠️ This event is also used to indicate the client to reload all activity groups. This is the case if only
+        `event_type: change` is set and the `group_id` field is missing.
+      tags:
+        - name: entity
+        - name: event
+      payload:
+        $ref: '#/components/schemas/activityGroupChangeEventMsg'
     update_entity:
       summary: 🧪 Update an entity.
       description: |
@@ -4106,6 +4119,22 @@ components:
           required:
             - msg
             - msg_data
+    activityGroupChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: activity_group_change
+            cat:
+              type: string
+              const: ENTITY
+            msg_data:
+              $ref: '#/components/schemas/ActivityGroup'
+          required:
+            - msg
+            - msg_data
     updateEntityMsg:
       type: object
       allOf:
@@ -6779,6 +6808,95 @@ components:
         - macro
         - remote
 
+    ActivityGroup:
+      description: |
+        An activity group creates a dependency between multiple activities. Switching between activities will consider
+        the current state of the included entities and only turn-on or -off the required entities.
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/entityId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        description:
+          $ref: '#/components/schemas/languageText'
+        options:
+          $ref: '#/components/schemas/ActivityGroupOptions'
+        activities:
+          description: Included activities in the group.
+          type: array
+          items:
+            $ref: '#/components/schemas/IncludedActivity'
+
+    IncludedActivity:
+      description: |
+        Minimal activity object to show the activity in a user interface with it's friendly name and icon.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/entityId'
+        name:
+          $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
+        state:
+          $ref: '#/components/schemas/SequenceState'
+      required:
+        - entity_id
+        - name
+
+    SequenceState:
+      description: |
+        State of an Activity or Macro sequence:
+        - `RUNNING`: Sequence is currently running
+        - `COMPLETED`: Final state for a macro
+        - `ON`: Final activity state for the `on` sequence
+        - `OFF`: Final activity state for the `off` sequence
+        - `STOPPED`: The sequence was aborted with a stop request
+        - `TIMEOUT`: The sequence timed out and was aborted
+        - `ERROR`: There was an error running the sequence and did not complete
+      type: string
+      enum:
+        - RUNNING
+        - COMPLETED
+        - ON
+        - OFF
+        - STOPPED
+        - TIMEOUT
+        - ERROR
+
+    ActivityGroupOptions:
+      description: |
+        👷Not yet finalized!
+
+        Activity group specific options, e.g. how delays are handled when switching between activities.
+      type: object
+      properties:
+        remove_turn_on_delays:
+          description: |
+            - `previous_cmd_skipped`: Only remove delay steps if the previous step is skipped, because the entity is in a
+               power-on state.
+            - `between_skipped_cmds`: Only remove delay steps if the previous and next power-on steps are skipped, because
+               the entity is already in a power-on state.
+            - `never`: Never remove delay steps in the on-sequence of the new activity.
+          type: string
+          enum:
+            - previous_cmd_skipped
+            - between_skipped_cmds
+            - never
+        turn_off_unused_entities:
+          description: |
+            - `always`: Always turn off unused entities in the previous activity.
+            - `in_off_sequence`: Only turn off unused entities which are included in the off-sequence of the previous activity.
+            - `never`: Never turn off entities in the previous activity.
+          type: string
+          enum:
+            - always
+            - in_off_sequence
+            - never
+
     languageCode:
       description: |
         Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
@@ -7485,7 +7603,7 @@ components:
       type: object
       description: |
         The `new_state` property is omitted for `event_type` = `delete`.  
-        If only `event_type` is present then the client should reload all entity data.
+        The client should reload all entity data, if only `event_type` is present.
       properties:
         event_type:
           $ref: '#/components/schemas/defaultChangeEventType'
@@ -7495,6 +7613,21 @@ components:
           $ref: '#/components/schemas/entityType'
         new_state:
           $ref: '#/components/schemas/entityUpdate'
+      required:
+        - event_type
+
+    activityGroupChange:
+      type: object
+      description: |
+        The `new_state` property is omitted for `event_type` = `delete`.  
+        The client should reload all activity group data, if only `event_type` is present.
+      properties:
+        event_type:
+          $ref: '#/components/schemas/defaultChangeEventType'
+        group_id:
+          $ref: '#/components/schemas/entityId'
+        new_state:
+          $ref: '#/components/schemas/ActivityGroup'
       required:
         - event_type
 
