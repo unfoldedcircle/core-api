@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.23.0-beta'
+  version: '0.23.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -8988,11 +8988,20 @@ components:
           description: Authentication method
           type: string
         ssid:
-          description: Network name (service set identifier)
+          description: |
+            SSID network name as friendly UTF-8 representation. Use this name to present the network to users, but not for
+            adding a new network configuration. This is a lossy conversion from the native SSID byte array.
+          type: string
+        ssid_hex:
+          description: |
+            Hex encoded string of the native SSID byte array.
+
+            Always use this representation, when connecting to a network from a scan result.
           type: string
       required:
         - bssid
         - ssid
+        - ssid_hex
 
     WifiStatus:
       type: object
@@ -9007,6 +9016,9 @@ components:
           type: string
         ssid:
           description: Network name (service set identifier)
+          type: string
+        ssid_hex:
+          description: Hex encoded string of the native SSID byte array.
           type: string
         freq:
           description: Frequency of the channel in MHz (e.g., 2412 = channel 1)
@@ -9048,16 +9060,24 @@ components:
       type: object
       properties:
         ssid:
-          description: Network name (service set identifier)
+          description: |
+            Network name (service set identifier).
+            
+            Only use for valid UTF-8 names, when creating a new configuration and not from a scan result.    
+            Always use `ssid_hex`, when adding a network configuration from a scan result! Otherwise it's not guaranteed,
+            that the correct network is configured. The SSID name can contain non-displayable characters.
           type: string
           minLength: 1
           maxLength: 32
+        ssid_hex:
+          description: |
+            Hex encoded string of the native SSID byte array, returned from a network scan.
+          minLength: 2
+          maxLength: 64
         password:
           type: string
           minLength: 1
           maxLength: 63
-      required:
-        - ssid
 
     # change to OpenAPI: enhanced with id
     ModifyWifiNetwork:
@@ -9089,6 +9109,9 @@ components:
         ssid:
           description: Network name (service set identifier)
           type: string
+        ssid_hex:
+          description: Hex encoded string of the native SSID byte array.
+          type: string
         secured:
           description: Secured or unsecured network
           type: boolean
@@ -9099,6 +9122,7 @@ components:
       required:
         - id
         - ssid
+        - ssid_hex
         - secured
 
     WpaState:
