@@ -162,7 +162,7 @@ requests in `msg_data.cmd_id`.
 | menu              | -              | Menu                                                                     |
 | back              | -              | Back / exit function for menu navigation.                                |
 | select_source     | source         | Select an input source from the available sources.                       |
-| select_sound_mode | sound_mode     | Select a sound mode from the available modes.                            |
+| select_sound_mode | mode           | Select a sound mode from the available modes.                            |
 | 🚧 search         |                |                                                                          |
 
 ### Events
@@ -321,6 +321,26 @@ The integration may return other values, but the UI will most likely handle them
     "cmd_id": "shuffle",
     "params": {
       "shuffle": true
+    }
+  }
+}
+```
+
+### select_sound_mode
+
+Specify a sound mode value contained in the `sound_mode_list` attribute array.
+
+```json
+{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "select_sound_mode",
+    "params": {
+      "mode": "MOVIE"
     }
   }
 }
