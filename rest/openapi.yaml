@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.28.3
+  version: 0.28.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -12548,6 +12548,14 @@ components:
                         (e.g. Marantz AVR, MCE devices).
                       type: integer
                       minimum: 0
+                    repeat:
+                      description: |
+                        Repeat each IR command in the dataset n times. Defaults to 0 (no repeat) if not specified.  
+                        This setting is intended mainly for PRONTO codes with certain devices requiring the same command being
+                        sent twice (e.g. Sony and Epson devices).
+                      type: integer
+                      minimum: 0
+                      maximum: 20
                     codeset:
                       description: "Read-only information about the infrared codeset. \U0001F477 **TODO** Use `/remotes/entities/:entityId/ir`\nendpoints to manage infrared codes.\n"
                       type: object
@@ -12688,6 +12696,14 @@ components:
                     (e.g. Marantz AVR, MCE devices).
                   type: integer
                   minimum: 0
+                repeat:
+                  description: |
+                    Repeat each IR command in the dataset n times. Defaults to 0 (no repeat) if not specified.  
+                    This setting is intended mainly for PRONTO codes with certain devices requiring the same command being
+                    sent twice (e.g. Sony and Epson devices).
+                  type: integer
+                  minimum: 0
+                  maximum: 20
                 codeset:
                   type: object
                   properties:
