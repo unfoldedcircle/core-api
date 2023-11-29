@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.23.1-beta'
+  version: '0.23.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2621,8 +2621,10 @@ components:
       description: |
         Subscribe to one or multiple event channels.
         
-        - The special `All` channel will deliver all available events and clear all other subscriptions for the session.
-        - If the session is already subscribed to the `All` channel, any other channels are ignored.
+        - The special `all` channel will deliver all available events and clear all other subscriptions for the session.
+        - If the session is already subscribed to the `all` channel, any other channels are ignored.
+        - The special `entities` channel will deliver all entity and activity-group related events. This includes all
+          entity-type channels (`entity_###`) and the `activity_group` channel.
         - Depending on the security role not all event subscriptions may be available.
       tags:
         - name: event
@@ -6151,6 +6153,17 @@ components:
             - all
             - configuration
             - entities
+            - entity_button
+            - entity_switch
+            - entity_climate
+            - entity_cover
+            - entity_light
+            - entity_media_player
+            - entity_sensor
+            - entity_activity
+            - entity_macro
+            - entity_remote
+            - activity_groups
             - integrations
             - profiles
             - emitters
