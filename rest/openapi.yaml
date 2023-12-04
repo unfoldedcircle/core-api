@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.29.0
+  version: 0.29.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -12233,9 +12233,15 @@ components:
         $ref: '#/components/schemas/IrEmitter'
     IrEmitterType:
       type: string
-      description: 'The type of the device, e.g. a Remote Two docking station, a network based IR blaster or something else.'
+      description: |
+        The type of the IR emitter device:
+        - `DOCK`: a Remote Two docking station
+        - `INTERNAL`: internal IR
+        - `IR_BLASTER`: a network based IR blaster
+        - `OTHER`: something else
       enum:
         - DOCK
+        - INTERNAL
         - IR_BLASTER
         - OTHER
     IrStatus:
