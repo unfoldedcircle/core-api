@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.23.2-beta'
+  version: '0.24.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -179,6 +179,8 @@ channels:
           - $ref: '#/components/messages/set_device_cfg'
           - $ref: '#/components/messages/get_display_cfg'
           - $ref: '#/components/messages/set_display_cfg'
+          - $ref: '#/components/messages/get_features_cfg'
+          - $ref: '#/components/messages/set_features_cfg'
           - $ref: '#/components/messages/get_haptic_cfg'
           - $ref: '#/components/messages/set_haptic_cfg'
           - $ref: '#/components/messages/get_localization_cfg'
@@ -868,6 +870,23 @@ components:
       summary: 🧪 Display settings response.
       payload:
         $ref: '#/components/schemas/displayCfgMsg'
+
+    get_features_cfg:
+      summary: 🧪 Get feature flag settings.
+      payload:
+        $ref: '#/components/schemas/getFeaturesCfgMsg'
+      x-response:
+        $ref: '#/components/messages/features_cfg'
+    set_features_cfg:
+      summary: 🧪 Modify a feature flag.
+      payload:
+        $ref: '#/components/schemas/setFeaturesCfgMsg'
+      x-response:
+        $ref: '#/components/messages/features_cfg'
+    features_cfg:
+      summary: 🧪 Feature flag settings response.
+      payload:
+        $ref: '#/components/schemas/featuresCfgMsg'
 
     get_haptic_cfg:
       summary: 🧪 Get haptic settings.
@@ -3449,6 +3468,44 @@ components:
               const: display_cfg
             msg_data:
               $ref: '#/components/schemas/cfgDisplay'
+          required:
+            - msg
+
+    getFeaturesCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_features_cfg
+            msg_data:
+              $ref: '#/components/schemas/getConfigurationOptions'
+          required:
+            - msg
+    setFeaturesCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: set_features_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgFeatureUpdate'
+          required:
+            - msg
+            - msg_data
+    featuresCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: features_cfg
+            msg_data:
+              $ref: '#/components/schemas/cfgFeatures'
           required:
             - msg
 
@@ -6962,6 +7019,8 @@ components:
           $ref: '#/components/schemas/cfgDevice'
         display:
           $ref: '#/components/schemas/cfgDisplay'
+        features:
+          $ref: '#/components/schemas/cfgFeatures'
         haptic:
           $ref: '#/components/schemas/cfgHaptic'
         localization:
@@ -7022,6 +7081,42 @@ components:
       required:
         - brightness
         - auto_brightness
+
+    cfgFeatures:
+      type: array
+      items:
+        $ref: '#/components/schemas/cfgFeature'
+
+    cfgFeature:
+      type: object
+      properties:
+        id:
+          type: string
+        enabled:
+          type: boolean
+        title:
+          $ref: '#/components/schemas/languageText'
+        description:
+          $ref: '#/components/schemas/languageText'
+        help_url:
+          type: string
+          format: url
+      required:
+        - id
+        - enabled
+        - title
+        - description
+
+    cfgFeatureUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+        enabled:
+          type: boolean
+      required:
+        - id
+        - enabled
 
     cfgHaptic:
       type: object

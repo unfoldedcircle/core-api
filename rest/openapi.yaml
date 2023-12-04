@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.28.4
+  version: 0.29.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -6230,6 +6230,57 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /cfg/features:
+    get:
+      tags:
+        - cfg
+      summary: Get feature flag settings.
+      description: |
+        Feature flag configuration.
+      operationId: getFeatureFlagSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgFeatures'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: Modify a feature flag.
+      description: |
+        Enable or disable a feature flag setting.
+      operationId: updateFeatureFlagSetting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgFeatureUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgFeatures'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /cfg/haptic:
     get:
       tags:
@@ -10068,6 +10119,8 @@ components:
           $ref: '#/components/schemas/CfgRemoteDevice'
         display:
           $ref: '#/components/schemas/CfgDisplay'
+        features:
+          $ref: '#/components/schemas/CfgFeatures'
         haptic:
           $ref: '#/components/schemas/CfgHaptic'
         localization:
@@ -10115,6 +10168,39 @@ components:
       required:
         - brightness
         - auto_brightness
+    CfgFeatures:
+      type: array
+      items:
+        $ref: '#/components/schemas/CfgFeature'
+    CfgFeature:
+      type: object
+      properties:
+        id:
+          type: string
+        enabled:
+          type: boolean
+        title:
+          $ref: '#/components/schemas/LanguageText'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        help_url:
+          type: string
+          format: url
+      required:
+        - id
+        - enabled
+        - title
+        - description
+    CfgFeatureUpdate:
+      type: object
+      properties:
+        id:
+          type: string
+        enabled:
+          type: boolean
+      required:
+        - id
+        - enabled
     CfgHaptic:
       type: object
       properties:
