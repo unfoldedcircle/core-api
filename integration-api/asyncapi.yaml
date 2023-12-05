@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.7.0-alpha'
+  version: '0.8.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -16,7 +16,7 @@ info:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: https://creativecommons.org/licenses/by-sa/4.0/
   description: |
-    **Work in progress** API definition of the Remote Two integration WebSocket API.
+    API definition of the Remote Two integration WebSocket API.
     
     API message status legend:
     
@@ -375,12 +375,17 @@ components:
     setup_driver:
       summary: 🧪 Start driver setup.
       description: |
-        If a driver includes a `setup_data_schema` object in it's driver metadata, it enables the dynamic driver setup
+        If a driver includes a `setup_data_schema` object in its driver metadata, it enables the dynamic driver setup
         process. The setup process can be a simple "start-confirm-done" between the Remote Two and the integration
         driver, or a fully dynamic, multi-step process with user interactions, where the user has to provide additional
         data or select different options.
+        
+        The `reconfigure` flag indicates if the user wants to reconfigure an already configured driver in the Remote.
+        It's up to the driver on how to handle a reconfiguration request and run a different logic. For example, this
+        allows to show an options screen to change certain values, or present the option to modify, add or delete
+        provided device entities.
 
-        After confirmation the `setup_driver` request, the integration driver has to send `driver_setup_change` events:
+        After confirming the `setup_driver` request, the integration driver has to send `driver_setup_change` events:
         
         - `event_type: SETUP` with `state: SETUP` is a progress event to keep the process running, see below.
         - `event_type: SETUP` with `state: WAIT_USER_ACTION` can be sent to the Remote Two to request a user
@@ -394,7 +399,7 @@ components:
         - Setup progress (watchdog): 60 seconds. If no setup message is received within that time, the setup process
           is aborted.
         - User action timeout: 3 minutes. If there's no user response within that time, the setup process is aborted.
-        - Overall setup timeout: 5 minutes. If the setup process is automatically aborted if it is still running after
+        - Overall setup timeout: 5 minutes. The setup process is automatically aborted if it is still running after
           that time.
 
         If no setup is needed, but the integration driver requires to show additional information to the user before
@@ -486,8 +491,6 @@ components:
         Subscribe to entity state change events to receive `entity_change` events from the integration driver.
         
         If no entity IDs are specified then events for all available entities are sent to the Remote Two.
-        
-        TODO support different event types?
       tags:
         - name: entity
         - name: required
@@ -996,6 +999,10 @@ components:
             msg_data:
               type: object
               properties:
+                reconfigure:
+                  description: |
+                    If set to `true`: reconfigure an already configured driver.
+                  type: boolean
                 setup_data:
                   $ref: '#/components/schemas/SettingsValues'
               required:

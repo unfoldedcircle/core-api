@@ -10,6 +10,7 @@ _Changes in the next release_
 
 ### Changed
 - Rename media-player `select_sound_mode` command parameter from `sound_mode` to `mode`.
+- Integration API: add `reconfigure` flag in `setup_driver` request message to reconfigure a driver.
 
 ---
 
