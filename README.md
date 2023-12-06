@@ -56,8 +56,11 @@ how to develop an integration driver for the Remote Two.
 #### Examples
 
 - [API models in Rust](https://github.com/unfoldedcircle/api-model-rs)
-- [NodeJS API wrapper for the UC Integration API](https://github.com/unfoldedcircle/integration-node-library)
-- [Python API wrapper library for the UC Integration API](https://github.com/unfoldedcircle/integration-python-library)
+- [Node.js API wrapper for the UC Integration API](https://github.com/unfoldedcircle/integration-node-library)
+- [Python API wrapper library for the UC Integration API](https://github.com/unfoldedcircle/integration-python-library)  
+  Integrations using the Python API wrapper:
+  - [Android TV integration](https://github.com/unfoldedcircle/integration-androidtv)
+  - [Denon AVR integration](https://github.com/unfoldedcircle/integration-denonavr)
 - [Home Assistant integration](https://github.com/unfoldedcircle/integration-home-assistant) written in Rust
 
 We plan to release more examples in the future.
@@ -76,20 +79,10 @@ functionality.
 The Remote Two acts as server. Whenever the remote enters standby it may choose to disconnect open WebSocket sessions.
 It is up to the client to reconnect again.
 
-## Roadmap
+## Other resources
 
-In the short term we will publish the following APIs and additional repositories: 
-
-- [x] WebSocket integration API
-- [x] REST Core API, WebSocket Core API
-- [x] [API models in Rust](https://github.com/unfoldedcircle/api-model-rs) (Apache License 2.0)
-- [x] [Home Assistant integration](https://github.com/unfoldedcircle/integration-home-assistant) (Mozilla Public License 2.0)
-- [x] [remote-core simulator](https://github.com/unfoldedcircle/core-simulator) to start developing integrations without a Remote Two device
-- [x] Open Source [remote-ui application](https://github.com/unfoldedcircle/remote-ui)
-- [x] Dock API for sending & learning IR codes
-
-More detailed information about open issues can be found and tracked in the GitHub
-[Issues](https://github.com/unfoldedcircle/core-api/issues) tab.
+- [remote-core simulator](https://github.com/unfoldedcircle/core-simulator) to start developing integrations without a Remote Two device
+- Open Source [remote-ui application](https://github.com/unfoldedcircle/remote-ui)
 
 ## API versioning
 
