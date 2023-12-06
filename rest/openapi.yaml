@@ -1,14 +1,14 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.29.1
+  version: 0.29.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are Basic Auth for every request\nand cookie based session login with the `/api/pub/login` endpoint.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote UI\n- `Bearer Token` for ever request.  \n  This is the preferred authentication method for external systems communicating with the Remote Two.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
   description: Find out more about the Remote Two
   url: 'https://www.unfoldedcircle.com/'
@@ -1293,7 +1293,8 @@ paths:
         - integrations
       summary: Start setting up a new integration driver.
       description: |
-        Start a new setup process for the given integration driver and provided setup data.
+        Start a new setup process for the given integration driver and provided setup data, or reconfigure an existing
+        driver.
 
         - This operation immediately starts the driver communication and setup process.
         - There may only be one active setup process per driver, otherwise status code `409` is returned.
@@ -1308,15 +1309,15 @@ paths:
         Request body:
         - `name`: optional integration name. If not specified the name of the integration driver is used.
         - `setup_data`: optional driver setting values corresponding to the driver's `setup_data_schema` object.
+        - `reconfigure`: set to true to reconfigure an already configured driver. The configuration options and behaviour
+          is driver dependent.
 
         Response status codes:
-        - `400`: invalid data in request body.
+        - `400`: invalid data in request body. E.g. setting the reconfigure flag for a new driver which is not yet configured.
         - `404`: specified `driver_id` in request body does not exist.
         - `409`: a setup process for the given `driver_id` already exists. Either continue or abort existing process.
         - `422`: the setup process cannot be used: either the integration is already configured or doesn't allow to be
                  set up again.  
-                 ⚠️ At the moment the setup process is only implemented for new integration setups. This will be extended
-                    to re-run the setup process of an already configured integration.
         - `503`: integration driver communication error. Either driver is not reachable or communication failed.
       operationId: setupIntegration
       requestBody:
@@ -11639,6 +11640,9 @@ components:
           $ref: '#/components/schemas/LanguageText'
         setup_data:
           $ref: '#/components/schemas/SettingsValues'
+        reconfigure:
+          description: Reconfigure an already configured integration.
+          type: boolean
       required:
         - driver_id
     IntegrationSetupError:

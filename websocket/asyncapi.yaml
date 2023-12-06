@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.24.0-beta'
+  version: '0.24.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2503,7 +2503,8 @@ components:
     setup_integration:
       summary: 🧪 Start setting up a new integration driver.
       description: |
-        Start a new setup process for the given integration driver and provided setup data.
+        Start a new setup process for the given integration driver and provided setup data, or reconfigure an existing
+        driver.
 
         - This operation immediately starts the driver communication and setup process.
         - There may only be one active setup process per driver, otherwise status code `409` is returned.
@@ -2518,15 +2519,15 @@ components:
         Request body:
         - `name`: optional integration name. If not specified the name of the integration driver is used.
         - `setup_data`: optional driver setting values corresponding to the driver's `setup_data_schema` object.
+        - `reconfigure`: set to true to reconfigure an already configured driver. The configuration options and behaviour
+          is driver dependent.
 
         Response status codes:
-        - `400`: invalid data in request body.
+        - `400`: invalid data in request body. E.g. setting the reconfigure flag for a new driver which is not yet configured.
         - `404`: specified `driver_id` in request body does not exist.
         - `409`: a setup process for the given `driver_id` already exists. Either continue or abort existing process.
         - `422`: the setup process cannot be used: either the integration is already configured or doesn't allow to be
                  set up again.  
-                 ⚠️ At the moment the setup process is only implemented for new integration setups. This will be extended
-                    to re-run the setup process of an already configured integration.
         - `503`: integration driver communication error. Either driver is not reachable or communication failed.
       tags:
         - name: integration
@@ -7673,6 +7674,9 @@ components:
           $ref: '#/components/schemas/languageText'
         setup_data:
           $ref: '#/components/schemas/SettingsValues'
+        reconfigure:
+          description: Reconfigure an already configured integration.
+          type: boolean
       required:
         - driver_id
 
