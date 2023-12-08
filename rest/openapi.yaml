@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.29.2
+  version: 0.29.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -4081,6 +4081,70 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/ir/convert/{format}':
+    get:
+      tags:
+        - infrared
+      summary: Convert an IR code into a different format.
+      description: |
+        This GET endpoint to convert IR codes is intended for simple scripts and tests.
+
+        Parameters:
+        - `code`: URL encoded PRONTO code or HEX Code (spaces, commas and semicolons must be encoded).
+        - `repeat`: How many times to decode the repeat part of the IR code.
+          - Only relevant for IR formats not containing a repeat count, as: PRONTO
+          - PRONTO codes: repeats the data in the repeat sequence of the code.
+            - If the 4th field of the PRONTO code is `0000`, then it doesn't contain a repeat sequence and the repeat
+              parameter is ignored!
+            - If the code only contains a repeat sequence and a missing first sequence (3rd field is `0000`), the repeat
+              sequence is encoded at least once and the repeat count automatically increased by one.
+        - `to`: The destination format. Only RAW IR timings are supported at the moment.
+      operationId: convertIrCode
+      parameters:
+        - name: format
+          in: path
+          description: IR format
+          required: true
+          schema:
+            $ref: '#/components/schemas/IrCodeFormat'
+        - name: code
+          in: query
+          description: IR code
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - name: repeat
+          in: query
+          description: Repeat count for PRONTO code
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 20
+        - name: to
+          in: query
+          description: Destination IR format
+          required: false
+          schema:
+            type: string
+            enum:
+              - RAW
+      responses:
+        '200':
+          description: Successful IR code conversion
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IrRawCode'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -12152,6 +12216,24 @@ components:
       description: 'IR code value, either in HEX or PRONTO format as defined in the format field.'
       type: string
       format: '^(?:[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}|[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,})$'
+    IrRawCode:
+      type: object
+      properties:
+        raw:
+          type: array
+          items:
+            type: integer
+            minimum: 0
+        frequency:
+          type: integer
+          minimum: 0
+        duty_cycle:
+          type: integer
+          minimum: 0
+          maximum: 100
+      required:
+        - raw
+        - frequency
     IrEmitter:
       type: object
       properties:
