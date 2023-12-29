@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.29.3
+  version: 0.30.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1646,8 +1646,6 @@ paths:
           - `503` (Service Unavailable) is returned if the driver communication fails.
           - If the driver is not active, the settings are only applied and not tested! This is for development use only.
         - See request description on how to update or remove an existing setting.
-
-        **TODO:** allow driver name change?
       operationId: updateIntegrationDriver
       parameters:
         - $ref: '#/components/parameters/driver_id'
@@ -4254,7 +4252,7 @@ paths:
         - The IR repeat signal will automatically be sent the number of times specified in the repeat field.
         - If the next request contains the same IR command, the repeat count will be reset in the dock and therefore
           the repeat signal prolonged.
-        - A 'PUT /ir/emitters/{emitterId}/stopsend' request will stop the remaining repeat commands.
+        - A 'PUT /ir/emitters/{emitterId}/stop_send' request will stop the remaining repeat commands.
         - Depending on the IR `format`, a repeat value might be already part of the `code`.
           - ⚠️ The `repeat` value will override the embedded repeat information.
           - See _IR formats_ below.
@@ -4264,10 +4262,11 @@ paths:
           (depending on IR format).
         - Continuous IR repeat is not activated:
           - every IR send request will send the full IR command.
-          - ⚠️ the 'PUT /ir/emitters/{emitterId}/stopsend' command will have no effect!
+          - ⚠️ the 'PUT /ir/emitters/{emitterId}/stop_send' command will have no effect!
 
         ### IR formats
         - `PRONTO`: PRONTO HEX format:
+          - Only raw codes are supported (first number is `0000`).
           - The PRONTO HEX format does not include a dedicated repeat count field, but an optional 2nd burst
             pair sequence used for repeats.
             - The third number in the PRONTO code specifies the number of burst pairs in the 1st sequence.
@@ -4312,8 +4311,7 @@ paths:
                       maximum: 20
                     cmd_delay:
                       description: |
-                        Optional delay between sending IR commands, if `cmd_id` refers to a command with multiple IR codes
-                        (e.g. Marantz AVR, MCE devices).
+                        Optional delay between sending IR commands, if `cmd_id` refers to a command with multiple IR codes.
                       type: integer
                       minimum: 0
                     port_id:
@@ -4329,7 +4327,7 @@ paths:
                       description: |
                         IR code to send.
                         - PRONTO codes can use a space or comma as separator.
-                        - Multiple codes can be separated by a pipe (`|`).
+                        - Multiple codes can be separated by a plus `+` (for example: `0000 0068 0001 0000 0001 + 0000 0068 0001 0000 0002`).
                       type: string
                     format:
                       $ref: '#/components/schemas/IrCodeFormat'
@@ -4365,11 +4363,11 @@ paths:
                   codeset_id: ir.manufacturer.123
                   cmd_id: CHANNEL_DOWN
                   port_id: '4'
-              Learned PRONTO code on default output:
+              PRONTO code on default output:
                 value:
                   code: '0000,0068,0000,0010,0060,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0018,0018,0018,0030,0018,0030,0018,0030,0018,0018,0018,0030,0018,0018,0018,0018,0018,0030,0318'
                   format: PRONTO
-              Learned PRONTO code on default output and repeat count:
+              PRONTO code on default output and repeat count:
                 value:
                   code: 0000 0068 0000 0010 0060 0018 0030 0018 0018 0018 0030 0018 0018 0018 0018 0018 0030 0018 0018 0018 0030 0018 0030 0018 0030 0018 0018 0018 0030 0018 0018 0018 0018 0018 0030 0318
                   format: PRONTO
@@ -7951,10 +7949,10 @@ paths:
       description: |
         ⚠️ This is for testing only. Please use the `/ir/emitters/` endpoints for sending IR codes.
 
-        Send an IR command, either in Pronto or [IRremoteESP8266 Hex](https://github.com/crankyoldgit/IRremoteESP8266) format.
+        Send an IR command, either in Pronto or [IRremoteESP8266 Hex](https://github.com/unfoldedcircle/IRremoteESP8266) format.
 
         Hex format: `<protocol>;<hex-ir-code>;<bits>;<repeat-count>`
-        - protocol: numeric value from supported and enabled protocols. See: [decode_type_t](https://github.com/crankyoldgit/IRremoteESP8266/blob/v2.8.0/src/IRremoteESP8266.h#L866)
+        - protocol: numeric value from supported and enabled protocols. See: [decode_type_t](https://github.com/unfoldedcircle/IRremoteESP8266/blob/v2.8.5-ucd2.2/src/IRremoteESP8266.h#L1011)
         - hex-ir-code: HEX value prefixed with `0x`
         - bits: number of bits in hex value
         - repeat-count: number of repeats
@@ -7983,7 +7981,7 @@ paths:
                 pronto:
                   description: 'Pronto IR code, values separated by space or comma'
                   type: string
-                  pattern: '^[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,}$'
+                  pattern: '^0000((, )[a-fA-F0-9]{4}){5,}$'
                 hex:
                   description: Hex IR code
                   type: string
@@ -12187,7 +12185,16 @@ components:
         - key
         - value
     IrCodeFormat:
-      description: Supported IR code formats
+      description: |
+        Supported IR code formats:
+        - `HEX`: Unfolded Circle HEX codes, `<protocol>;<hex-ir-code>;<bits>;<repeat-count>` (based on
+          [IRremoteESP8266 Hex](https://github.com/unfoldedcircle/IRremoteESP8266) format).
+          - protocol: numeric value from supported and enabled protocols. See: [decode_type_t](https://github.com/unfoldedcircle/IRremoteESP8266/blob/v2.8.5-ucd2.2/src/IRremoteESP8266.h#L1011)
+          - hex-ir-code: HEX value prefixed with `0x`
+          - bits: number of bits in hex value
+          - repeat-count: number of repeats
+        - `PRONTO`: PRONTO hex codes
+          - Only raw codes are supported. First number must be `0000`.
       type: string
       enum:
         - HEX
@@ -12213,9 +12220,18 @@ components:
         - format
         - value
     IrCodeValue:
-      description: 'IR code value, either in HEX or PRONTO format as defined in the format field.'
+      description: |
+        IR code value, either in HEX or PRONTO format as defined in the format field.
+
+        - Multiple IR codes in a sequence can be specified with a plus character `+` as divider.
+          - For example: `3;0x20F0A956;32;0 + 3;0x20F02956;32;0`
+          - This works for HEX and PRONTO
+        - PRONTO only: 2 toggling codes can be specified with a pipe character `|` as divider.
+          - Only two codes toggling codes are valid. 
+          - For example: `0000 0068 0001 0000 0002 0800 | 0000 0068 0001 0000 8002 0800`
+        - ⚠️ Sequence and toggle divider cannot be mixed.
       type: string
-      format: '^(?:[\d]{1,3};0x[a-fA-F0-9]{1,16};[\d]{1,2};[\d]{1,2}|[a-fA-F0-9]{4}((,| )[a-fA-F0-9]{4}){3,})$'
+      format: '^(?:(?:\d{1,3};0x[a-fA-F0-9]{1,16};\d{1,2};\d{1,2}(?:\s*\+\s*\d{1,3};0x[a-fA-F0-9]{1,16};\d{1,2};\d{1,2})*)|(?:0000(?:[, ][a-fA-F0-9]{4}){5,}(?:(?:\s*\+\s*0000(?:[, ][a-fA-F0-9]{4}){5,})*|\s*\|\s*0000(?:[, ][a-fA-F0-9]{4}){5,})))$'
     IrRawCode:
       type: object
       properties:
@@ -12722,8 +12738,7 @@ components:
                   properties:
                     cmd_delay:
                       description: |
-                        Delay in milliseconds between sending IR commands, if a command contains multiple IR codes,
-                        (e.g. Marantz AVR, MCE devices).
+                        Delay in milliseconds between sending IR commands, if a command contains multiple IR codes.
                       type: integer
                       minimum: 0
                     repeat:
@@ -12870,8 +12885,7 @@ components:
               properties:
                 cmd_delay:
                   description: |
-                    Delay in milliseconds between sending IR commands, if a command contains multiple IR codes,
-                    (e.g. Marantz AVR, MCE devices).
+                    Delay in milliseconds between sending IR commands, if a command contains multiple IR codes.
                   type: integer
                   minimum: 0
                 repeat:
