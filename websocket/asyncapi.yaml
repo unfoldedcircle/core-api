@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.24.1-beta'
+  version: '0.24.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7933,6 +7933,14 @@ components:
         serial:
           type: string
           description: Dock serial number.
+        led_brightness:
+          type: integer
+          minimum: 0
+          maximum: 100
+        eth_led_brightness:
+          type: integer
+          minimum: 0
+          maximum: 100
         connection_type:
           type: string
           description: |
