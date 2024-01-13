@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.30.1
+  version: 0.30.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -9871,13 +9871,17 @@ components:
             - never
         turn_off_unused_entities:
           description: |
-            - `always`: Always turn off unused entities in the previous activity.
+            - `always`: Always turn off unused entities in the previous activity.  
+               All included entities are considered, not just the ones used in the on-sequence of the new activity.
             - `in_off_sequence`: Only turn off unused entities which are included in the off-sequence of the previous activity.
+            - `run_off_sequence`: Run the original off-sequence of the old activity and dynamically filter out power-off commands.  
+               All power-off commands from entities used in the new activity's power-on sequence will be filtered out.
             - `never`: Never turn off entities in the previous activity.
           type: string
           enum:
             - always
             - in_off_sequence
+            - run_off_sequence
             - never
     AdminPin:
       type: string
