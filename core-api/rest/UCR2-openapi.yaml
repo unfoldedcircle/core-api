@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.30.2
+  version: 0.30.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2446,7 +2446,7 @@ paths:
         the total number of defined activities.
 
         The optional text search query searches in the activity name and activity identifier.
-            
+        
         The overview information doesn't include all details of an activity. The full activity information is retrievable
         with `/activities/{entityId}`.
       operationId: getActivities
@@ -7800,9 +7800,14 @@ paths:
         progress with the `GET /docks/devices/{dockId}/update/{id}` operation or listen to the WebSocket
         `dock_update_change` event message.
 
-        Response codes:
+        The battery of the remote needs to be at last 20% charged to start the dock firmware update. 
+
+        Error response codes:
+        - `400`: Bad request if no update is available for the given dock.
+        - `404`: Dock identifier not found.
         - `409`: Conflict, an update is already running. Use the `GET` operation to retrieve the current update identifier.
-        - `503`: The dock is not connected, or the update service is unavailable. Please try again later.
+        - `503`: The dock is not connected, not enough battery to start the update, or the update service is unavailable.  
+                 Please try again later.
       operationId: updateDockFirmware
       parameters:
         - $ref: '#/components/parameters/dock_id'
@@ -7816,6 +7821,8 @@ paths:
                 properties:
                   id:
                     type: string
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -11227,7 +11234,7 @@ components:
     EntityCmdParamNumber:
       type: object
       description: |
-        Number value parameter with optional limits.   
+        Number value parameter with optional limits.
       properties:
         default:
           description: 'Default value to use, e.g. in a UI editor.'
@@ -12457,7 +12464,7 @@ components:
         $ref: '#/components/schemas/MacroOverview'
     MacroCreate:
       description: |
-        Dedicated request object to create a new macro.  
+        Dedicated request object to create a new macro.
       type: object
       allOf:
         - properties:
@@ -13574,6 +13581,12 @@ components:
       properties:
         device_name:
           description: Custom name of the remote
+          type: string
+        hostname:
+          description: Hostname of the remote
+          type: string
+        address:
+          description: MAC address of the remote
           type: string
         api:
           description: API version

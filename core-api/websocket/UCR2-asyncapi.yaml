@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.24.2-beta'
+  version: '0.24.3-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -6647,6 +6647,12 @@ components:
       properties:
         device_name:
           description: Custom name of the remote
+          type: string
+        hostname:
+          description: Hostname of the remote
+          type: string
+        address:
+          description: MAC address of the remote
           type: string
         api:
           description: API version
