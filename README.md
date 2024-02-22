@@ -1,4 +1,5 @@
-[![AsyncAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml)
+[![AsyncAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml) 
+[![OpenAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/openapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml)
 
 # Unfolded Circle Core APIs
 
@@ -11,11 +12,9 @@ This repository contains API specifications of [Unfolded Circle Remote Two](http
 API definitions:
 
 - [WebSocket Integration API](./integration-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/).
-- [WebSocket Core API](https://github.com/unfoldedcircle/core-simulator/tree/main/core-api) defined with [AsyncAPI](https://www.asyncapi.com/)
-- [REST Core API](https://github.com/unfoldedcircle/core-simulator/tree/main/core-api) defined with [OpenAPI](https://www.openapis.org/)
+- [WebSocket Core API](./core-api/websocket/README.md) defined with [AsyncAPI](https://www.asyncapi.com/)
+- [REST Core API](./core-api/rest/README.md) defined with [OpenAPI](https://www.openapis.org/)
 - [WebSocket Dock API](./dock-api/README.md) defined with [AsyncAPI](https://www.asyncapi.com/)
-
-ℹ️  The Core-APIs will be migrated to this repository soon.
 
 Integration driver documentation:
 
@@ -68,16 +67,9 @@ We plan to release more examples in the future.
 ## Core APIs
 
 The Remote Two WebSockets & REST core APIs allow you to interact with the Unfolded Circle remote-core application and
-take full control of its features. The APIs are specialized for certain features, but otherwise contain the same
-functionality.
+take full control of its features.
 
-- The REST API adds:
-  - custom resource handling for uploading icons, images etc.
-  - user management and authentication handling.
-- The WebSockets API adds event subscription with asynchronous notifications. 
-
-The Remote Two acts as server. Whenever the remote enters standby it may choose to disconnect open WebSocket sessions.
-It is up to the client to reconnect again.
+See [core-api](./core-api) directory for more information.
 
 ## Other resources
 
