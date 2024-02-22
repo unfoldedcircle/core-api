@@ -3,13 +3,13 @@ name: OpenAPI
 on:
   push:
     paths:
-      - 'rest-api/**'
-#      - '.github/workflows/openapi.yml'
+      - 'core-api/rest/**'
+      - '.github/workflows/openapi.yml'
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
-      - 'rest-api/**'
-#      - '.github/workflows/openapi.yml'
+      - 'core-api/rest/**'
+      - '.github/workflows/openapi.yml'
 
 jobs:
   validate:
@@ -17,9 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Validate
         uses: mbowman100/swagger-validator-action@master
         with:
           files: |
-            ./rest-api/openapi.yaml
+            ./core-api/rest/UCR2-openapi.yaml

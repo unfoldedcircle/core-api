@@ -4,14 +4,14 @@ on:
   push:
     paths:
       - 'dock-api/**'
-      - 'websocket-api/**'
+      - 'core-api/websocket/**'
       - 'integration-api/**'
       - '.github/workflows/asyncapi.yml'
   pull_request:
     types: [ opened, synchronize, reopened ]
     paths:
       - 'dock-api/**'
-      - 'websocket-api/**'
+      - 'core-api/websocket/**'
       - 'integration-api/**'
       - '.github/workflows/asyncapi.yml'
 
@@ -21,20 +21,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-#      - name: Validate websocket-api
-#        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
-#        with:
-#          filepath: './websocket-api/asyncapi.yaml'
+      - name: Validate websocket-api
+        uses: WaleedAshraf/asyncapi-github-action@v0.0.10
+        with:
+          filepath: './core-api/websocket/UCR2-asyncapi.yaml'
 
       - name: Validate integration-api
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
+        uses: WaleedAshraf/asyncapi-github-action@v0.0.10
         with:
           filepath: './integration-api/asyncapi.yaml'
 
       - name: Validate dock-api
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.9
+        uses: WaleedAshraf/asyncapi-github-action@v0.0.10
         with:
           filepath: './dock-api/UCD2-asyncapi.yaml'
 
@@ -51,6 +51,10 @@ jobs:
           fi;
           ag --version
 
+      - name: Generate core AsyncAPI HTML doc
+        run: |
+          ag ./core-api/websocket/UCR2-asyncapi.yaml @asyncapi/html-template -o ./static/api/ws --force-write
+
       - name: Generate integration AsyncAPI HTML doc
         run: |
           ag ./integration-api/asyncapi.yaml @asyncapi/html-template -o ./static/api/integration --force-write
@@ -59,15 +63,22 @@ jobs:
         run: |
           ag ./dock-api/UCD2-asyncapi.yaml @asyncapi/html-template -o ./static/api/dock --force-write
 
+      - name: Deploy core API GH page
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        with:
+          branch: gh-pages
+          folder: ./static/api/ws
+          target-folder: ./ws
+
       - name: Deploy integration API GH page
-        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: ./static/api/integration
           target-folder: ./integration
 
       - name: Deploy dock API GH page
-        uses: JamesIves/github-pages-deploy-action@v4.3.0
+        uses: JamesIves/github-pages-deploy-action@v4.5.0
         with:
           branch: gh-pages
           folder: ./static/api/dock

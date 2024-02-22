@@ -1,4 +1,5 @@
-[![AsyncAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml)
+[![AsyncAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml) 
+[![OpenAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/openapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml)
 
 # Unfolded Circle Core APIs
 
