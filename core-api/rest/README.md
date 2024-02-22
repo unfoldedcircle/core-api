@@ -3,7 +3,13 @@
 The Core-API is defined with [OpenAPI](https://www.openapis.org/).
 
 You can use the online [Swagger Editor](https://editor.swagger.io/) to load and browse the specification or use your
-favorite IDE with OpenAPI support (e.g. IntelliJ).
+favorite IDE with OpenAPI support (e.g. IntelliJ or Visual Studio Code).
+
+- [OpenAPI YAML definition](UCR2-openapi.yaml).
+  - ℹ️ This is a bundled YAML file generated from individual definitions.
+  - Most OpenAPI tools only work with a single file.
+  - We might publish the original definitions at a later time.
+- See [/doc folder](../../doc/README.md) for further API documentation and information.
 
 ## Postman Collection
 
