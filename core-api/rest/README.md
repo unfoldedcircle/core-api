@@ -1,4 +1,4 @@
-# Core REST API
+# Remote Two REST Core-API
 
 The Core-API is defined with [OpenAPI](https://www.openapis.org/).
 
