@@ -7800,7 +7800,7 @@ paths:
         progress with the `GET /docks/devices/{dockId}/update/{id}` operation or listen to the WebSocket
         `dock_update_change` event message.
 
-        The battery of the remote needs to be at last 20% charged to start the dock firmware update. 
+        The battery of the remote needs to be at least 20% charged to start the dock firmware update. 
 
         Error response codes:
         - `400`: Bad request if no update is available for the given dock.
