@@ -1,18 +1,42 @@
 # Media Player Entity
 
----
-**TODO**
-- Define album art image limits
-- Define media types
-- Playlist handling
-- Media browsing
-- Searching
+<!-- TOC -->
+* [Features](#features)
+  * [Attributes](#attributes)
+  * [States](#states)
+  * [Device Classes](#device-classes)
+  * [Options](#options)
+* [Integration API](#integration-api)
+  * [Commands](#commands)
+  * [Simple Commands](#simple-commands)
+    * [Command Name Patterns](#command-name-patterns)
+  * [Events](#events)
+    * [Media types](#media-types)
+    * [Media images](#media-images)
+  * [Command examples](#command-examples)
+    * [on](#on)
+    * [play_pause](#play_pause)
+    * [volume](#volume)
+    * [seek](#seek)
+    * [repeat](#repeat)
+    * [shuffle](#shuffle)
+    * [select_sound_mode](#select_sound_mode)
+    * [Custom simple command](#custom-simple-command)
+  * [Event examples](#event-examples)
+    * [State change event](#state-change-event)
+* [Open issues and missing features](#open-issues-and-missing-features)
+<!-- TOC -->
+
 ---
 
 A media player entity controls playback of media on a device. This could be an online music streaming service, a TV,
 a stereo or a video player. 
 
 ## Features
+
+Media-player features define the capabilities of the controlled device. For example the `dpad` feature will enable the
+four directional commands and the enter command. Furthermore, certain features control the appearance and functionality
+of the media-player UI on the Remote Two.
 
 | Name              | R | W | Description                                                                     |
 |-------------------|---|---|---------------------------------------------------------------------------------|
@@ -40,18 +64,41 @@ a stereo or a video player.
 | media_image_url   | ✅ | ❌ | The player provides an image url of the media being played.                     |
 | media_type        | ✅ | ❌ | The player announces the type of media being played.                            |
 | dpad              | ❌ | ✅ | Directional pad navigation, provides up / down / left / right / enter commands. |
+| numpad            | ❌ | ✅ | Number pad, provides digit_0, .. , digit_9 commands.                            |
 | home              | ❌ | ✅ | Home navigation support with home & back commands.                              |
 | menu              | ❌ | ✅ | Menu navigation support with menu & back commands.                              |
+| guide             | ❌ | ✅ | Program guide support with guide & back commands.                               |
+| info              | ❌ | ✅ | Information popup / menu support with info & back commands.                     |
 | color_buttons     | ❌ | ✅ | Color button support for red / green / yellow / blue function commands.         |
 | channel_switcher  | ❌ | ✅ | Channel zapping support with channel up and down commands.                      |
 | select_source     | ✅ | ✅ | Media playback sources or inputs can be selected.                               |
 | select_sound_mode | ✅ | ✅ | Sound modes can be selected, e.g. stereo or surround.                           |
+| eject             | ❌ | ✅ | The media can be ejected, e.g. a slot-in CD or USB stick.                       |
+| open_close        | ❌ | ✅ | The player supports opening and closing, e.g. a disc tray.                      |
+| audio_track       | ❌ | ✅ | The player supports selecting or switching the audio track.                     |
+| subtitle          | ❌ | ✅ | The player supports selecting or switching subtitles.                           |
+| record            | ❌ | ✅ | The player has recording capabilities with record, my_recordings, live commands |
+
+- R: readable 
+  - ✅ Feature has a readable attribute to retrieve the current or available values.
+  - ❌ Feature value(s) cannot be read.
+- W: writeable
+  - ✅ Feature has one or multiple commands to trigger an action or set a value. 
+  - ❌ No corresponding command(s), only the current value(s) of the feature can be read. 
 
 🚧 Planned features are playlist handling, media browsing and searching.
 
+🧑‍💻 Integration driver developers:
+- If certain features or commands are missing for your device, they can be defined with ["simple commands"](#simple-commands).
+- If a feature doesn't fully match your device, for example it only has a `record` function but no `my_recordings` or
+  `live` functions, then the desired command(s) should also be defined as a ["simple command"](#simple-commands).
+  - For the command name use the corresponding `cmd_id` in uppercase to keep any command related automations.  
+    (This would be `RECORD` for the record-only feature example).
+
 ### Attributes
 
-Entity attributes are controlled by features. Multiple features can act on the same attribute.
+Entity attributes are enabled by features and hold the current value of a feature or provide available options.
+Multiple features can act on the same attribute.
 
 | Attribute       | Features                   | Type    | Values              | Description                                                                 |
 |-----------------|----------------------------|---------|---------------------|-----------------------------------------------------------------------------|
@@ -116,9 +163,12 @@ the media player with a different icon, behaviour etc.
 
 ### Options
 
-| Name         | Type   | Values | Default | Description                                                                                                                                                                                                                                                                                                           |
-|--------------|--------|--------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| volume_steps | number | 2..100 | 100     | Number of available volume steps for the set volume command and UI controls.<br/>Examples: 100 = any value between 0..100, 50 = only odd numbers, 3 = \[33, 67, 100] etc. Value 0 = mute.<br/>Note: if the integration receives an "unexpected" number it is required to round up or down to the next matching value. |
+Optional features of the media-player entity.
+
+| Name            | Type   | Values | Default | Description                                                                                                                                                                                                                                                                                                           |
+|-----------------|--------|--------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| simple_commands | array  | string | []      | Additional commands the media-player supports, which are not covered in the feature list. See [simple commands](#simple-commands).<br/>Example: `["EXIT", "THUMBS_UP", "THUMBS_DOWN"]`                                                                                                                                |
+| volume_steps    | number | 2..100 | 100     | Number of available volume steps for the set volume command and UI controls.<br/>Examples: 100 = any value between 0..100, 50 = only odd numbers, 3 = \[33, 67, 100] etc. Value 0 = mute.<br/>Note: if the integration receives an "unexpected" number it is required to round up or down to the next matching value. |
 
 ## Integration API
 
@@ -154,16 +204,52 @@ requests in `msg_data.cmd_id`.
 | cursor_left       | -              | Directional pad left.                                                    |
 | cursor_right      | -              | Directional pad right.                                                   |
 | cursor_enter      | -              | Directional pad enter.                                                   |
+| digit_0 - digit_9 | -              | Number pad digits 0..9.                                                  |
 | function_red      | -              | Function red.                                                            |
 | function_green    | -              | Function green.                                                          |
 | function_yellow   | -              | Function yellow.                                                         |
 | function_blue     | -              | Function blue.                                                           |
 | home              | -              | Home menu                                                                |
 | menu              | -              | Menu                                                                     |
-| back              | -              | Back / exit function for menu navigation.                                |
+| guide             | -              | Program guide menu.                                                      |
+| info              | -              | Information menu / what's playing.                                       |
+| back              | -              | Back / exit function for menu navigation (to exit menu, guide, info).    |
 | select_source     | source         | Select an input source from the available sources.                       |
 | select_sound_mode | mode           | Select a sound mode from the available modes.                            |
+| record            | -              | Start, stop or open recording menu (device dependant).                   |
+| my_recordings     | -              | Open recordings.                                                         |
+| live              | -              | Switch to live view.                                                     |
+| eject             | -              | Eject media.                                                             |
+| open_close        | -              | Open or close.                                                           |
+| audio_track       | -              | Switch or select audio track.                                            |
+| subtitle          | -              | Switch or select subtitle.                                               |
 | 🚧 search         |                |                                                                          |
+
+### Simple Commands
+
+Additional commands can be enabled with the `simple_commands` options. A device exposing a media-player entity can
+support all additional device commands, not covered with the standard features, as so-called "simple commands".
+These commands are comparable with the infrared remote-entity commands, where keys trigger an action on the device:
+
+- The command is fully defined by its name and doesn't have any further arguments or related attributes.
+- Command names must be upper case and may not contain spaces.
+  - The upper case restriction makes them distinguishable from the pre-defined feature commands. 
+  - Only a subset of the 7-bit ASCII printable characters are allowed: `-/_.:+#*°@%()?`
+  - Maximum length is 20 characters.
+  - Command name regex: `^[A-Z0-9\/_.:+#*°@%()?-]{1,20}$`
+- 🚧 Simple commands cannot be translated yet. In the web-configurator they show up as defined.
+
+#### Command Name Patterns
+
+Even though command names can be freely defined with the allowed characters, the following prefixes should be used.
+This allows better integration into Remote Two, like default UI mappings and grouping of similar commands.
+
+- `INPUT_`: source inputs, e.g. `INPUT_AUX1`, `INPUT_TV`, `INPUT_RADIO`
+- `APP_`: applications, e.g. `APP_MY_TV_STREAMING`, `APP_INTERNET`
+- `MODE_`: mode changing functions, e.g. `MODE_16/9`, `MODE_SURROUND`, `MODE_FOOTBALL`
+- `MENU_`: additional menus, e.g. `MENU_SMART_HOME`, `MENU_QUICK`
+- `DIGIT_`: additional input digits besides the pre-defined numpad digits, e.g. `DIGIT_10`, `DIGIT_10+`
+- `ZONE_`: multi-room functions, e.g. `ZONE_A`, `ZONE_MULTIROOM`
 
 ### Events
 
@@ -326,7 +412,7 @@ The integration may return other values, but the UI will most likely handle them
 }
 ```
 
-### select_sound_mode
+#### select_sound_mode
 
 Specify a sound mode value contained in the `sound_mode_list` attribute array.
 
@@ -342,6 +428,21 @@ Specify a sound mode value contained in the `sound_mode_list` attribute array.
     "params": {
       "mode": "MOVIE"
     }
+  }
+}
+```
+
+#### Custom simple command
+
+```json
+{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "THUMBS_UP"
   }
 }
 ```
@@ -372,3 +473,11 @@ Specify a sound mode value contained in the `sound_mode_list` attribute array.
   }
 }
 ```
+
+## Open issues and missing features
+
+- Define album art image limits
+- Define media types
+- Playlist handling
+- Media browsing
+- Searching

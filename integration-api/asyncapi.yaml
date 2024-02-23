@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.8.0-beta'
+  version: '0.9.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1882,20 +1882,32 @@ components:
                   - media_album
                   - media_image_url
                   - media_type
-                  - source
-                  - sound_mode
-#                  - up # TODO media navigation controls: part of entity, or solve as yet to define "media player / scene card"?
-#                  - down
-#                  - left
-#                  - right
-#                  - ok
-#                  - back
-#                  - menu
-#                  - home
+                  - dpad
+                  - numpad
+                  - home
+                  - menu
+                  - guide
+                  - info
+                  - color_buttons
+                  - channel_switcher
+                  - select_source
+                  - select_sound_mode
+                  - eject
+                  - open_close
+                  - audio_track
+                  - subtitle
+                  - record
                   # TODO playlist handling, browsing, searching
             options:
               type: object
               properties:
+                simple_commands:
+                  description: |
+                    Additional commands the media-player supports, which are not covered in the feature list.  
+                    Example: `["EXIT", "THUMBS_UP", "THUMBS_DOWN"]`
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SimpleCommand'
                 volume_steps:
                   description: |
                     Number of available volume steps for the set volume command and UI controls. Examples:
@@ -1990,6 +2002,10 @@ components:
             - sensor
             - remote
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
+
+    SimpleCommand:
+      type: string
+      format: "^[A-Z0-9\/_.:+#*°@%()?-]{1,20}$"
 
     # derived from Core-API integrationSetupChange: without driver_id
     driverSetupChange:
