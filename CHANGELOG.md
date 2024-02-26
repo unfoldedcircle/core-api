@@ -8,17 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Changes in the next release_
 
+---
+
+## 0.9.0-beta - 2024-02-26
 ### Added
 - Media-player entity features ([#32](https://github.com/unfoldedcircle/core-api/issues/32), [feature-and-bug-tracker#56](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/56), [feature-and-bug-tracker#92](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/92)):
   - new features: numpad, guide, info, eject, open_close, audio_track, subtitle, record.
   - support "simple commands" for any additional commands not covered by a feature.
+- Add hostname and MAC address to version information ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
 
 ### Changed
 - Rename media-player `select_sound_mode` command parameter from `sound_mode` to `mode`.
 - Integration API: add `reconfigure` flag in `setup_driver` request message to reconfigure a driver.
 - Migrated REST- & WebSocket Core-APIs from the core-simulator repository to the `core-api` directory.
-
----
 
 ## 0.8.0-alpha - 2023-07-15
 ### Added
