@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.30.4
+  version: 0.31.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2446,7 +2446,7 @@ paths:
         the total number of defined activities.
 
         The optional text search query searches in the activity name and activity identifier.
-        
+            
         The overview information doesn't include all details of an activity. The full activity information is retrievable
         with `/activities/{entityId}`.
       operationId: getActivities
@@ -2778,6 +2778,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceButtonMappings'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/activities/{entityId}/buttons/{buttonId}/{buttonPress}':
+    get:
+      tags:
+        - remotes
+      summary: Get a button press mapping.
+      operationId: getActivityButtonPressMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+        - $ref: '#/components/parameters/button_press'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityCommand'
+              example:
+                cmd_id: HOME
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Remove a button press mapping.
+      operationId: deleteActivityButtonPressMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+        - $ref: '#/components/parameters/button_press'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -5117,6 +5164,53 @@ paths:
                 - button: DPAD_UP
                   short_press:
                     cmd_id: CURSOR_UP
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/buttons/{buttonId}/{buttonPress}':
+    get:
+      tags:
+        - remotes
+      summary: Get a button press mapping.
+      operationId: getRemoteButtonPressMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+        - $ref: '#/components/parameters/button_press'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EntityCommand'
+              example:
+                cmd_id: HOME
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - remotes
+      summary: Remove a button press mapping.
+      operationId: deleteRemoteButtonPressMapping
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/button_id'
+        - $ref: '#/components/parameters/button_press'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -9289,6 +9383,16 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/ButtonId'
+    button_press:
+      name: buttonPress
+      in: path
+      description: Button press type.
+      required: true
+      schema:
+        type: string
+        enum:
+          - short_press
+          - long_press
     cmd_id:
       name: cmdId
       in: path
@@ -11234,7 +11338,7 @@ components:
     EntityCmdParamNumber:
       type: object
       description: |
-        Number value parameter with optional limits.
+        Number value parameter with optional limits.   
       properties:
         default:
           description: 'Default value to use, e.g. in a UI editor.'
@@ -12464,7 +12568,7 @@ components:
         $ref: '#/components/schemas/MacroOverview'
     MacroCreate:
       description: |
-        Dedicated request object to create a new macro.
+        Dedicated request object to create a new macro.  
       type: object
       allOf:
         - properties:
