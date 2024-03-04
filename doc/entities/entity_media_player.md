@@ -67,6 +67,7 @@ of the media-player UI on the Remote Two.
 | numpad            | ❌ | ✅ | Number pad, provides digit_0, .. , digit_9 commands.                            |
 | home              | ❌ | ✅ | Home navigation support with home & back commands.                              |
 | menu              | ❌ | ✅ | Menu navigation support with menu & back commands.                              |
+| context_menu      | ❌ | ✅ | Context menu (for example right clicking or long pressing an item).             |
 | guide             | ❌ | ✅ | Program guide support with guide & back commands.                               |
 | info              | ❌ | ✅ | Information popup / menu support with info & back commands.                     |
 | color_buttons     | ❌ | ✅ | Color button support for red / green / yellow / blue function commands.         |
@@ -78,6 +79,7 @@ of the media-player UI on the Remote Two.
 | audio_track       | ❌ | ✅ | The player supports selecting or switching the audio track.                     |
 | subtitle          | ❌ | ✅ | The player supports selecting or switching subtitles.                           |
 | record            | ❌ | ✅ | The player has recording capabilities with record, my_recordings, live commands |
+| settings          | ❌ | ✅ | The player supports a settings menu.                                            |
 
 - R: readable 
   - ✅ Feature has a readable attribute to retrieve the current or available values.
@@ -211,6 +213,7 @@ requests in `msg_data.cmd_id`.
 | function_blue     | -              | Function blue.                                                           |
 | home              | -              | Home menu                                                                |
 | menu              | -              | Menu                                                                     |
+| context_menu      | -              | Context menu                                                             |
 | guide             | -              | Program guide menu.                                                      |
 | info              | -              | Information menu / what's playing.                                       |
 | back              | -              | Back / exit function for menu navigation (to exit menu, guide, info).    |
@@ -223,6 +226,7 @@ requests in `msg_data.cmd_id`.
 | open_close        | -              | Open or close.                                                           |
 | audio_track       | -              | Switch or select audio track.                                            |
 | subtitle          | -              | Switch or select subtitle.                                               |
+| settings          | -              | Settings menu                                                            |
 | 🚧 search         |                |                                                                          |
 
 ### Simple Commands
