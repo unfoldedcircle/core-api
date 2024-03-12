@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Changes in the next release_
 
+### Added
+- New media-player entity features: context_menu, settings
+
 ---
 
 ## 0.9.0-beta - 2024-02-26
