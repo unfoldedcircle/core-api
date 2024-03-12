@@ -11,5 +11,7 @@ This section contains unreleased changed which will be part of an upcoming relea
 ### Added
 - Add hostname and MAC address to version information returned in `/pub/version` endpoint ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
 - Add individual button press endpoints to delete short- and long-press mappings in remotes and activities.
+### Changed
+- Software update channel names are uppercase.
 
 ---

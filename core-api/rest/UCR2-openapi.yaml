@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.31.0
+  version: 0.31.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -58,6 +58,7 @@ paths:
       tags:
         - info
       summary: Get version information about installed components.
+      operationId: getVersion
       responses:
         '200':
           description: Successful operation
@@ -71,6 +72,7 @@ paths:
       tags:
         - info
       summary: Get status information about the system.
+      operationId: getStatus
       responses:
         '200':
           description: Successful operation
@@ -130,6 +132,7 @@ paths:
       tags:
         - info
       summary: Retrieve health check information about the system and running services.
+      operationId: healthCheck
       responses:
         '200':
           description: Successful operation
@@ -10510,19 +10513,19 @@ components:
         channel:
           description: |
             Software update channels:
-            - `default`: release channel
-            - `testing`: new test and beta versions which might become the next release if successfully tested.
-            - `development`: untested alpha versions from the developers.  
+            - `DEFAULT`: release channel
+            - `TESTING`: new test and beta versions which might become the next release if successfully tested.
+            - `DEVELOPMENT`: untested alpha versions from the developers.  
                ⚠️ High chance of breaking changes, bugs and loosing data!
 
-            Other channels than `default` might require an access token in `channel_token`, since they are intended for
+            Other channels than `DEFAULT` might require an access token in `channel_token`, since they are intended for
             a closed user group.
           type: string
           anyOf:
             - enum:
-                - default
-                - testing
-                - development
+                - DEFAULT
+                - TESTING
+                - DEVELOPMENT
             - {}
         channel_token:
           description: |

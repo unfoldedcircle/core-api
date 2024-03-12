@@ -10,5 +10,7 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ### Added
 - Add hostname and MAC address to version information returned in `version_info response message ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
+### Changed
+- Software update channel names are uppercase.
 
 ---

@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.24.3-beta'
+  version: '0.24.4-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7269,19 +7269,19 @@ components:
         channel:
           description: |
             Software update channels:
-            - `default`: release channel
-            - `testing`: new test and beta versions which might become the next release if successfully tested.
-            - `development`: untested alpha versions from the developers.  
+            - `DEFAULT`: release channel
+            - `TESTING`: new test and beta versions which might become the next release if successfully tested.
+            - `DEVELOPMENT`: untested alpha versions from the developers.  
                ⚠️ High chance of breaking changes, bugs and loosing data!
 
-            Other channels than `default` might require an access token in `channel_token`, since they are intended for
+            Other channels than `DEFAULT` might require an access token in `channel_token`, since they are intended for
             a closed user group.
           type: string
           anyOf:
             - enum:
-                - default
-                - testing
-                - development
+                - DEFAULT
+                - TESTING
+                - DEVELOPMENT
             - { }  # extensible enum: there might be more channels than defined above
         channel_token:
           description: |
