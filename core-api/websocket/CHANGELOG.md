@@ -10,6 +10,7 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ### Added
 - Add hostname and MAC address to version information returned in `version_info response message ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
+- ADD `restart_required` field in the CfgSoftwareUpdate response for the UI to show a restart required notice in the OTA settings screen.
 ### Changed
 - Software update channel names are uppercase.
 

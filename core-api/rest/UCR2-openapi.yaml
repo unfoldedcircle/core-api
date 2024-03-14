@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.31.1
+  version: 0.31.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -10535,6 +10535,9 @@ components:
             - If the `default` channel is selected when updating settings: the token will be ignored.
           type: string
           pattern: '^[-a-zA-Z0-9._~+/]{1,256}=?$'
+        restart_required:
+          description: 'Optional response field only: a configuration change requires a restart.'
+          type: boolean
       required:
         - check_for_updates
         - auto_update
