@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.24.5-beta'
+  version: '0.24.6-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -120,16 +120,16 @@ servers:
     description: |
       Local test server.
     security:
-      - token: []
-      - basic: []
+      - token: [ ]
+      - basic: [ ]
   test-wss:
     url: localhost:8443
     protocol: wss
     description: |
       Local test server.
     security:
-      - token: []
-      - basic: []
+      - token: [ ]
+      - basic: [ ]
 # TODO enhance tags with `externalDocs` and url links once API is hosted in public repo
 tags:
   - name: integration
@@ -148,7 +148,7 @@ channels:
     publish:
       description: |
         Core-API for clients to interact with the remote.
-        
+
       operationId: pubRemoteMessage
       tags:
         - name: core
@@ -193,6 +193,7 @@ channels:
           - $ref: '#/components/messages/set_network_cfg'
           - $ref: '#/components/messages/get_software_update_cfg'
           - $ref: '#/components/messages/set_software_update_cfg'
+          - $ref: '#/components/messages/reset_software_update_cfg'
           - $ref: '#/components/messages/get_power_saving_cfg'
           - $ref: '#/components/messages/set_power_saving_cfg'
           - $ref: '#/components/messages/get_profile_cfg'
@@ -203,8 +204,8 @@ channels:
           - $ref: '#/components/messages/set_voice_control_cfg'
           - $ref: '#/components/messages/get_voice_assistants'
 
-#          - $ref: '#/components/messages/get_log_cfg'
-#          - $ref: '#/components/messages/set_log_cfg'
+          # - $ref: '#/components/messages/get_log_cfg'
+          # - $ref: '#/components/messages/set_log_cfg'
           # --- entity handling
           - $ref: '#/components/messages/get_entity_types'
           - $ref: '#/components/messages/get_entity'
@@ -240,12 +241,12 @@ channels:
           - $ref: '#/components/messages/stop_dock_setup'
 
           # --- IR handling
-#          - $ref: '#/components/messages/ir_send'
-#          - $ref: '#/components/messages/ir_learn'
-#          - $ref: '#/components/messages/ir_get_commands'
-#          - $ref: '#/components/messages/ir_add_cmd'
-#          - $ref: '#/components/messages/ir_update_cmd'
-#          - $ref: '#/components/messages/ir_remove_cmd'
+          # - $ref: '#/components/messages/ir_send'
+          # - $ref: '#/components/messages/ir_learn'
+          # - $ref: '#/components/messages/ir_get_commands'
+          # - $ref: '#/components/messages/ir_add_cmd'
+          # - $ref: '#/components/messages/ir_update_cmd'
+          # - $ref: '#/components/messages/ir_remove_cmd'
 
           # --- WiFi handling
           - $ref: '#/components/messages/get_wifi_status'
@@ -300,7 +301,7 @@ channels:
           - $ref: '#/components/messages/voice_control_cfg'
           - $ref: '#/components/messages/voice_assistants'
 
-#          - $ref: '#/components/messages/log_cfg'
+          # - $ref: '#/components/messages/log_cfg'
           # --- entity handling
           - $ref: '#/components/messages/entity_types'
           - $ref: '#/components/messages/entities'
@@ -319,8 +320,8 @@ channels:
           - $ref: '#/components/messages/dock_setup_status'
 
           # --- IR handling
-#          - $ref: '#/components/messages/ir_learned_code'
-#          - $ref: '#/components/messages/ir_commands'
+          # - $ref: '#/components/messages/ir_learned_code'
+          # - $ref: '#/components/messages/ir_commands'
 
           # --- WiFi handling
           - $ref: '#/components/messages/wifi_status'
@@ -378,7 +379,7 @@ channels:
           - $ref: '#/components/messages/get_integration_setup_status'
           - $ref: '#/components/messages/set_integration_user_data'
           - $ref: '#/components/messages/stop_integration_setup'
-  
+
     subscribe:
       description: |
         ⚠️ Attention: this is NOT a different WebSocket endpoint! It is purely used for logical grouping of all
@@ -609,7 +610,7 @@ components:
             req_id: 123
             msg: result
             code: 200
-            msg_data: {}
+            msg_data: { }
         - payload:
             kind: resp
             req_id: 124
@@ -1031,6 +1032,14 @@ components:
         $ref: '#/components/schemas/setSoftwareUpdateCfgMsg'
       x-response:
         $ref: '#/components/messages/software_update_cfg'
+    reset_software_update_cfg:
+      summary: 🧪 Reset software update settings.
+      description: |
+        Set all software update settings to default values and use the default release update channel.
+      payload:
+        $ref: '#/components/schemas/resetSoftwareUpdateCfgMsg'
+      x-response:
+        $ref: '#/components/messages/software_update_cfg'
     software_update_cfg:
       summary: 🧪 Software update settings response.
       payload:
@@ -1300,9 +1309,9 @@ components:
         Unloads and deletes multiple configured entities, either by integration identifier or by entity identifiers.
         If a deleted entity is still provided from an integration, it can be reused and will show up again as
         available entity from its integration.
-    
+        
         ⚠️ An empty request body array will delete all configured entities!
-    
+        
         All references to the configured entities will be removed from profile pages and groups.
         
         This is a best effort operation:
@@ -1910,12 +1919,12 @@ components:
 
         - Normal profile (default): can do anything, change settings, add pages, entities, integrations, etc.
         - Restricted profile: intended for guests or children, who can only use the remote, but cannot change settings.
-      
+        
         The admin PIN is required to switch from a restricted to a normal profile. It can be defined in settings.
-    
+        
         - Switching away from a restricted profile will prompt the user to enter the admin PIN.
         - Switching to a restricted profile can be done without entering the admin PIN.
-    
+        
         Profile request object:
         
         - `profile_id` is optional and auto-generated if not specified. Otherwise it needs to be a unique profile identifier.
@@ -2269,7 +2278,7 @@ components:
         Create an integration driver instance and associate it with the driver.
         For simple integration drivers there's a 1:1 relationship only between an instance and driver.
         For multi-device drivers, each device corresponds to an integration instance.
-    
+        
         - the `integration_id` is automatically created by the system to make it unique over all integrations.
         - for multi-device drivers the `device_id` must be specified and may not already exist in another instance of the
           same driver.
@@ -2349,7 +2358,7 @@ components:
         no longer show up as an available entity (unless the `filter=ALL` query parameter is set).
         
         If `entity_ids` is not provided or is empty, all entities from the integration are configured.
-  
+        
         Use message `configure_entity_from_integration` to configure a single entity and optionally rename it
         or change its icon.
         
@@ -3303,13 +3312,13 @@ components:
     getAmbientLightMsg:
       type: object
       allOf:
-          - $ref: '#/components/schemas/commonReq'
-          - properties:
-              msg:
-                type: string
-                const: get_ambient_light
-            required:
-              - msg
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_ambient_light
+          required:
+            - msg
     ambientLightMsg:
       type: object
       allOf:
@@ -3743,6 +3752,16 @@ components:
           required:
             - msg
             - msg_data
+    resetSoftwareUpdateCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: reset_software_update_cfg
+          required:
+            - msg
     softwareUpdateCfgMsg:
       type: object
       allOf:
@@ -6061,7 +6080,7 @@ components:
               const: set_integration_user_data
             msg_data:
               type: object
-              properties: 
+              properties:
                 driver_id:
                   type: string
                 data:
@@ -6230,13 +6249,13 @@ components:
             - battery_status
             - ambient_light
             # TODO define all event channels. Suggestions:
-#            - cfg_log
-#            - cfg_ui
-#            - log
-#            - notification
-#            - gui
-#            - wifi
-        - {}  # extensible enum: there might be more event channels than defined above
+            # - cfg_log
+            # - cfg_ui
+            # - log
+            # - notification
+            # - gui
+            # - wifi
+        - { }  # extensible enum: there might be more event channels than defined above
 
     warningEventMsg:
       type: object
@@ -6824,9 +6843,9 @@ components:
           $ref: '#/components/schemas/languageText'
         icon:
           $ref: '#/components/schemas/iconIdentifier'
-# we had this in v1, but it's probably a risky feature allowing to change / disable features
-#        features:
-#          $ref: '#/components/schemas/entityFeatures'
+        # we had this in v1, but it's probably a risky feature allowing to change / disable features
+        #        features:
+        #          $ref: '#/components/schemas/entityFeatures'
         description:
           $ref: '#/components/schemas/languageText'
       required:

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.31.2
+  version: 0.31.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -6911,6 +6911,24 @@ paths:
                 $ref: '#/components/schemas/CfgSoftwareUpdate'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    delete:
+      tags:
+        - cfg
+      summary: Reset all software update settings to default values.
+      description: |
+        Set all software update settings to default values and use the default release update channel.
+      operationId: resetSoftwareUpdateSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgSoftwareUpdate'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
