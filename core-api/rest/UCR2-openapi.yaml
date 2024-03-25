@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.31.3
+  version: 0.32.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8905,6 +8905,9 @@ paths:
       summary: Set a power mode
       description: |
         Setting `SUSPEND` will put the system immediately into suspend mode!
+
+        Note: suspend mode might be prevented by standby inhibitors, for example by activity sequences or if an integration
+        setup is running.
       operationId: setPowerMode
       parameters:
         - $ref: '#/components/parameters/power_mode'
@@ -8936,6 +8939,105 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
+  /system/power/standby_inhibitors:
+    get:
+      tags:
+        - system
+      summary: Get standby inhibitors.
+      operationId: getStandbyInhibitors
+      description: |
+        Automatic system standby can be prevented with "standby inhibitors". For example during integration setup or as a
+        user option for activities.
+
+        There are two types of inhibitors:
+        - Temporary inhibitors set a delay value for which the device doesn't go into standby. After the delay and
+          the idle timeouts have expired, the remote goes into standby and the temporary inhibitor will be removed.
+        - Blocking inhibitors will prevent the device to go into standby until the inhibitor is removed by the client.
+
+        Note: temporary inhibitors will only be checked and removed during standby events. As long as the device is active,
+        they may still appear in the result.
+      responses:
+        '200':
+          description: List of inhibitors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inhibitors'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    post:
+      tags:
+        - system
+      summary: Create a standby inhibitor.
+      operationId: createStandbyInhibitor
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStandbyInhibitor'
+        required: true
+      responses:
+        '201':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                required:
+                  - id
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+    delete:
+      tags:
+        - system
+      summary: Remove all standby inhibitors.
+      operationId: deleteAllStandbyInhibitors
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/system/power/standby_inhibitors/{id}':
+    delete:
+      tags:
+        - system
+      summary: Remove a standby inhibitor.
+      operationId: deleteStandbyInhibitor
+      parameters:
+        - name: id
+          in: path
+          description: Inhibitor identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /system/sensors/ambient_light:
     get:
       tags:
@@ -11843,6 +11945,64 @@ components:
       enum:
         - HEADER
         - MESSAGE
+    InhibitMode:
+      type: string
+      enum:
+        - BLOCK
+        - DELAY
+    Inhibitor:
+      type: object
+      properties:
+        id:
+          description: Unique identifier
+          type: string
+        who:
+          description: A descriptive string who is inhibiting
+          type: string
+        why:
+          description: A descriptive string why is being inhibited
+          type: string
+        mode:
+          $ref: '#/components/schemas/InhibitMode'
+        delay:
+          description: 'Delay value in seconds for mode: DELAY'
+          type: integer
+          minimum: 0
+        created:
+          description: Duration in seconds when this inhibitor was created
+          type: integer
+          minimum: 0
+      required:
+        - id
+        - who
+        - mode
+    Inhibitors:
+      type: array
+      items:
+        $ref: '#/components/schemas/Inhibitor'
+    CreateStandbyInhibitor:
+      type: object
+      properties:
+        id:
+          description: 'Unique identifier, automatically crated if not specified.'
+          type: string
+          minLength: 1
+          maxLength: 64
+        who:
+          description: A descriptive string who is inhibiting
+          type: string
+          minLength: 1
+          maxLength: 64
+        why:
+          description: A descriptive string why is being inhibited
+          type: string
+          maxLength: 64
+        delay:
+          description: 'Delay standby for given seconds, otherwise block indefinitely until inhibitor is removed.'
+          type: integer
+          minimum: 1
+      required:
+        - who
     CreateIntegrationSetup:
       type: object
       properties:

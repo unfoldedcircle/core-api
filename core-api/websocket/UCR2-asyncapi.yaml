@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.24.6-beta'
+  version: '0.25.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -170,6 +170,11 @@ channels:
           - $ref: '#/components/messages/get_system_update_progress'
           - $ref: '#/components/messages/get_power_mode'
           - $ref: '#/components/messages/set_power_mode'
+          - $ref: '#/components/messages/get_standby_inhibitors'
+          - $ref: '#/components/messages/create_standby_inhibitor'
+          - $ref: '#/components/messages/del_standby_inhibitor'
+          - $ref: '#/components/messages/del_all_standby_inhibitors'
+
           # --- configuration handling
           - $ref: '#/components/messages/reset_configuration'
           - $ref: '#/components/messages/get_configuration'
@@ -732,7 +737,7 @@ components:
       payload:
         $ref: '#/components/schemas/systemUpdateInfoMsg'
     update_system:
-      summary: 🔍 Perform system update.
+      summary: 🧪 Perform system update.
       description: |
         Start a system update with the given `update_id` parameter. Use `latest` to use the latest available system update.
 
@@ -757,13 +762,13 @@ components:
       x-response:
         $ref: '#/components/messages/update_system_result'
     update_system_result:
-      summary: 🔍 System update response.
+      summary: 🧪 System update response.
       description: |
         Returns the state of the system update request.
       payload:
         $ref: '#/components/schemas/updateSystemResultMsg'
     get_system_update_progress:
-      summary: 🔍 Get system update progress.
+      summary: 🧪 Get system update progress.
       description: |
         This is a manual request for the update progress if the system update event messages cannot be used.
       payload:
@@ -771,24 +776,69 @@ components:
       x-response:
         $ref: '#/components/messages/system_update_progress'
     system_update_progress:
-      summary: 🔍 System update progress response.
+      summary: 🧪 System update progress response.
       payload:
         $ref: '#/components/schemas/systemUpdateProgressMsg'
 
     get_power_mode:
-      summary: 🔍 Get current power mode and battery information.
+      summary: 🧪 Get current power mode and battery information.
       payload:
         $ref: '#/components/schemas/getPowerModeMsg'
       x-response:
         $ref: '#/components/messages/power_mode'
     power_mode:
-      summary: 🔍 Current power mode response.
+      summary: 🧪 Current power mode response.
       payload:
         $ref: '#/components/schemas/powerModeMsg'
     set_power_mode:
-      summary: 🔍 Change the current power mode.
+      summary: 🧪 Change the current power mode.
       payload:
         $ref: '#/components/schemas/setPowerModeMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+
+    get_standby_inhibitors:
+      summary: 🧪 Get standby inhibitors.
+      description: |
+        Automatic system standby can be prevented with "standby inhibitors". For example during integration setup or as
+        a user option for activities.
+
+        There are two types of inhibitors:
+
+        - Temporary inhibitors set a delay value for which the device doesn't go into standby. After the delay and the
+          idle timeouts have expired, the remote goes into standby and the temporary inhibitor will be removed.
+        - Blocking inhibitors will prevent the device to go into standby until the inhibitor is removed by the client.
+        
+        Note: temporary inhibitors will only be checked and removed during standby events. As long as the device is
+        active, they may still appear in the result.
+      payload:
+        $ref: '#/components/schemas/getStandbyInhibitorsMsg'
+      x-response:
+        $ref: '#/components/messages/standby_inhibitors'
+    standby_inhibitors:
+      summary: 🧪 Standby inhibitors response.
+      payload:
+        $ref: '#/components/schemas/inhibitorsMsg'
+    create_standby_inhibitor:
+      summary: 🧪 Create a standby inhibitor.
+      payload:
+        $ref: '#/components/schemas/createStandbyInhibitorMsg'
+      x-response:
+        $ref: '#/components/messages/standby_inhibitor'
+    standby_inhibitor:
+      summary: 🧪 Standby inhibitor response.
+      payload:
+        $ref: '#/components/schemas/inhibitorMsg'
+    del_standby_inhibitor:
+      summary: 🧪 Remove a standby inhibitor.
+      payload:
+        $ref: '#/components/schemas/delStandbyInhibitorMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    del_all_standby_inhibitors:
+      summary: 🧪 Remove all standby inhibitors.
+      payload:
+        $ref: '#/components/schemas/delAllStandbyInhibitorsMsg'
       x-response:
         $ref: '#/components/messages/result'
 
@@ -2696,7 +2746,7 @@ components:
         $ref: '#/components/schemas/warningEventMsg'
 
     integration_driver_change:
-      summary: 🔍 Integration driver change event.
+      summary: 🧪 Integration driver change event.
       description: |
         Emitted if an integration driver has changed, a new driver has been added or a configured driver has been
         deleted.
@@ -2706,7 +2756,7 @@ components:
       payload:
         $ref: '#/components/schemas/integrationDriverChangeEventMsg'
     integration_change:
-      summary: 🔍 Integration change event.
+      summary: 🧪 Integration change event.
       description: |
         Emitted if an integration instance has changed, a new instance has been added or a configured instance has been
         deleted.
@@ -2716,7 +2766,7 @@ components:
       payload:
         $ref: '#/components/schemas/integrationChangeEventMsg'
     integration_state:
-      summary: 🔍 Integration state event.
+      summary: 🧪 Integration state event.
       description: |
         Emitted if the connection state of an integration driver or instance has changed.
       tags:
@@ -2791,7 +2841,7 @@ components:
         $ref: '#/components/schemas/dockUpdateChangeEventMsg'
 
     integration_discovery:
-      summary: 🔍 Integration discovery event.
+      summary: 🧪 Integration discovery event.
       description: |
         Emitted if integration discovery is started, stopped or a new integration was discovered on the network.
       tags:
@@ -2800,7 +2850,7 @@ components:
         $ref: '#/components/schemas/integrationDiscoveryEventMsg'
 
     integration_setup_change:
-      summary: 🔍 Integration setup state change event.
+      summary: 🧪 Integration setup state change event.
       description: |
         Emitted for all integration setup flow state changes.
       tags:
@@ -2818,7 +2868,7 @@ components:
         $ref: '#/components/schemas/softwareUpdateEventMsg'
 
     power_mode_change:
-      summary: 🔍 Power mode change event.
+      summary: 🧪 Power mode change event.
       description: |
         Emitted when the power saving mode changes.
       tags:
@@ -2827,7 +2877,7 @@ components:
         $ref: '#/components/schemas/powerModeChangeEventMsg'
 
     battery_status:
-      summary: 🔍 Battery status event.
+      summary: 🧪 Battery status event.
       description: |
         Emitted when the battery status changes.
       tags:
@@ -3308,6 +3358,89 @@ components:
           required:
             - msg
             - msg_data
+
+    getStandbyInhibitorsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_standby_inhibitors
+          required:
+            - msg
+    inhibitorsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: standby_inhibitors
+            msg_data:
+              $ref: '#/components/schemas/Inhibitors'
+          required:
+            - msg
+            - msg_data
+    createStandbyInhibitorMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: create_standby_inhibitor
+            msg_data:
+              $ref: '#/components/schemas/CreateStandbyInhibitor'
+          required:
+            - msg
+            - msg_data
+    inhibitorMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: standby_inhibitor
+            msg_data:
+              type: string
+              properties:
+                id:
+                  type: string
+              required:
+                - id
+          required:
+            - msg
+            - msg_data
+    delStandbyInhibitorMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: del_standby_inhibitor
+            msg_data:
+              type: object
+              properties:
+                id:
+                  type: string
+              required:
+                - id
+          required:
+            - msg
+            - msg_data
+    delAllStandbyInhibitorsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: del_all_standby_inhibitors
+          required:
+            - msg
 
     getAmbientLightMsg:
       type: object
@@ -9388,3 +9521,67 @@ components:
           maximum: 65535
       required:
         - intensity
+
+    # --- OpenAPI Standby.yaml
+
+    Inhibitors:
+      type: array
+      items:
+        $ref: '#/components/schemas/Inhibitor'
+
+    Inhibitor:
+      type: object
+      properties:
+        id:
+          description: Unique identifier
+          type: string
+        who:
+          description: A descriptive string who is inhibiting
+          type: string
+        why:
+          description: A descriptive string why is being inhibited
+          type: string
+        mode:
+          $ref: '#/components/schemas/InhibitMode'
+        delay:
+          description: "Delay value in seconds for mode: DELAY"
+          type: integer
+          minimum: 0
+        created:
+          description: Duration in seconds when this inhibitor was created
+          type: integer
+          minimum: 0
+      required:
+        - id
+        - who
+        - mode
+
+    InhibitMode:
+      type: string
+      enum:
+        - BLOCK
+        - DELAY
+
+    CreateStandbyInhibitor:
+      type: object
+      properties:
+        id:
+          description: Unique identifier, automatically crated if not specified.
+          type: string
+          minLength: 1
+          maxLength: 64
+        who:
+          description: A descriptive string who is inhibiting
+          type: string
+          minLength: 1
+          maxLength: 64
+        why:
+          description: A descriptive string why is being inhibited
+          type: string
+          maxLength: 64
+        delay:
+          description: Delay standby for given seconds, otherwise block indefinitely until inhibitor is removed.
+          type: integer
+          minimum: 1
+      required:
+        - who

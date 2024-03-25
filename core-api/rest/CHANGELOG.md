@@ -12,7 +12,8 @@ This section contains unreleased changed which will be part of an upcoming relea
 - Add hostname and MAC address to version information returned in `/pub/version` endpoint ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
 - Add individual button press endpoints to delete short- and long-press mappings in remotes and activities.
 - Add `restart_required` field in the CfgSoftwareUpdate response for the web-configurator to show a restart required notice in the OTA settings screen.
-- Add `DELETE /api/cfg/software_update` endpoint to reset software OTA settings. 
+- Add `DELETE /api/cfg/software_update` endpoint to reset software OTA settings.
+- Add standby inhibitor management endpoints.
 ### Changed
 - Software update channel names are uppercase.
 
