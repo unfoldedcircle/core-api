@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.9.1-beta'
+  version: '0.10.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1298,8 +1298,10 @@ components:
                 cmd_id:
                   type: string
                 params:
+                  # TODO Define parameter objects with oneOf or just document possible objects?
                   description: |
-                    TODO Define parameter objects with oneOf or just document possible objects?
+                    See <https://github.com/unfoldedcircle/core-api/tree/main/doc/entities> for command parameter
+                    definitions.
                   type: object
               required:
                 - entity_type
@@ -1611,7 +1613,7 @@ components:
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `light`, `media_player`,
-        `sensor`, `switch`. 
+        `remote`,`sensor`, `switch`. 
         
         The `entity_type` value acts as discriminator for the entity type, which defines the supported features and
         options of an entity.  
@@ -1927,6 +1929,33 @@ components:
                   minimum: 2
                   maximum: 100
 
+    remote:
+      description: |
+        A remote entity can send commands to a controllable device.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              type: array
+              items:
+                type: string
+                enum:
+                  - send
+                  - on_off
+                  - toggle
+            options:
+              type: object
+              properties:
+                supported_commands:
+                  description: |
+                    Optional list of supported commands. If not provided, the integration driver has to document the
+                    available commands for the user.  
+                    Example: `["EXIT", "CHANNEL_UP", "CHANNEL_DOWN"]`
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SimpleCommand'
+
     sensor:
       description: |
         A sensor entity provides measured values from devices or dedicated hardware sensors.  
@@ -2007,7 +2036,7 @@ components:
 
     SimpleCommand:
       type: string
-      format: "^[A-Z0-9\/_.:+#*°@%()?-]{1,20}$"
+      format: "^[A-Z0-9/_.:+#*°@%()?-]{1,20}$"
 
     # derived from Core-API integrationSetupChange: without driver_id
     driverSetupChange:
