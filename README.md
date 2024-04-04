@@ -59,6 +59,7 @@ how to develop an integration driver for the Remote Two.
 - [Python API wrapper library for the UC Integration API](https://github.com/unfoldedcircle/integration-python-library)  
   Integrations using the Python API wrapper:
   - [Android TV integration](https://github.com/unfoldedcircle/integration-androidtv)
+  - [Apple TV integration](https://github.com/unfoldedcircle/integration-appletv)
   - [Denon AVR integration](https://github.com/unfoldedcircle/integration-denonavr)
 - [Home Assistant integration](https://github.com/unfoldedcircle/integration-home-assistant) written in Rust
 
