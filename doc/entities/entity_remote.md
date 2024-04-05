@@ -2,6 +2,8 @@
 
 A remote entity can send commands to a controllable device.
 
+ℹ️ Supported in remote-core / Core Simulator from version 0.43.0.
+
 ## Features
 
 | Name     | R | W  | Description                                                                                                                                    |
@@ -47,9 +49,54 @@ None.
 
 Optional features of the remote entity.
 
-| Name               | Type   | Values | Default | Description                                                                                                                       |
-|--------------------|--------|--------|---------|-----------------------------------------------------------------------------------------------------------------------------------|
-| supported_commands | array  | string | []      | Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user. |
+| Name            | Type   | Values     | Default | Description                                                                                                                       |
+|-----------------|--------|------------|---------|-----------------------------------------------------------------------------------------------------------------------------------|
+| simple_commands | array  | string(20) | []      | Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user. |
+
+If the available commands are known by the integration driver, they should be made available in the `simple_commands`
+option. This allows the Remote Two configuration in the web-configurator to show all supported commands to the user.
+
+#### Simple commands
+
+A simple command is fully defined by its name and doesn't have any further arguments or related attributes. It's
+comparable to the simple commands in the media-player entity, with fewer naming restrictions.
+
+Restrictions:
+- A command name may not include whitespace characters.
+- The maximum length of a command name is 20 characters.
+- A command name may not be any of the defined `cmd_id` commands: on, off, toggle, send_cmd, send_cmd_sequence.
+- Commands cannot have any further parameters. For example, it's not possible to have a `switch_channel` command with
+  the channel number as parameter.
+
+Command naming recommendations:
+
+- Command names should be short and follow naming patterns.
+- Uppercase naming is preferred.
+- Dedicated power on/off or toggle commands should not be added. Use the `on_off` and `toggle` features with the defined
+  `on`, `off` and `toggle` commands.
+
+#### Command Name Patterns
+
+Even though command names can be freely defined, it's highly recommended to follow a naming pattern and use the
+recommended names for common commands. This allows better integration into Remote Two, like default UI mappings and
+grouping of similar commands.
+
+- Navigation: `CURSOR_UP`, `CURSOR_DOWN`, `CURSOR_LEFT`, `CURSOR_RIGHT`, `CURSOR_ENTER`, `BACK`, `EXIT`
+- Menus: `HOME`, `MENU`, `CONTEXT_MENU`, `GUIDE`, `INFO`, `SETTINGS`
+- Volume control: `VOLUME_UP`, `VOLUME_DOWN`, `MUTE_TOGGLE`, `MUTE`, `UNMUTE`
+- Media playback: `PLAY_PAUSE`, `STOP`, `PREVIOUS`, `NEXT`, `FAST_FORWARD`, `REWIND`
+
+See [media-player entity commands](entity_media_player.md#commands) for further commands.
+
+Prefixes for other common functions:
+
+- `INPUT_`: source inputs, e.g. `INPUT_AUX1`, `INPUT_TV`, `INPUT_RADIO`
+- `APP_`: applications, e.g. `APP_MY_TV_STREAMING`, `APP_INTERNET`
+- `MODE_`: mode changing functions, e.g. `MODE_16/9`, `MODE_SURROUND`, `MODE_FOOTBALL`
+- `MENU_`: additional menus, e.g. `MENU_SMART_HOME`, `MENU_QUICK`
+- `DIGIT_`: additional input digits besides the pre-defined numpad digits, e.g. `DIGIT_10`, `DIGIT_10+`
+- `ZONE_`: multi-room functions, e.g. `ZONE_A`, `ZONE_MULTIROOM`
+
 
 ## Integration API
 
@@ -63,7 +110,7 @@ requests in `msg_data.cmd_id`.
 | on                | -          |              | Send the on-command to the controlled device.                                                |
 | off               | -          |              | Send the off-command.                                                                        |
 | toggle            | -          |              | Toggle the current remote of the controlled device, either from on -> off or from off -> on. |
-| send_cmd          | command    | String(30)   | A single command.                                                                            |
+| send_cmd          | command    | String(20)   | A single command.                                                                            |
 |                   | repeat     | Number       | Optional: how many times the command shall be repeated. Defaults to 1 if not specified.      |
 |                   | delay      | Number       | Optional: delay in milliseconds between repeated commands.                                   |
 |                   | hold       | Number       | Optional: time in milliseconds before a command is released. Defaults to 0 if not specified. |
@@ -72,8 +119,8 @@ requests in `msg_data.cmd_id`.
 |                   | delay      | Number       | Optional: delay in milliseconds between commands.                                            |
 |                   | hold       | Number       | Optional: time in milliseconds before each command is released.                              |
 
-- A command may not include whitespace characters.
-- The maximum length of a command name is 30 characters.
+- A command name may not include whitespace characters.
+- The maximum length of a command name is 20 characters.
 - A command name may not be any of the defined `cmd_id`: on, off, toggle, send_cmd, send_cmd_sequence
 - If no `delay` parameter is included, the integration driver has to choose an appropriate delay based on the controlled device.
 
@@ -165,7 +212,7 @@ The following attributes must be included:
     "entity_id": "remote-1",
     "cmd_id": "send_cmd",
     "params": {
-      "command": "ENTER",
+      "command": "CURSOR_ENTER",
       "hold": 800
     }
   }

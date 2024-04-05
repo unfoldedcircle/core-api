@@ -1947,14 +1947,14 @@ components:
             options:
               type: object
               properties:
-                supported_commands:
+                simple_commands:
                   description: |
                     Optional list of supported commands. If not provided, the integration driver has to document the
                     available commands for the user.  
                     Example: `["EXIT", "CHANNEL_UP", "CHANNEL_DOWN"]`
                   type: array
                   items:
-                    $ref: '#/components/schemas/SimpleCommand'
+                    $ref: '#/components/schemas/SimpleRemoteCommand'
 
     sensor:
       description: |
@@ -2037,6 +2037,10 @@ components:
     SimpleCommand:
       type: string
       format: "^[A-Z0-9/_.:+#*°@%()?-]{1,20}$"
+
+    SimpleRemoteCommand:
+      type: string
+      format: "^\\S{1,20}$"
 
     # derived from Core-API integrationSetupChange: without driver_id
     driverSetupChange:
