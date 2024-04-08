@@ -49,9 +49,11 @@ None.
 
 Optional features of the remote entity.
 
-| Name            | Type   | Values     | Default | Description                                                                                                                       |
-|-----------------|--------|------------|---------|-----------------------------------------------------------------------------------------------------------------------------------|
-| simple_commands | array  | string(20) | []      | Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user. |
+| Name            | Type   | Values              | Default | Description                                                                                                                                  |
+|-----------------|--------|---------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------|
+| simple_commands | array  | string(20)          | []      | Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user.            |
+| button_mapping  | array  | DeviceButtonMapping | []      | Optional command mapping for the physical buttons. If not provided, an automatic mapping is attempted based on the provided simple_commands. |
+| user_interface  | object | UserInterface       | {}      | Optional user interface definition for the supported commands.                                                                               |
 
 If the available commands are known by the integration driver, they should be made available in the `simple_commands`
 option. This allows the Remote Two configuration in the web-configurator to show all supported commands to the user.
@@ -97,6 +99,192 @@ Prefixes for other common functions:
 - `DIGIT_`: additional input digits besides the pre-defined numpad digits, e.g. `DIGIT_10`, `DIGIT_10+`
 - `ZONE_`: multi-room functions, e.g. `ZONE_A`, `ZONE_MULTIROOM`
 
+#### Button mapping
+
+A default button mapping can be provided in `options.button_mapping`.
+
+The `DeviceButtonMapping` object is defined in the [Integration-API](../../integration-api) and is based on the same
+definition in the Core-API.
+
+Example of `entity.options` object:
+```json
+{
+  "simple_commands": [
+    "VOLUME_UP",
+    "VOLUME_DOWN",
+    "HOME",
+    "CURSOR_UP",
+    "CURSOR_DOWN",
+    "CURSOR_LEFT",
+    "CURSOR_RIGHT",
+    "CURSOR_ENTER"
+  ],
+  "button_mapping": [
+    {
+      "button": "POWER",
+      "short_press": {
+        "cmd_id": "remote.toggle"
+      }
+    },
+    {
+      "button": "RED",
+      "short_press": {
+        "cmd_id": "remote.send_cmd",
+        "params": {
+          "command": "VOLUME_DOWN",
+          "repeat": 10
+        }
+      }
+    },
+    {
+      "button": "DPAD_UP",
+      "short_press": {
+        "cmd_id": "CURSOR_UP"
+      }
+    },
+    {
+      "button": "DPAD_MIDDLE",
+      "short_press": {
+        "cmd_id": "CURSOR_ENTER"
+      },
+      "long_press": {
+        "cmd_id": "MENU"
+      }
+    },
+    {
+      "button": "DPAD_DOWN",
+      "short_press": {
+        "cmd_id": "CURSOR_DOWN"
+      }
+    },
+    {
+      "button": "BLUE",
+      "short_press": {
+        "cmd_id": "remote.send_cmd_sequence",
+        "params": {
+          "sequence": "HOME,CURSOR_DOWN,CURSOR_RIGHT,CURSOR_ENTER",
+          "delay": 200
+        }
+      }
+    }
+  ]
+}
+```
+
+Button identifiers for Remote Two:
+- `BACK`
+- `HOME`
+- `VOICE`
+- `VOLUME_UP`, `VOLUME_DOWN`, `MUTE`
+- `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_MIDDLE`
+- `GREEN`, `YELLOW`, `RED`, `BLUE`
+- `CHANNEL_UP`, `CHANNEL_DOWN`
+- `PREV`, `PLAY`, `NEXT`
+- `POWER`
+
+A detailed button mapping can be retrieved with the Core-API: `GET /api/cfg/device/button_layout`.
+
+#### User interface
+
+A default user interface can be provided in `options.user_interface`.
+
+The `UserInterface` object is defined in the [Integration-API](../../integration-api) and is based on the Core-API
+`ActivityUserInterface` definition.
+
+##### UI page example
+
+![ui-page-media.png](../img/ui-page-media.png)
+
+`entity.options` object:
+```json
+{
+  "simple_commands": [
+    "MY_RECORDINGS",
+    "MY_APPS",
+    "REVERSE",
+    "PLAY",
+    "PAUSE",
+    "FORWARD",
+    "RECORD"
+  ],
+  "user_interface": {
+    "pages": [
+      {
+        "page_id": "media",
+        "name": "Media",
+        "grid": { "width": 4, "height": 6 },
+        "items": [
+          {
+            "type": "text",
+            "text": "Recordings",
+            "command": {
+              "cmd_id": "MY_RECORDINGS"
+            },
+            "location": { "x": 0, "y": 2 },
+            "size": { "width": 2, "height": 1 }
+          },
+          {
+            "type": "text",
+            "text": "Apps",
+            "command": {
+              "cmd_id": "MY_APPS"
+            },
+            "location": { "x": 2, "y": 2 },
+            "size": { "width": 2, "height": 1 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:bw",
+            "command": {
+              "cmd_id": "REVERSE"
+            },
+            "location": { "x": 0, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:play",
+            "command": {
+              "cmd_id": "PLAY"
+            },
+            "location": { "x": 1, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:pause",
+            "command": {
+              "cmd_id": "PAUSE"
+            },
+            "location": { "x": 2, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:ff",
+            "command": {
+              "cmd_id": "FORWARD"
+            },
+            "location": { "x": 3, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:rec",
+            "command": {
+              "cmd_id": "RECORD"
+            },
+            "location": { "x": 2, "y": 4 }
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Screen grid sizes for Remote Two:
+- Minimal size: 1 x 1
+- Maximum size: 8 x 12
+- Default: 4 x 6
+
+The screen layout grid definition can be retrieved with the Core-API: `GET /api/cfg/device/screen_layout`.
 
 ## Integration API
 
