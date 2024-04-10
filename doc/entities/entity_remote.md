@@ -6,11 +6,11 @@ A remote entity can send commands to a controllable device.
 
 ## Features
 
-| Name     | R | W  | Description                                                                                                                                    |
-|----------|---|----|------------------------------------------------------------------------------------------------------------------------------------------------|
-| send_cmd | ❌ | ✅  | Default feature of a remote entity. Always present, even if not specified.                                                                     |
-| on_off   | ✅ | ✅  | Remote has on and off commands.                                                                                                                |
-| toggle   | ❌ | ✅  | Toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command. |
+| Name     | R | W  | Description                                                                                                                                          |
+|----------|---|----|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| send_cmd | ❌ | ✅  | Default feature of a remote entity. Always present, even if not specified.                                                                           |
+| on_off   | ✅ | ✅  | Remote has on and off commands.                                                                                                                      |
+| toggle   | ❌ | ✅  | Power toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command. |
 
 - R: readable
     - ✅ Feature has a readable attribute to retrieve the current or available values.
@@ -49,14 +49,23 @@ None.
 
 Optional features of the remote entity.
 
-| Name            | Type   | Values              | Default | Description                                                                                                                                  |
-|-----------------|--------|---------------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| simple_commands | array  | string(20)          | []      | Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user.            |
-| button_mapping  | array  | DeviceButtonMapping | []      | Optional command mapping for the physical buttons. If not provided, an automatic mapping is attempted based on the provided simple_commands. |
-| user_interface  | object | UserInterface       | {}      | Optional user interface definition for the supported commands.                                                                               |
+| Name            | Type   | Values              | Default | Description                                                                                                                       |
+|-----------------|--------|---------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------|
+| simple_commands | array  | string(20)          | []      | Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user. |
+| button_mapping  | array  | DeviceButtonMapping | []      | Optional command mapping for the physical buttons.                                                                                |
+| user_interface  | object | UserInterface       | {}      | Optional user interface definition for the supported commands.                                                                    |
 
 If the available commands are known by the integration driver, they should be made available in the `simple_commands`
 option. This allows the Remote Two configuration in the web-configurator to show all supported commands to the user.
+Otherwise, the user has to know the command names and has to enter them manually for each command.
+
+If `button_mapping` or `user_interface` options are not provided, an automatic mapping is attempted based on the command
+names in `simple_commands`. The mapping logic is similar to the infrared codesets in the internal IR-remotes.
+See [Command name patterns](#command-name-patterns) below on how commands should be named.
+
+The automatic button and user interface creation is only done once at the initial entity configuration. From that point
+on the user can independently modify the UI and button mapping. Only changes in the `simple_commands` list will be
+applied to the configured entities in Remote Two, if the available entities are reloaded from the integration driver.
 
 #### Simple commands
 
@@ -170,6 +179,9 @@ Example of `entity.options` object:
   ]
 }
 ```
+
+See [Commands](#commands) about entity commands and their short vs fully qualified syntax. For example `on` and `off` vs
+`remote.on` and `remote.off`.
 
 Button identifiers for Remote Two:
 - `BACK`
@@ -290,27 +302,78 @@ The screen layout grid definition can be retrieved with the Core-API: `GET /api/
 
 ### Commands
 
-The integration driver has to implement a handler for the `entity_command` message to process the following command
-requests in `msg_data.cmd_id`.
+The integration driver has to implement a handler for the `entity_command` WebSocket message to process the following
+command requests in `msg_data.cmd_id`.
 
 | cmd_id            | Parameters | Type         | Description                                                                                  |
 |-------------------|------------|--------------|----------------------------------------------------------------------------------------------|
 | on                | -          |              | Send the on-command to the controlled device.                                                |
 | off               | -          |              | Send the off-command.                                                                        |
-| toggle            | -          |              | Toggle the current remote of the controlled device, either from on -> off or from off -> on. |
+| toggle            | -          |              | Toggle the power state of the controlled device, either from on -> off or from off -> on.    |
 | send_cmd          | command    | String(20)   | A single command.                                                                            |
 |                   | repeat     | Number       | Optional: how many times the command shall be repeated. Defaults to 1 if not specified.      |
 |                   | delay      | Number       | Optional: delay in milliseconds between repeated commands.                                   |
 |                   | hold       | Number       | Optional: time in milliseconds before a command is released. Defaults to 0 if not specified. |
-| send_cmd_sequence | sequence   | String array | Command list. Same defaults are used as for the `send` command.                              |
+| send_cmd_sequence | sequence   | String array | Command list. Same defaults are used as for the `send_cmd` command.                          |
 |                   | repeat     | Number       | Optional: how many times each command shall be repeated.                                     |
 |                   | delay      | Number       | Optional: delay in milliseconds between commands.                                            |
 |                   | hold       | Number       | Optional: time in milliseconds before each command is released.                              |
 
+- The `command` and `sequence` parameters will either contain a simple command (if specified in entity options) or a
+  freetext command. It is up to the integration driver to verify and validate commands.
 - A command name may not include whitespace characters.
 - The maximum length of a command name is 20 characters.
-- A command name may not be any of the defined `cmd_id`: on, off, toggle, send_cmd, send_cmd_sequence
-- If no `delay` parameter is included, the integration driver has to choose an appropriate delay based on the controlled device.
+- A command name may not be any of the defined `cmd_id` commands: on, off, toggle, send_cmd, send_cmd_sequence
+- If no `delay` parameter is included, the integration driver has to choose an appropriate delay based on the command
+  and controlled device.
+
+#### Using commands for button mappings and UI elements 
+
+When defining commands in button mappings or UI elements, either entity commands or simple commands can be used. 
+- Entity commands are all the commands an entity defines (see `cmd_id` column in [Commands](#commands) above). Example:
+```json
+{
+  "cmd_id": "toggle"
+}
+```
+
+- If the integration driver provides the `simple_commands` option, the specified commands can be directly used in
+  `cmd_id`. Example:
+```json
+{
+  "cmd_id": "PLAY"
+}
+```
+
+- Specified simple commands can also be used in the `send_cmd` entity command.
+- The `command` parameter of `send_cmd` allows any command name ("free-text") and it's up to the integration driver to
+  validate the received commands.  
+  Example of a simple command used in `send_cmd`:
+```json
+{
+  "cmd_id": "send_cmd",
+  "params": {
+    "command": "PLAY"
+  }
+}
+```
+
+- If an entity command is used it's recommended to prefix it with the entity type to use the same naming convention as
+  in the Core-API.
+  - Using the fully qualified command name might make it easier in the integration driver to distinguish the commands.
+  - A missing entity type prefix is automatically added when an available remote-entity is configured in Remote Two.
+  - When working with the Core-API, for example reconfiguring a button mapping, the fully qualified command name is
+    required.
+
+Recommended fully-qualified entity command name:
+```json
+{
+  "cmd_id": "remote.send_cmd",
+  "params": {
+    "command": "PLAY"
+  }
+}
+```
 
 ### Events
 
@@ -324,6 +387,14 @@ The following attributes must be included:
 | state         | New entity [state](#states).  |
 
 ### Command examples
+
+Remote-entity examples of received `entity_command` WebSocket messages in an integration driver.
+
+Notes:
+- These commands are slightly different from the button mapping and UI item commands and may not be confused!
+  - See Integration-API vs Core-API models.
+- For example a simple command will always be wrapped into the entity command `send_cmd` and the `cmd_id` values refer
+to the defined [Commands](#commands) without the entity type prefix.
 
 #### on
 
