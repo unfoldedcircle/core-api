@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
+---
+
+## 0.25.0-beta
 ### Added
 - Add hostname and MAC address to version information returned in `version_info response message ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
 - Add `restart_required` field in the CfgSoftwareUpdate response for the UI to show a restart required notice in the OTA settings screen.
@@ -15,5 +18,3 @@ This section contains unreleased changed which will be part of an upcoming relea
 - Add standby inhibitor management messages.
 ### Changed
 - Software update channel names are uppercase.
-
----

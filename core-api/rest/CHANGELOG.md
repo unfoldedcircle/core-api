@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
+---
+
+## 0.32.0
 ### Added
 - Add hostname and MAC address to version information returned in `/pub/version` endpoint ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
 - Add individual button press endpoints to delete short- and long-press mappings in remotes and activities.
@@ -17,4 +20,3 @@ This section contains unreleased changed which will be part of an upcoming relea
 ### Changed
 - Software update channel names are uppercase.
 
----
