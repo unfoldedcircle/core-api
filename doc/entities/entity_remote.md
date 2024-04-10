@@ -303,7 +303,8 @@ The screen layout grid definition can be retrieved with the Core-API: `GET /api/
 ### Commands
 
 The integration driver has to implement a handler for the `entity_command` WebSocket message to process the following
-command requests in `msg_data.cmd_id`.
+command requests in `msg_data.cmd_id`. See [Command examples](#command-examples) and [Integration-API](../../integration-api)
+for the full message structure.
 
 | cmd_id            | Parameters | Type         | Description                                                                                  |
 |-------------------|------------|--------------|----------------------------------------------------------------------------------------------|
@@ -328,6 +329,14 @@ command requests in `msg_data.cmd_id`.
   and controlled device.
 
 #### Using commands for button mappings and UI elements 
+
+‼️ Attention: the `cmd_id` for button mapping and UI item commands is slightly different than the remote-entity 
+[Commands](#commands)!
+- Core-API button mapping and UI item commands:
+  - The `cmd_id` value is either a simple command or an entity command with the entity type prefix. 
+- Integration-API entity commands:
+  - The `cmd_id` value refers to the defined [Commands](#commands) without the entity type prefix.
+  - A simple command will always be wrapped into the remote-entity command `send_cmd`.
 
 When defining commands in button mappings or UI elements, either entity commands or simple commands can be used. 
 - Entity commands are all the commands an entity defines (see `cmd_id` column in [Commands](#commands) above). Example:
@@ -389,12 +398,6 @@ The following attributes must be included:
 ### Command examples
 
 Remote-entity examples of received `entity_command` WebSocket messages in an integration driver.
-
-Notes:
-- These commands are slightly different from the button mapping and UI item commands and may not be confused!
-  - See Integration-API vs Core-API models.
-- For example a simple command will always be wrapped into the entity command `send_cmd` and the `cmd_id` values refer
-to the defined [Commands](#commands) without the entity type prefix.
 
 #### on
 
