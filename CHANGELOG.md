@@ -10,6 +10,8 @@ _Changes in the next release_
 
 ### Added
 - New media-player entity features: context_menu, settings. Support has been included in firmware v1.7.4.
+- New remote-entity for sending commands. This allows to write custom integrations for devices which don't fit a media-player entity.
+  - The first integration supporting remote-entity will be Home Assistant.
 
 ---
 

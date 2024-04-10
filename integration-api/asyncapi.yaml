@@ -8,10 +8,11 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.9.1-beta'
+  version: '0.10.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
+    email: support@unfoldedcircle.com
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: https://creativecommons.org/licenses/by-sa/4.0/
@@ -1298,8 +1299,10 @@ components:
                 cmd_id:
                   type: string
                 params:
+                  # TODO Define parameter objects with oneOf or just document possible objects?
                   description: |
-                    TODO Define parameter objects with oneOf or just document possible objects?
+                    See <https://github.com/unfoldedcircle/core-api/tree/main/doc/entities> for command parameter
+                    definitions.
                   type: object
               required:
                 - entity_type
@@ -1611,7 +1614,10 @@ components:
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `light`, `media_player`,
-        `sensor`, `switch`. 
+        `remote`,`sensor`, `switch`. 
+
+        See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
+        for more information.
         
         The `entity_type` value acts as discriminator for the entity type, which defines the supported features and
         options of an entity.  
@@ -1660,6 +1666,9 @@ components:
         
         A button is stateless. To represent something that can be turned on and off, then the `switch` entity should be
         used.
+
+        See [button entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_button.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -1680,6 +1689,9 @@ components:
         user for the current state.
         
         If the switch controls a light source, then the 'light' entity is usually a better choice.
+
+        See [switch entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_switch.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -1713,6 +1725,9 @@ components:
       description: |
         A climate entity controls heating, ventilation and air conditioning (HVAC) devices. This can range from simple
         fans to personal air conditioning units to integrated building devices.
+
+        See [climate entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_climate.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -1775,6 +1790,9 @@ components:
         Entity for covering or opening things like blinds, window covers, curtains, etc. The entity `features` specify
         the abilities of the cover and the controllable properties, whereas the `device_class` specifies the UI
         representation.
+
+        See [cover entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_cover.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -1820,6 +1838,9 @@ components:
         controlled like setting brightness, hue, color saturation and color temperature.
         
         The [HSV color model](https://en.wikipedia.org/wiki/HSL_and_HSV) is used for adjusting color and brightness.
+
+        See [light entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_light.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -1850,6 +1871,9 @@ components:
       description: |
         A media player entity controls playback of media on a device. This could be an online music streaming service,
         a TV, a stereo or a video player.
+
+        See [media player entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_media_player.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -1927,6 +1951,42 @@ components:
                   minimum: 2
                   maximum: 100
 
+    remote:
+      description: |
+        A remote entity can send commands to a controllable device.
+        
+        See [remote entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_remote.md)
+        for more information.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              type: array
+              items:
+                type: string
+                enum:
+                  - send_cmd
+                  - on_off
+                  - toggle
+            options:
+              type: object
+              properties:
+                simple_commands:
+                  description: |
+                    Optional list of supported commands. If not provided, the integration driver has to document the
+                    available commands for the user.  
+                    Example: `["EXIT", "CHANNEL_UP", "CHANNEL_DOWN"]`
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/SimpleRemoteCommand'
+                button_mapping:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/DeviceButtonMapping'
+                user_interface:
+                  $ref: '#/components/schemas/UserInterface'
+
     sensor:
       description: |
         A sensor entity provides measured values from devices or dedicated hardware sensors.  
@@ -1935,6 +1995,9 @@ components:
       
         - The `custom` device class allows arbitrary UI labels and units.
         - The `temperature` device class performs automatic conversion between °C and °F.
+
+        See [sensor entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_sensor.md)
+        for more information.
       allOf:
         - $ref: '#/components/schemas/entity'
         - type: object
@@ -2007,7 +2070,11 @@ components:
 
     SimpleCommand:
       type: string
-      format: "^[A-Z0-9\/_.:+#*°@%()?-]{1,20}$"
+      format: "^[A-Z0-9/_.:+#*°@%()?-]{1,20}$"
+
+    SimpleRemoteCommand:
+      type: string
+      format: "^\\S{1,20}$"
 
     # derived from Core-API integrationSetupChange: without driver_id
     driverSetupChange:
@@ -2387,3 +2454,136 @@ components:
       description: |
         Optional icon identifier. If specified the icon will be set. An empty identifier while updating the object
         removes the existing icon.
+
+    DeviceButtonMapping:
+      type: object
+      properties:
+        button:
+          description: Physical button identifier
+          type: string
+        short_press:
+          $ref: '#/components/schemas/EntityCommand'
+        long_press:
+          $ref: '#/components/schemas/EntityCommand'
+      required:
+        - button
+
+    EntityCommand:
+      type: object
+      properties:
+        cmd_id:
+          description: |
+            Simple command name or entity command identifier, as returned in the entity command metadata.
+          type: string
+        params:
+          description: |
+            For entity commands: optional command parameters as key / value pairs.
+            See entity documentation for available parameters.
+          type: object
+      required:
+        - cmd_id
+      example:
+        cmd_id: remote.on
+
+    UserInterface:
+      type: object
+      properties:
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserInterfacePage'
+
+    UserInterfacePage:
+      type: object
+      properties:
+        page_id:
+          type: string
+        name:
+          description: Optional page name
+          type: string
+        grid:
+          $ref: '#/components/schemas/Grid'
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserInterfaceItem'
+      required:
+        - page_id
+        - grid
+        - items
+
+    UserInterfaceItem:
+      description: |
+        A user interface item is either an icon, text or media information from a media-player entity.
+        - Icon and text items can be static or linked to a command specified in the `command` field.
+        - Default size is 1x1 if not specified.
+      type: object
+      properties:
+        type:
+          description: |
+            Type of the user interface item:
+            - `icon`: show an icon, either a UC icon or a custom icon. Field `icon` must contain the icon identifier.
+            - `text`: show text only from field `text`.
+          type: string
+          enum:
+            - icon
+            - text
+            - numpad
+        icon:
+          description: |
+            Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.
+            Available prefixes:
+              - `uc:` - integrated icon font
+              - `custom:` - custom resource
+          type: string
+        text:
+          type: string
+        command:
+          $ref: '#/components/schemas/EntityCommand'
+        location:
+          $ref: '#/components/schemas/GridLocation'
+        size:
+          $ref: '#/components/schemas/GridItemSize'
+      required:
+        - type
+        - location
+
+    Grid:
+      description: Grid layout size.
+      type: object
+      properties:
+        width:
+          type: integer
+          minimum: 1
+        height:
+          type: integer
+          minimum: 1
+      required:
+        - width
+        - height
+
+    GridItemSize:
+      description: 'Item size in the button grid. Default size if not specified: 1 x 1'
+      type: object
+      properties:
+        width:
+          type: integer
+          minimum: 1
+          default: 1
+        height:
+          type: integer
+          minimum: 1
+          default: 1
+    GridLocation:
+      description: Button placement in the grid with 0-based coordinates.
+      type: object
+      properties:
+        x:
+          type: integer
+          minimum: 0
+        'y':
+          type: integer
+          minimum: 0
+      required:
+        - x
+        - 'y'
