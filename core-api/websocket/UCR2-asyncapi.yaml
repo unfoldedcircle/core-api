@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two WebSocket Core-API
-  version: '0.25.0-beta'
+  version: '0.26.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -267,6 +267,9 @@ channels:
           - $ref: '#/components/messages/wifi_network_command'
           - $ref: '#/components/messages/del_wifi_network'
 
+          # --- BT handling
+          - $ref: '#/components/messages/bt_pairing_response'
+
     subscribe:
       description: Core-API for clients to receive messages from the remote.
       operationId: subRemoteMessage
@@ -333,6 +336,11 @@ channels:
           - $ref: '#/components/messages/wifi_scan_status'
           - $ref: '#/components/messages/wifi_networks'
           - $ref: '#/components/messages/wifi_network'
+
+          # --- BT handling
+          - $ref: '#/components/messages/bt_pairing_started'
+          - $ref: '#/components/messages/bt_pairing_auth_request'
+          - $ref: '#/components/messages/bt_pairing_complete'
 
   /intg:
     publish:
@@ -1910,6 +1918,48 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/wifiChangeEventMsg'
+
+    # --- BT handling
+    bt_pairing_started:
+      summary: 🔍 Inform user that pairing has started.
+      description: |
+        Emitted if a central started pairing with the Remote.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/btPairingStartedEventMsg'
+
+    bt_pairing_auth_request:
+      summary: 🔍 Request pairing authorization from the user.
+      description: |
+        Depending on authentication requirements, IO capabilities, etc. a different type of authentication is requested.
+        The client must respond with the `bt_pairing_response` event.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/btPairingAuthRequestEventMsg'
+
+    bt_pairing_complete:
+      summary: 🔍 Bonding process has finished.
+      description: |
+        This event is emitted after the bonding process, either with a success state or an error code if bonding failed.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/btPairingCompleteEventMsg'
+
+    bt_pairing_response:
+      summary: 🔍 Action to bt_pairing_auth_request event.
+      description: |
+        This request needs to be sent for a bt_pairing_auth_request event:
+        - `Passkey` request: either provide the passkey entered by the user, or decline it with `confirm: false`.
+        - `NumericComparison` request: confirm or decline with `confirm: true | false`.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/btPairingResponseMsg'
+      x-response:
+        $ref: '#/components/messages/result'
 
     # --- Profile handling
 
@@ -5103,6 +5153,72 @@ components:
               const: REMOTE
             msg_data:
               $ref: '#/components/schemas/WifiChange'
+          required:
+            - msg
+            - msg_data
+
+    # --- BT handling
+    btPairingStartedEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: bt_pairing_started
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/BtPairingStarted'
+          required:
+            - msg
+            - msg_data
+
+    btPairingAuthRequestEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: bt_pairing_auth_request
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/BtPairingAuthRequest'
+          required:
+            - msg
+            - msg_data
+
+    btPairingCompleteEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: bt_pairing_complete
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/BtPairingComplete'
+          required:
+            - msg
+            - msg_data
+
+    btPairingResponseMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: bt_pairing_response
+            msg_data:
+              $ref: '#/components/schemas/BtPairingResponse'
           required:
             - msg
             - msg_data
@@ -9488,6 +9604,161 @@ components:
         - WRONG_KEY
         - NETWORK_ADDED
         - NETWORK_REMOVED
+
+    # --- BT handling
+    BtPairingStarted:
+      type: object
+      properties:
+        id:
+          description: Bonding request identifier.
+          type: integer
+        peer:
+          $ref: '#/components/schemas/BtPeer'
+      required:
+        - id
+        - peer
+    
+    BtPairingAuthRequest:
+      type: object
+      properties:
+        id:
+          description: Bonding request identifier.
+          type: integer
+        entity_id:
+          description: Optional remote-entity identifier.
+          type: string
+        peer:
+          $ref: '#/components/schemas/BtPeer'
+        kind:
+          $ref: '#/components/schemas/BtBondingSecurityType'
+        passkey:
+          description: |
+            Only set for `kind: DisplayNumber | NumericComparison`
+          type: integer
+          minimum: 0
+      required:
+        - id
+        - peer
+        - kind
+
+    BtPairingComplete:
+      type: object
+      properties:
+        id:
+          description: Bonding request identifier.
+          type: integer
+        entity_id:
+          description: Optional remote-entity identifier.
+          type: string
+        success:
+          type: boolean
+        status_code:
+          description: Pairing error if not successful.
+          type: string
+          enum:
+            - SUCCESS
+            - CONNECTION_TIMEOUT
+            - REMOTE_USER_TERMINATED_CONNECTION
+            - AUTHENTICATION_FAILURE
+            - OTHER
+        reason:
+          description: |
+            Authentication error reason code. Only set for `status_code: AUTHENTICATION_FAILURE`.
+            Common reason codes are, but not limited to:
+            - `PASSKEY_ENTRY_FAILED`
+            - `AUTHENTICATION_REQUIREMENTS`
+            - `CONFIRM_VALUE_FAILED`
+            - `PAIRING_NOT_SUPPORTED`
+            - `ENCRYPTION_KEY_SIZE`
+            - `COMMAND_NOT_SUPPORTED`
+            - `UNSPECIFIED_REASON`
+            - `REPEATED_ATTEMPTS`
+            - `INVALID_PARAMETERS`
+            - `DHKEY_CHECK_FAILED`
+            - `NUMERIC_COMPARISON_FAILED`
+          type: string
+        peer:
+          $ref: '#/components/schemas/BtPeer'
+      required:
+        - id
+        - success
+        - peer
+
+    # --- OpenAPI Remote.yaml
+
+    BtBondingSecurityType:
+      description: |
+        Bonding security type:
+        - `JustWorks`: Automatic pairing, peripheral only needs to confirm pairing request from central.
+        - `DisplayNumber`: Peripheral must display number for the central to confirm.
+        - `NumericComparison`: Peripheral must confirm or declined if the numeric value matches the displayed number on the central.
+        - `PasskeyInput`: Peripheral must enter displayed passkey on central.
+      type: string
+      enum:
+        - JUST_WORKS
+        - DISPLAY_NUMBER
+        - NUMERIC_COMPARISON
+        - PASSKEY_INPUT
+
+    BtPairingResponse:
+      description: |
+        Response to a pairing request.
+        - `Passkey` request: either provide the passkey entered by the user, decline it with `confirm: false`.
+        - `NumericComparison` request: confirm or decline with `confirm: true | false`.
+      type: object
+      allOf:
+        - properties:
+            id:
+              description: Bonding request identifier.
+              type: integer
+          required:
+            - id
+        - oneOf:
+            - type: object
+              properties:
+                passkey:
+                  description: 6-digit passkey displayed on the central, sent as text. Leading zero(s) can be included or omitted.
+                  type: string
+                  minLength: 1
+                  maxLength: 6
+              required:
+                - passkey
+            - type: object
+              properties:
+                confirm:
+                  description: Confirm or decline a bonding request.
+                  type: boolean
+              required:
+                - confirm
+
+    BtPeer:
+      description: Information about the (paired) peer.
+      type: object
+      properties:
+        address:
+          description: BT address in 00:00:00:00:00:00 format.
+          type: string
+        addr_type:
+          $ref: '#/components/schemas/BtAddressType'
+      required:
+        - address
+        - addr_type
+
+    BtAddressType:
+      description: |
+        Address type:
+        - `LE_PUBLIC`: Public device address
+        - `LE_RANDOM`: Random device address
+        - `LE_PUBLIC_IDENTITY`: Public identity address (corresponds to resolved private address)
+        - `LE_RANDOM_IDENTITY`: Random (static) identity address (corresponds to resolved private address)
+        - `UNKNOWN`: Address could not be determined, or an error occurred
+      type: string
+      enum:
+        - LE_PUBLIC
+        - LE_RANDOM
+        - LE_PUBLIC_IDENTITY
+        - LE_RANDOM_IDENTITY
+        - UNKNOWN
 
     # --- OpenAPI PowerMode.yaml
 
