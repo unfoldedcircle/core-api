@@ -6307,6 +6307,35 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /cfg/bt:
+    get:
+      tags:
+        - cfg
+      summary: "\U0001F477 Get Bluetooth settings."
+      description: |
+        _TODO_
+
+        Advertisement name placeholders:
+        - `000000` will be replaced with the last 3 BT MAC address values.
+        - `00:00:00:00:00:00` will be replaced with the full BT MAC address.
+      operationId: getBtSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgBt'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /cfg/bt/profiles:
     get:
       tags:
@@ -10792,6 +10821,8 @@ components:
     CfgAll:
       type: object
       properties:
+        bt:
+          $ref: '#/components/schemas/CfgBt'
         button:
           $ref: '#/components/schemas/CfgButtons'
         device:
@@ -10819,6 +10850,27 @@ components:
         restart_required:
           description: A configuration change requires a restart.
           type: boolean
+    CfgBt:
+      type: object
+      properties:
+        peripheral_connections:
+          description: Maximum number of peripheral connections at the same time.
+          type: integer
+          minimum: 1
+        advertisement_name:
+          description: Advertisement name of the Remote.
+          type: string
+        enable_hci_log:
+          description: Enable HCI logging.
+          type: boolean
+        enable_debug_port:
+          description: Enable BT subsystem debug TCP-port for remote control.
+        version:
+          description: BT subsystem version.
+          type: string
+      required:
+        - peripheral_connections
+        - advertisement_name
     CfgButtons:
       type: object
       properties:
@@ -13712,6 +13764,9 @@ components:
         pairing_enabled:
           description: Indicates if a central can pair with this BT-remote peripheral.
           type: boolean
+        advertisement_name:
+          description: Advertisement name of the peripheral. Usually only set when `pairing_enabled` is true.
+          type: string
         peer:
           $ref: '#/components/schemas/BtPeer'
       required:
