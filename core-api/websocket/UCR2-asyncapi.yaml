@@ -9654,6 +9654,7 @@ components:
         success:
           type: boolean
         status_code:
+          description: Pairing error if not successful.
           type: string
           enum:
             - SUCCESS
@@ -9661,12 +9662,27 @@ components:
             - REMOTE_USER_TERMINATED_CONNECTION
             - AUTHENTICATION_FAILURE
             - OTHER
+        reason:
+          description: |
+            Authentication error reason code. Only set for `status_code: AUTHENTICATION_FAILURE`.
+            Common reason codes are, but not limited to:
+            - `PASSKEY_ENTRY_FAILED`
+            - `AUTHENTICATION_REQUIREMENTS`
+            - `CONFIRM_VALUE_FAILED`
+            - `PAIRING_NOT_SUPPORTED`
+            - `ENCRYPTION_KEY_SIZE`
+            - `COMMAND_NOT_SUPPORTED`
+            - `UNSPECIFIED_REASON`
+            - `REPEATED_ATTEMPTS`
+            - `INVALID_PARAMETERS`
+            - `DHKEY_CHECK_FAILED`
+            - `NUMERIC_COMPARISON_FAILED`
+          type: string
         peer:
           $ref: '#/components/schemas/BtPeer'
       required:
         - id
         - success
-        - status_code
         - peer
 
     # --- OpenAPI Remote.yaml
