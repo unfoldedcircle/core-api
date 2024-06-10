@@ -5197,7 +5197,7 @@ components:
         - properties:
             msg:
               type: string
-              const: bt_pairing_auth_request
+              const: bt_pairing_complete
             cat:
               type: string
               const: DEVICE
