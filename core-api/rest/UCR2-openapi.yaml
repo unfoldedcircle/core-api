@@ -2468,7 +2468,7 @@ paths:
         the total number of defined activities.
 
         The optional text search query searches in the activity name and activity identifier.
-            
+        
         The overview information doesn't include all details of an activity. The full activity information is retrievable
         with `/activities/{entityId}`.
       operationId: getActivities
@@ -13767,6 +13767,9 @@ components:
         ‼️ Only `kind: PasskeyInput` is currently implemented.
       type: object
       properties:
+        id:
+          description: Bonding request identifier
+          type: integer
         profile:
           description: BT peripheral connection profile to associate the bonding request.
           type: integer
@@ -13781,10 +13784,10 @@ components:
             - `PasskeyInput`: Peripheral must enter displayed passkey on central.
           type: string
           enum:
-            - JustWorks
-            - DisplayNumber
-            - NumericComparison
-            - PasskeyInput
+            - JUST_WORKS
+            - DISPLAY_NUMBER
+            - NUMERIC_COMPARISON
+            - PASSKEY_INPUT
         passkey:
           description: |
             Only set for `kind: DisplayNumber | NumericComparison`
@@ -13800,17 +13803,30 @@ components:
         - `Passkey` request: either provide the passkey entered by the user, decline it with `confirm: false`.
         - `NumericComparison` request: confirm or decline with `confirm: true | false`.
       type: object
-      oneOf:
+      allOf:
         - properties:
-            passkey:
-              type: string
-              description: '6-digit passkey displayed on the central, sent as text. Leading zero(s) can be included or omitted.'
-              minLength: 1
-              maxLength: 6
-        - properties:
-            confirm:
-              description: Confirm or decline a bonding request.
-              type: boolean
+            id:
+              description: Bonding request identifier.
+              type: integer
+          required:
+            - id
+        - oneOf:
+            - type: object
+              properties:
+                passkey:
+                  description: '6-digit passkey displayed on the central, sent as text. Leading zero(s) can be included or omitted.'
+                  type: string
+                  minLength: 1
+                  maxLength: 6
+              required:
+                - passkey
+            - type: object
+              properties:
+                confirm:
+                  description: Confirm or decline a bonding request.
+                  type: boolean
+              required:
+                - confirm
     BtPeer:
       description: Information about the (paired) peer.
       type: object
@@ -13826,18 +13842,18 @@ components:
     BtAddressType:
       description: |
         Address type:
-        - `LePublic`: Public Device Address
-        - `LeRandom`: Random Device Address
-        - `LePublicIdentity`: Public Identity Address (Corresponds to Resolved Private Address)
-        - `LeRandomIdentity`: Random (static) Identity Address (Corresponds to Resolved Private Address)
-        - `Unknown`: Address could not be determined, or an error occurred
+        - `LE_PUBLIC`: Public device address
+        - `LE_RANDOM`: Random device address
+        - `LE_PUBLIC_IDENTITY`: Public identity address (corresponds to resolved private address)
+        - `LE_RANDOM_IDENTITY`: Random (static) identity address (corresponds to resolved private address)
+        - `UNKNOWN`: Address could not be determined, or an error occurred
       type: string
       enum:
-        - LePublic
-        - LeRandom
-        - LePublicIdentity
-        - LeRandomIdentity
-        - Unknown
+        - LE_PUBLIC
+        - LE_RANDOM
+        - LE_PUBLIC_IDENTITY
+        - LE_RANDOM_IDENTITY
+        - UNKNOWN
     BtDeviceProfileInfo:
       description: |
         BT device profile overview information. Contains all required device information to make a device selection.
