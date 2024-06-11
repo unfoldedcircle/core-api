@@ -1,0 +1,315 @@
+{
+  "id": "lg_webos",
+  "name": "LG WebOS TV",
+  "version": 1,
+  "peripherals": {
+    "keyboard": true,
+    "mouse": true
+  },
+  "commands": {
+    "keyboard": [
+      "KEY_A",
+      "KEY_B",
+      "KEY_C",
+      "KEY_D",
+      "KEY_E",
+      "KEY_F",
+      "KEY_G",
+      "KEY_H",
+      "KEY_I",
+      "KEY_J",
+      "KEY_K",
+      "KEY_L",
+      "KEY_M",
+      "KEY_N",
+      "KEY_O",
+      "KEY_P",
+      "KEY_Q",
+      "KEY_R",
+      "KEY_S",
+      "KEY_T",
+      "KEY_U",
+      "KEY_V",
+      "KEY_W",
+      "KEY_X",
+      "KEY_Y",
+      "KEY_Z",
+      "KEY_1",
+      "KEY_2",
+      "KEY_3",
+      "KEY_4",
+      "KEY_5",
+      "KEY_6",
+      "KEY_7",
+      "KEY_8",
+      "KEY_9",
+      "KEY_0",
+      "KEY_RETURN",
+      "KEY_ESC",
+      "KEY_BACKSPACE",
+      "KEY_SPACE",
+      "KEY_MINUS",
+      "KEY_EQUAL",
+      "KEY_LEFT_BRACE",
+      "KEY_RIGHT_BRACE",
+      "KEY_BACKSLASH",
+      "KEY_HASH_TILDE",
+      "KEY_SEMICOLON",
+      "KEY_APOSTROPHE",
+      "KEY_GRAVE",
+      "KEY_COMMA",
+      "KEY_DOT",
+      "KEY_SLASH",
+      "KEY_PAUSE",
+      "KEY_PAGE_UP",
+      "KEY_PAGE_DOWN",
+      "KEY_RIGHT_ARROW",
+      "KEY_LEFT_ARROW",
+      "KEY_DOWN_ARROW",
+      "KEY_UP_ARROW",
+      "KEYPAD_SLASH",
+      "KEYPAD_ASTERISK",
+      "KEYPAD_MINUS",
+      "KEYPAD_PLUS",
+      "KEYPAD_1",
+      "KEYPAD_2",
+      "KEYPAD_3",
+      "KEYPAD_4",
+      "KEYPAD_5",
+      "KEYPAD_6",
+      "KEYPAD_7",
+      "KEYPAD_8",
+      "KEYPAD_9",
+      "KEYPAD_0",
+      "KEYPAD_DOT",
+      "KEY_POWER",
+      "KEY_STOP",
+      "KEY_MUTE",
+      "KEY_VOLUME_UP",
+      "KEY_VOLUME_DOWN",
+      "KEY_LEFT_GUI"
+    ],
+    "consumer": [
+    ],
+    "system": [
+    ]
+  },
+  "command_mapping": {
+    "BACK": "KEY_ESC",
+    "HOME": "KEY_LEFT_GUI",
+    "POWER_OFF": "KEY_POWER",
+    "VOLUME_UP": "KEY_VOLUME_UP",
+    "VOLUME_DOWN": "KEY_VOLUME_DOWN",
+    "MUTE_TOGGLE": "KEY_MUTE",
+    "CHANNEL_UP": "KEY_PAGE_UP",
+    "CHANNEL_DOWN": "KEY_PAGE_DOWN",
+    "PAUSE": "KEY_PAUSE",
+    "STOP": "KEY_STOP",
+    "CURSOR_LEFT": "KEY_LEFT_ARROW",
+    "CURSOR_RIGHT": "KEY_RIGHT_ARROW",
+    "CURSOR_UP": "KEY_UP_ARROW",
+    "CURSOR_DOWN": "KEY_DOWN_ARROW",
+    "CURSOR_ENTER": "KEY_RETURN"
+  },
+  "user_interface": {
+    "pages": [
+      {
+        "grid": {
+          "height": 6,
+          "width": 4
+        },
+        "name": "Numbers",
+        "page_id": "numbers",
+        "items": [
+          {
+            "command": {
+              "cmd_id": "KEY_1"
+            },
+            "location": {
+              "x": 0,
+              "y": 0
+            },
+            "text": "1",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_2"
+            },
+            "location": {
+              "x": 1,
+              "y": 0
+            },
+            "text": "2",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_3"
+            },
+            "location": {
+              "x": 2,
+              "y": 0
+            },
+            "text": "3",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_4"
+            },
+            "location": {
+              "x": 0,
+              "y": 1
+            },
+            "text": "4",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_5"
+            },
+            "location": {
+              "x": 1,
+              "y": 1
+            },
+            "text": "5",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_6"
+            },
+            "location": {
+              "x": 2,
+              "y": 1
+            },
+            "text": "6",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_7"
+            },
+            "location": {
+              "x": 0,
+              "y": 2
+            },
+            "text": "7",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_8"
+            },
+            "location": {
+              "x": 1,
+              "y": 2
+            },
+            "text": "8",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_9"
+            },
+            "location": {
+              "x": 2,
+              "y": 2
+            },
+            "text": "9",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_ESC"
+            },
+            "location": {
+              "x": 0,
+              "y": 3
+            },
+            "text": "ESC",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_0"
+            },
+            "location": {
+              "x": 1,
+              "y": 3
+            },
+            "text": "0",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_RETURN"
+            },
+            "location": {
+              "x": 2,
+              "y": 3
+            },
+            "text": "Enter",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAGE_UP"
+            },
+            "location": {
+              "x": 3,
+              "y": 0
+            },
+            "text": "CH up",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAGE_DOWN"
+            },
+            "location": {
+              "x": 3,
+              "y": 1
+            },
+            "text": "CH down",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_LEFT_GUI"
+            },
+            "location": {
+              "x": 2,
+              "y": 4
+            },
+            "text": "Home",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_STOP"
+            },
+            "icon": "uc:stop",
+            "location": {
+              "x": 1,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAUSE"
+            },
+            "icon": "uc:pause",
+            "location": {
+              "x": 2,
+              "y": 5
+            },
+            "type": "icon"
+          }
+        ]
+      }
+    ]
+  }
+}
