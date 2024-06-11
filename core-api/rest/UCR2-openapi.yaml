@@ -2468,7 +2468,7 @@ paths:
         the total number of defined activities.
 
         The optional text search query searches in the activity name and activity identifier.
-        
+            
         The overview information doesn't include all details of an activity. The full activity information is retrievable
         with `/activities/{entityId}`.
       operationId: getActivities
@@ -5177,7 +5177,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/BtBondingResponse'
+              $ref: '#/components/schemas/BtPairingResponse'
             examples:
               Passkey entry:
                 value:
@@ -13741,12 +13741,12 @@ components:
         - profile
     BtRemotePairingInfo:
       description: |
-        BT-remote pairing information. The `bonding_request` field is set if a bonding request is active, `peer` is only
+        BT-remote pairing information. The `pairing_request` field is set if a pairing request is active, `peer` is only
         set if the remote has been paired with a central device.
       type: object
       properties:
-        bonding_request:
-          $ref: '#/components/schemas/BtBondingRequest'
+        pairing_request:
+          $ref: '#/components/schemas/BtPairingRequest'
         paired:
           description: Indicates if BT-remote entity peripheral is paired with a central device.
           type: boolean
@@ -13761,33 +13761,22 @@ components:
       required:
         - paired
         - pairing_enabled
-    BtBondingRequest:
+    BtPairingRequest:
       description: |
-        A central requests bonding with the peripheral.
+        A central requests pairing with the peripheral.
         ‼️ Only `kind: PasskeyInput` is currently implemented.
       type: object
       properties:
         id:
-          description: Bonding request identifier
+          description: Pairing request identifier
           type: integer
         profile:
-          description: BT peripheral connection profile to associate the bonding request.
+          description: BT peripheral connection profile to associate the pairing request.
           type: integer
         peer:
           $ref: '#/components/schemas/BtPeer'
         kind:
-          description: |
-            Bonding security type:
-            - `JustWorks`: Automatic pairing, peripheral only needs to confirm pairing request from central.
-            - `DisplayNumber`: Peripheral must display number for the central to confirm.
-            - `NumericComparison`: Peripheral must confirm or declined if the numeric value matches the displayed number on the central.
-            - `PasskeyInput`: Peripheral must enter displayed passkey on central.
-          type: string
-          enum:
-            - JUST_WORKS
-            - DISPLAY_NUMBER
-            - NUMERIC_COMPARISON
-            - PASSKEY_INPUT
+          $ref: '#/components/schemas/BtSecurityType'
         passkey:
           description: |
             Only set for `kind: DisplayNumber | NumericComparison`
@@ -13797,16 +13786,16 @@ components:
         - profile
         - peer
         - kind
-    BtBondingResponse:
+    BtPairingResponse:
       description: |
-        Response to a BtBondingRequest.
+        Response to a BtPairingRequest.
         - `Passkey` request: either provide the passkey entered by the user, decline it with `confirm: false`.
         - `NumericComparison` request: confirm or decline with `confirm: true | false`.
       type: object
       allOf:
         - properties:
             id:
-              description: Bonding request identifier.
+              description: Pairing request identifier.
               type: integer
           required:
             - id
@@ -13823,7 +13812,7 @@ components:
             - type: object
               properties:
                 confirm:
-                  description: Confirm or decline a bonding request.
+                  description: Confirm or decline a pairing request.
                   type: boolean
               required:
                 - confirm
@@ -13854,6 +13843,19 @@ components:
         - LE_PUBLIC_IDENTITY
         - LE_RANDOM_IDENTITY
         - UNKNOWN
+    BtSecurityType:
+      description: |
+        Bonding security type:
+        - `JustWorks`: Automatic pairing, peripheral only needs to confirm pairing request from central.
+        - `DisplayNumber`: Peripheral must display number for the central to confirm.
+        - `NumericComparison`: Peripheral must confirm or declined if the numeric value matches the displayed number on the central.
+        - `PasskeyInput`: Peripheral must enter displayed passkey on central.
+      type: string
+      enum:
+        - JUST_WORKS
+        - DISPLAY_NUMBER
+        - NUMERIC_COMPARISON
+        - PASSKEY_INPUT
     BtDeviceProfileInfo:
       description: |
         BT device profile overview information. Contains all required device information to make a device selection.
