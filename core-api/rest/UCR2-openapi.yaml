@@ -4807,7 +4807,7 @@ paths:
         To clear an array simply provide an empty array.
 
         - Button mappings are configured with the dedicated `/remotes/{entityId}/buttons` and
-          `/remote/{entityId}/buttons/{button}` endpoints.
+          `/remotes/{entityId}/buttons/{button}` endpoints.
         - The user interface is configured with the dedicated `/remotes/{entityId}/ui`, `/remotes/{entityId}/ui/pages`
           and `/remotes/{entityId}/ui/pages/{pageId}` endpoints.
       parameters:
@@ -13453,6 +13453,8 @@ components:
                     - `false`: remote was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
+                kind:
+                  $ref: '#/components/schemas/RemoteKind'
                 bt:
                   type: object
                   properties:
