@@ -3,8 +3,10 @@
 - Tested with LG OLED77CX6LA
 - Supports keyboard and mouse devices.
 
-TODO:
-- Back key not yet found to exit all menus. Workaround: use home key (`KEY_LEFT_GUI`).
+## Known issues
+
+- Back key not yet found to exit all menus. Workaround: use home key (`KEY_LEFT_GUI`), press twice to open home, then
+  exit menu.
 
 ## Regular keycodes (Keyboard Keypad Page (0x07))
 
