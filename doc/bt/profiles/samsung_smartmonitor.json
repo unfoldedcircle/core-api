@@ -452,7 +452,7 @@
           },
           {
             "command": {
-              "cmd_id": "CONSUMER_REFRESH"
+              "cmd_id": "CONSUMER_AC_REFRESH"
             },
             "location": {
               "x": 0,
