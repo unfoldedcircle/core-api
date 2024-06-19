@@ -3,9 +3,14 @@
 - Based on generic Android device.
 - Tested with Google Chromecast HD, running Android TV 12 (STTE.240315.002)
 
-TODO:
-- YouTube button, identified as BUTTON_3 (190), Netflix button, identified as BUTTON_4 (191)
-  - According to <https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/KeyEvent.java#570>: Generic Game Pad Button #3 & #4.
+## Known issues
+
+- YouTube and Netflix buttons could not be found.
+  - Workaround: use [Button Mapper: Remap your keys](https://play.google.com/store/apps/details?id=flar2.homebutton)
+    or a similar app to remap buttons and add a shortcut for these apps.
+  - Note: YouTube button is identified as BUTTON_3 (190), Netflix button as BUTTON_4 (191). According to
+    [Android's KeyEvent class](https://android.googlesource.com/platform/frameworks/base/+/master/core/java/android/view/KeyEvent.java)
+    these should be "Generic Game Pad Button #3 & #4".
   - This project had no luck either: <https://github.com/designer-living/pi-usb-gadget-controller/blob/main/ANDROID_MAPPING.md>
 
 ## Regular keycodes (Keyboard Keypad Page (0x07))

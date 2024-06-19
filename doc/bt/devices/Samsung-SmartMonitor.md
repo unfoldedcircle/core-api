@@ -1,8 +1,14 @@
 # Samsung Smart Monitor
 
 - Tested with M7
+- Supports keyboard and mouse devices.
 
 ‼️ **work in progress**
+
+## Known issues
+
+- The monitor disconnects Bluetooth peripherals after power off.  
+  The device cannot be turned on again, only with the original Samsung remote.
 
 ## Regular keycodes (Keyboard Keypad Page (0x07))
 
