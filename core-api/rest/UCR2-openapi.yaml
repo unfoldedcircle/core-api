@@ -9269,6 +9269,30 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /system/logs/hci:
+    get:
+      tags:
+        - system
+      summary: Download HCI trace file.
+      description: |
+        Retrieve the Bluetooth HCI trace file in binary PacketLogger file format.
+
+        - `404 Not Found` is returned if there's no HCI trace file.
+      operationId: downloadHciLog
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /system/power:
     get:
       tags:
