@@ -104,7 +104,7 @@
       "KEY_RO",
       "KEY_YEN",
       "KEYPAD_JPCOMMA",
-      "KEY_ZENKAKU_HANKAKU,",
+      "KEY_ZENKAKU_HANKAKU",
       "KEY_LEFT_GUI",
       "KEY_MEDIA_PLAY_PAUSE",
       "KEY_MEDIA_STOP_CD",
@@ -342,7 +342,7 @@
           },
           {
             "command": {
-              "cmd_id": "KEY_PLUS"
+              "cmd_id": "KEYPAD_PLUS"
             },
             "location": {
               "x": 0,
@@ -353,7 +353,7 @@
           },
           {
             "command": {
-              "cmd_id": "KEY_MINUS"
+              "cmd_id": "KEYPAD_MINUS"
             },
             "location": {
               "x": 0,
@@ -448,21 +448,6 @@
               "width": 4
             },
             "text": "Consumer codes",
-            "type": "text"
-          },
-          {
-            "command": {
-              "cmd_id": "CONSUMER_AC_REFRESH"
-            },
-            "location": {
-              "x": 0,
-              "y": 2
-            },
-            "size": {
-              "height": 1,
-              "width": 2
-            },
-            "text": "Refresh",
             "type": "text"
           },
           {
