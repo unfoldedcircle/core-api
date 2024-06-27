@@ -6321,6 +6321,36 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: Modify Bluetooth settings.
+      description: |
+        Change one or multiple Bluetooth settings.
+
+        - If `peripheral_connections` is not specified, the original setting will be kept.
+        - The `peripheral_connections` setting must be enabled with a feature flag, otherwise it will be ignored and only
+          a single connection be used.
+      operationId: updateBtSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgBtUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgBt'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /cfg/bt/profiles:
     get:
       tags:
@@ -10874,12 +10904,31 @@ components:
           type: boolean
         enable_debug_port:
           description: Enable BT subsystem debug TCP-port for remote control.
+          type: boolean
         version:
           description: BT subsystem version.
           type: string
       required:
         - peripheral_connections
         - advertisement_name
+        - enable_hci_log
+        - enable_debug_port
+    CfgBtUpdate:
+      type: object
+      properties:
+        peripheral_connections:
+          description: Maximum number of peripheral connections at the same time.
+          type: integer
+          minimum: 1
+        enable_hci_log:
+          description: Enable HCI logging.
+          type: boolean
+        enable_debug_port:
+          description: Enable BT subsystem debug TCP-port for remote control.
+          type: boolean
+      required:
+        - enable_hci_log
+        - enable_debug_port
     CfgButtons:
       type: object
       properties:
