@@ -3,12 +3,11 @@
 - Tested with M7
 - Supports keyboard and mouse devices.
 
-‼️ **work in progress**
-
 ## Known issues
 
-- The monitor disconnects Bluetooth peripherals after power off.  
-  The device cannot be turned on again, only with the original Samsung remote.
+- The monitor disconnects Bluetooth peripherals after power off.
+  - The device cannot be turned on again with Bluetooth, only with the original Samsung remote.
+  - Workaround: use infrared power commands (Samsung, Generic TV1).
 
 ## Regular keycodes (Keyboard Keypad Page (0x07))
 
