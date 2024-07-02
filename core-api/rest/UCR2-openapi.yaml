@@ -10926,9 +10926,6 @@ components:
         enable_debug_port:
           description: Enable BT subsystem debug TCP-port for remote control.
           type: boolean
-      required:
-        - enable_hci_log
-        - enable_debug_port
     CfgButtons:
       type: object
       properties:
