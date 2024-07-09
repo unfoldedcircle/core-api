@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
-### Added
-- BT HID peripheral support in remote entities ([feature-and-bug-tracker#65](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/65)). 
-
 ---
+
+## 0.33.0
+### Added
+- BT HID peripheral support with new BT-remote entity ([feature-and-bug-tracker#65](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/65)).
+  - New resource type `BtDeviceProfile` for Bluetooth device profiles.
+  - New endpoints for Bluetooth configuration, HCI logs and BT system control.
 
 ## 0.32.0
 ### Added

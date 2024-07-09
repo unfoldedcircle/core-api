@@ -10,6 +10,10 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ---
 
+## 0.26.0-beta
+### Added
+- Bluetooth peripheral pairing events (`bt_pairing_started`, `bt_pairing_auth_request`, `bt_pairing_complete`) and request message (`bt_pairing_response`).
+
 ## 0.25.0-beta
 ### Added
 - Add hostname and MAC address to version information returned in `version_info response message ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
