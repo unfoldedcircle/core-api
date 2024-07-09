@@ -8,6 +8,7 @@ This repository contains API specifications of [Unfolded Circle Remote Two](http
 ## Overview
 
 - [Remote Two user interface](./doc/remote-ui.md)
+- [Bluetooth HID peripheral support](doc/bt/README.md)
 
 API definitions:
 

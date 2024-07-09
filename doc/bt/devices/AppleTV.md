@@ -2,8 +2,6 @@
 
 - Tested with Apple TV 4k, TvOS 17.4
 
-‼️ **work in progress, not yet fully tested**
-
 ## Regular keycodes (Keyboard Keypad Page (0x07))
 
 | Key name                | Usage code | OK | Description                                                               |

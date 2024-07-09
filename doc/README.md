@@ -1,6 +1,7 @@
 # Remote Two API Documentation
 
 - [Remote Two user interface](remote-ui.md)
+- [Bluetooth HID peripheral support](bt/README.md)
 - [Remote Two DNS-SD lookup](discovery.md)
 
 ## Integration API
