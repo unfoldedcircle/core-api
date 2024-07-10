@@ -1,0 +1,723 @@
+{
+  "id": "default",
+  "name": "Default",
+  "version": 1,
+  "peripherals": {
+    "keyboard": true,
+    "mouse": true
+  },
+  "commands": {
+    "keyboard": [
+      "KEY_A",
+      "KEY_B",
+      "KEY_C",
+      "KEY_D",
+      "KEY_E",
+      "KEY_F",
+      "KEY_G",
+      "KEY_H",
+      "KEY_I",
+      "KEY_J",
+      "KEY_K",
+      "KEY_L",
+      "KEY_M",
+      "KEY_N",
+      "KEY_O",
+      "KEY_P",
+      "KEY_Q",
+      "KEY_R",
+      "KEY_S",
+      "KEY_T",
+      "KEY_U",
+      "KEY_V",
+      "KEY_W",
+      "KEY_X",
+      "KEY_Y",
+      "KEY_Z",
+      "KEY_1",
+      "KEY_2",
+      "KEY_3",
+      "KEY_4",
+      "KEY_5",
+      "KEY_6",
+      "KEY_7",
+      "KEY_8",
+      "KEY_9",
+      "KEY_0",
+      "KEY_RETURN",
+      "KEY_ESC",
+      "KEY_BACKSPACE",
+      "KEY_TAB",
+      "KEY_SPACE",
+      "KEY_MINUS",
+      "KEY_EQUAL",
+      "KEY_LEFT_BRACE",
+      "KEY_RIGHT_BRACE",
+      "KEY_BACKSLASH",
+      "KEY_HASH_TILDE",
+      "KEY_SEMICOLON",
+      "KEY_APOSTROPHE",
+      "KEY_GRAVE",
+      "KEY_COMMA",
+      "KEY_DOT",
+      "KEY_SLASH",
+      "KEY_CAPSLOCK",
+      "KEY_F1",
+      "KEY_F2",
+      "KEY_F3",
+      "KEY_F4",
+      "KEY_F5",
+      "KEY_F6",
+      "KEY_F7",
+      "KEY_F8",
+      "KEY_F9",
+      "KEY_F10",
+      "KEY_F11",
+      "KEY_F12",
+      "KEY_SYSRQ",
+      "KEY_SCROLL_LOCK",
+      "KEY_PAUSE",
+      "KEY_INSERT",
+      "KEY_HOME",
+      "KEY_PAGE_UP",
+      "KEY_DELETE",
+      "KEY_END",
+      "KEY_PAGE_DOWN",
+      "KEY_RIGHT_ARROW",
+      "KEY_LEFT_ARROW",
+      "KEY_DOWN_ARROW",
+      "KEY_UP_ARROW",
+      "KEYPAD_NUMLOCK",
+      "KEYPAD_SLASH",
+      "KEYPAD_ASTERISK",
+      "KEYPAD_MINUS",
+      "KEYPAD_PLUS",
+      "KEYPAD_ENTER",
+      "KEYPAD_1",
+      "KEYPAD_2",
+      "KEYPAD_3",
+      "KEYPAD_4",
+      "KEYPAD_5",
+      "KEYPAD_6",
+      "KEYPAD_7",
+      "KEYPAD_8",
+      "KEYPAD_9",
+      "KEYPAD_0",
+      "KEYPAD_DOT",
+      "KEY_102ND",
+      "KEY_APPLICATION",
+      "KEY_POWER",
+      "KEYPAD_EQUAL",
+      "KEY_F13",
+      "KEY_F14",
+      "KEY_F15",
+      "KEY_F16",
+      "KEY_F17",
+      "KEY_F18",
+      "KEY_F19",
+      "KEY_F20",
+      "KEY_F21",
+      "KEY_F22",
+      "KEY_F23",
+      "KEY_F24",
+      "KEY_EXECUTE",
+      "KEY_HELP",
+      "KEY_MENU",
+      "KEY_SELECT",
+      "KEY_STOP",
+      "KEY_AGAIN",
+      "KEY_UNDO",
+      "KEY_CUT",
+      "KEY_COPY",
+      "KEY_PASTE",
+      "KEY_FIND",
+      "KEY_MUTE",
+      "KEY_VOLUME_UP",
+      "KEY_VOLUME_DOWN",
+      "KEYPAD_COMMA",
+      "KEY_RO",
+      "KEY_KATAKANA_HIRAGANA",
+      "KEY_YEN",
+      "KEY_HENKAN",
+      "KEY_MUHENKAN",
+      "KEYPAD_JPCOMMA",
+      "KEY_HANGEUL",
+      "KEY_HANJA",
+      "KEY_KATAKANA",
+      "KEY_HIRAGANA",
+      "KEY_ZENKAKU_HANKAKU",
+      "KEY_MEDIA_PLAY_PAUSE",
+      "KEY_MEDIA_STOP_CD",
+      "KEY_MEDIA_PREVIOUS_SONG",
+      "KEY_MEDIA_NEXT_SONG",
+      "KEY_MEDIA_EJECT_CD",
+      "KEY_MEDIA_VOLUME_UP",
+      "KEY_MEDIA_VOLUME_DOWN",
+      "KEY_MEDIA_MUTE",
+      "KEY_MEDIA_WWW",
+      "KEY_MEDIA_BACK",
+      "KEY_MEDIA_FORWARD",
+      "KEY_MEDIA_STOP",
+      "KEY_MEDIA_FIND",
+      "KEY_MEDIA_SCROLL_UP",
+      "KEY_MEDIA_SCROLL_DOWN",
+      "KEY_MEDIA_EDIT",
+      "KEY_MEDIA_SLEEP",
+      "KEY_MEDIA_COFFEE",
+      "KEY_MEDIA_REFRESH",
+      "KEY_MEDIA_CALC"
+    ],
+    "consumer": [
+      "CONSUMER_POWER",
+      "CONSUMER_RESET",
+      "CONSUMER_SLEEP",
+      "CONSUMER_SLEEP_MODE",
+      "CONSUMER_ILLUMINATION",
+      "CONSUMER_FUNCTION_BUTTONS",
+      "CONSUMER_MENU",
+      "CONSUMER_MENU_PICK",
+      "CONSUMER_MENU_UP",
+      "CONSUMER_MENU_DOWN",
+      "CONSUMER_MENU_LEFT",
+      "CONSUMER_MENU_RIGHT",
+      "CONSUMER_MENU_ESCAPE",
+      "CONSUMER_MENU_VALUE_INCREASE",
+      "CONSUMER_MENU_VALUE_DECREASE",
+      "CONSUMER_DATA_ON_SCREEN",
+      "CONSUMER_CLOSED_CAPTION",
+      "CONSUMER_VCR_TV",
+      "CONSUMER_SNAPSHOT",
+      "CONSUMER_RED_MENU_BUTTON",
+      "CONSUMER_GREEN_MENU_BUTTON",
+      "CONSUMER_BLUE_MENU_BUTTON",
+      "CONSUMER_YELLOW_MENU_BUTTON",
+      "CONSUMER_ASPECT",
+      "CONSUMER_DISPLAY_BRIGHTNESS_INCREMENT",
+      "CONSUMER_DISPLAY_BRIGHTNESS_DECREMENT",
+      "CONSUMER_DISPLAY_BACKLIGHT_TOGGLE",
+      "CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MINIMUM",
+      "CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MAXIMUM",
+      "CONSUMER_DISPLAY_SET_AUTO_BRIGHTNESS",
+      "CONSUMER_KEYBOARD_BRIGHTNESS_INCREMENT",
+      "CONSUMER_KEYBOARD_BRIGHTNESS_DECREMENT",
+      "CONSUMER_KEYBOARD_BACKLIGHT_OOC",
+      "CONSUMER_MODE_STEP",
+      "CONSUMER_RECALL_LAST",
+      "CONSUMER_ENTER_CHANNEL",
+      "CONSUMER_MEDIA_SELECT_COMPUTER",
+      "CONSUMER_MEDIA_SELECT_TV",
+      "CONSUMER_MEDIA_SELECT_WWW",
+      "CONSUMER_MEDIA_SELECT_DVD",
+      "CONSUMER_MEDIA_SELECT_TELEPHONE",
+      "CONSUMER_MEDIA_SELECT_PROGRAM_GUIDE",
+      "CONSUMER_MEDIA_SELECT_VIDEO_PHONE",
+      "CONSUMER_MEDIA_SELECT_GAMES",
+      "CONSUMER_MEDIA_SELECT_MESSAGES",
+      "CONSUMER_MEDIA_SELECT_CD",
+      "CONSUMER_MEDIA_SELECT_VCR",
+      "CONSUMER_MEDIA_SELECT_TUNER",
+      "CONSUMER_QUIT",
+      "CONSUMER_HELP",
+      "CONSUMER_MEDIA_SELECT_TAPE",
+      "CONSUMER_MEDIA_SELECT_CABLE",
+      "CONSUMER_MEDIA_SELECT_SATELLITE",
+      "CONSUMER_MEDIA_SELECT_HOME",
+      "CONSUMER_CHANNEL_INCREMENT",
+      "CONSUMER_CHANNEL_DECREMENT",
+      "CONSUMER_VCR_PLUS",
+      "CONSUMER_PLAY",
+      "CONSUMER_PAUSE",
+      "CONSUMER_RECORD",
+      "CONSUMER_FAST_FORWARD",
+      "CONSUMER_REWIND",
+      "CONSUMER_SCAN_NEXT_TRACK",
+      "CONSUMER_SCAN_PREVIOUS_TRACK",
+      "CONSUMER_STOP",
+      "CONSUMER_EJECT",
+      "CONSUMER_RANDOM_PLAY",
+      "CONSUMER_REPEAT",
+      "CONSUMER_SLOW_TRACKING",
+      "CONSUMER_PLAY_PAUSE",
+      "CONSUMER_VOICE_COMMAND",
+      "CONSUMER_VOLUME",
+      "CONSUMER_MUTE",
+      "CONSUMER_BASS_BOOST",
+      "CONSUMER_VOLUME_INCREMENT",
+      "CONSUMER_VOLUME_DECREMENT",
+      "CONSUMER_SLOW",
+      "CONSUMER_AL_LAUNCH_BUTTON_CONFIGURATION_TOOL",
+      "CONSUMER_AL_PROGRAMMABLE_BUTTON_CONFIGURATION",
+      "CONSUMER_AL_CONSUMER_CONTROL_CONFIGURATION",
+      "CONSUMER_AL_WORD_PROCESSOR",
+      "CONSUMER_AL_TEXT_EDITOR",
+      "CONSUMER_AL_SPREADSHEET",
+      "CONSUMER_AL_GRAPHICS_EDITOR",
+      "CONSUMER_AL_PRESENTATION_APP",
+      "CONSUMER_AL_DATABASE_APP",
+      "CONSUMER_AL_EMAIL_READER",
+      "CONSUMER_AL_NEWSREADER",
+      "CONSUMER_AL_VOICEMAIL",
+      "CONSUMER_AL_CONTACTS_ADDRESS_BOOK",
+      "CONSUMER_AL_CALENDAR_SCHEDULE",
+      "CONSUMER_AL_TASK_PROJECT_MANAGER",
+      "CONSUMER_AL_LOG_JOURNAL_TIMECARD",
+      "CONSUMER_AL_CHECKBOOK_FINANCE",
+      "CONSUMER_AL_CALCULATOR",
+      "CONSUMER_AL_A_V_CAPTURE_PLAYBACK",
+      "CONSUMER_AL_LOCAL_MACHINE_BROWSER",
+      "CONSUMER_AL_INTERNET_BROWSER",
+      "CONSUMER_AL_NETWORK_CHAT",
+      "CONSUMER_AL_LOGOFF",
+      "CONSUMER_AL_TERMINAL_LOCK_SCREENSAVER",
+      "CONSUMER_AL_CONTROL_PANEL",
+      "CONSUMER_AL_SELECT_TASK_APPLICATION",
+      "CONSUMER_AL_NEXT_TASK_APPLICATION",
+      "CONSUMER_AL_PREVIOUS_TASK_APPLICATION",
+      "CONSUMER_AL_INTEGRATED_HELP_CENTER",
+      "CONSUMER_AL_DOCUMENTS",
+      "CONSUMER_AL_SPELL_CHECK",
+      "CONSUMER_AL_KEYBOARD_LAYOUT",
+      "CONSUMER_AL_SCREEN_SAVER",
+      "CONSUMER_AL_FILE_BROWSER",
+      "CONSUMER_AL_IMAGE_BROWSER",
+      "CONSUMER_AL_AUDIO_BROWSER",
+      "CONSUMER_AL_MOVIE_BROWSER",
+      "CONSUMER_AL_INSTANT_MESSAGING",
+      "CONSUMER_AL_OEM_FEATURES_TIPS_TUTORIAL_BROWSER",
+      "CONSUMER_AL_CONTEXT_AWARE_DESKTOP_ASSISTANT",
+      "CONSUMER_AC_NEW",
+      "CONSUMER_AC_OPEN",
+      "CONSUMER_AC_CLOSE",
+      "CONSUMER_AC_EXIT",
+      "CONSUMER_AC_SAVE",
+      "CONSUMER_AC_PRINT",
+      "CONSUMER_AC_PROPERTIES",
+      "CONSUMER_AC_UNDO",
+      "CONSUMER_AC_COPY",
+      "CONSUMER_AC_CUT",
+      "CONSUMER_AC_PASTE",
+      "CONSUMER_AC_FIND",
+      "CONSUMER_AC_SEARCH",
+      "CONSUMER_AC_GO_TO",
+      "CONSUMER_AC_HOME",
+      "CONSUMER_AC_BACK",
+      "CONSUMER_AC_FORWARD",
+      "CONSUMER_AC_STOP",
+      "CONSUMER_AC_REFRESH",
+      "CONSUMER_AC_BOOKMARKS",
+      "CONSUMER_AC_ZOOM_IN",
+      "CONSUMER_AC_ZOOM_OUT",
+      "CONSUMER_AC_ZOOM",
+      "CONSUMER_AC_SCROLL_UP",
+      "CONSUMER_AC_SCROLL_DOWN",
+      "CONSUMER_AC_PAN",
+      "CONSUMER_AC_EDIT",
+      "CONSUMER_AC_CANCEL",
+      "CONSUMER_AC_INSERT_MODE",
+      "CONSUMER_AC_DELETE",
+      "CONSUMER_AC_REDO_REPEAT",
+      "CONSUMER_AC_REPLY",
+      "CONSUMER_AC_FORWARD_MSG",
+      "CONSUMER_AC_SEND",
+      "CONSUMER_AC_DESKTOP_SHOW_ALL_APPLICATIONS",
+      "CONSUMER_KEYBOARD_INPUT_ASSIST_PREVIOUS",
+      "CONSUMER_KEYBOARD_INPUT_ASSIST_NEXT",
+      "CONSUMER_KEYBOARD_INPUT_ASSIST_PREVIOUS_GROUP",
+      "CONSUMER_KEYBOARD_INPUT_ASSIST_NEXT_GROUP",
+      "CONSUMER_KEYBOARD_INPUT_ASSIST_ACCEPT",
+      "CONSUMER_KEYBOARD_INPUT_ASSIST_CANCEL"
+    ],
+    "system": [
+      "SYSTEM_POWER_DOWN",
+      "SYSTEM_SLEEP",
+      "SYSTEM_WAKE_UP"
+    ]
+  },
+  "command_mapping": {
+    "BACK": "CONSUMER_AC_BACK",
+    "HOME": "CONSUMER_AC_HOME",
+    "GUIDE": "CONSUMER_MEDIA_SELECT_PROGRAM_GUIDE",
+    "CONTEXT_MENU": "CONSUMER_MENU",
+    "INFO": "CONSUMER_DATA_ON_SCREEN",
+    "EXIT": "CONSUMER_QUIT",
+    "POWER_TOGGLE": "KEY_POWER",
+    "POWER_ON": "SYSTEM_WAKE_UP",
+    "POWER_OFF": "SYSTEM_SLEEP",
+    "VOLUME_UP": "CONSUMER_VOLUME_INCREMENT",
+    "VOLUME_DOWN": "CONSUMER_VOLUME_DECREMENT",
+    "MUTE_TOGGLE": "CONSUMER_MUTE",
+    "CHANNEL_UP": "CONSUMER_CHANNEL_INCREMENT",
+    "CHANNEL_DOWN": "CONSUMER_CHANNEL_DECREMENT",
+    "PREVIOUS": "CONSUMER_SCAN_PREVIOUS_TRACK",
+    "NEXT": "CONSUMER_SCAN_NEXT_TRACK",
+    "REWIND": "CONSUMER_REWIND",
+    "FAST_FORWARD": "CONSUMER_FAST_FORWARD",
+    "PLAY_PAUSE": "CONSUMER_PLAY_PAUSE",
+    "STOP": "CONSUMER_STOP",
+    "RECORD": "CONSUMER_RECORD",
+    "CURSOR_LEFT": "KEY_LEFT_ARROW",
+    "CURSOR_RIGHT": "KEY_RIGHT_ARROW",
+    "CURSOR_UP": "KEY_UP_ARROW",
+    "CURSOR_DOWN": "KEY_DOWN_ARROW",
+    "CURSOR_ENTER": "KEY_RETURN",
+    "FUNCTION_RED": "CONSUMER_RED_MENU_BUTTON",
+    "FUNCTION_GREEN": "CONSUMER_GREEN_MENU_BUTTON",
+    "FUNCTION_BLUE": "CONSUMER_BLUE_MENU_BUTTON",
+    "FUNCTION_YELLOW": "CONSUMER_YELLOW_MENU_BUTTON"
+  },
+  "user_interface": {
+    "pages": [
+      {
+        "grid": {
+          "height": 6,
+          "width": 4
+        },
+        "name": "Numbers",
+        "page_id": "numbers",
+        "items": [
+          {
+            "command": {
+              "cmd_id": "KEY_1"
+            },
+            "location": {
+              "x": 0,
+              "y": 0
+            },
+            "text": "1",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_2"
+            },
+            "location": {
+              "x": 1,
+              "y": 0
+            },
+            "text": "2",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_3"
+            },
+            "location": {
+              "x": 2,
+              "y": 0
+            },
+            "text": "3",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_4"
+            },
+            "location": {
+              "x": 0,
+              "y": 1
+            },
+            "text": "4",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_5"
+            },
+            "location": {
+              "x": 1,
+              "y": 1
+            },
+            "text": "5",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_6"
+            },
+            "location": {
+              "x": 2,
+              "y": 1
+            },
+            "text": "6",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_7"
+            },
+            "location": {
+              "x": 0,
+              "y": 2
+            },
+            "text": "7",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_8"
+            },
+            "location": {
+              "x": 1,
+              "y": 2
+            },
+            "text": "8",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_9"
+            },
+            "location": {
+              "x": 2,
+              "y": 2
+            },
+            "text": "9",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_0"
+            },
+            "location": {
+              "x": 1,
+              "y": 3
+            },
+            "text": "0",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_ESC"
+            },
+            "location": {
+              "x": 3,
+              "y": 0
+            },
+            "text": "ESC",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_AC_EXIT"
+            },
+            "location": {
+              "x": 3,
+              "y": 2
+            },
+            "text": "Exit",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_AC_BACK"
+            },
+            "location": {
+              "x": 3,
+              "y": 3
+            },
+            "text": "Back",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEYPAD_PLUS"
+            },
+            "location": {
+              "x": 0,
+              "y": 4
+            },
+            "text": "+",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEYPAD_MINUS"
+            },
+            "location": {
+              "x": 0,
+              "y": 5
+            },
+            "text": "-",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAGE_UP"
+            },
+            "location": {
+              "x": 1,
+              "y": 4
+            },
+            "text": "Pg up",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAGE_DOWN"
+            },
+            "location": {
+              "x": 1,
+              "y": 5
+            },
+            "text": "Pg down",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_COMMA"
+            },
+            "location": {
+              "x": 2,
+              "y": 4
+            },
+            "text": ",",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_DOT"
+            },
+            "location": {
+              "x": 3,
+              "y": 4
+            },
+            "text": ".",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_MENU"
+            },
+            "location": {
+              "x": 2,
+              "y": 5
+            },
+            "text": "Menu",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_MEDIA_SELECT_PROGRAM_GUIDE"
+            },
+            "location": {
+              "x": 3,
+              "y": 5
+            },
+            "text": "Guide",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "Media Consumer",
+        "page_id": "media2",
+        "grid": {
+          "height": 6,
+          "width": 4
+        },
+        "items": [
+          {
+            "location": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "height": 1,
+              "width": 4
+            },
+            "text": "Consumer codes",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_SCAN_PREVIOUS_TRACK"
+            },
+            "icon": "uc:prev",
+            "location": {
+              "x": 0,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_PLAY"
+            },
+            "icon": "uc:play",
+            "location": {
+              "x": 1,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_PAUSE"
+            },
+            "icon": "uc:pause",
+            "location": {
+              "x": 2,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_SCAN_NEXT_TRACK"
+            },
+            "icon": "uc:next",
+            "location": {
+              "x": 3,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_REWIND"
+            },
+            "icon": "uc:bw",
+            "location": {
+              "x": 0,
+              "y": 4
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_STOP"
+            },
+            "icon": "uc:stop",
+            "location": {
+              "x": 1,
+              "y": 4
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_RECORD"
+            },
+            "icon": "uc:rec",
+            "location": {
+              "x": 2,
+              "y": 4
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_FAST_FORWARD"
+            },
+            "icon": "uc:ff",
+            "location": {
+              "x": 3,
+              "y": 4
+            },
+            "type": "icon"
+          }
+        ]
+      }
+    ]
+  }
+}

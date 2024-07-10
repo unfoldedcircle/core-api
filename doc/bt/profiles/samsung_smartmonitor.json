@@ -1,0 +1,545 @@
+{
+  "id": "samsung_smartmonitor",
+  "name": "Samsung Smart Monitor M7",
+  "version": 1,
+  "peripherals": {
+    "keyboard": true,
+    "mouse": true
+  },
+  "commands": {
+    "keyboard": [
+      "KEY_A",
+      "KEY_B",
+      "KEY_C",
+      "KEY_D",
+      "KEY_E",
+      "KEY_F",
+      "KEY_G",
+      "KEY_H",
+      "KEY_I",
+      "KEY_J",
+      "KEY_K",
+      "KEY_L",
+      "KEY_M",
+      "KEY_N",
+      "KEY_O",
+      "KEY_P",
+      "KEY_Q",
+      "KEY_R",
+      "KEY_S",
+      "KEY_T",
+      "KEY_U",
+      "KEY_V",
+      "KEY_W",
+      "KEY_X",
+      "KEY_Y",
+      "KEY_Z",
+      "KEY_1",
+      "KEY_2",
+      "KEY_3",
+      "KEY_4",
+      "KEY_5",
+      "KEY_6",
+      "KEY_7",
+      "KEY_8",
+      "KEY_9",
+      "KEY_0",
+      "KEY_RETURN",
+      "KEY_ESC",
+      "KEY_BACKSPACE",
+      "KEY_TAB",
+      "KEY_SPACE",
+      "KEY_MINUS",
+      "KEY_EQUAL",
+      "KEY_LEFT_BRACE",
+      "KEY_RIGHT_BRACE",
+      "KEY_BACKSLASH",
+      "KEY_HASH_TILDE",
+      "KEY_SEMICOLON",
+      "KEY_APOSTROPHE",
+      "KEY_GRAVE",
+      "KEY_COMMA",
+      "KEY_DOT",
+      "KEY_SLASH",
+      "KEY_CAPSLOCK",
+      "KEY_F1",
+      "KEY_F2",
+      "KEY_F3",
+      "KEY_F4",
+      "KEY_F5",
+      "KEY_F6",
+      "KEY_F7",
+      "KEY_F8",
+      "KEY_F9",
+      "KEY_F10",
+      "KEY_F11",
+      "KEY_F12",
+      "KEY_PAUSE",
+      "KEY_INSERT",
+      "KEY_HOME",
+      "KEY_PAGE_UP",
+      "KEY_DELETE",
+      "KEY_END",
+      "KEY_PAGE_DOWN",
+      "KEY_RIGHT_ARROW",
+      "KEY_LEFT_ARROW",
+      "KEY_DOWN_ARROW",
+      "KEY_UP_ARROW",
+      "KEYPAD_SLASH",
+      "KEYPAD_ASTERISK",
+      "KEYPAD_MINUS",
+      "KEYPAD_PLUS",
+      "KEYPAD_ENTER",
+      "KEY_102ND",
+      "KEY_POWER",
+      "KEY_HELP",
+      "KEY_MENU",
+      "KEY_SELECT",
+      "KEY_COPY",
+      "KEY_PASTE",
+      "KEY_MUTE",
+      "KEY_VOLUME_UP",
+      "KEY_VOLUME_DOWN",
+      "KEYPAD_COMMA",
+      "KEY_RO",
+      "KEY_YEN",
+      "KEYPAD_JPCOMMA",
+      "KEY_ZENKAKU_HANKAKU",
+      "KEY_LEFT_GUI",
+      "KEY_MEDIA_PLAY_PAUSE",
+      "KEY_MEDIA_STOP_CD",
+      "KEY_MEDIA_PREVIOUS_SONG",
+      "KEY_MEDIA_NEXT_SONG",
+      "KEY_MEDIA_WWW",
+      "KEY_MEDIA_BACK",
+      "KEY_MEDIA_FORWARD",
+      "KEY_MEDIA_SLEEP",
+      "KEY_MEDIA_REFRESH",
+      "KEY_MEDIA_CALC"
+    ],
+    "consumer": [
+      "CONSUMER_POWER",
+      "CONSUMER_SLEEP_MODE",
+      "CONSUMER_MENU",
+      "CONSUMER_MENU_ESCAPE",
+      "CONSUMER_RED_MENU_BUTTON",
+      "CONSUMER_GREEN_MENU_BUTTON",
+      "CONSUMER_BLUE_MENU_BUTTON",
+      "CONSUMER_YELLOW_MENU_BUTTON",
+      "CONSUMER_ASPECT",
+      "CONSUMER_MODE_SELECT_3D",
+      "CONSUMER_DISPLAY_BRIGHTNESS_INCREMENT",
+      "CONSUMER_DISPLAY_BRIGHTNESS_DECREMENT",
+      "CONSUMER_DISPLAY_BACKLIGHT_TOGGLE",
+      "CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MINIMUM",
+      "CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MAXIMUM",
+      "CONSUMER_MEDIA_SELECT_WWW",
+      "CONSUMER_QUIT",
+      "CONSUMER_CHANNEL_INCREMENT",
+      "CONSUMER_CHANNEL_DECREMENT",
+      "CONSUMER_VCR_PLUS",
+      "CONSUMER_PLAY",
+      "CONSUMER_PAUSE",
+      "CONSUMER_RECORD",
+      "CONSUMER_FAST_FORWARD",
+      "CONSUMER_REWIND",
+      "CONSUMER_SCAN_NEXT_TRACK",
+      "CONSUMER_SCAN_PREVIOUS_TRACK",
+      "CONSUMER_STOP",
+      "CONSUMER_MUTE",
+      "CONSUMER_VOLUME_INCREMENT",
+      "CONSUMER_VOLUME_DECREMENT",
+      "CONSUMER_AC_HOME",
+      "CONSUMER_AC_BACK"
+    ],
+    "system": [
+      "SYSTEM_SLEEP",
+      "SYSTEM_MAIN_MENU",
+      "SYSTEM_COLD_RESTART"
+    ]
+  },
+  "command_mapping": {
+    "BACK": "CONSUMER_AC_BACK",
+    "HOME": "CONSUMER_AC_HOME",
+    "GUIDE": "KEY_MENU",
+    "SETTINGS": "CONSUMER_MENU",
+    "EXIT": "CONSUMER_QUIT",
+    "POWER_TOGGLE": "KEY_POWER",
+    "VOLUME_UP": "KEY_VOLUME_UP",
+    "VOLUME_DOWN": "KEY_VOLUME_DOWN",
+    "MUTE_TOGGLE": "KEY_MUTE",
+    "CHANNEL_UP": "CONSUMER_CHANNEL_INCREMENT",
+    "CHANNEL_DOWN": "CONSUMER_CHANNEL_DECREMENT",
+    "PREVIOUS": "CONSUMER_SCAN_PREVIOUS_TRACK",
+    "NEXT": "CONSUMER_SCAN_NEXT_TRACK",
+    "REWIND": "CONSUMER_REWIND",
+    "FAST_FORWARD": "CONSUMER_FAST_FORWARD",
+    "PLAY_PAUSE": "CONSUMER_PLAY",
+    "STOP": "CONSUMER_STOP",
+    "RECORD": "CONSUMER_RECORD",
+    "CURSOR_LEFT": "KEY_LEFT_ARROW",
+    "CURSOR_RIGHT": "KEY_RIGHT_ARROW",
+    "CURSOR_UP": "KEY_UP_ARROW",
+    "CURSOR_DOWN": "KEY_DOWN_ARROW",
+    "CURSOR_ENTER": "KEY_RETURN",
+    "FUNCTION_RED": "CONSUMER_RED_MENU_BUTTON",
+    "FUNCTION_GREEN": "CONSUMER_GREEN_MENU_BUTTON",
+    "FUNCTION_BLUE": "CONSUMER_BLUE_MENU_BUTTON",
+    "FUNCTION_YELLOW": "CONSUMER_YELLOW_MENU_BUTTON"
+  },
+  "user_interface": {
+    "pages": [
+      {
+        "grid": {
+          "height": 6,
+          "width": 4
+        },
+        "name": "Numbers",
+        "page_id": "numbers",
+        "items": [
+          {
+            "command": {
+              "cmd_id": "KEY_1"
+            },
+            "location": {
+              "x": 0,
+              "y": 0
+            },
+            "text": "1",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_2"
+            },
+            "location": {
+              "x": 1,
+              "y": 0
+            },
+            "text": "2",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_3"
+            },
+            "location": {
+              "x": 2,
+              "y": 0
+            },
+            "text": "3",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_4"
+            },
+            "location": {
+              "x": 0,
+              "y": 1
+            },
+            "text": "4",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_5"
+            },
+            "location": {
+              "x": 1,
+              "y": 1
+            },
+            "text": "5",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_6"
+            },
+            "location": {
+              "x": 2,
+              "y": 1
+            },
+            "text": "6",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_7"
+            },
+            "location": {
+              "x": 0,
+              "y": 2
+            },
+            "text": "7",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_8"
+            },
+            "location": {
+              "x": 1,
+              "y": 2
+            },
+            "text": "8",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_9"
+            },
+            "location": {
+              "x": 2,
+              "y": 2
+            },
+            "text": "9",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_0"
+            },
+            "location": {
+              "x": 1,
+              "y": 3
+            },
+            "text": "0",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_ESC"
+            },
+            "location": {
+              "x": 3,
+              "y": 0
+            },
+            "text": "ESC",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_AC_EXIT"
+            },
+            "location": {
+              "x": 3,
+              "y": 2
+            },
+            "text": "Exit",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_AC_BACK"
+            },
+            "location": {
+              "x": 3,
+              "y": 3
+            },
+            "text": "Back",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEYPAD_PLUS"
+            },
+            "location": {
+              "x": 0,
+              "y": 4
+            },
+            "text": "+",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEYPAD_MINUS"
+            },
+            "location": {
+              "x": 0,
+              "y": 5
+            },
+            "text": "-",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAGE_UP"
+            },
+            "location": {
+              "x": 1,
+              "y": 4
+            },
+            "text": "Pg up",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_PAGE_DOWN"
+            },
+            "location": {
+              "x": 1,
+              "y": 5
+            },
+            "text": "Pg down",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_COMMA"
+            },
+            "location": {
+              "x": 2,
+              "y": 4
+            },
+            "text": ",",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_DOT"
+            },
+            "location": {
+              "x": 3,
+              "y": 4
+            },
+            "text": ".",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "KEY_MENU"
+            },
+            "location": {
+              "x": 2,
+              "y": 5
+            },
+            "text": "Menu",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_MEDIA_SELECT_PROGRAM_GUIDE"
+            },
+            "location": {
+              "x": 3,
+              "y": 5
+            },
+            "text": "Guide",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "Media Consumer",
+        "page_id": "media2",
+        "grid": {
+          "height": 6,
+          "width": 4
+        },
+        "items": [
+          {
+            "location": {
+              "x": 0,
+              "y": 0
+            },
+            "size": {
+              "height": 1,
+              "width": 4
+            },
+            "text": "Consumer codes",
+            "type": "text"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_SCAN_PREVIOUS_TRACK"
+            },
+            "icon": "uc:prev",
+            "location": {
+              "x": 0,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_PLAY"
+            },
+            "icon": "uc:play",
+            "location": {
+              "x": 1,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_PAUSE"
+            },
+            "icon": "uc:pause",
+            "location": {
+              "x": 2,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_SCAN_NEXT_TRACK"
+            },
+            "icon": "uc:next",
+            "location": {
+              "x": 3,
+              "y": 5
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_REWIND"
+            },
+            "icon": "uc:bw",
+            "location": {
+              "x": 0,
+              "y": 4
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_STOP"
+            },
+            "icon": "uc:stop",
+            "location": {
+              "x": 1,
+              "y": 4
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_RECORD"
+            },
+            "icon": "uc:rec",
+            "location": {
+              "x": 2,
+              "y": 4
+            },
+            "type": "icon"
+          },
+          {
+            "command": {
+              "cmd_id": "CONSUMER_FAST_FORWARD"
+            },
+            "icon": "uc:ff",
+            "location": {
+              "x": 3,
+              "y": 4
+            },
+            "type": "icon"
+          }
+        ]
+      }
+    ]
+  }
+}

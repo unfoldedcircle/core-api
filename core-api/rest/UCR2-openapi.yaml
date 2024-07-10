@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.32.0
+  version: 0.33.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -43,7 +43,7 @@ tags:
   - name: infrared
     description: "\U0001F308 Infrared code set lookup, custom IR code management and IR emitter devices.\n"
   - name: remotes
-    description: "\U0001F3AE Customizable user interface and button mappings for remote-entities\ncontrolling single IR- and the like devices.\n"
+    description: "\U0001F3AE Create BT- and IR-remote-entities. Customize user interface and button mappings for all remote-entities types\nincluding external remote-entities from integrations.\n"
   - name: profiles
     description: "\U0001F464 User profile configuration with profiles, groups, pages"
   - name: cfg
@@ -754,10 +754,22 @@ paths:
                       - 11025
                       - 22050
                       - 44100
+                - type: BtDeviceProfile
+                  name:
+                    en: Bluetooth device profile
+                    de: Bluetooth Geräteprofil
+                  description:
+                    en: Bluetooth peripheral device profile. Defines available HID commands like keyboard keys and consumer codes. Maximum size is 64 KB.
+                  file_formats:
+                    - json
+                  max_file_size: 65536
+                  max_count: 100
     delete:
       tags:
         - resources
       summary: Delete all resources.
+      description: |
+        ⚠️ All resources of all types are deleted if no resource-type query restriction is specified!
       operationId: deleteAllResources
       parameters:
         - $ref: '#/components/parameters/resource_type_query'
@@ -773,6 +785,8 @@ paths:
       tags:
         - resources
       summary: Get total number of available resources of a given type.
+      description: |
+        The available resource types can be retrieved with the `GET /resources` endpoint.
       operationId: getResourceTypeItemsCount
       parameters:
         - $ref: '#/components/parameters/resource_type'
@@ -794,6 +808,8 @@ paths:
       tags:
         - resources
       summary: List available media resources of a given type.
+      description: |
+        The available resource types can be retrieved with the `GET /resources` endpoint.
       operationId: getResourceTypeItems
       parameters:
         - $ref: '#/components/parameters/resource_type'
@@ -828,9 +844,9 @@ paths:
     post:
       tags:
         - resources
-      summary: Upload media resource files.
+      summary: Upload media or other resource files.
       description: |
-        Upload one or more binary resource files as form-data. Files must conform to the given type according to the metadata
+        Upload one or more resource files as form-data. Files must conform to the given type according to the metadata
         returned in `GET /api/resources`. E.g. an icon resource has other image size restrictions than a background image.
 
         The file names are normalized (e.g. spaces replaced with underscores) and returned as resource identifiers.
@@ -919,6 +935,9 @@ paths:
               schema:
                 type: string
                 format: binary
+            application/json:
+              schema:
+                type: object
         '404':
           $ref: '#/components/responses/Err404NotFound'
     delete:
@@ -4569,9 +4588,19 @@ paths:
         - remotes
       summary: Get total number of remote-entities.
       description: |
-        The total number of available remotes are returned in the `Pagination-Count` header. This allows to prepare the
-        retrieval of the remotes with the `GET` operation and paging parameters.
+        The total number of available remotes of the specified kind (BT, IR, external) are returned in the
+        `Pagination-Count` header. This allows to prepare the retrieval of the remotes with the `GET` operation
+        and paging parameters.
+
+        Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
       operationId: getRemoteCount
+      parameters:
+        - name: kind
+          in: query
+          description: Remote kind
+          required: false
+          schema:
+            $ref: '#/components/schemas/RemoteKind'
       responses:
         '200':
           description: Successful operation
@@ -4589,13 +4618,21 @@ paths:
         - remotes
       summary: Get remote-entities overview with paging.
       description: |
-        Returns an overview of all defined remotes with the given paging parameters. Use the `HEAD` operation to retrieve
-        the total number of defined remotes.
+        Returns an overview of all defined remotes of the specified kind (BT, IR, external) with the given paging
+        parameters. Use the `HEAD` operation to retrieve the total number of defined remotes.
 
         The overview information doesn't include all details of a remote. The full remote information is retrievable
         with `/remotes/{entityId}`.
+
+        Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
       operationId: getInfraredEntities
       parameters:
+        - name: kind
+          in: query
+          description: Remote kind
+          required: false
+          schema:
+            $ref: '#/components/schemas/RemoteKind'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -4627,22 +4664,33 @@ paths:
     post:
       tags:
         - remotes
-      summary: Create a new remote-entity with a manufacturer IR code set or an empty custom code set.
+      summary: Create a new BT- or IR-remote entity.
       description: |
-        Create a new entity of type `remote`. An remote-entity is a special internal entity without association to an
-        integration driver.
+        Create a new Bluetooth or infrared `remote`-entity. External remote-entities cannot be created, they must be
+        provided by integration drivers. BT- and IR-entities are special internal entities without an integration driver
+        association.
+        Infrared-remote entities can be created with a manufacturer IR code-set or an empty custom code-set to learn or load
+        custom IR codes. Bluetooth-remote entities emulate a HID keyboard and mouse. An optional device-profile can be
+        specified to customize the available commands and key-mappings.
 
-        To create a new remote at least a name must be provided. If no manufacturer infrared code set is specified in
-        `options.codeset_id`, a new custom code set is automatically created for the user to manually specify or learn the
-        codes.  
+        To create a new remote at least a name must be provided. 
         The `icon` and `description` properties are optional and can be set later with the `PUT` update operation.
 
         When setting a text in a multilingual field, like name or description, the default `en` identifier should always be
         included.
 
+        IR-remotes:
+        - If no manufacturer infrared code set is specified in `options.codeset_id`, a new custom code set is automatically
+          created for the user to manually specify or learn the codes.
+
+        BT-remotes:
+        - Device profiles can be retrieved with the `GET /cfg/bt/profiles` endpoint.
+        - Custom device profiles can be uploaded with the resource API endpoint `POST /resources/BtDeviceProfile`.
+        - If no device-profile is specified, the default profile is used which exposes all HID key commands.
+
         The new remote can be cloned from another remote-entity identifier in `clone_from`. All applicable configuration
         will be copied, except a new remote name must be specified. The `icon` and `description` fields can still be
-        specified and will override the copied data. The `options.codeset_id` is not allowed when cloning data.
+        specified and will override the copied data. The `options.codeset_id` is not allowed when cloning an IR-remote.
       operationId: createRemote
       requestBody:
         content:
@@ -4650,18 +4698,18 @@ paths:
             schema:
               $ref: '#/components/schemas/RemoteCreate'
             examples:
-              create with existing code set:
+              create IR-remote with existing code set:
                 value:
                   name:
                     en: My new remote
                   codeset_id: ir.manufacturer.123
-              crate with custom code set (default device type & manufacturer):
+              create IR-remote with custom code set (default device type & manufacturer):
                 value:
                   name:
                     en: My custom remote
                   custom_codeset:
                     device_name: My device
-              'remote with icon, description and custom code set':
+              'IR-remote with icon, description and custom code set':
                 value:
                   name:
                     en: My custom remote
@@ -4672,6 +4720,16 @@ paths:
                     manufacturer_id: custom
                     device_name: My device
                     device_type: various
+              create Bluetooth-remote:
+                value:
+                  name:
+                    en: My BT remote
+                  icon: 'uc:tv'
+                  description:
+                    en: Using the default device profile
+                  kind: BT
+                  bt:
+                    dev_profile_id: generic_android
               clone:
                 value:
                   name:
@@ -4700,6 +4758,13 @@ paths:
       description: |
         ⚠️ All defined entities will be irrevocably deleted!
       operationId: deleteAllRemotes
+      parameters:
+        - name: kind
+          in: query
+          description: Remote kind
+          required: false
+          schema:
+            $ref: '#/components/schemas/RemoteKind'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -4742,7 +4807,7 @@ paths:
         To clear an array simply provide an empty array.
 
         - Button mappings are configured with the dedicated `/remotes/{entityId}/buttons` and
-          `/remote/{entityId}/buttons/{button}` endpoints.
+          `/remotes/{entityId}/buttons/{button}` endpoints.
         - The user interface is configured with the dedicated `/remotes/{entityId}/ui`, `/remotes/{entityId}/ui/pages`
           and `/remotes/{entityId}/ui/pages/{pageId}` endpoints.
       parameters:
@@ -4965,6 +5030,178 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/bt':
+    get:
+      tags:
+        - remotes
+      summary: "\U0001F9EA Get information about a Bluetooth remote-entity."
+      description: |
+        Retrieve information of this BT-remote entity.
+
+        Response codes:
+        - `400 Bad Request` is returned if the entity is not a BT-remote entity.
+      operationId: getBtRemoteInfo
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BtRemoteInfo'
+              examples:
+                Newly created BT-remote entity:
+                  value:
+                    profile: 1
+                    dev_profile_id: default
+                    peripherals:
+                      keyboard: true
+                      mouse: true
+                Paired BT-remote entity:
+                  value:
+                    profile: 1
+                    dev_profile_id: my_device
+                    peer:
+                      address: 'AE:35:DC:88:AA:11'
+                      addr_type: LePublic
+                    peripherals:
+                      keyboard: true
+                      mouse: false
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  '/remotes/{entityId}/bt/pairing':
+    get:
+      tags:
+        - remotes
+      summary: "\U0001F9EA Get pairing information of a Bluetooth remote-entity."
+      description: |
+        Retrieve pairing specific information of this BT-remote entity.
+
+        - If the peripheral is paired (`paired: true`), the peer address is returned in the `peer` field.
+        - If there's a bonding request from a central, the `bonding_request` object is set.
+          - ‼️ Only `PasskeyInput` bonding requests are currently supported.
+
+        Response codes:
+        - `400 Bad Request` is returned if the entity is not a BT-remote entity.
+      operationId: getBtRemotePairingInfo
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BtRemotePairingInfo'
+              examples:
+                Paired peripheral:
+                  value:
+                    paired: true
+                    peer:
+                      address: 'AE:35:DC:88:AA:11'
+                      addr_type: LePublic
+                Bonding request:
+                  value:
+                    bonding_request:
+                      profile: 1
+                      peer:
+                        address: 'AE:35:DC:88:AA:11'
+                        addr_type: LePublic
+                      kind: PasskeyInput
+                    paired: false
+                    pairing_enabled: true
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    put:
+      tags:
+        - remotes
+      summary: "\U0001F9EA Enable or disable BT-remote pairing."
+      description: |
+        Once a BT-remote entity is paired with a central, it will no longer accept pairing requests from a central.
+        For example if the user removed the pairing information (usually through a "forget this Bluetooth device" action).
+
+        This command enables pairing again. Note: there is no timeout, the peripheral remains in pairing mode as long as
+        it is not deactivated again!
+
+        The current pairing state can be retrieved with `GET /remotes/{entityId}/bt/pairing`.
+
+        Response codes:
+        - `400 Bad Request`: invalid request data or if the entity is not a BT-remote entity.
+        - `503 Service Unavailable`: BT is switched off, or the service is not responding.
+      operationId: enableBtRemotePairing
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - name: enabled
+          in: query
+          description: Enable pairing.
+          required: true
+          schema:
+            type: boolean
+            default: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    post:
+      tags:
+        - remotes
+      summary: "\U0001F9EA Send a pairing response."
+      description: |
+        Send the displayed pairing passkey on the central or decline a pairing request.
+
+        Response codes:
+        - `400 Bad Request`: invalid request data or if the entity is not a BT-remote entity.
+        - `503 Service Unavailable`: BT is switched off, or the service is not responding.
+      operationId: sendPairingResponse
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BtPairingResponse'
+            examples:
+              Passkey entry:
+                value:
+                  passkey: '012345'
+              Decline passkey pairing request:
+                value:
+                  confirm: false
+              Accept non-passkey pairing request:
+                value:
+                  confirm: true
+        required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   '/remotes/{entityId}/buttons':
     get:
       tags:
@@ -6055,6 +6292,135 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /cfg/bt:
+    get:
+      tags:
+        - cfg
+      summary: "\U0001F9EA Get Bluetooth settings."
+      description: |
+        Retrieve Bluetooth settings
+
+        Advertisement name placeholders:
+        - `000000` will be replaced with the last 3 BT MAC address values.
+        - `00:00:00:00:00:00` will be replaced with the full BT MAC address.
+      operationId: getBtSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgBt'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: "\U0001F9EA Modify Bluetooth settings."
+      description: |
+        Change one or multiple Bluetooth settings. The remote must be restarted after a configuration change.
+
+        - If `peripheral_connections` or `enable_hci_log` is not specified, the original setting will be kept.
+        - The `peripheral_connections` setting must be enabled with a feature flag, otherwise it will be ignored and only
+          a single connection be used.
+      operationId: updateBtSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgBtUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgBt'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/bt/profiles:
+    get:
+      tags:
+        - cfg
+      summary: Get Bluetooth device profiles.
+      description: |
+        Retrieve an overview of all available BT device profiles for BT-remote entities.
+
+        Pre-defined system profiles and custom profiles are returned. Custom profiles can override system profiles if they
+        specify the same `id`. The type of profile is indicated in the `user_profile` flag.
+      operationId: getBtDeviceProfiles
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BtDeviceProfileInfos'
+              example:
+                - id: default
+                  name:
+                    en: Default
+                  version: 1
+                  peripherals:
+                    keyboard: true
+                    mouse: true
+                - id: generic_android
+                  name:
+                    en: Generic Android
+                  version: 1
+                  peripherals:
+                    keyboard: true
+                    mouse: true
+                - id: my_device
+                  name:
+                    en: My custom device
+                  user_profile: true
+                  version: 2
+                  peripherals:
+                    keyboard: true
+                    mouse: false
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  '/cfg/bt/profiles/{id}':
+    get:
+      tags:
+        - cfg
+      summary: Retrieve a Bluetooth device profile.
+      description: |
+        Retrieve a specific BT device profile for BT-remote entities. System and custom profiles can be retrieved.
+
+        To upload and delete custom profiles, please use the resource endpoints: `/resources/BtDeviceProfile`.
+      operationId: getBtDeviceProfile
+      parameters:
+        - $ref: '#/components/parameters/resource_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BtDeviceProfile'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /cfg/button:
     get:
       tags:
@@ -8474,6 +8840,64 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /system/bt:
+    put:
+      tags:
+        - system
+      summary: "\U0001F9EA Perform a Bluetooth operation."
+      description: |
+        Change the Bluetooth controller power mode or clear all bonding information.
+
+        `power_mode`:
+        - `On`: power-on the BT controller
+        - `Off`: power-off the BT controller
+        - `Sleep`: put the BT controller into HCI sleep mode
+      operationId: performBtOperation
+      parameters:
+        - name: clear_bonds
+          in: query
+          description: Clear bonding data
+          schema:
+            type: boolean
+        - name: power_mode
+          in: query
+          description: Set power mode
+          schema:
+            type: string
+            enum:
+              - 'On'
+              - 'Off'
+              - Sleep
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - system
+      summary: "\U0001F9EA Perform a Bluetooth subsystem reset."
+      description: |
+        A BT subsystem reset removes all bonding information and removes the BT-remote entity associations to BT connection 
+        profiles.
+
+        The BT-remote entities are not removed, but they need to be paired again with a BT central device.
+      operationId: performBtReset
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /system/factory_reset:
     get:
       tags:
@@ -8880,6 +9304,30 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+  /system/logs/hci:
+    get:
+      tags:
+        - system
+      summary: Download HCI trace file.
+      description: |
+        Retrieve the Bluetooth HCI trace file in binary PacketLogger file format.
+
+        - `404 Not Found` is returned if there's no HCI trace file.
+      operationId: downloadHciLog
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /system/power:
     get:
       tags:
@@ -10417,6 +10865,8 @@ components:
     CfgAll:
       type: object
       properties:
+        bt:
+          $ref: '#/components/schemas/CfgBt'
         button:
           $ref: '#/components/schemas/CfgButtons'
         device:
@@ -10443,6 +10893,43 @@ components:
           $ref: '#/components/schemas/CfgVoiceControl'
         restart_required:
           description: A configuration change requires a restart.
+          type: boolean
+    CfgBt:
+      type: object
+      properties:
+        peripheral_connections:
+          description: Maximum number of peripheral connections at the same time.
+          type: integer
+          minimum: 1
+        advertisement_name:
+          description: Advertisement name of the Remote.
+          type: string
+        enable_hci_log:
+          description: Enable HCI logging.
+          type: boolean
+        enable_debug_port:
+          description: Enable BT subsystem debug TCP-port for remote control.
+          type: boolean
+        version:
+          description: BT subsystem version.
+          type: string
+      required:
+        - peripheral_connections
+        - advertisement_name
+        - enable_hci_log
+        - enable_debug_port
+    CfgBtUpdate:
+      type: object
+      properties:
+        peripheral_connections:
+          description: Maximum number of peripheral connections at the same time.
+          type: integer
+          minimum: 1
+        enable_hci_log:
+          description: Enable HCI logging.
+          type: boolean
+        enable_debug_port:
+          description: Enable BT subsystem debug TCP-port for remote control.
           type: boolean
     CfgButtons:
       type: object
@@ -13041,6 +13528,19 @@ components:
                     - `false`: remote was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
+                kind:
+                  $ref: '#/components/schemas/RemoteKind'
+                bt:
+                  type: object
+                  properties:
+                    dev_profile_id:
+                      description: BT device profile identifier
+                      type: boolean
+                    peripherals:
+                      $ref: '#/components/schemas/BtDevicePeripherals'
+                    profile:
+                      description: BT peripheral connection profile
+                      type: integer
                 ir:
                   description: |
                     Infrared settings: codeset name und used infrared emitter to send commands.
@@ -13146,6 +13646,15 @@ components:
                     - device_name
               required:
                 - custom_codeset
+            - type: object
+              properties:
+                kind:
+                  $ref: '#/components/schemas/RemoteKind'
+                bt:
+                  $ref: '#/components/schemas/BtRemoteCreateOptions'
+              required:
+                - kind
+                - bt
       required:
         - name
     RemoteOverview:
@@ -13266,6 +13775,252 @@ components:
           type: boolean
       required:
         - cmd_id
+    RemoteKind:
+      description: |
+        Type of remote-entity:
+        - `BT`: Bluetooth remote
+        - `IR`: Infrared remote
+        - `EXTERNAL`: Remote-entity provided from an integration to control a single device.
+      type: string
+      enum:
+        - BT
+        - IR
+        - EXTERNAL
+      default: IR
+    BtRemoteCreateOptions:
+      description: Options for creating a Bluetooth peripheral remote-entity.
+      type: object
+      properties:
+        dev_profile_id:
+          description: |
+            Bluetooth device profile identifier to customize available commands, button mappings and default UI screens.
+          type: string
+    BtRemoteInfo:
+      description: |
+        BT-remote information.
+      type: object
+      properties:
+        profile:
+          description: BT peripheral connection profile
+          type: integer
+        dev_profile_id:
+          description: Bluetooth device profile identifier.
+          type: string
+        dev_profile_version:
+          description: Bluetooth device profile version.
+          type: integer
+          minimum: 0
+        peer:
+          $ref: '#/components/schemas/BtPeer'
+        peripherals:
+          $ref: '#/components/schemas/BtDevicePeripherals'
+      required:
+        - profile
+    BtRemotePairingInfo:
+      description: |
+        BT-remote pairing information. The `pairing_request` field is set if a pairing request is active, `peer` is only
+        set if the remote has been paired with a central device.
+      type: object
+      properties:
+        pairing_request:
+          $ref: '#/components/schemas/BtPairingRequest'
+        paired:
+          description: Indicates if BT-remote entity peripheral is paired with a central device.
+          type: boolean
+        pairing_enabled:
+          description: Indicates if a central can pair with this BT-remote peripheral.
+          type: boolean
+        advertisement_name:
+          description: Advertisement name of the peripheral. Usually only set when `pairing_enabled` is true.
+          type: string
+        peer:
+          $ref: '#/components/schemas/BtPeer'
+      required:
+        - paired
+        - pairing_enabled
+    BtPairingRequest:
+      description: |
+        A central requests pairing with the peripheral.
+        ‼️ Only `kind: PasskeyInput` is currently implemented.
+      type: object
+      properties:
+        id:
+          description: Pairing request identifier
+          type: integer
+        profile:
+          description: BT peripheral connection profile to associate the pairing request.
+          type: integer
+        peer:
+          $ref: '#/components/schemas/BtPeer'
+        kind:
+          $ref: '#/components/schemas/BtSecurityType'
+        passkey:
+          description: |
+            Only set for `kind: DisplayNumber | NumericComparison`
+          type: integer
+          minimum: 0
+      required:
+        - profile
+        - peer
+        - kind
+    BtPairingResponse:
+      description: |
+        Response to a BtPairingRequest.
+        - `Passkey` request: either provide the passkey entered by the user, decline it with `confirm: false`.
+        - `NumericComparison` request: confirm or decline with `confirm: true | false`.
+      type: object
+      allOf:
+        - properties:
+            id:
+              description: Pairing request identifier.
+              type: integer
+          required:
+            - id
+        - oneOf:
+            - type: object
+              properties:
+                passkey:
+                  description: '6-digit passkey displayed on the central, sent as text. Leading zero(s) can be included or omitted.'
+                  type: string
+                  minLength: 1
+                  maxLength: 6
+              required:
+                - passkey
+            - type: object
+              properties:
+                confirm:
+                  description: Confirm or decline a pairing request.
+                  type: boolean
+              required:
+                - confirm
+    BtPeer:
+      description: Information about the (paired) peer.
+      type: object
+      properties:
+        address:
+          description: 'BT address in 00:00:00:00:00:00 format.'
+          type: string
+        addr_type:
+          $ref: '#/components/schemas/BtAddressType'
+      required:
+        - address
+        - addr_type
+    BtAddressType:
+      description: |
+        Address type:
+        - `LE_PUBLIC`: Public device address
+        - `LE_RANDOM`: Random device address
+        - `LE_PUBLIC_IDENTITY`: Public identity address (corresponds to resolved private address)
+        - `LE_RANDOM_IDENTITY`: Random (static) identity address (corresponds to resolved private address)
+        - `UNKNOWN`: Address could not be determined, or an error occurred
+      type: string
+      enum:
+        - LE_PUBLIC
+        - LE_RANDOM
+        - LE_PUBLIC_IDENTITY
+        - LE_RANDOM_IDENTITY
+        - UNKNOWN
+    BtSecurityType:
+      description: |
+        Bonding security type:
+        - `JustWorks`: Automatic pairing, peripheral only needs to confirm pairing request from central.
+        - `DisplayNumber`: Peripheral must display number for the central to confirm.
+        - `NumericComparison`: Peripheral must confirm or declined if the numeric value matches the displayed number on the central.
+        - `PasskeyInput`: Peripheral must enter displayed passkey on central.
+      type: string
+      enum:
+        - JUST_WORKS
+        - DISPLAY_NUMBER
+        - NUMERIC_COMPARISON
+        - PASSKEY_INPUT
+    BtDeviceProfileInfo:
+      description: |
+        BT device profile overview information. Contains all required device information to make a device selection.
+      type: object
+      properties:
+        id:
+          description: Device profile identifier
+          type: string
+        user_profile:
+          description: System or user provided device profile.
+          type: boolean
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        version:
+          type: integer
+        peripherals:
+          $ref: '#/components/schemas/BtDevicePeripherals'
+      required:
+        - id
+        - name
+        - version
+        - peripherals
+    BtDeviceProfileInfos:
+      type: array
+      items:
+        $ref: '#/components/schemas/BtDeviceProfileInfo'
+    BtDeviceProfile:
+      description: |
+        BT device profile to define available key commands and pre-defined button mappings and UI screens.
+      type: object
+      properties:
+        id:
+          description: Device profile identifier
+          type: string
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        version:
+          type: integer
+        peripherals:
+          $ref: '#/components/schemas/BtDevicePeripherals'
+        commands:
+          type: object
+          properties:
+            keyboard:
+              type: array
+              items:
+                type: string
+            consumer:
+              type: array
+              items:
+                type: string
+            system:
+              type: array
+              items:
+                type: string
+          required:
+            - keyboard
+            - consumer
+            - system
+        command_mapping:
+          type: object
+          additionalProperties:
+            type: string
+        button_mapping:
+          $ref: '#/components/schemas/DeviceButtonMappings'
+        user_interface:
+          $ref: '#/components/schemas/ActivityUserInterface'
+      required:
+        - id
+        - name
+        - version
+        - peripherals
+        - commands
+        - command_mapping
+    BtDevicePeripherals:
+      description: Supported device peripherals. A device can support a single mode or act as a composite device.
+      type: object
+      properties:
+        keyboard:
+          description: Device is a HID keyboard
+          type: boolean
+        mouse:
+          description: Device is a mouse keyboard
+          type: boolean
     ResourceType:
       type: string
       format: '^[a-zA-Z]+$'

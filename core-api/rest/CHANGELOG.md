@@ -10,6 +10,12 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ---
 
+## 0.33.0
+### Added
+- BT HID peripheral support with new BT-remote entity ([feature-and-bug-tracker#65](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/65)).
+  - New resource type `BtDeviceProfile` for Bluetooth device profiles.
+  - New endpoints for Bluetooth configuration, HCI logs and BT system control.
+
 ## 0.32.0
 ### Added
 - Add hostname and MAC address to version information returned in `/pub/version` endpoint ([#33](https://github.com/unfoldedcircle/core-api/issues/33)).
