@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.33.0
+  version: 0.34.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -1128,7 +1128,7 @@ paths:
     put:
       tags:
         - integrations
-      summary: "\U0001F477 Execute connection test and fetch metadata from discovered integration driver."
+      summary: "\U0001F9EA Execute connection test and fetch metadata from discovered integration driver."
       description: |
         Perform a driver connection test with a discovered driver. If the driver requires a token, it must be specified in
         the request body.
@@ -1288,6 +1288,93 @@ paths:
           $ref: '#/components/responses/Err409Conflict'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
+  /intg/install:
+    post:
+      tags:
+        - integrations
+      summary: "\U0001F9EA Upload and install a custom integration."
+      description: |
+        Install a custom integration driver from an integration driver installation archive.
+
+        ℹ️ This is a synchronous operation which takes at least 10 seconds to complete for a small Node.js driver.
+        Larger archives will require more time. This might change to async processing and background installation in the future. 
+
+        Integration driver archive requirements:
+        - TAR GZip archive (either .tgz or .tar.gz file suffix) with a maximum size of 100 MB.
+        - In the root of the archive, there must be a `driver.json` file describing the custom integration driver.  
+          See `IntegrationDataMetadata` schema for the driver.json format.
+        - The driver binary must be in the `./bin` subdirectory.
+          - Either a statically linked aarch64 executable named `driver`.
+          - Or a Node.js file named `driver.js`.
+        - All application files must be in one of the following subdirectories, other locations are not accessible at runtime:
+          - `./bin`: application binary, usually only `driver`.
+          - `./config`: configuration data. Path is accessible with `UC_CONFIG_HOME` environment variable.
+          - `./data`: application data. Path is accessible with `UC_DATA_HOME` environment variable.
+
+        Restrictions:
+        - Maximum 10 custom integrations can be installed.
+        - Only Node.js is supported besides a statically linked binary. Other runtimes are not supported at the moment.
+        - The integration driver runs in a sandbox. Access to devices and the filesystem is restricted.
+        - No symlinks are allowed. They are automatically removed during the installation.
+        - Executable files are only allowed in the `./bin` directory.
+          - An integration driver should be limited to one process and not launch other processes.
+          - No other tools are provided in the runtime environment. E.g. there is no shell available and no other tools
+            like `cp` or `mv`.
+        - Only the `config` and `data` directories are writeable and persisted between restarts.
+          - The `/tmp` directory can be used for small temporary files. Files are not persisted between restarts.
+        - File access with relative paths between `bin`, `config`, and `data` is not possible.
+          - Environment variables must be used to retrieve the full path of these directories.
+            - `UC_CONFIG_HOME` and `HOME`: configuration directory.
+            - `STATE_DIRECTORY`: data directory.
+          - The returned path may not be stored, it may change with future software updates.
+
+        To delete a custom integration, use the regular endpoints to delete an integration instance and driver:
+        - Delete integration `DELETE /api/intg/instances/:intgId`.
+        - Delete driver and installation files: `DELETE /api/intg/drivers/:driverId`.
+
+        Error response codes:
+        - `400`: invalid archive, missing data in archive or included metadata cannot be read.
+        - `409`: custom integration is not compatible with the current firmware or the maximum amount of custom integration
+                 installations has been reached.
+        - `413`: archive is too large.
+        - `422`: integration is already installed, or the `driver_id` has been used by another integration.
+        - `503`: service unavailable, an installation is already running or a fatal error occurred at a previous
+                 installation and the device needs to be restarted.
+        - `507`: insufficient storage to upload and process installation archive.
+      operationId: installCustomIntegration
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: TAR GZip Archive file with the custom integration. File extension must be `.tar.gz` or `.tgz`.
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Custom integration successfully installed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationDriverInfo'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '413':
+          $ref: '#/components/responses/Err413PayloadTooLarge'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
   /intg/setup:
     get:
       tags:
@@ -1513,6 +1600,7 @@ paths:
             type: string
             enum:
               - LOCAL
+              - CUSTOM
               - EXTERNAL
         - $ref: '#/components/parameters/enabled'
         - $ref: '#/components/parameters/instantiable'
@@ -1547,6 +1635,7 @@ paths:
             type: string
             enum:
               - LOCAL
+              - CUSTOM
               - EXTERNAL
         - $ref: '#/components/parameters/enabled'
         - $ref: '#/components/parameters/instantiable'
@@ -1585,7 +1674,7 @@ paths:
     post:
       tags:
         - integrations
-      summary: "\U0001F477 Manually register a new integration driver."
+      summary: "\U0001F9EA Manually register a new integration driver."
       description: |
         A driver provides the connection parameters and optional setup configuration for an integration driver.
 
@@ -1820,8 +1909,11 @@ paths:
       description: |
         Unloads and deletes an integration driver with all instances and provided entities.
 
-        ⚠️ **Attention: all references to the integration driver will be removed! This includes all driver instances,
-        provided entities and their references in profile pages and groups.**
+        ⚠️ **Attention**:
+        - All references to the integration driver will be removed! This includes all driver instances,
+        provided entities and their references in profile pages and groups.
+        - If the driver is a custom installed driver, the driver will be removed from the remote, including all
+        configuration settings.
       operationId: deleteIntegrationDriver
       parameters:
         - $ref: '#/components/parameters/driver_id'
@@ -8371,7 +8463,7 @@ paths:
     get:
       tags:
         - dock
-      summary: "\U0001F477 Test IR command."
+      summary: Test IR command.
       description: |
         ⚠️ This is for testing only. Please use the `/ir/emitters/` endpoints for sending IR codes.
 
@@ -8436,7 +8528,7 @@ paths:
     post:
       tags:
         - dock
-      summary: "\U0001F477 Send IR command."
+      summary: Send IR command.
       description: |
         ⚠️ This is for testing only. Please use the `/ir/emitters/` endpoints for sending IR codes.
 
@@ -9165,6 +9257,8 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '409':
           $ref: '#/components/responses/Err409Conflict'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
   /system/logs:
     get:
       tags:
@@ -12747,8 +12841,13 @@ components:
         - driver_url
     IntegrationDriverType:
       type: string
+      description: |
+        - `LOCAL`: pre-installed integration driver in the firmware.
+        - `CUSTOM`: user-installed custom integration driver on the remote.
+        - `EXTERNAL`: external integration driver on the network.
       enum:
         - LOCAL
+        - CUSTOM
         - EXTERNAL
     IntegrationDriverUpdate:
       type: object
