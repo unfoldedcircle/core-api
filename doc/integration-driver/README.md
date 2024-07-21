@@ -7,3 +7,4 @@
 - [Driver mDNS advertisement](driver-advertisement.md)
 - [Driver registration](driver-registration.md)
 - [Driver setup](driver-setup.md)
+- [Install integration driver on the device](driver-installation.md)
