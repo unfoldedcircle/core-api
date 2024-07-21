@@ -14,6 +14,8 @@
   - after the pairing confirmation, otherwise it still shows as not paired.
   - after deleting a paired device, otherwise it still shows paired.
 - Pairing information is not included in backup archive.
-- Entity command validation issue in `send_cmd` & `send_key` commands with negative mouse movement values.
 
 See [known device issues](known_issues.md) for more information.
+
+Fixed in v1.9.0 beta:
+- Entity command validation issue in `send_cmd` & `send_key` commands with negative mouse movement values.

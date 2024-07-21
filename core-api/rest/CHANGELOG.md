@@ -10,6 +10,10 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ---
 
+## 0.34.0
+### Added
+- Custom integration driver installation.
+
 ## 0.33.0
 ### Added
 - BT HID peripheral support with new BT-remote entity ([feature-and-bug-tracker#65](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/65)).

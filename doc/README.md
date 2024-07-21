@@ -12,3 +12,4 @@
 - [WebSockets handling](integration-driver/websocket.md)
 - [Driver registration](integration-driver/driver-registration.md)
 - [Driver setup](integration-driver/driver-setup.md)
+- [Install integration driver on the device](integration-driver/driver-installation.md)
