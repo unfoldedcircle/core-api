@@ -1,8 +1,10 @@
-# Driver Installation on the Remote
+# Driver installation on the Remote
 
-Starting with firmware v1.9.0, installation drivers can be installed on the Remote.
+Starting with firmware v1.9.0, custom installation drivers can be installed on the Remote.
 
-## Installation Archive Format
+‼️ Custom integration drivers is a developer preview and not all features are implemented yet. See [missing features](#missing-features).
+
+## Installation archive format
 
 Integration driver archive requirements:
 - TAR GZip archive (either .tgz or .tar.gz file suffix) with a maximum size of 100 MB.
@@ -15,7 +17,7 @@ Integration driver archive requirements:
   - `./config`: optional configuration data. Path is accessible with `UC_CONFIG_HOME` environment variable.
   - `./data`: optional application data. Path is accessible with `UC_DATA_HOME` environment variable.
 
-### Metadata File
+### Metadata file
 
 The `driver.json` metadata file in the root of the archive describes the integration driver. 
 
@@ -74,7 +76,7 @@ It is a reduced version of the `IntegrationDriver` object, without driver connec
   - This is the first screen of the setup, all further screens are dynamically provided by the driver. 
 - ⚠️ `min_core_api` is not yet used.
 
-### Driver Icon
+### Driver icon
 
 A driver icon can either use a predefined icon or a custom icon. Predefined icons are prefixed with `uc:`, followed by
 the icon identifier in lowercase.
@@ -94,7 +96,7 @@ Example `driver.json` (other fields omitted for simplicity):
 The icon file called `foobar.png` must be added to the root of the archive.
 Icons must be of size 90x90 pixels and either in PNG or JPG format. Maximum size is 32 KB.
 
-### Installation Archive Example
+### Installation archive example
 
 Example of a Node.js based integration driver archive (contents of bin/node_modules are not shown for a clearer overview):
 ```
@@ -134,7 +136,17 @@ Example of a Node.js based integration driver archive (contents of bin/node_modu
   - No other tools are provided in the runtime environment. E.g. there is no shell available and no other tools
     like `cp` or `mv`.
 
-### Runtime Environment
+### Missing features
+
+- [ ] Resource restrictions for integration drivers: limit maximum amount of memory and CPU usage.
+- [ ] Update an installed integrations.
+  - Workaround: remove and re-install.
+- [ ] Resource usage: provide memory and CPU usage per integration.
+  - Only the overall resource usage can be monitored with `GET /api/pub/status`.
+- [ ] Web-Configurator support: install custom integration drivers.
+  - Custom integration drivers can already be deleted in the web-configurator.
+
+### Runtime environment
 
 The driver runs in a sandbox with limited access to the host system.
 
@@ -157,7 +169,16 @@ The driver runs in a sandbox with limited access to the host system.
 
 _TODO more details about sandbox environment_
 
-## Install Driver
+#### Network
+
+The integration runs on the same network environment as the Remote. There is no network bridge or firewall. 
+
+- Binding ports below 1024 is not possible.
+
+⚠️ A port-binding filter might be added in the future to prevent integrations to steal away ports of other integrations.
+The port range 8000-9200 and port 13333 must be avoided!
+
+## Install driver
 
 ```shell
 curl --location 'http://$IP/api/intg/install' \
@@ -167,7 +188,7 @@ curl --location 'http://$IP/api/intg/install' \
 
 See [REST Core API](../../core-api/rest/README.md) for more details.
 
-## Delete Driver
+## Delete driver
 
 To delete a custom integration, use the regular endpoints to delete an integration instance and driver. 
 These are the same endpoints as for an external network integration driver:
@@ -179,7 +200,7 @@ See [REST Core API](../../core-api/rest/README.md) for more details.
 
 The instance and driver can also be deleted in the web-configurator.
 
-## Log Access
+## Log access
 
 Output to stdout and stderr are automatically stored with a timestamp and accessible as the other system logs:
 
@@ -193,12 +214,24 @@ Log files can also be downloaded in the web-configurator: _Settings, Development
 ## Recommendations
 
 - Node.js should be preferred for writing integration drivers.
+- If using Python:
+  - Use [PyInstaller](https://pyinstaller.org/) to create a binary distribution.
+  - Use the default one-folder bundle containing an executable (`--onedir`). Avoid the one-file bundled executable, since
+    it will easily use an additional 100 MB of memory!
+  - See [Android TV integration](https://github.com/unfoldedcircle/integration-androidtv) or [Apple TV integration](https://github.com/unfoldedcircle/integration-appletv)
+    as an example.
 - An integration driver should be limited to one process and not launch other processes.
-- If the integration needs to create an IPv4 or IPv6 server socket:
-  - Use ports above 10000.
-  - Binding ports below 1024 is not possible.
-  - Range 8000-9200 and 13333 must be avoided and might be blocked in the future!
+- Use ports above 10000 if the integration needs to create an IPv4 or IPv6 server socket (besides the required WebSocket
+  server for the integration-API).
 - Preserve resources, use as little memory and CPU as possible.
 - Use stdout & stderr for logging.
 
-_TODO example driver_
+## Example integrations
+
+The following Python based integration drivers create a custom integration installation archive during build with a
+GitHub action:
+
+- [Android TV](https://github.com/unfoldedcircle/integration-androidtv)
+- [Apple TV](https://github.com/unfoldedcircle/integration-appletv)
+- [Denon AVR](https://github.com/unfoldedcircle/integration-denonavr)
+
