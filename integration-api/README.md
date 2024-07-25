@@ -24,6 +24,7 @@ The provided Bash wrapper script [`create-html-docker.sh`](create-html-docker.sh
 
 | Integration API | UCR2 Firmware | Core Simulator |
 |-----------------|---------------|----------------|
-| 0.10.0          |               | 0.43.0         |
+| 0.11.0          | 1.9.2-beta    |                |
+| 0.10.0          | 1.7.12        | 0.43.0         |
 | 0.9.0           | 1.7.2         | 0.41.0         |
 | 0.8.0           | 1.5.2         | 0.39.7         |

@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two WebSocket Integration API
-  version: '0.10.0-beta'
+  version: '0.11.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -131,6 +131,7 @@ channels:
           - $ref: '#/components/messages/supported_entity_types'
           - $ref: '#/components/messages/configured_entities'
           - $ref: '#/components/messages/localization_cfg'
+          - $ref: '#/components/messages/runtime_info'
     subscribe:
       description: |
         Integration API for the Remote Two to receive messages from integration drivers.  
@@ -160,6 +161,7 @@ channels:
           - $ref: '#/components/messages/get_supported_entity_types'
           - $ref: '#/components/messages/get_configured_entities'
           - $ref: '#/components/messages/get_localization_cfg'
+          - $ref: '#/components/messages/get_runtime_info'
 
 components:
   securitySchemes:
@@ -293,7 +295,7 @@ components:
         $ref: '#/components/schemas/driverMetadataMsg'
 
     enter_standby:
-      summary: 🔍 Remote Two goes into standby event.
+      summary: 🚀 Remote Two goes into standby event.
       description: |
         Notification event that the Remote Two goes into standby mode and won't process incoming events anymore.
       tags:
@@ -304,7 +306,7 @@ components:
         $ref: '#/components/schemas/enterStandbyEvent'
 
     exit_standby:
-      summary: 🔍 Remote Two leaves standby event.
+      summary: 🚀 Remote Two leaves standby event.
       description: |
         Notification event that the Remote Two is out of standby. The integration should resume operation if it
         suspended it while receiving the `enter_standby` event.  
@@ -374,7 +376,7 @@ components:
       payload:
         $ref: '#/components/schemas/deviceStateEventMsg'
     setup_driver:
-      summary: 🧪 Start driver setup.
+      summary: 🚀 Start driver setup.
       description: |
         If a driver includes a `setup_data_schema` object in its driver metadata, it enables the dynamic driver setup
         process. The setup process can be a simple "start-confirm-done" between the Remote Two and the integration
@@ -425,7 +427,7 @@ components:
       payload:
         $ref: '#/components/schemas/abortDriverSetupEvent'
     driver_setup_change:
-      summary: 🧪 Driver setup state change event.
+      summary: 🚀 Driver setup state change event.
       description: |
         Emitted for all driver setup flow state changes.
         
@@ -440,7 +442,7 @@ components:
       payload:
         $ref: '#/components/schemas/driverSetupChangeEvent'
     set_driver_user_data:
-      summary: 🧪 Provide requested driver setup data.
+      summary: 🚀 Provide requested driver setup data.
       description: |
         Set required data to configure the integration driver or continue the setup process.
         
@@ -487,7 +489,7 @@ components:
       payload:
         $ref: '#/components/schemas/availableEntitiesMsg'
     subscribe_events:
-      summary: 🧪 🍕 Subscribe to events.
+      summary: 🚀 🍕 Subscribe to events.
       description: |
         Subscribe to entity state change events to receive `entity_change` events from the integration driver.
         
@@ -514,18 +516,22 @@ components:
       x-response:
         $ref: '#/components/messages/result'
     get_version:
-      summary: 🚀 Get Remote Two version information.
+      summary: 🧪  Get Remote Two version information.
+      description: |
+        ℹ️️ implemented in firmware 0.9.2.
       payload:
         $ref: '#/components/schemas/getVersionMsg'
       x-response:
         $ref: '#/components/messages/version'
     version:
-      summary: 🔍 Remote version information response.
+      summary: 🧪 Remote version information response.
       payload:
         $ref: '#/components/schemas/versionMsg'
     get_supported_entity_types:
-      summary: 🚀 Get supported entities in the Remote Two.
+      summary: 🧪 Get supported entities in the Remote Two.
       description: |
+        ℹ️️ implemented in firmware 0.9.2.
+
         This is a metadata request for supported entities in the Remote Two and allows the client to check if it's still
         compatible. New releases can support new entities or entities might get renamed in major updates.
       tags:
@@ -543,12 +549,14 @@ components:
       payload:
         $ref: '#/components/schemas/supportedEntityTypesMsg'
     get_configured_entities:
-      summary: 🔍 Retrieve configured entities from this integration.
+      summary: 🧪 Retrieve configured entities from this integration.
       description: |
-        ⚠️ not yet implemented in the remote-core!
+        ℹ️️ implemented in firmware 0.9.2.
 
         Request the configured entities in the Remote Two originating from this integration. These are all the entities
-        which are being used in the Remote Two and assigned in a profile.
+        which have been configured in the Remote Two.  
+        ⚠️ This doesn't mean that all entities are actively being used (assigned in a profile and shown in the user
+        interface).
         
         This allows the driver e.g. to optimize its device communication and only consider actively used entities.  
         Another option for the driver to be notified about used entities is through the `subscribe_events` requests.
@@ -559,16 +567,18 @@ components:
       x-response:
         $ref: '#/components/messages/configured_entities'
     configured_entities:
-      summary: 🔍 Configured entities response.
+      summary: 🚀 Configured entities response.
       description: |
-        ⚠️ not yet implemented in the remote-core!
+        The returned entity identifiers are configured in the Remote.
       tags:
         - name: entity
       payload:
         $ref: '#/components/schemas/configuredEntitiesMsg'
     get_localization_cfg:
-      summary: 🔍 Retrieve the localization settings of the Remote Two.
+      summary: 🧪 Retrieve the localization settings of the Remote Two.
       description: |
+        ℹ️️ implemented in firmware 0.9.2.
+
         The active localization settings of the Remote Two can be used if the integration driver requires localized
         settings for texts or units of measurements. 
         
@@ -580,11 +590,31 @@ components:
       x-response:
         $ref: '#/components/messages/localization_cfg'
     localization_cfg:
-      summary: 🔍 Active localization settings of the Remote Two.
+      summary: 🧪 Active localization settings of the Remote Two.
       tags:
         - name: metadata
       payload:
         $ref: '#/components/schemas/localizationMsg'
+    get_runtime_info:
+      summary: 🔍 Retrieve driver runtime information from the Remote.
+      description: |
+        ℹ️️ implemented in firmware 0.9.2.
+
+        Request driver runtime information from the Remote. This returns driver and instance identifiers for advanced
+        usage of the REST Core-API. These identifiers could also be propagated to a home automation system to interact
+        with the Remote and REST Core-API.
+      tags:
+        - name: metadata
+      payload:
+        $ref: '#/components/schemas/getRuntimeInfoMsg'
+      x-response:
+        $ref: '#/components/messages/runtime_info'
+    runtime_info:
+      summary: 🔍 Driver runtime information from the Remote Two.
+      tags:
+        - name: metadata
+      payload:
+        $ref: '#/components/schemas/runtimeInfoMsg'
 
     get_entity_states:
       summary: 🚀 🍕 Get the current state of the configured entities.
@@ -1239,6 +1269,30 @@ components:
               const: localization_cfg
             msg_data:
               $ref: '#/components/schemas/localizationSettings'
+          required:
+            - msg
+            - msg_data
+
+    getRuntimeInfoMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_runtime_info
+          required:
+            - msg
+
+    runtimeInfoMsg:
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: runtime_info
+            msg_data:
+              $ref: '#/components/schemas/runtimeInfo'
           required:
             - msg
             - msg_data
@@ -2396,18 +2450,27 @@ components:
     versionInfo:
       type: object
       properties:
+        device_name:
+          description: Custom name of the remote
+          type: string
+        hostname:
+          description: Hostname of the remote
+          type: string
+        address:
+          description: MAC address of the remote
+          type: string
         api:
+          description: API version
           type: string
         core:
+          description: Core app version
           type: string
         ui:
+          description: Frontend app version
           type: string
         os:
+          description: Operating system version
           type: string
-        integrations: # untyped Map<string,string>
-          type: object
-          additionalProperties:
-            type: string
 
     localizationSettings:
       type: object
@@ -2417,6 +2480,7 @@ components:
         country_code:
           $ref: '#/components/schemas/countryCode'
         time_zone:
+          description: Time zone name according to IANA <https://www.iana.org/time-zones>, e.g. `Europe/Copenhagen`.
           type: string
         time_format_24h:
           type: boolean
@@ -2442,6 +2506,26 @@ components:
         - METRIC
         - US
         - UK
+
+    runtimeInfo:
+      type: object
+      properties:
+        driver_id:
+          description: Identifier under which this integration driver is accessible in the Remote.
+          type: string
+        intg_ids:
+          description: |
+            Defined integration instance identifiers of this integration driver in the Remote.  
+            ℹ️ Only single-device integration drivers are supported at the moment, i.e. there's maximum one integration
+               instance per driver.
+          type: array
+          items:
+            type: string
+        log_id:
+          description: Log service identifier for a custom integration driver running on the Remote.
+          type: string
+      required:
+        - driver_id
 
     # =========================================================================
     # from OpenAPI
