@@ -8,7 +8,9 @@ protocol and are designed with message exchange patterns.
 
 ### Authentication
 
-An integration driver may require a token for authentication, or no authentication at all.
+⚠️ Custom integrations running on the remote do not support authentication.
+
+An external integration driver may require a token for authentication, or no authentication at all.
 
 - During driver registration the preferred authentication type and the token can be specified.
 - Default authentication method: message based if a token has been set.
@@ -75,8 +77,6 @@ restrictions), a fallback option with text messages exists. See AsyncAPI specifi
 ```
 
 The remote will close the connection if the integration sends any other code than 200 or 401. 
-
-**TODO** _describe token handling with REST API / web-configurator_
 
 #### No Authentication
 

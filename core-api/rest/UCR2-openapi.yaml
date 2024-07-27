@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two REST API
-  version: 0.34.0
+  version: 0.34.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -431,15 +431,15 @@ paths:
     get:
       tags:
         - external-token
-      summary: Get registered external systems.
+      summary: "\U0001F9EA Get registered external systems."
       description: |
-        External systems are handled with the R2 integrations. Before an access token for such a system can be provided,
-        the corresponding system needs to be registered.
+        External systems cannot be created manually. They are automatically being created if a custom integration driver
+        requests to use the "external tokens" feature. This is enabled with the driver feature `auth.external_tokens`.
 
-        _TODO: reference to WebSocket API for integration registration._
+        ⚠️ External integration drivers cannot use this feature.
 
-        If the expected system name is not returned by this call, any operations on that system name will fail:
-        `/auth/external/{system}`.
+        If the expected system name is not returned by this call, all operations on the `/auth/external/{system}` endpoints
+        with that system name will fail.
         Therefore, it's advisable to either call this method first or react on the 404 error while providing or updating an
         external system token, to inform the client user, that the integration is not available on the remote.
       operationId: getExternalSystems
@@ -468,27 +468,48 @@ paths:
     post:
       tags:
         - external-token
-      summary: Provide an access token of an external system.
+      summary: "\U0001F9EA Provide an access token of an external system."
       description: |
         An access token is usually required to connect to external systems like Home Assistant.
-        This method allows the external system to automatically provide the access token for the corresponding R2
+        This method allows the external system to automatically provide the access token for the corresponding Remote
         integration instead of forcing the user to type it in. If the token name already exists for the given system,
         error `422` is returned.
-        Use the put method to update an existing token.
+        Use the PUT method to update an existing token.
 
-        The format of the access token depends on the external system and the involved R2 integration.
-        It could be a UUID, a JWT or any other representation required for the integration to communicate with the
-        external system.
+        Required fields are:
+        - `token_id`: the main identifier for a given system. It must be unique within that system and may not end in
+          `-DATA` or `-URL`.
+        - `name`: a friendly name to show in a user interface. It must be unique within that system.
+        - `token`: the secret credential.
 
-        The `system` parameter is determined by the registered R2 integration. Only registered system name identifiers are
-        valid, otherwise error `404` will be returned.
-        E.g. a "FooBar" integration might register the system identifier name "foobar".
+        The format of the access token depends on the external system and the involved Remote integration.
+        It could be a UUID, a JWT, a PEM certificate or any other representation required for the integration to communicate
+        with the external system.
+
+        ⚠️ External access tokens can be used by the pre-installed integrations and the custom integrations installable by
+        the user. External integrations cannot access the secret token value.
+
+        ⚠️ The secret token value cannot be retrieved anymore with the API and is only available in the corresponding driver
+        runtime as a credential file.
+
+        To use the "external tokens" feature an integration driver has to request the driver feature `auth.external_tokens`.
+        If enabled, an external system is automatically created with the `system` identifier matching the `driver_id`.
+
         Use the `GET /auth/external` method the retrieve the registered systems.
+
+        Mapped credential files are automatically created in the corresponding integration driver runtime for the new token:
+        - Environment variable `UC_TOKENS_HOME` specifies the directory containing the credential files.
+        - The `token_id` value is used as credential file name for the secret token.
+          - For example: for `token_id: foobar`, the credential file is accessible at the `${UC_TOKENS_HOME}/foobar` path.
+          - The credential file contains the `token` field value in plain text.
+        - Optional files are created for the `url` and `data` fields:
+          - `{token_id}-URL` contains the `url` value. Example: `${UC_TOKENS_HOME}/foobar-URL`
+          - `{token_id}-DATA` contains the `data` value. Example: `${UC_TOKENS_HOME}/foobar-DATA`
       operationId: addExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
       requestBody:
-        description: Access token that needs to be added to the remote
+        description: Access token that needs to be added to the remote.
         content:
           application/json:
             schema:
@@ -500,19 +521,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token_id:
-                    type: string
-                    format: '^[a-zA-Z0-9\-_]+$'
-                    minLength: 1
-                    maxLength: 36
-                    description: |
-                      Unique token identifier, used for later token management through the external system or management ui.
-                      If the token identifier has been provided in the request, then then same identifier is returned, otherwise a
-                      UUID is generated.
-                required:
-                  - token_it
+                $ref: '#/components/schemas/ExternalAccessTokenResponse'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -523,11 +532,10 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
-      x-codegen-request-body-name: body
     head:
       tags:
         - external-token
-      summary: Get total number of available tokens for an external system.
+      summary: "\U0001F9EA Get total number of available tokens for an external system."
       operationId: getExternalAccessTokenCount
       parameters:
         - $ref: '#/components/parameters/system'
@@ -548,7 +556,7 @@ paths:
     get:
       tags:
         - external-token
-      summary: List available tokens for an external system.
+      summary: "\U0001F9EA List available tokens for an external system."
       operationId: getExternalAccessTokens
       parameters:
         - $ref: '#/components/parameters/system'
@@ -586,6 +594,8 @@ paths:
       tags:
         - external-token
       summary: Remove all access tokens of an external system.
+      description: |
+        All mapped credential files of the corresponding integration driver are also deleted.
       operationId: deleteExternalAccessTokensBySystem
       parameters:
         - $ref: '#/components/parameters/system'
@@ -602,7 +612,16 @@ paths:
     get:
       tags:
         - external-token
-      summary: Get external access token.
+      summary: "\U0001F9EA Get external access token."
+      description: |
+        Retrieve an external access token by system and token identifiers.
+
+        ⚠️ Only the public information of the token is returned, the secret token value itself cannot be retrieved anymore
+        with the API.
+
+        The secret token values are automatically mapped to credential files in the corresponding integration driver
+        runtime. The `token_id` value is used as file name for the token, with additional files for the optional `url` and
+        `data` fields.
       operationId: getExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
@@ -625,10 +644,13 @@ paths:
     put:
       tags:
         - external-token
-      summary: Replace an existing access token of an external system.
+      summary: "\U0001F9EA Replace an existing access token of an external system."
       description: |
         This methods allows an already provided token of an external system to be updated. The token is identified by
         the system name and the token identification.
+
+        The token, url and data values are also updated in the mapped credential files of the corresponding running
+        integration driver.
       operationId: replaceExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
@@ -657,6 +679,8 @@ paths:
       summary: Remove an external access token.
       description: |
         No error is returned if the `tokenId` doesn't exist. `404` is only returned it the `system` is not found.
+
+        The mapped credential files of the corresponding integration driver are also deleted.
       operationId: deleteExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
@@ -1914,6 +1938,8 @@ paths:
         provided entities and their references in profile pages and groups.
         - If the driver is a custom installed driver, the driver will be removed from the remote, including all
         configuration settings.
+        - If an external access token system has been created for the driver, it will be removed as well, including all
+          associated tokens!
       operationId: deleteIntegrationDriver
       parameters:
         - $ref: '#/components/parameters/driver_id'
@@ -12233,113 +12259,97 @@ components:
         system:
           $ref: '#/components/schemas/ExternalSystemId'
         name:
-          $ref: '#/components/schemas/ExternalSystemName'
+          $ref: '#/components/schemas/ExtSystemName'
+      required:
+        - system
+        - name
     ExternalSystemId:
       type: string
       format: '^[a-zA-Z0-9\-_]+$'
       minLength: 1
       maxLength: 50
       description: Unique external system identifier registered by an R2 integration to interact with the API.
-    ExternalSystemName:
+    TokenId:
+      type: string
+      format: '^[a-zA-Z0-9\-_]+$'
+      minLength: 1
+      maxLength: 36
+      description: |
+        Unique token identifier, used for later token management through the external system or management ui.
+    ExtSystemName:
       type: string
       minLength: 1
       maxLength: 50
       description: |
         Friendly name of the external system to display to the user within the app. This name must be unique for an external
         system and should be as short and concise as possible.
-        Use the description field for more information.
+    ExtAccessToken:
+      type: string
+      minLength: 1
+      maxLength: 32768
+      description: |
+        The token to access the external system with the corresponding Remote integration.
+        This could be a UUID, a JWT, a PEM certificate or any other representation required for the integration to
+        authenticate on the system.
+    ExtAccessTokenDescription:
+      type: string
+      maxLength: 2048
+      description: Optional description of the external access token.
+    ExtAccessTokenUrl:
+      type: string
+      maxLength: 2048
+      description: Optional URL of the external system.
+    ExtAccessTokenData:
+      type: string
+      maxLength: 32768
+      description: |
+        Optional data from the external system for the Remote integration.  
+        ⚠️ Attention: this data is not protected and retrievable by API clients!
     ExternalAccessTokens:
       type: array
       items:
-        type: object
-        properties:
-          system:
-            $ref: '#/components/schemas/ExternalSystemName'
-          token_id:
-            type: string
-          name:
-            type: string
-          description:
-            type: string
-            maxLength: 2048
-            description: Optional description of the external access token.
-          url:
-            type: string
-            maxLength: 2048
-            description: Optional URL of the external system.
-          data:
-            type: string
-            maxLength: 2048
-            description: Optional data from the external system for the R2 integration.
-          creation_date:
-            type: string
-            format: date-time
+        $ref: '#/components/schemas/ExternalAccessToken'
     ExternalAccessToken:
       type: object
       properties:
         system:
-          $ref: '#/components/schemas/ExternalSystemName'
+          $ref: '#/components/schemas/ExternalSystemId'
         token_id:
-          type: string
+          $ref: '#/components/schemas/TokenId'
         name:
-          type: string
-        token:
-          type: string
-          minLength: 1
-          maxLength: 2048
-          description: |
-            The token to access the external system with the corresponding R2 integration.
-            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
-            system.
+          $ref: '#/components/schemas/ExtSystemName'
         description:
-          type: string
-          maxLength: 2048
-          description: Optional description of the external access token.
+          $ref: '#/components/schemas/ExtAccessTokenDescription'
         url:
-          type: string
-          maxLength: 2048
-          description: Optional URL of the external system.
+          $ref: '#/components/schemas/ExtAccessTokenUrl'
         data:
-          type: string
-          maxLength: 2048
-          description: Optional data from the external system for the R2 integration.
+          $ref: '#/components/schemas/ExtAccessTokenData'
         creation_date:
           type: string
           format: date-time
+      required:
+        - system
+        - token_id
+        - name
+        - creation_date
     ExternalAccessTokenRequest:
       type: object
+      description: |
+        The token_id can be provided by the external system. If omitted, an UUID is generated and returned in the
+        ExternalAccessToken response. It may not end in `-DATA` or `-URL`.
       properties:
         token_id:
-          type: string
-          format: '^[a-zA-Z0-9\-_]+$'
-          minLength: 1
-          maxLength: 36
-          description: |
-            Unique token identifier, used for later token management through the external system or management ui.
-            This identifier can be provided by the external system. If omitted, an UUID is generated and returned in the
-            ExternalAccessToken response.
+          $ref: '#/components/schemas/TokenId'
         name:
-          $ref: '#/components/schemas/ExternalSystemName'
+          $ref: '#/components/schemas/ExtSystemName'
         token:
-          type: string
-          minLength: 1
-          maxLength: 2048
-          description: |
-            The token to access the external system with the corresponding R2 integration.
-            This could be a UUID, a JWT or any other representation required for the integration to authenticate on the
-            system.
+          $ref: '#/components/schemas/ExtAccessToken'
         description:
-          type: string
-          maxLength: 2048
-          description: Optional description of the external access token.
+          $ref: '#/components/schemas/ExtAccessTokenDescription'
         url:
-          type: string
-          maxLength: 2048
-          description: Optional URL of the external system.
+          $ref: '#/components/schemas/ExtAccessTokenUrl'
         data:
-          type: string
-          maxLength: 2048
-          description: Optional data from the external system for the R2 integration.
+          $ref: '#/components/schemas/ExtAccessTokenData'
       required:
         - name
         - token
@@ -12350,6 +12360,16 @@ components:
         description: Any other informative message about the external system
         url: 'ws://smart.home'
         data: 'optional: true, foo: bar, free: text'
+    ExternalAccessTokenResponse:
+      type: object
+      description: |
+        If the token identifier has been provided in the request, then then same identifier is returned, otherwise a
+        UUID is generated.
+      properties:
+        token_id:
+          $ref: '#/components/schemas/TokenId'
+      required:
+        - token_id
     FriendlyName:
       type: string
       maxLength: 64

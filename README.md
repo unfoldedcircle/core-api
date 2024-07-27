@@ -29,6 +29,9 @@ The Remote Two WebSockets integrations API allows writing device integrations fo
 former YIO remote devices.  
 At the moment only user integrations running on an external host are supported.
 
+ℹ️ Beta release 1.9.0 allows to install custom integration drivers on the Remote. This is a developer preview feature
+to test their integrations.
+
 The integration driver acts as server and the Remote Two as client. The remote connects to the integration when an
 integration instance is configured. Whenever the remote enters standby it may choose to disconnect and automatically
 reconnect again after wakeup.

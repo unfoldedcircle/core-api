@@ -1,16 +1,19 @@
 ## How to write an integration driver
 
-The integration API allows to develop integration drivers in any programming language capable of running a WebSockets
-server.
+The integration API allows to develop external integration drivers in any programming language capable of running
+a WebSockets server. Custom integration drivers require Node.js or a statically linked binary.
 
-ℹ️ At the moment only external integrations which run on a separate device on your network are supported.
+- `External integration driver`: a driver running on an external device, reachable by the Remote. 
+- `Custom integration driver`: a driver running on the Remote in a restricted, sandboxed environment.
 
-We will publish the requirements and supported runtimes at a later date. The only thing we can say right now is that
-aiming for a statically compiled binary will have a higher chance of being compatible for on-device publishing.
-This includes for example Rust and C / C++, whereas interpreted languages like Java, Python and Node.js etc. will most
-likely not be suitable. Reasons are the limited resources (memory, storage, CPU) on the embedded Remote device. A good
-reference for testing is a [Raspberry Pi Zero W](https://www.raspberrypi.com/products/raspberry-pi-zero-w/), which
-is also the platform of the former YIO Remote.
+ℹ️ Beta release 1.9.0 allows to install custom integration drivers on the Remote.   
+This is a developer preview feature to test integrations. See [Driver installation on the Remote](driver-installation.md)
+for more information.
+
+ℹ️ See [NodeJS API wrapper](https://github.com/unfoldedcircle/integration-node-library) for a quick start in JavaScript,
+or the [Python API wrapper](https://github.com/unfoldedcircle/integration-python-library) if using Python.
+
+When writing a driver from scratch without using a wrapper library:
 
 1. Choose your programming language.
 2. Choose a WebSockets server library or framework for your language.
@@ -18,16 +21,19 @@ is also the platform of the former YIO Remote.
 4. Choose which [entities and features](../entities/README.md) the driver should expose.
 5. Implement the required WebSockets text messages in the [WebSocket Integration API](../../integration-api/asyncapi.yaml).
 
-ℹ️ See [NodeJS API wrapper](https://github.com/unfoldedcircle/integration-node-library) for a quick start in JavaScript.
+❗️ Using a wrapper library or one of the existing open source drivers as a start will greatly simplify driver development.
+Node.js should be preferred when developing a custom integration driver.
 
 ### Integration Driver Types
 
-There are two different driver types one can implement: either a simple single device driver or a multi device instance
-driver.
+The API defines two different driver types: a simple single-device driver or a multi-device instance driver.
+
+⚠️ Only the single device instance driver is supported. The multi-device driver type will most likely not be implemented
+in the near future!
 
 #### Single Device Instance Driver
 
-The single device instance driver is the default and easiest driver to develop:
+The single-device instance driver is the default and easiest driver to develop:
 
 - There is no concept of different or individual devices, just entities that the driver provides. 
 - The driver offers a list of available entities to the remote. This can be a single media player entity, or a large
@@ -36,33 +42,14 @@ The single device instance driver is the default and easiest driver to develop:
 - The driver may still control multiple physical devices, but from the Remote's point of view, these are just different
   entities provided from the same integration driver.
 
-This driver type is suitable for all device integrations which don't require much or any configuration by the user, or
-if the configuration shall be kept separate from the remote on purpose.
 E.g. if smart WiFi light bulbs can be discovered by the driver and then each bulb can be provided as a
 [light entity](../entities/entity_light.md) to the remote.
 
-#### Multi Device Instance Driver
-
-⚠️ This feature is not yet available!
-
-The multi device instance driver is an advanced driver capable of discovering physical devices and delegating the
-setup or configuration to the Remote / web-configurator.
-
-- Each device is considered a driver instance.  
-  There is one driver process handling multiple devices. The interaction and handling with a specific device is called
-  device instance. The technical implementation is up to the developer. This could be a multi-threaded or async
-  implementation. 
-- Each instance offers a list of available entities to the remote.
-- Each instance has its own device state (connected, disconnected, error, etc.).
-- All driver communication is handled on the same WebSocket connection. I.e. the Remote only establishes one connection
-  to the integration driver, no matter how many device instances there are. 
-- The driver has the option to interact with the user during the setup process with progress and notification
-  screens. E.g. asking the user to perform an action - _press button X on device_ - or provide additional data like
-  device credentials. 
-
 ### Authentication
 
-An integration driver can choose if the Remote Two requires authentication or not to connect to the driver.  
+⚠️ Custom integrations running on the remote do not support authentication.
+
+An external integration driver can choose if the Remote Two requires authentication or not to connect to the driver.  
 Supported are header based token authentication during connection setup or with an application level message after the
 connection has been established.
 
@@ -71,7 +58,7 @@ See [WebSocket authentication](websocket.md#authentication) for more information
 ### Connection Handling
 
 - Support multiple Remote sessions
-  - A driver should support multiple, independent WebSocket connections at the same time. 
+  - An external driver should support multiple, independent WebSocket connections at the same time. 
 - Keep alive
   - The driver must support WebSocket [Ping Pong control frames](https://tools.ietf.org/html/rfc6455#section-5.5.2).  
     Please check your WebSocket library, most libraries support this out of the box.
@@ -80,10 +67,12 @@ See [WebSocket authentication](websocket.md#authentication) for more information
 
 ### Driver Registration
 
-An integration driver should advertise itself over mDNS for auto-discovery and allow user configuration with the
-web-configurator. See [mDNS advertisement](driver-advertisement.md) for more information.
+⚠️ Custom integrations running on the remote are automatically registered during installation.
 
-An integration driver can optionally register itself at a remote and provide its authentication token.
+An external integration driver should advertise itself over mDNS for auto-discovery and allow user configuration with
+the web-configurator. See [mDNS advertisement](driver-advertisement.md) for more information.
+
+An external integration driver can optionally register itself at a remote and provide its authentication token.
 
 See [driver registration](driver-registration.md) for more information.
 

@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 _Changes in the next release_
 
+### Added
+- Bluetooth HID peripheral support.
+- Custom integration installation. 
+- Integration-API: add `get_runtime_info` request message to retrieve driver runtime information from the Remote.
+
 ---
 
 ## 0.10.0-beta - 2024-04-10

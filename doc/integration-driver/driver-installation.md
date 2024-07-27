@@ -37,6 +37,12 @@ It is a reduced version of the `IntegrationDriver` object, without driver connec
     "en": "Control Foobar products",
     "de": "Steuere Foobar Produkte"
   },
+  "features": [
+    {
+      "name": "auth.external_tokens",
+      "required": true
+    }
+  ],
   "developer": {
     "name": "Unfolded Circle ApS",
     "email": "hello@unfoldedcircle.com",
@@ -70,8 +76,13 @@ It is a reduced version of the `IntegrationDriver` object, without driver connec
 }
 ```
 
-- `driver_id` must be at least 4 characters long and start with a letter. Only lower-case letters, digits and `-`, `_` are allowed.
-- Multiple language fields are not required. If only a single language is provided, it should use the `en` key.
+- `driver_id` must be at least 5 characters long and start with a lower-case letter.
+  - Only lower-case letters, digits and `-`, `_` are allowed.
+  - Common system identifiers are not allowed and will be rejected (e.g. `daemon`, `backup`, etc.).
+  - The `uc_` prefix should not be used. This is reserved for pre-installed integrations. Any custom integrations using
+    this prefix might get removed during a future firmware update.
+- Multiple language fields are not required, but recommended.
+  - If only a single language is provided, it should use the `en` key.
 - `setup_data_schema` is optional if the driver provides a setup flow.
   - This is the first screen of the setup, all further screens are dynamically provided by the driver. 
 - ⚠️ `min_core_api` is not yet used.
@@ -163,6 +174,9 @@ The driver runs in a sandbox with limited access to the host system.
   - The returned path may not be stored, it may change with future software updates.
 - Only the `$UC_CONFIG_HOME` and `$UC_DATA_HOME` directories are writeable and persisted between restarts.
   - The `/tmp` directory can be used for small temporary files. Files are not persisted between restarts.
+- A dynamic user and group is allocated when the driver is started.
+  - The user and group IDs may change between driver restarts.
+  - Write access to the `$UC_CONFIG_HOME`, `$UC_DATA_HOME` and `/tmp` directories is ensured.
 
 ⚠️ CPU and memory restrictions are not yet in place but will be enforced in a future firmware update!
 - A single integration driver should not use more than 100 MB of memory.
@@ -177,6 +191,16 @@ The integration runs on the same network environment as the Remote. There is no 
 
 ⚠️ A port-binding filter might be added in the future to prevent integrations to steal away ports of other integrations.
 The port range 8000-9200 and port 13333 must be avoided!
+
+#### Native integration drivers
+
+_TODO sysroot, available dynamic libraries_
+
+The [Remote Two Cross Compile Toolchain](https://github.com/unfoldedcircle/ucr2-toolchain) can be used to cross-compile
+a native binary for the Remote.
+
+- The driver must be compiled as a static binary for libc.
+- Most dynamic libraries in the cross-compile sysroot are NOT available in the custom integration runtime environment!
 
 ## Install driver
 

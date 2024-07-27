@@ -10,6 +10,10 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ---
 
+## 0.34.1
+### Changed
+- Cleanup external token access endpoints for first implementation with Home Assistant.
+
 ## 0.34.0
 ### Added
 - Custom integration driver installation.
