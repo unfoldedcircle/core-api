@@ -1,9 +1,9 @@
-# Remote Two WebSocket Core-API
+# Unfolded Circle Remote WebSocket Core-API
 
-The Remote Two acts as server. Whenever the remote enters standby it may choose to disconnect open WebSocket sessions.
+The Remote device acts as server. Whenever the device enters standby, it may choose to disconnect open WebSocket sessions.
 It is up to the client to reconnect again.
 
-The Core-API is defined with [AsyncAPI](https://www.asyncapi.com/).
+The UCR WS Core-API is defined with [AsyncAPI](https://www.asyncapi.com/).
 
 - [AsyncAPI YAML definition](UCR2-asyncapi.yaml).
 - See [/doc folder](../../doc/README.md) for further API documentation and information.

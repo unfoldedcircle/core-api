@@ -1,16 +1,16 @@
 openapi: 3.0.3
 info:
-  title: Remote Two REST API
-  version: 0.34.1
+  title: Remote Two/3 REST Core-API
+  version: 0.35.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote UI\n- `Bearer Token` for ever request.  \n  This is the preferred authentication method for external systems communicating with the Remote Two.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle REST Core-API for Remote Two/3 (_UCR REST Core-API_ in short) allows to configure the remote and\nmanage custom resource files. Furthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Unfolded Circle Remote Core-APIs consist of:\n- this REST API\n- the [UCR WebSocket Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/websocket),\n  providing asynchronous events.\n\nThe focus of the Core-APIs is to provide all functionality for the UI application and the web-configurator.  \nThey allow to interact with the Unfolded Circle remote-core service and take full control of its features.\n\nThe Core-APIs may also be used by other external systems and integration drivers, if specific configuration or\ninteraction features are required, which are not present in the [UCR Integration-API](https://github.com/unfoldedcircle/core-api/tree/main/integration-api).\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote-UI.\n- `Bearer Token` for every request.  \n  This is the preferred authentication method for external systems communicating with the UCR REST Core-API.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
-  description: Find out more about the Remote Two
+  description: Find out more about the Remote 3
   url: 'https://www.unfoldedcircle.com/'
 servers:
   - url: /api
@@ -273,7 +273,7 @@ paths:
     post:
       tags:
         - api-keys
-      summary: Create an API key for the Remote Two APIs.
+      summary: Create an API key for the UCR APIs.
       description: |
         The returned API key in `api_key` is only visible in this response. Afterwards it cannot be retrieved anymore!
 
@@ -2234,7 +2234,7 @@ paths:
         - integrations
       summary: Configure multiple available entities.
       description: |
-        Configure multiple new Remote Two entities from available integration entities. Once configured, the entities will
+        Configure multiple new UC Remote entities from available integration entities. Once configured, the entities will
         no longer show up as an available entity (unless the `filter=ALL` query parameter is set).
 
         An empty request body array will configure all available entities.
@@ -2282,7 +2282,7 @@ paths:
         - integrations
       summary: Configure an available entity.
       description: |
-        Configure a new Remote Two entity from an available integration entity. Once configured, the entity will no longer
+        Configure a new UC Remote entity from an available integration entity. Once configured, the entity will no longer
         show up as available entity (unless the `filter=ALL` query parameter is set).
 
         The entity `name`, `icon` and `description` fields may be changed. If not specified in the request the values from
@@ -8673,7 +8673,7 @@ paths:
         - system
       summary: Create and export a device configuration backup.
       description: |
-        Export the full Remote Two device configuration. This allows to restore the configuration after a factory reset
+        Export the full UC Remote device configuration. This allows to restore the configuration after a factory reset
         or to load the configuration onto another device.
 
         - The backup archive is only returned to the client and not stored on the device. 
@@ -8731,7 +8731,7 @@ paths:
         - system
       summary: Upload and restore a device configuration backup.
       description: |
-        Restore the Remote Two device configuration from the uploaded backup archive. The backup archive is only used
+        Restore the UC Remote device configuration from the uploaded backup archive. The backup archive is only used
         to restore the system and deleted after restore.
 
         - It is highly recommended to perform the restore while the remote is in the docking station.
@@ -10346,7 +10346,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: activity was created by Remote Two and can be edited.
+                    - `true` / property missing: activity was created by UC Remote and can be edited.
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -10416,7 +10416,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: activity was created by Remote Two and can be edited.
+                    - `true` / property missing: activity was created by UC Remote and can be edited.
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -11410,7 +11410,7 @@ components:
             firmware_version:
               description: |
                 [SemVer](https://semver.org/) version requirement, describing the intersection of some version comparators to
-                match the installed Remote Two firmware.
+                match the installed UC Remote firmware.
 
                 - `>=1.0`: requires at least version 1.0.0
                 - `>=0.9.0, <0.10.0`: only works with minor version 0.9.*   
@@ -12038,7 +12038,7 @@ components:
       format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 5
       maxLength: 110
-      description: Unique UC Remote Two identifier over all entities and integrations.
+      description: Unique UC Remote identifier over all entities and integrations.
     EntityCommand:
       description: |
         Entity command object. The `entity_id` only has to be specified if it's not already included as a parameter in the URL.
@@ -13253,7 +13253,7 @@ components:
       type: string
       description: |
         The type of the IR emitter device:
-        - `DOCK`: a Remote Two docking station
+        - `DOCK`: an Unfolded Circle docking station
         - `INTERNAL`: internal IR
         - `IR_BLASTER`: a network based IR blaster
         - `OTHER`: something else
@@ -13342,7 +13342,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: macro was created by Remote Two and can be edited.
+                    - `true` / property missing: macro was created by UC Remote and can be edited.
                     - `false`: macro was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -13412,7 +13412,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: macro was created by Remote Two and can be edited.
+                    - `true` / property missing: macro was created by UC Remote and can be edited.
                     - `false`: macro was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -13643,7 +13643,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `true` / property missing: remote was created by UC Remote and can be edited.
                     - `false`: remote was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -13798,7 +13798,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `true` / property missing: remote was created by UC Remote and can be edited.
                     - `false`: remote was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
