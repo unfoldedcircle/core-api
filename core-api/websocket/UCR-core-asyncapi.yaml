@@ -116,7 +116,7 @@ info:
       - `401`: invalid authentication and the connection will be closed.
 
 externalDocs:
-  description: Find out more about the Remote 3
+  description: Find out more about the Remotes
   url: 'https://www.unfoldedcircle.com/'
 defaultContentType: application/json
 
@@ -6991,8 +6991,9 @@ components:
     versionInfo:
       type: object
       properties:
-        model_number:
-          description: Model number of the remote (ucr2 for Remote Two, ucr3 for Remote 3).
+        model:
+          description: |
+            Short model identifier of the remote (UCR2 for Remote Two, UCR3 for Remote 3).
           type: string
         device_name:
           description: Custom name of the remote
@@ -7007,7 +7008,7 @@ components:
           description: API version
           type: string
         core:
-          description: Core app version
+          description: Core service version
           type: string
         ui:
           description: Frontend app version
@@ -7025,8 +7026,13 @@ components:
       type: object
       properties:
         model_name:
+          description: Friendly name of the device model.
           type: string
         model_number:
+          description: |
+            Full model number of the remote:
+            - `ucr2` for Remote Two
+            - `ucr3-##` for Remote 3, ## suffix indicates color variant
           type: string
         serial_number:
           type: string

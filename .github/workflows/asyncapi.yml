@@ -26,7 +26,7 @@ jobs:
       - name: Validate websocket-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.10
         with:
-          filepath: './core-api/websocket/UCR2-asyncapi.yaml'
+          filepath: './core-api/websocket/UCR-core-asyncapi.yaml'
 
       - name: Validate integration-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.10

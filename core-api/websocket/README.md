@@ -5,12 +5,12 @@ It is up to the client to reconnect again.
 
 The UCR WS Core-API is defined with [AsyncAPI](https://www.asyncapi.com/).
 
-- [AsyncAPI YAML definition](UCR2-asyncapi.yaml).
+- [AsyncAPI YAML definition](UCR-core-asyncapi.yaml).
 - See [/doc folder](../../doc/README.md) for further API documentation and information.
 
 ## API HTML documentation
 
-- View with [AsyncAPI Studio online tool](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/core-api/websocket/UCR2-asyncapi.yaml).  
+- View with [AsyncAPI Studio online tool](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/core-api/websocket/UCR-core-asyncapi.yaml).  
   The link will directly load the yaml definition file from GitHub and display it together with the HTML documentation
   in the browser.
 
