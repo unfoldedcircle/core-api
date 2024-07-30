@@ -1,6 +1,6 @@
 ## How to write an integration driver
 
-The integration API allows to develop external integration drivers in any programming language capable of running
+The Integration-API allows to develop external integration drivers in any programming language capable of running
 a WebSockets server. Custom integration drivers require Node.js or a statically linked binary.
 
 - `External integration driver`: a driver running on an external device, reachable by the Remote. 
@@ -19,7 +19,7 @@ When writing a driver from scratch without using a wrapper library:
 2. Choose a WebSockets server library or framework for your language.
 3. Choose a JSON framework for your language.
 4. Choose which [entities and features](../entities/README.md) the driver should expose.
-5. Implement the required WebSockets text messages in the [WebSocket Integration API](../../integration-api/asyncapi.yaml).
+5. Implement the required WebSockets text messages in the [WebSocket Integration API](../../integration-api/UCR-integration-asyncapi.yaml).
 
 ❗️ Using a wrapper library or one of the existing open source drivers as a start will greatly simplify driver development.
 Node.js should be preferred when developing a custom integration driver.
@@ -177,7 +177,7 @@ Example of an event message:
 ### Required Messages
 
 For a functioning integration driver not all defined messages and optional features in the integration API have to be
-implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the [WebSocket Integration AsyncAPI definition](../../integration-api/asyncapi.yaml).
+implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the [WebSocket Integration AsyncAPI definition](../../integration-api/UCR-integration-asyncapi.yaml).
 
 Required request messages which must be processed and answered by a driver:
 

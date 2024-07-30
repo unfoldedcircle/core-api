@@ -17,4 +17,4 @@ command -v ag >/dev/null 2>&1 || {
 
 readonly OUT_DIR=html
 mkdir -p $OUT_DIR
-ag asyncapi.yaml @asyncapi/html-template --force-write -o $OUT_DIR
+ag UCR-integration-asyncapi.yaml @asyncapi/html-template --force-write -o $OUT_DIR

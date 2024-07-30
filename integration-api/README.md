@@ -1,6 +1,6 @@
 # WebSocket Integration API
 
-- [AsyncAPI YAML definition](asyncapi.yaml).
+- [AsyncAPI YAML definition](UCR-integration-asyncapi.yaml).
 
 - See [/doc folder](../doc/README.md) for the API documentation and further information.
 
