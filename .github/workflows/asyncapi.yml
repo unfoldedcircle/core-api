@@ -53,7 +53,7 @@ jobs:
 
       - name: Generate core AsyncAPI HTML doc
         run: |
-          ag ./core-api/websocket/UCR2-asyncapi.yaml @asyncapi/html-template -o ./static/api/ws --force-write
+          ag ./core-api/websocket/UCR-core-asyncapi.yaml @asyncapi/html-template -o ./static/api/ws --force-write
 
       - name: Generate integration AsyncAPI HTML doc
         run: |
