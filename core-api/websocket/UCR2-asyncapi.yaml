@@ -12,6 +12,7 @@ info:
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
+    email: support@unfoldedcircle.com
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: https://creativecommons.org/licenses/by-sa/4.0/
@@ -176,10 +177,13 @@ channels:
           - $ref: '#/components/messages/get_system_update_progress'
           - $ref: '#/components/messages/get_power_mode'
           - $ref: '#/components/messages/set_power_mode'
+          - $ref: '#/components/messages/get_battery_charger'
+          - $ref: '#/components/messages/update_battery_charger'
           - $ref: '#/components/messages/get_standby_inhibitors'
           - $ref: '#/components/messages/create_standby_inhibitor'
           - $ref: '#/components/messages/del_standby_inhibitor'
           - $ref: '#/components/messages/del_all_standby_inhibitors'
+          - $ref: '#/components/messages/get_ambient_light'
 
           # --- configuration handling
           - $ref: '#/components/messages/reset_configuration'
@@ -294,8 +298,9 @@ channels:
           - $ref: '#/components/messages/factory_reset_token'
           - $ref: '#/components/messages/api_access'
           - $ref: '#/components/messages/system_update_info'
-          - $ref: '#/components/messages/get_power_mode'
-          - $ref: '#/components/messages/get_ambient_light'
+          - $ref: '#/components/messages/power_mode'
+          - $ref: '#/components/messages/battery_charger'
+          - $ref: '#/components/messages/ambient_light'
           # --- configuration handling
           - $ref: '#/components/messages/configuration'
           - $ref: '#/components/messages/button_cfg'
@@ -811,6 +816,27 @@ components:
       x-response:
         $ref: '#/components/messages/result'
 
+    get_battery_charger:
+      summary: 👷 Get battery charger information.
+      description: |
+        Device features:
+        - `DOCK_CHARGING`: device can be charged in docking station (UCR2, UCR3).
+        - `WIRELESS_CHARGING`: device has wireless charging support (UCR3).
+      payload:
+        $ref: '#/components/schemas/getBatteryChargerMsg'
+      x-response:
+        $ref: '#/components/messages/battery_charger'
+    battery_charger:
+      summary: 👷 Battery charger response.
+      payload:
+        $ref: '#/components/schemas/batteryChargerMsg'
+    update_battery_charger:
+      summary: 👷 Enable or disable wireless charging.
+      payload:
+        $ref: '#/components/schemas/updateBatteryChargerMsg'
+      x-response:
+        $ref: '#/components/messages/battery_charger'
+
     get_standby_inhibitors:
       summary: 🧪 Get standby inhibitors.
       description: |
@@ -899,6 +925,15 @@ components:
         $ref: '#/components/messages/button_cfg'
     button_cfg:
       summary: 🧪 Button settings response.
+      description: |
+        Button backlight configuration.
+
+        Device features:
+        - `BACKLIGHT`: buttons have backlight (UCR2, UCR3).  
+        - `RGB_COLOR`: RGB color backlight support (UCR3).
+        - `ZONES`: backlight can be controlled with individual zones (UCR3).
+
+        ⚠️ Individual color per zone is not yet supported.
       payload:
         $ref: '#/components/schemas/buttonCfgMsg'
 
@@ -3415,6 +3450,43 @@ components:
             - msg
             - msg_data
 
+    getBatteryChargerMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_battery_charger
+          required:
+            - msg
+    batteryChargerMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: battery_charger
+            msg_data:
+              $ref: '#/components/schemas/BatteryCharger'
+          required:
+            - msg
+            - msg_data
+    updateBatteryChargerMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_battery_charger
+            msg_data:
+              $ref: '#/components/schemas/BatteryChargerUpdate'
+          required:
+            - msg
+            - msg_data
+
     getStandbyInhibitorsMsg:
       type: object
       allOf:
@@ -3577,7 +3649,7 @@ components:
               type: string
               const: set_button_cfg
             msg_data:
-              $ref: '#/components/schemas/cfgButton'
+              $ref: '#/components/schemas/cfgButtonUpdate'
           required:
             - msg
             - msg_data
@@ -6919,6 +6991,9 @@ components:
     versionInfo:
       type: object
       properties:
+        model_number:
+          description: Model number of the remote (ucr2 for Remote Two, ucr3 for Remote 3).
+          type: string
         device_name:
           description: Custom name of the remote
           type: string
@@ -7330,12 +7405,58 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+        static_color:
+          $ref: '#/components/schemas/staticButtonColor'
         auto_brightness:
           description: When enabled, button backlight will automatically turn on in a dark room.
           type: boolean
+        features:
+          description: Supported features by the device.
+          type: array
+          items:
+            type: string
       required:
         - brightness
         - auto_brightness
+
+    cfgButtonUpdate:
+      description: Button configuration model to update settings. Missing properties are not changed.
+      type: object
+      properties:
+        brightness:
+          description: Overall button backlight brightness. 0 = off, 100 = max.
+          type: integer
+          minimum: 0
+          maximum: 100
+        static_color:
+          $ref: '#/components/schemas/staticButtonColor'
+        auto_brightness:
+          description: When enabled, button backlight will automatically turn on in a dark room.
+          type: boolean
+
+    staticButtonColor:
+      description: Static color settings for all zones, if supported by the device.
+      type: object
+      properties:
+        rgb:
+          description: The overall rgb color value for the specified zones [int, int, int].
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 255
+          minItems: 3
+          maxItems: 3
+        zones:
+          description: The enabled backlight zones. All zones are enabled if no zones are set.
+          type: array
+          items:
+            type: string
+            minimum: 1
+            maximum: 50
+          maxItems: 32
+      required:
+        - rgb_color
 
     cfgDevice:
       type: object
@@ -9785,6 +9906,33 @@ components:
         - DISCHARGING
         - NOT_CHARGING
         - FULL
+
+    BatteryCharger:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            type: string
+        power_supply:
+          description: A power supply is online, device doesn't run on battery.
+          type: boolean
+        wireless_charging:
+          description: Wireless charging is active. Only returned on devices with wireless charging.
+          type: boolean
+        wireless_charging_enabled:
+          description: Wireless charging is enabled. Only returned on devices with wireless charging.
+          type: boolean
+      required:
+        - features
+        - power_supply
+
+    BatteryChargerUpdate:
+      type: object
+      properties:
+        wireless_charging_enabled:
+          description: Enable or disable wireless charging. Only supported on devices with wireless charging.
+          type: boolean
 
     # --- OpenAPI AmbientLight.yaml
 

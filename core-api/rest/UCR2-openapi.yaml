@@ -5,6 +5,7 @@ info:
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
+    email: support@unfoldedcircle.com
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
@@ -6546,6 +6547,15 @@ paths:
       summary: Get button settings.
       description: |
         Button backlight configuration.
+
+        Device features:
+        - `BACKLIGHT`: buttons have backlight (UCR2, UCR3).  
+        - `RGB_COLOR`: RGB color backlight support (UCR3).
+        - `ZONES`: backlight can be controlled with individual zones (UCR3).
+
+        Backlight zone definitions can be retrieved with `/cfg/device/button_layout`.
+
+        ⚠️ Individual color per zone is not yet supported.
       operationId: getButtonSettings
       parameters:
         - name: default
@@ -6575,7 +6585,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CfgButtons'
+              $ref: '#/components/schemas/CfgButtonsUpdate'
         required: true
       responses:
         '200':
@@ -6647,7 +6657,10 @@ paths:
         - cfg
       summary: Get the button layouts of the device.
       description: |
-        Meta-information about the button groups and button layouts.
+        Meta-information about the button groups, button layouts and backlight zone information.
+
+        If a button group supports backlight zones, an additional entry with button group `type` suffix `_backlight` is
+        defined.
       operationId: getRemoteDeviceButtonLayoutSettings
       responses:
         '200':
@@ -9507,6 +9520,56 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
+  /system/power/charger:
+    get:
+      tags:
+        - system
+      summary: Get battery charger information.
+      description: |
+        Device features:
+        - `DOCK_CHARGING`: device can be charged in docking station (UCR2, UCR3).
+        - `WIRELESS_CHARGING`: device has wireless charging support (UCR3).
+      operationId: getBatteryCharger
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryCharger'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    put:
+      tags:
+        - system
+      summary: "\U0001F477 Enable or disable wireless charging."
+      description: |
+        This operation is only supported on devices with wireless charging.
+      operationId: updateBatteryCharger
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatteryChargerUpdate'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryCharger'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   /system/power/standby_inhibitors:
     get:
       tags:
@@ -10964,11 +11027,36 @@ components:
         status:
           $ref: '#/components/schemas/PowerStatus'
         power_supply:
-          description: Power supply online
+          description: 'A power supply is online, device doesn''t run on battery.'
           type: boolean
       required:
         - capacity
         - status
+    BatteryCharger:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            type: string
+        power_supply:
+          description: 'A power supply is online, device doesn''t run on battery.'
+          type: boolean
+        wireless_charging:
+          description: Wireless charging is active. Only returned on devices with wireless charging.
+          type: boolean
+        wireless_charging_enabled:
+          description: Wireless charging is enabled. Only returned on devices with wireless charging.
+          type: boolean
+      required:
+        - features
+        - power_supply
+    BatteryChargerUpdate:
+      type: object
+      properties:
+        wireless_charging_enabled:
+          description: Enable or disable wireless charging. Only supported on devices with wireless charging.
+          type: boolean
     PowerStatus:
       type: string
       enum:
@@ -11059,12 +11147,56 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+        static_color:
+          $ref: '#/components/schemas/StaticButtonColor'
         auto_brightness:
           description: 'When enabled, button backlight will automatically turn on in a dark room.'
           type: boolean
+        features:
+          description: Supported features by the device.
+          type: array
+          items:
+            type: string
       required:
         - brightness
         - auto_brightness
+    CfgButtonsUpdate:
+      description: Button configuration model to update settings. Missing properties are not changed.
+      type: object
+      properties:
+        brightness:
+          description: 'Overall button backlight brightness. 0 = off, 100 = max.'
+          type: integer
+          minimum: 0
+          maximum: 100
+        static_color:
+          $ref: '#/components/schemas/StaticButtonColor'
+        auto_brightness:
+          description: 'When enabled, button backlight will automatically turn on in a dark room.'
+          type: boolean
+    StaticButtonColor:
+      description: 'Static color settings for given zones, if supported by the device.'
+      type: object
+      properties:
+        rgb:
+          description: 'The overall rgb color value for the specified zones [int, int, int].'
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 255
+          minItems: 3
+          maxItems: 3
+        zones:
+          description: The enabled backlight zones. All zones are enabled if no zones are set.
+          type: array
+          items:
+            type: string
+            minimum: 1
+            maximum: 50
+          maxItems: 32
+      required:
+        - rgb
     CfgDisplay:
       type: object
       properties:
@@ -11423,12 +11555,21 @@ components:
       maxLength: 255
       description: Optional description
     DeviceButtonGroup:
-      description: Button group type.
+      description: |
+        Button group type, either physical buttons or button backlight zones:
+        - `keypad`: physical keypad buttons.
+        - `keypad_backlight`: button backlight zones.
       type: string
       enum:
         - keypad
+        - keypad_backlight
     DeviceButtonLayout:
-      description: 'Button group definitions with layout placement, size, icon and language specific names.'
+      description: |
+        Button group definitions with layout placement, size, icon and language specific names.
+
+        The grid width & height definitions do not need to be proportional! To get the correct size, the grid has to be
+        placed over the physical dimensions of the button group. For example if buttons in a row can be placed in the middle
+        of another button row, the width value can be doubled, with the button width set to 2.
       type: object
       properties:
         type:
@@ -14468,6 +14609,7 @@ components:
         model_name:
           type: string
         model_number:
+          description: 'Model number of the remote (ucr2 for Remote Two, ucr3 for Remote 3).'
           type: string
         serial_number:
           type: string
@@ -14741,6 +14883,9 @@ components:
     VersionInfo:
       type: object
       properties:
+        model_number:
+          description: 'Model number of the remote (ucr2 for Remote Two, ucr3 for Remote 3).'
+          type: string
         device_name:
           description: Custom name of the remote
           type: string
