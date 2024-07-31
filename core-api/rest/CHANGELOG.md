@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
+### Changed
+- Changed naming for Remote Two and Remote 3 (same API).
+- Add UCR3 specific enhancements and feature flags for charger and button backlight.
+
 ---
 
 ## 0.34.1

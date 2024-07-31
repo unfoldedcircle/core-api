@@ -26,12 +26,12 @@ jobs:
       - name: Validate websocket-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.10
         with:
-          filepath: './core-api/websocket/UCR2-asyncapi.yaml'
+          filepath: './core-api/websocket/UCR-core-asyncapi.yaml'
 
       - name: Validate integration-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.10
         with:
-          filepath: './integration-api/asyncapi.yaml'
+          filepath: './integration-api/UCR-integration-asyncapi.yaml'
 
       - name: Validate dock-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.10
@@ -53,11 +53,11 @@ jobs:
 
       - name: Generate core AsyncAPI HTML doc
         run: |
-          ag ./core-api/websocket/UCR2-asyncapi.yaml @asyncapi/html-template -o ./static/api/ws --force-write
+          ag ./core-api/websocket/UCR-core-asyncapi.yaml @asyncapi/html-template -o ./static/api/ws --force-write
 
       - name: Generate integration AsyncAPI HTML doc
         run: |
-          ag ./integration-api/asyncapi.yaml @asyncapi/html-template -o ./static/api/integration --force-write
+          ag ./integration-api/UCR-integration-asyncapi.yaml @asyncapi/html-template -o ./static/api/integration --force-write
 
       - name: Generate dock AsyncAPI HTML doc
         run: |

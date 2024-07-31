@@ -7,16 +7,20 @@
 asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
-  title: Remote Two WebSocket Core-API
-  version: '0.26.0-beta'
+  title: Remote Two/3 WebSocket Core-API
+  version: '0.27.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
+    email: support@unfoldedcircle.com
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: https://creativecommons.org/licenses/by-sa/4.0/
   description: |
-    **Work in progress** API definition of the Remote Two Core WebSocket API.
+    The Unfolded Circle WebSocket Core-API for Remote Two/3 (_UCR WS Core-API_ in short) allows to interact with the
+    Unfolded Circle remote-core service and take control of most of its features. It is a subset of the
+    [UCR REST Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/rest), but provides additional
+    asynchronous event messages.
     
     API message status legend:
     
@@ -26,24 +30,27 @@ info:
     | 🚧   | Planned feature and most likely not (fully) implemented in the initial release. |
     | 👷   | API definition is work in progress, not ready yet for implementation.           |
     | 🔍   | API definition review & implementation.                                         |
-    | 🧪   | API has been implemented in the Remote Two and is currently being tested.       |
+    | 🧪   | API has been implemented in the UC Remote and is currently being tested.        |
     | 🚀   | Ready to use - feedback welcomed.                                               |
     
     ## Overview
 
-    The Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take
-    full control of its features.
+    The Unfolded Circle Remote Core-APIs consist of:
+    - this WebSocket API
+    - the [UCR REST Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/rest).
+
+    The remote-core service acts as WebSocket server. Whenever the remote enters standby it may choose to disconnect
+    client connections.
     
-    The remote-core application acts as server. Whenever the remote enters standby it may choose to disconnect client
-    connections.
+    The focus of the Core-APIs is to provide all functionality for the UI application and the web-configurator.  
+    They allow to interact with the Unfolded Circle remote-core service and take full control of its features.
     
-    The focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  
-    It may also be used by other external systems and integration drivers, if specific configuration or interaction
-    features are required, which are not present in the Integration API.
+    The Core-APIs may also be used by other external systems and integration drivers, if specific configuration or
+    interaction features are required, which are not present in the [UCR Integration-API](https://github.com/unfoldedcircle/core-api/tree/main/integration-api).
 
     ## 🚧 Missing Features
     
-    **This API is a preview version and does not yet contain all functionality.**
+    **This API is a work-in-progress and does not yet contain all functionality of the REST API.**
     
     The following features will be continuously added (in no particular order):
     
@@ -109,7 +116,7 @@ info:
       - `401`: invalid authentication and the connection will be closed.
 
 externalDocs:
-  description: Find out more about the Remote Two
+  description: Find out more about the Remotes
   url: 'https://www.unfoldedcircle.com/'
 defaultContentType: application/json
 
@@ -170,10 +177,13 @@ channels:
           - $ref: '#/components/messages/get_system_update_progress'
           - $ref: '#/components/messages/get_power_mode'
           - $ref: '#/components/messages/set_power_mode'
+          - $ref: '#/components/messages/get_battery_charger'
+          - $ref: '#/components/messages/update_battery_charger'
           - $ref: '#/components/messages/get_standby_inhibitors'
           - $ref: '#/components/messages/create_standby_inhibitor'
           - $ref: '#/components/messages/del_standby_inhibitor'
           - $ref: '#/components/messages/del_all_standby_inhibitors'
+          - $ref: '#/components/messages/get_ambient_light'
 
           # --- configuration handling
           - $ref: '#/components/messages/reset_configuration'
@@ -288,8 +298,9 @@ channels:
           - $ref: '#/components/messages/factory_reset_token'
           - $ref: '#/components/messages/api_access'
           - $ref: '#/components/messages/system_update_info'
-          - $ref: '#/components/messages/get_power_mode'
-          - $ref: '#/components/messages/get_ambient_light'
+          - $ref: '#/components/messages/power_mode'
+          - $ref: '#/components/messages/battery_charger'
+          - $ref: '#/components/messages/ambient_light'
           # --- configuration handling
           - $ref: '#/components/messages/configuration'
           - $ref: '#/components/messages/button_cfg'
@@ -805,6 +816,27 @@ components:
       x-response:
         $ref: '#/components/messages/result'
 
+    get_battery_charger:
+      summary: 👷 Get battery charger information.
+      description: |
+        Device features:
+        - `DOCK_CHARGING`: device can be charged in docking station (UCR2, UCR3).
+        - `WIRELESS_CHARGING`: device has wireless charging support (UCR3).
+      payload:
+        $ref: '#/components/schemas/getBatteryChargerMsg'
+      x-response:
+        $ref: '#/components/messages/battery_charger'
+    battery_charger:
+      summary: 👷 Battery charger response.
+      payload:
+        $ref: '#/components/schemas/batteryChargerMsg'
+    update_battery_charger:
+      summary: 👷 Enable or disable wireless charging.
+      payload:
+        $ref: '#/components/schemas/updateBatteryChargerMsg'
+      x-response:
+        $ref: '#/components/messages/battery_charger'
+
     get_standby_inhibitors:
       summary: 🧪 Get standby inhibitors.
       description: |
@@ -893,6 +925,15 @@ components:
         $ref: '#/components/messages/button_cfg'
     button_cfg:
       summary: 🧪 Button settings response.
+      description: |
+        Button backlight configuration.
+
+        Device features:
+        - `BACKLIGHT`: buttons have backlight (UCR2, UCR3).  
+        - `RGB_COLOR`: RGB color backlight support (UCR3).
+        - `ZONES`: backlight can be controlled with individual zones (UCR3).
+
+        ⚠️ Individual color per zone is not yet supported.
       payload:
         $ref: '#/components/schemas/buttonCfgMsg'
 
@@ -2437,7 +2478,7 @@ components:
     configure_entity_from_integration:
       summary: 🧪 Configure an available entity.
       description: |
-        Configure a new Remote Two entity from an available integration entity. Once configured, the entity will no
+        Configure a new UC Remote entity from an available integration entity. Once configured, the entity will no
         longer show up as available entity (unless the `all` filter is set).
         
         The entity `name`, `icon` and `description` fields may be changed. If not specified in the request the values from
@@ -2454,7 +2495,7 @@ components:
     configure_entities_from_integration:
       summary: 🧪 Configure multiple available entities.
       description: |
-        Configure multiple new Remote Two entities from available integration entities. Once configured, the entities will
+        Configure multiple new UC Remote entities from available integration entities. Once configured, the entities will
         no longer show up as an available entity (unless the `filter=ALL` query parameter is set).
         
         If `entity_ids` is not provided or is empty, all entities from the integration are configured.
@@ -3409,6 +3450,43 @@ components:
             - msg
             - msg_data
 
+    getBatteryChargerMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_battery_charger
+          required:
+            - msg
+    batteryChargerMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: battery_charger
+            msg_data:
+              $ref: '#/components/schemas/BatteryCharger'
+          required:
+            - msg
+            - msg_data
+    updateBatteryChargerMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_battery_charger
+            msg_data:
+              $ref: '#/components/schemas/BatteryChargerUpdate'
+          required:
+            - msg
+            - msg_data
+
     getStandbyInhibitorsMsg:
       type: object
       allOf:
@@ -3571,7 +3649,7 @@ components:
               type: string
               const: set_button_cfg
             msg_data:
-              $ref: '#/components/schemas/cfgButton'
+              $ref: '#/components/schemas/cfgButtonUpdate'
           required:
             - msg
             - msg_data
@@ -6913,6 +6991,10 @@ components:
     versionInfo:
       type: object
       properties:
+        model:
+          description: |
+            Short model identifier of the remote (UCR2 for Remote Two, UCR3 for Remote 3).
+          type: string
         device_name:
           description: Custom name of the remote
           type: string
@@ -6926,7 +7008,7 @@ components:
           description: API version
           type: string
         core:
-          description: Core app version
+          description: Core service version
           type: string
         ui:
           description: Frontend app version
@@ -6944,8 +7026,13 @@ components:
       type: object
       properties:
         model_name:
+          description: Friendly name of the device model.
           type: string
         model_number:
+          description: |
+            Full model number of the remote:
+            - `ucr2` for Remote Two
+            - `ucr3-##` for Remote 3, ## suffix indicates color variant
           type: string
         serial_number:
           type: string
@@ -7324,12 +7411,58 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+        static_color:
+          $ref: '#/components/schemas/staticButtonColor'
         auto_brightness:
           description: When enabled, button backlight will automatically turn on in a dark room.
           type: boolean
+        features:
+          description: Supported features by the device.
+          type: array
+          items:
+            type: string
       required:
         - brightness
         - auto_brightness
+
+    cfgButtonUpdate:
+      description: Button configuration model to update settings. Missing properties are not changed.
+      type: object
+      properties:
+        brightness:
+          description: Overall button backlight brightness. 0 = off, 100 = max.
+          type: integer
+          minimum: 0
+          maximum: 100
+        static_color:
+          $ref: '#/components/schemas/staticButtonColor'
+        auto_brightness:
+          description: When enabled, button backlight will automatically turn on in a dark room.
+          type: boolean
+
+    staticButtonColor:
+      description: Static color settings for all zones, if supported by the device.
+      type: object
+      properties:
+        rgb:
+          description: The overall rgb color value for the specified zones [int, int, int].
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 255
+          minItems: 3
+          maxItems: 3
+        zones:
+          description: The enabled backlight zones. All zones are enabled if no zones are set.
+          type: array
+          items:
+            type: string
+            minimum: 1
+            maximum: 50
+          maxItems: 32
+      required:
+        - rgb_color
 
     cfgDevice:
       type: object
@@ -9779,6 +9912,33 @@ components:
         - DISCHARGING
         - NOT_CHARGING
         - FULL
+
+    BatteryCharger:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            type: string
+        power_supply:
+          description: A power supply is online, device doesn't run on battery.
+          type: boolean
+        wireless_charging:
+          description: Wireless charging is active. Only returned on devices with wireless charging.
+          type: boolean
+        wireless_charging_enabled:
+          description: Wireless charging is enabled. Only returned on devices with wireless charging.
+          type: boolean
+      required:
+        - features
+        - power_supply
+
+    BatteryChargerUpdate:
+      type: object
+      properties:
+        wireless_charging_enabled:
+          description: Enable or disable wireless charging. Only supported on devices with wireless charging.
+          type: boolean
 
     # --- OpenAPI AmbientLight.yaml
 

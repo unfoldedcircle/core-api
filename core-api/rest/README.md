@@ -1,11 +1,11 @@
-# Remote Two REST Core-API
+# Unfolded Circle Remote REST Core-API
 
-The Core-API is defined with [OpenAPI](https://www.openapis.org/).
+The UCR REST Core-API is defined with [OpenAPI](https://www.openapis.org/).
 
 You can use the online [Swagger Editor](https://editor.swagger.io/) to load and browse the specification or use your
 favorite IDE with OpenAPI support (e.g. IntelliJ or Visual Studio Code).
 
-- [OpenAPI YAML definition](UCR2-openapi.yaml).
+- [OpenAPI YAML definition](UCR-core-openapi.yaml).
   - ℹ️ This is a bundled YAML file generated from individual definitions.
   - Most OpenAPI tools only work with a single file.
   - We might publish the original definitions at a later time.

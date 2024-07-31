@@ -18,6 +18,7 @@ The `model` key specifies the physical device or the [core-simulator](https://gi
 
 | Model          | Description           |
 |----------------|-----------------------|
+| UCR3           | Remote 3              |
 | UCR2           | Remote Two            |
 | UCR2-simulator | Remote Core simulator |
 | YIO1           | YIO Remote            |

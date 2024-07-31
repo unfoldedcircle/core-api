@@ -1,16 +1,17 @@
 openapi: 3.0.3
 info:
-  title: Remote Two REST API
-  version: 0.34.1
+  title: Remote Two/3 REST Core-API
+  version: 0.35.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
+    email: support@unfoldedcircle.com
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle Remote Two REST API allows to configure the remote and manage custom resource files.\nFurthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Remote Two WebSockets Core-API allows you to interact with the Unfolded Circle remote-core application and take\nfull control of its features.\n\nThe focus of the Core-API is to provide all functionality for the UI application and the web-configurator.  \nIt may also be used by other external systems and integration drivers, if specific configuration or interaction\nfeatures are required, which are not present in the Integration API.\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote UI\n- `Bearer Token` for ever request.  \n  This is the preferred authentication method for external systems communicating with the Remote Two.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle REST Core-API for Remote Two/3 (_UCR REST Core-API_ in short) allows to configure the remote and\nmanage custom resource files. Furthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Unfolded Circle Remote Core-APIs consist of:\n- this REST API\n- the [UCR WebSocket Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/websocket),\n  providing asynchronous events.\n\nThe focus of the Core-APIs is to provide all functionality for the UI application and the web-configurator.  \nThey allow to interact with the Unfolded Circle remote-core service and take full control of its features.\n\nThe Core-APIs may also be used by other external systems and integration drivers, if specific configuration or\ninteraction features are required, which are not present in the [UCR Integration-API](https://github.com/unfoldedcircle/core-api/tree/main/integration-api).\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote-UI.\n- `Bearer Token` for every request.  \n  This is the preferred authentication method for external systems communicating with the UCR REST Core-API.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
-  description: Find out more about the Remote Two
+  description: Find out more about the Remotes
   url: 'https://www.unfoldedcircle.com/'
 servers:
   - url: /api
@@ -273,7 +274,7 @@ paths:
     post:
       tags:
         - api-keys
-      summary: Create an API key for the Remote Two APIs.
+      summary: Create an API key for the UCR APIs.
       description: |
         The returned API key in `api_key` is only visible in this response. Afterwards it cannot be retrieved anymore!
 
@@ -2234,7 +2235,7 @@ paths:
         - integrations
       summary: Configure multiple available entities.
       description: |
-        Configure multiple new Remote Two entities from available integration entities. Once configured, the entities will
+        Configure multiple new UC Remote entities from available integration entities. Once configured, the entities will
         no longer show up as an available entity (unless the `filter=ALL` query parameter is set).
 
         An empty request body array will configure all available entities.
@@ -2282,7 +2283,7 @@ paths:
         - integrations
       summary: Configure an available entity.
       description: |
-        Configure a new Remote Two entity from an available integration entity. Once configured, the entity will no longer
+        Configure a new UC Remote entity from an available integration entity. Once configured, the entity will no longer
         show up as available entity (unless the `filter=ALL` query parameter is set).
 
         The entity `name`, `icon` and `description` fields may be changed. If not specified in the request the values from
@@ -6546,6 +6547,15 @@ paths:
       summary: Get button settings.
       description: |
         Button backlight configuration.
+
+        Device features:
+        - `BACKLIGHT`: buttons have backlight (UCR2, UCR3).  
+        - `RGB_COLOR`: RGB color backlight support (UCR3).
+        - `ZONES`: backlight can be controlled with individual zones (UCR3).
+
+        Backlight zone definitions can be retrieved with `/cfg/device/button_layout`.
+
+        ⚠️ Individual color per zone is not yet supported.
       operationId: getButtonSettings
       parameters:
         - name: default
@@ -6575,7 +6585,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CfgButtons'
+              $ref: '#/components/schemas/CfgButtonsUpdate'
         required: true
       responses:
         '200':
@@ -6647,7 +6657,10 @@ paths:
         - cfg
       summary: Get the button layouts of the device.
       description: |
-        Meta-information about the button groups and button layouts.
+        Meta-information about the button groups, button layouts and backlight zone information.
+
+        If a button group supports backlight zones, an additional entry with button group `type` suffix `_backlight` is
+        defined.
       operationId: getRemoteDeviceButtonLayoutSettings
       responses:
         '200':
@@ -8673,7 +8686,7 @@ paths:
         - system
       summary: Create and export a device configuration backup.
       description: |
-        Export the full Remote Two device configuration. This allows to restore the configuration after a factory reset
+        Export the full UC Remote device configuration. This allows to restore the configuration after a factory reset
         or to load the configuration onto another device.
 
         - The backup archive is only returned to the client and not stored on the device. 
@@ -8731,7 +8744,7 @@ paths:
         - system
       summary: Upload and restore a device configuration backup.
       description: |
-        Restore the Remote Two device configuration from the uploaded backup archive. The backup archive is only used
+        Restore the UC Remote device configuration from the uploaded backup archive. The backup archive is only used
         to restore the system and deleted after restore.
 
         - It is highly recommended to perform the restore while the remote is in the docking station.
@@ -9501,6 +9514,56 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BatteryStatusResponse'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  /system/power/charger:
+    get:
+      tags:
+        - system
+      summary: Get battery charger information.
+      description: |
+        Device features:
+        - `DOCK_CHARGING`: device can be charged in docking station (UCR2, UCR3).
+        - `WIRELESS_CHARGING`: device has wireless charging support (UCR3).
+      operationId: getBatteryCharger
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryCharger'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    put:
+      tags:
+        - system
+      summary: "\U0001F477 Enable or disable wireless charging."
+      description: |
+        This operation is only supported on devices with wireless charging.
+      operationId: updateBatteryCharger
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BatteryChargerUpdate'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BatteryCharger'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -10346,7 +10409,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: activity was created by Remote Two and can be edited.
+                    - `true` / property missing: activity was created by UC Remote and can be edited.
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -10416,7 +10479,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: activity was created by Remote Two and can be edited.
+                    - `true` / property missing: activity was created by UC Remote and can be edited.
                     - `false`: activity was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -10964,11 +11027,36 @@ components:
         status:
           $ref: '#/components/schemas/PowerStatus'
         power_supply:
-          description: Power supply online
+          description: 'A power supply is online, device doesn''t run on battery.'
           type: boolean
       required:
         - capacity
         - status
+    BatteryCharger:
+      type: object
+      properties:
+        features:
+          type: array
+          items:
+            type: string
+        power_supply:
+          description: 'A power supply is online, device doesn''t run on battery.'
+          type: boolean
+        wireless_charging:
+          description: Wireless charging is active. Only returned on devices with wireless charging.
+          type: boolean
+        wireless_charging_enabled:
+          description: Wireless charging is enabled. Only returned on devices with wireless charging.
+          type: boolean
+      required:
+        - features
+        - power_supply
+    BatteryChargerUpdate:
+      type: object
+      properties:
+        wireless_charging_enabled:
+          description: Enable or disable wireless charging. Only supported on devices with wireless charging.
+          type: boolean
     PowerStatus:
       type: string
       enum:
@@ -11059,12 +11147,56 @@ components:
           type: integer
           minimum: 0
           maximum: 100
+        static_color:
+          $ref: '#/components/schemas/StaticButtonColor'
         auto_brightness:
           description: 'When enabled, button backlight will automatically turn on in a dark room.'
           type: boolean
+        features:
+          description: Supported features by the device.
+          type: array
+          items:
+            type: string
       required:
         - brightness
         - auto_brightness
+    CfgButtonsUpdate:
+      description: Button configuration model to update settings. Missing properties are not changed.
+      type: object
+      properties:
+        brightness:
+          description: 'Overall button backlight brightness. 0 = off, 100 = max.'
+          type: integer
+          minimum: 0
+          maximum: 100
+        static_color:
+          $ref: '#/components/schemas/StaticButtonColor'
+        auto_brightness:
+          description: 'When enabled, button backlight will automatically turn on in a dark room.'
+          type: boolean
+    StaticButtonColor:
+      description: 'Static color settings for given zones, if supported by the device.'
+      type: object
+      properties:
+        rgb:
+          description: 'The overall rgb color value for the specified zones [int, int, int].'
+          type: array
+          items:
+            type: integer
+            minimum: 0
+            maximum: 255
+          minItems: 3
+          maxItems: 3
+        zones:
+          description: The enabled backlight zones. All zones are enabled if no zones are set.
+          type: array
+          items:
+            type: string
+            minimum: 1
+            maximum: 50
+          maxItems: 32
+      required:
+        - rgb
     CfgDisplay:
       type: object
       properties:
@@ -11410,7 +11542,7 @@ components:
             firmware_version:
               description: |
                 [SemVer](https://semver.org/) version requirement, describing the intersection of some version comparators to
-                match the installed Remote Two firmware.
+                match the installed UC Remote firmware.
 
                 - `>=1.0`: requires at least version 1.0.0
                 - `>=0.9.0, <0.10.0`: only works with minor version 0.9.*   
@@ -11423,12 +11555,21 @@ components:
       maxLength: 255
       description: Optional description
     DeviceButtonGroup:
-      description: Button group type.
+      description: |
+        Button group type, either physical buttons or button backlight zones:
+        - `keypad`: physical keypad buttons.
+        - `keypad_backlight`: button backlight zones.
       type: string
       enum:
         - keypad
+        - keypad_backlight
     DeviceButtonLayout:
-      description: 'Button group definitions with layout placement, size, icon and language specific names.'
+      description: |
+        Button group definitions with layout placement, size, icon and language specific names.
+
+        The grid width & height definitions do not need to be proportional! To get the correct size, the grid has to be
+        placed over the physical dimensions of the button group. For example if buttons in a row can be placed in the middle
+        of another button row, the width value can be doubled, with the button width set to 2.
       type: object
       properties:
         type:
@@ -12038,7 +12179,7 @@ components:
       format: '^[a-zA-Z0-9\-_\.]+$'
       minLength: 5
       maxLength: 110
-      description: Unique UC Remote Two identifier over all entities and integrations.
+      description: Unique UC Remote identifier over all entities and integrations.
     EntityCommand:
       description: |
         Entity command object. The `entity_id` only has to be specified if it's not already included as a parameter in the URL.
@@ -13253,7 +13394,7 @@ components:
       type: string
       description: |
         The type of the IR emitter device:
-        - `DOCK`: a Remote Two docking station
+        - `DOCK`: an Unfolded Circle docking station
         - `INTERNAL`: internal IR
         - `IR_BLASTER`: a network based IR blaster
         - `OTHER`: something else
@@ -13342,7 +13483,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: macro was created by Remote Two and can be edited.
+                    - `true` / property missing: macro was created by UC Remote and can be edited.
                     - `false`: macro was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -13412,7 +13553,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: macro was created by Remote Two and can be edited.
+                    - `true` / property missing: macro was created by UC Remote and can be edited.
                     - `false`: macro was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -13643,7 +13784,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `true` / property missing: remote was created by UC Remote and can be edited.
                     - `false`: remote was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -13798,7 +13939,7 @@ components:
               properties:
                 editable:
                   description: |
-                    - `true` / property missing: remote was created by Remote Two and can be edited.
+                    - `true` / property missing: remote was created by UC Remote and can be edited.
                     - `false`: remote was provided by an integration and cannot be edited.
                   type: boolean
                   default: true
@@ -14466,8 +14607,13 @@ components:
       type: object
       properties:
         model_name:
+          description: Friendly name of the device model.
           type: string
         model_number:
+          description: |
+            Full model number of the remote:
+            - `ucr2` for Remote Two
+            - `ucr3-##` for Remote 3, ## suffix indicates color variant
           type: string
         serial_number:
           type: string
@@ -14741,6 +14887,10 @@ components:
     VersionInfo:
       type: object
       properties:
+        model:
+          description: |
+            Short model identifier of the remote (UCR2 for Remote Two, UCR3 for Remote 3).
+          type: string
         device_name:
           description: Custom name of the remote
           type: string
@@ -14754,7 +14904,7 @@ components:
           description: API version
           type: string
         core:
-          description: Core app version
+          description: Core service version
           type: string
         ui:
           description: Frontend app version
