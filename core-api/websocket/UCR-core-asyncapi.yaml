@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.27.0-beta'
+  version: '0.28.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7239,6 +7239,7 @@ components:
         - activity
         - macro
         - remote
+        - ir_emitter
 
     ActivityGroup:
       description: |

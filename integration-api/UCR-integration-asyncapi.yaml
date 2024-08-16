@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.11.1-beta'
+  version: '0.12.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1667,8 +1667,8 @@ components:
 
     entity:
       description: |
-        Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `light`, `media_player`,
-        `remote`,`sensor`, `switch`. 
+        Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `ir_emitter`, `light`,
+        `media_player`, `remote`,`sensor`, `switch`. 
 
         See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
         for more information.
@@ -1885,6 +1885,41 @@ components:
                   - tilt
                   - tilt_stop
                   - tilt_position
+
+    ir_emitter:
+      description: |
+        An IR-emitter entity allows to send IR commands in PRONTO hex format.
+  
+        This entity allows to integrate external IR blasters and emitters. Once added to a Remote, a new IR-emitter
+        output is registered which can be used for IR-remote entities. Similar as adding a new dock.
+  
+        See [IR-emitter entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_ir_emitter.md)
+        for more information.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              type: array
+              items:
+                type: string
+                enum:
+                  - send_ir
+            options:
+              type: object
+              properties:
+                ports:
+                  description: |
+                    List of individual emitter ports which can be selected for sending IR commands.
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/EmitterPort'
+                ir_formats:
+                  description: |
+                    Supported IR formats besides `PRONTO`. The PRONTO hex format must always be supported.
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/IrFormat'
 
     light:
       description: |
@@ -2120,6 +2155,7 @@ components:
             - climate
             - sensor
             - remote
+            - ir_emitter
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
 
     SimpleCommand:
@@ -2675,3 +2711,22 @@ components:
       required:
         - x
         - 'y'
+
+    EmitterPort:
+      type: object
+      properties:
+        id:
+          type: string
+          minLength: 1
+          maxLength: 32
+        name:
+          type: string
+          minLength: 1
+          maxLength: 50
+
+    IrFormat:
+      description: Supported IR formats by the emitter
+      type: string
+      enum:
+        - PRONTO
+        - HEX
