@@ -1,7 +1,7 @@
 {
   "id": "appletv",
   "name": "Apple TV HD & 4K",
-  "version": 1,
+  "version": 2,
   "peripherals": {
     "keyboard": true,
     "mouse": false
@@ -137,11 +137,11 @@
     "FAST_FORWARD": "CONSUMER_FAST_FORWARD",
     "PLAY_PAUSE": "CONSUMER_PLAY_PAUSE",
     "STOP": "CONSUMER_STOP",
-    "CURSOR_LEFT": "KEY_LEFT_ARROW",
-    "CURSOR_RIGHT": "KEY_RIGHT_ARROW",
-    "CURSOR_UP": "KEY_UP_ARROW",
-    "CURSOR_DOWN": "KEY_DOWN_ARROW",
-    "CURSOR_ENTER": "KEY_RETURN"
+    "CURSOR_LEFT": "CONSUMER_MENU_LEFT",
+    "CURSOR_RIGHT": "CONSUMER_MENU_RIGHT",
+    "CURSOR_UP": "CONSUMER_MENU_UP",
+    "CURSOR_DOWN": "CONSUMER_MENU_DOWN",
+    "CURSOR_ENTER": "CONSUMER_MENU_PICK"
   },
   "user_interface": {
     "pages": [
