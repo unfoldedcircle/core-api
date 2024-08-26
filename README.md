@@ -58,7 +58,9 @@ how to develop an integration driver for the Remote devices.
 #### Examples
 
 - [API models in Rust](https://github.com/unfoldedcircle/api-model-rs)
-- [Node.js API wrapper for the UC Integration-API](https://github.com/unfoldedcircle/integration-node-library)
+- [Node.js API wrapper for the UC Integration-API](https://github.com/unfoldedcircle/integration-node-library)  
+  Integrations using the Node.js API wrapper:
+  - [Global Caché IR integration](https://github.com/unfoldedcircle/integration-globalcache)
 - [Python API wrapper library for the UC Integration-API](https://github.com/unfoldedcircle/integration-python-library)  
   Integrations using the Python API wrapper:
   - [Android TV integration](https://github.com/unfoldedcircle/integration-androidtv)
