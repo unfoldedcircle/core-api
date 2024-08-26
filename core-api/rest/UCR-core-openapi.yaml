@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.35.0
+  version: 0.36.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -12390,6 +12390,7 @@ components:
         - activity
         - macro
         - remote
+        - ir_emitter
     ExternalSystems:
       type: array
       items:

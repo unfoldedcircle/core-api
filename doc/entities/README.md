@@ -23,9 +23,9 @@ Supported entities:
 - [Media Player](entity_media_player.md)
 - [Remote](entity_remote.md)
 - [Sensor](entity_sensor.md)
+- [IR-Emitter](entity_ir_emitter.md)
 
-The 🚧 icon within the entity descriptions indicates a planned feature and will most likely not be (fully) implemented
-in the initial release.
+The 🚧 icon within the entity descriptions indicates a planned feature.
 
 ## Integration API
 

@@ -12,6 +12,7 @@ _Changes in the next release_
 - Bluetooth HID peripheral support.
 - Custom integration installation. 
 - Integration-API: add `get_runtime_info` request message to retrieve driver runtime information from the Remote.
+- New IR-emitter entity.
 
 ---
 
