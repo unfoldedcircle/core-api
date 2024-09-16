@@ -268,7 +268,8 @@ Source: https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-14.0
 
 ## Consumer codes (Consumer Page (0x0C))
 
-Source: https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-14.0.0_r0.78/drivers/hid/hid-input.c#875
+- Source: https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-14.0.0_r0.78/drivers/hid/hid-input.c#875
+- Android key events: https://developer.android.com/reference/android/view/KeyEvent
 
 | Key name                                            | Usage code | Android key code             | Comment                     |
 |-----------------------------------------------------|------------|------------------------------|-----------------------------|
