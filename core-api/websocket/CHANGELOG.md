@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
+### Added
+- Add Wake on WLAN setting to the network configuration.
+
 ---
 
 ## 0.28.0-beta
