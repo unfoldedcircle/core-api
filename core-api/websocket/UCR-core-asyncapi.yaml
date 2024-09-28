@@ -525,6 +525,7 @@ channels:
           - $ref: '#/components/messages/integration_driver_change'
           - $ref: '#/components/messages/integration_change'
           - $ref: '#/components/messages/integration_state'
+          - $ref: '#/components/messages/active_profile_change'
           - $ref: '#/components/messages/profile_change'
           - $ref: '#/components/messages/configuration_change'
           - $ref: '#/components/messages/ir_learning'
@@ -2110,6 +2111,16 @@ components:
         $ref: '#/components/schemas/deleteAllProfilesMsg'
       x-response:
         $ref: '#/components/messages/result'
+
+    active_profile_change:
+      summary: 🧪 Active profile change event.
+      description: |
+        Emitted if the active profile changed.
+      tags:
+        - name: profile
+        - name: event
+      payload:
+        $ref: '#/components/schemas/activeProfileChangeEventMsg'
 
     profile_change:
       summary: 🧪 Profile change event.
@@ -5439,6 +5450,22 @@ components:
               const: delete_all_profiles
           required:
             - msg
+    activeProfileChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: active_profile_change
+            cat:
+              type: string
+              const: UI
+            msg_data:
+              $ref: '#/components/schemas/activeProfileChange'
+          required:
+            - msg
+            - msg_data
     profileChangeEventMsg:
       type: object
       allOf:
@@ -8182,6 +8209,21 @@ components:
           $ref: '#/components/schemas/ActivityGroup'
       required:
         - event_type
+
+    activeProfileChange:
+      type: object
+      description: |
+        The `new_state.profile` object contains additional profile data of the new active `profile_id`.
+      properties:
+        profile_id:
+          $ref: '#/components/schemas/simpleId'
+        new_state:
+          type: object
+          properties:
+            profile:
+              $ref: '#/components/schemas/profileData'
+      required:
+        - profile_id
 
     profileChange:
       type: object

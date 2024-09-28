@@ -14,6 +14,7 @@ _Changes in the next release_
 - Integration-API: add `get_runtime_info` request message to retrieve driver runtime information from the Remote.
 - New IR-emitter entity.
 - Core APIs: add Wake on WLAN setting to the network configuration.
+- WS Core API: new `active_profile_change` event is emitted whenever the active profile has changed.
 
 ---
 
