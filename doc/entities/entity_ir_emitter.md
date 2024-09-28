@@ -141,7 +141,7 @@ IR-emitter entity examples of received `entity_command` WebSocket messages in an
 
 #### send_ir with PRONTO code on default output
 
-Sending a single PRONTO code (without repeat) on an IR-emitter with only one output port (`optoins.ports` not specified
+Sending a single PRONTO code (without repeat) on an IR-emitter with only one output port (`options.ports` not specified
 or empty):
 
 ```json
