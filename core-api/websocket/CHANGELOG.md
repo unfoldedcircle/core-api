@@ -10,6 +10,7 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ### Added
 - Add Wake on WLAN setting to the network configuration.
+- New `active_profile_change` event is emitted whenever the active profile has changed.
 
 ---
 
