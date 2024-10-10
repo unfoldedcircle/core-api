@@ -6,7 +6,7 @@
 
 ## API HTML documentation
 
-- View with [AsyncAPI Studio online tool](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/integration-api/asyncapi.yaml).  
+- View with [AsyncAPI Studio online tool](https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/integration-api/UCR-integration-asyncapi.yaml).  
   The link will directly load the yaml definition file from GitHub and display it together with the HTML documentation in
 the browser.
 
