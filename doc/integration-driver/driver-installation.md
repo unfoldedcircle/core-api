@@ -141,6 +141,7 @@ Example of a Node.js based integration driver archive (contents of bin/node_modu
 
 - Maximum 10 custom integrations can be installed.
 - Only Node.js is supported besides a statically linked binary. Other runtimes are not supported at the moment.
+  - Python integrations must pack the Python runtime into the archive.
 - The integration driver runs in a sandbox. Access to devices and the filesystem is restricted.
 - No symlinks are allowed. They are automatically removed during the installation.
 - Executable files are only allowed in the `./bin` directory.
@@ -166,14 +167,18 @@ The driver runs in a sandbox with limited access to the host system.
   - `UC_INTEGRATION_HTTP_PORT`: port number.
 - The working directory is set to the binary directory.
 - The binary directory is read-only.
-- Node.js version: v16.18. A future firmware update will provide a newer Node.js LTS version. 
+- Node.js version: v20.16 (firmware release 1.9.3 and newer).
+  - There are no pre-installed node modules.
+  - An integration driver must include all required modules in the installation archive, including `uc-integration-api` (if used). 
 - File access with relative paths between `bin`, `config`, and `data` is not possible.
   - Environment variables must be used to retrieve the full path of these directories.
     - `UC_CONFIG_HOME` and `HOME`: configuration directory.
     - `UC_DATA_HOME`: data directory.
   - The returned path may not be stored, it may change with future software updates.
 - Only the `$UC_CONFIG_HOME` and `$UC_DATA_HOME` directories are writeable and persisted between restarts.
-  - The `/tmp` directory can be used for small temporary files. Files are not persisted between restarts.
+  - The `/tmp` directory can be used for small temporary files.
+    - This is a RAM file system and limited by the available free memory. 
+    - Temporary files are not persisted between restarts.
 - A dynamic user and group is allocated when the driver is started.
   - The user and group IDs may change between driver restarts.
   - Write access to the `$UC_CONFIG_HOME`, `$UC_DATA_HOME` and `/tmp` directories is ensured.
@@ -249,6 +254,7 @@ Log files can also be downloaded in the web-configurator: _Settings, Development
   server for the integration-API).
 - Preserve resources, use as little memory and CPU as possible.
 - Use stdout & stderr for logging.
+- Only use `/tmp` for small, temporary files since it is a RAM file system.
 
 ## Example integrations
 
