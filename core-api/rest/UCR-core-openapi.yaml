@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.37.0
+  version: 0.38.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -9461,6 +9461,55 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+  /system/logs/web:
+    get:
+      tags:
+        - system
+      summary: Get the log-streaming web app configuration.
+      description: |
+        Retrieve the log-streaming web app configuration.
+      operationId: getLogWebAppCfg
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemLogWebAppCfg'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    put:
+      tags:
+        - system
+      summary: Configure log-streaming web app.
+      description: |
+        - The web-app can be started and stopped with the `enable` flag.
+        - The `autostart` flag controls the automatic start after boot. If autostart is disabled, the web-app can still be
+          started and stopped manually.
+        - Log frontend URL: `/log`.
+        - The password to access the web app is optional:
+          - It needs to be at least 6 characters long, maximum length is 30 characters.
+          - Allowed characters: letters, numbers and special characters `*@^(){}[]=,.:_-`
+        - An empty password value will disable the password, a missing password field doesn't change an existing password.
+      operationId: setLogWebAppCfg
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemLogWebAppCfg'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemLogWebAppCfg'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
   /system/power:
     get:
       tags:
@@ -9755,7 +9804,52 @@ paths:
         start the download and return `state: DOWNLOAD`. Once successfully downloaded, it can be installed by calling this
         operation again.
 
-        ⚠️ Download progress events are not yet implemented!
+        The download process emits `software_update` progress event messages with `event_type: PROGRESS` and `state: DOWNLOAD`.
+        The payload fields `download_bytes`, `download_percent` and `update_id` are set.  
+
+        - A successful download is indicated with `download_percent: 100`, without the `download_bytes` field.
+        - The state is set to `FAILURE` if a download fails.
+        - Depending on download speed, `download_percent` might skip certain values or report the same value multiple times.
+        - The famous last percent will take longer due to image validation.
+
+        Example download progress events:    
+        - Download progress event:
+        ```json
+        {
+          "kind": "event",
+          "msg": "software_update",
+          "cat": "REMOTE",
+          "ts": "2024-09-30T16:25:18.668395688Z",
+          "msg_data": {
+            "event_type": "PROGRESS",
+            "progress": {
+              "download_bytes": 256734720,
+              "download_percent": 97,
+              "state": "DOWNLOAD",
+              "update_id": "some-id"
+            },
+            "update_id": "some-id"
+          }
+        }
+        ```
+        - Final success event:
+        ```json
+        {
+          "kind": "event",
+          "msg": "software_update",
+          "cat": "REMOTE",
+          "ts": "2024-09-30T16:25:34.229442566Z",
+          "msg_data": {
+            "event_type": "PROGRESS",
+            "progress": {
+              "download_percent": 100,
+              "state": "DOWNLOAD",
+              "update_id": "some-id"
+            },
+            "update_id": "some-id"
+          }
+        }
+        ```
 
         Error codes:
         - `404`: updateId does not exist
@@ -14688,6 +14782,21 @@ components:
         msg:
           description: Log message
           type: string
+    SystemLogWebAppCfg:
+      type: object
+      properties:
+        autostart:
+          description: Automatically run web-app after system start
+          type: boolean
+        enabled:
+          description: State of web-app
+          type: boolean
+        password:
+          description: |
+            Web-app password. The password can only be set and not retrieved.
+            An empty value will disable the password, a missing field doesn't change an existing password.
+          type: string
+          pattern: '^[\w*@^(){}\[\]:,.=-]{6,30}$'
     UiId:
       type: string
       format: '^[a-zA-Z0-9\-_]+$'

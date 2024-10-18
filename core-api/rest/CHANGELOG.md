@@ -10,6 +10,7 @@ This section contains unreleased changed which will be part of an upcoming relea
 
 ### Added
 - Add Wake on WLAN setting to the network configuration.
+- Control the [Logdy](https://logdy.dev/) web-app through `/system/logs/web`.
 
 ---
 
