@@ -13902,7 +13902,7 @@ components:
                 feature, otherwise only `start`.
               type: array
               items:
-                $ref: '#/components/schemas/RemoteFeatures'
+                $ref: '#/components/schemas/RemoteFeature'
             options:
               type: object
               properties:
@@ -14041,7 +14041,7 @@ components:
                 - bt
       required:
         - name
-    RemoteFeatures:
+    RemoteFeature:
       type: string
       enum:
         - on_off
@@ -14060,7 +14060,7 @@ components:
                 Supported features of the remote.
               type: array
               items:
-                $ref: '#/components/schemas/RemoteFeatures'
+                $ref: '#/components/schemas/RemoteFeature'
             options:
               type: object
               properties:
