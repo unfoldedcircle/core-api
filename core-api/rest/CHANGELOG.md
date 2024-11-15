@@ -6,13 +6,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-This section contains unreleased changed which will be part of an upcoming release. 
+This section contains unreleased changes which will be part of an upcoming release.
 
-### Added
-- Add Wake on WLAN setting to the network configuration.
-- Control the [Logdy](https://logdy.dev/) web-app through `/system/logs/web`.
+### Changed
+- Refactor inline enum definitions in Activity, ActivityGroupOptions, Macro, Remote to simplify data model code generation.
 
 ---
+
+## 0.38.0
+### Added
+- Control the [Logdy](https://logdy.dev/) web-app through `/system/logs/web`.
+
+## 0.37.0
+### Added
+- Add Wake on WLAN setting to the network configuration.
 
 ## 0.36.0
 ### Changed
