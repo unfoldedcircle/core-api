@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.38.0
+  version: 0.38.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -10494,10 +10494,7 @@ components:
                 feature, otherwise only `start`.
               type: array
               items:
-                type: string
-                enum:
-                  - on_off
-                  - start
+                $ref: '#/components/schemas/ActivityFeature'
             options:
               type: object
               properties:
@@ -10540,6 +10537,14 @@ components:
           required:
             - options
             - attributes
+    ActivityFeature:
+      description: |
+        Supported features of the activity. If the activity has an `off` sequence, it supports the common `on_off`
+        feature, otherwise only `start`.
+      type: string
+      enum:
+        - on_off
+        - start
     ActivityId:
       type: string
       format: '^[a-zA-Z0-9\-_]+$'
@@ -10564,10 +10569,7 @@ components:
                 feature, otherwise only `start`.
               type: array
               items:
-                type: string
-                enum:
-                  - on_off
-                  - start
+                $ref: '#/components/schemas/ActivityFeature'
             options:
               type: object
               properties:
@@ -10817,31 +10819,35 @@ components:
       type: object
       properties:
         remove_turn_on_delays:
-          description: |
-            - `previous_cmd_skipped`: Only remove delay steps if the previous step is skipped, because the entity is in a
-               power-on state.
-            - `between_skipped_cmds`: Only remove delay steps if the previous and next power-on steps are skipped, because
-               the entity is already in a power-on state.
-            - `never`: Never remove delay steps in the on-sequence of the new activity.
-          type: string
-          enum:
-            - previous_cmd_skipped
-            - between_skipped_cmds
-            - never
+          $ref: '#/components/schemas/RemoveTurnOnDelays'
         turn_off_unused_entities:
-          description: |
-            - `always`: Always turn off unused entities in the previous activity.  
-               All included entities are considered, not just the ones used in the on-sequence of the new activity.
-            - `in_off_sequence`: Only turn off unused entities which are included in the off-sequence of the previous activity.
-            - `run_off_sequence`: Run the original off-sequence of the old activity and dynamically filter out power-off commands.  
-               All power-off commands from entities used in the new activity's power-on sequence will be filtered out.
-            - `never`: Never turn off entities in the previous activity.
-          type: string
-          enum:
-            - always
-            - in_off_sequence
-            - run_off_sequence
-            - never
+          $ref: '#/components/schemas/TurnOffUnusedEntities'
+    RemoveTurnOnDelays:
+      description: |
+        - `previous_cmd_skipped`: Only remove delay steps if the previous step is skipped, because the entity is in a
+           power-on state.
+        - `between_skipped_cmds`: Only remove delay steps if the previous and next power-on steps are skipped, because
+           the entity is already in a power-on state.
+        - `never`: Never remove delay steps in the on-sequence of the new activity.
+      type: string
+      enum:
+        - previous_cmd_skipped
+        - between_skipped_cmds
+        - never
+    TurnOffUnusedEntities:
+      description: |
+        - `always`: Always turn off unused entities in the previous activity.  
+           All included entities are considered, not just the ones used in the on-sequence of the new activity.
+        - `in_off_sequence`: Only turn off unused entities which are included in the off-sequence of the previous activity.
+        - `run_off_sequence`: Run the original off-sequence of the old activity and dynamically filter out power-off commands.  
+           All power-off commands from entities used in the new activity's power-on sequence will be filtered out.
+        - `never`: Never turn off entities in the previous activity.
+      type: string
+      enum:
+        - always
+        - in_off_sequence
+        - run_off_sequence
+        - never
     AdminPin:
       type: string
       maxLength: 20
@@ -13596,9 +13602,7 @@ components:
                 Supported features of the macro.
               type: array
               items:
-                type: string
-                enum:
-                  - start
+                $ref: '#/components/schemas/MacroFeature'
             options:
               type: object
               properties:
@@ -13614,13 +13618,17 @@ components:
                   $ref: '#/components/schemas/CommandSequence'
           required:
             - options
+    MacroFeature:
+      type: string
+      enum:
+        - start
     Macros:
       type: array
       items:
         $ref: '#/components/schemas/MacroOverview'
     MacroCreate:
       description: |
-        Dedicated request object to create a new macro.  
+        Dedicated request object to create a new macro.
       type: object
       allOf:
         - properties:
@@ -13666,9 +13674,7 @@ components:
                 Supported features of the macro.
               type: array
               items:
-                type: string
-                enum:
-                  - start
+                $ref: '#/components/schemas/MacroFeature'
             options:
               type: object
               properties:
@@ -13896,10 +13902,7 @@ components:
                 feature, otherwise only `start`.
               type: array
               items:
-                type: string
-                enum:
-                  - on_off
-                  - send
+                $ref: '#/components/schemas/RemoteFeature'
             options:
               type: object
               properties:
@@ -14038,6 +14041,11 @@ components:
                 - bt
       required:
         - name
+    RemoteFeature:
+      type: string
+      enum:
+        - on_off
+        - send
     RemoteOverview:
       type: object
       allOf:
@@ -14052,9 +14060,7 @@ components:
                 Supported features of the remote.
               type: array
               items:
-                type: string
-                enum:
-                  - send
+                $ref: '#/components/schemas/RemoteFeature'
             options:
               type: object
               properties:
