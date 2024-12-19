@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.38.1
+  version: 0.38.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8762,7 +8762,7 @@ paths:
         - The device must have enough free disk space to restore the backup. At least 100 MB must be free to start the restore process.
 
         Error codes:
-        - `400`: bad request, back archive is invalid or corrupt. Check logs for further details.
+        - `400`: bad request, backup archive is invalid or corrupt. Check logs for further details.
         - `403`: forbidden, only an administrator account may restore a backup.
         - `409`: conflict, a backup or restore process is already running.
         - `500`: internal server error, the backup archive could not be processed. Check logs for further details.
@@ -11648,7 +11648,7 @@ components:
           $ref: '#/components/schemas/LanguageText'
         version:
           type: string
-          maxLength: 30
+          maxLength: 40
         description:
           $ref: '#/components/schemas/LanguageText'
         developer:
