@@ -195,7 +195,7 @@ The integration runs on the same network environment as the Remote. There is no 
 - Binding ports below 1024 is not possible.
 
 ⚠️ A port-binding filter might be added in the future to prevent integrations to steal away ports of other integrations.
-The port range 8000-9200 and port 13333 must be avoided!
+The port range 8000-9200 and port 13333 are not allowed to be used!
 
 #### Native integration drivers
 
@@ -239,6 +239,42 @@ Output to stdout and stderr are automatically stored with a timestamp and access
 See [REST Core API](../../core-api/rest/README.md) for more details.
 
 Log files can also be downloaded in the web-configurator: _Settings, Development: Logs_
+
+### Web-app log viewer
+
+⚠️ Available from firmware release v2.1.0
+
+The [Logdy](https://logdy.dev/) web application is installed on the device to monitor integration driver log events in
+near real time. 
+
+- URL: `http://$IP/log/`
+- This function is deactivated by default and the endpoint returns 503.
+- The log viewer must be started using the [REST Core API](../../core-api/rest/README.md)
+  with the `/api/system/logs/web` endpoint:
+  - `GET` request returns the current state.
+  - `PUT` request allows to start, stop or to permanently enable the log app. A password can be set to restrict access
+     to the web app.
+- Available logs:
+  - Remote core service
+  - All pre-installed and custom integrations
+  - Custom remote-ui service if installed
+- ❗️The log processing and logdy daemon require around 170 MB of the custom integration memory pool.
+
+Using curl to start the app:
+```shell
+curl --request PUT 'http://$IP/api/system/logs/web' \
+  --header 'Content-Type: application/json' \
+  --user web-configurator:$PIN \
+  --data '{"enabled": true}'
+```
+
+Start and permanently enable the app, even after a reboot:
+```shell
+curl --request PUT 'http://$IP/api/system/logs/web' \
+  --header 'Content-Type: application/json' \
+  --user web-configurator:$PIN \
+  --data '{"enabled": true; "autostart": true}'
+```
 
 ## Recommendations
 
