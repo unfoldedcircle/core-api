@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.12.0-beta'
+  version: '0.13.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -96,6 +96,8 @@ tags:
     description: Metadata information
   - name: required
     description: This message needs be handled / supported by an integration driver.
+  - name: oauth2
+    description: OAuth2 authorization
 
 channels:
   /intg:
@@ -132,6 +134,12 @@ channels:
           - $ref: '#/components/messages/configured_entities'
           - $ref: '#/components/messages/localization_cfg'
           - $ref: '#/components/messages/runtime_info'
+          # --- OAuth2 response
+          - $ref: '#/components/messages/oauth2_auth_url'
+          - $ref: '#/components/messages/oauth2_token'
+          # --- OAuth2 events
+          - $ref: '#/components/messages/oauth2_authorization'
+          - $ref: '#/components/messages/oauth2_refreshed'
     subscribe:
       description: |
         Integration API for the UC Remote to receive messages from integration drivers.  
@@ -162,6 +170,11 @@ channels:
           - $ref: '#/components/messages/get_configured_entities'
           - $ref: '#/components/messages/get_localization_cfg'
           - $ref: '#/components/messages/get_runtime_info'
+          # --- OAuth2 requests
+          - $ref: '#/components/messages/generate_oauth2_auth_url'
+          - $ref: '#/components/messages/create_oauth2_cfg'
+          - $ref: '#/components/messages/get_oauth2_token'
+          - $ref: '#/components/messages/delete_oauth2_token'
 
 components:
   securitySchemes:
@@ -746,6 +759,104 @@ components:
               entity_type: cover
               entity_id: blind-2_cover-only
               cmd_id: close
+
+    # OAuth2
+    generate_oauth2_auth_url:
+      summary: 👷 Request an OAuth2 authorization URL for the user.
+      description: |
+        A new unique authorization URL is created, which may only be used once. Only one active authorization URL per
+        integration is allowed. Old URLs will become invalid if multiple calls are made.
+        
+        Once the user has authorized the integration driver by the authorization server, the `oauth2_authorization`
+        event is emitted.
+        
+        The `client_data` dictionary can be used to encode driver specific data into the URL, which will be returned
+        in the `oauth2_authorization` event. This allows to link the authorization event to internal driver states,
+        e.g. a setup flow step.
+        
+        The following data fields are automatically injected by the core and overwritten if set by an integration:
+        - `intg`: set to the integration driver_id.
+        - `acc`: set to the default integration name.
+        - `dev`: set to the device address, used for the authentication callback URL.
+        
+        ℹ️️ implemented in firmware 2.2.3.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/generateOauth2AuthUrlMsg'
+      x-response:
+        $ref: '#/components/messages/oauth2_auth_url'
+    oauth2_auth_url:
+      summary: 👷 Generated OAuth2 authorization URL.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/oauth2AuthUrlMsg'
+
+    create_oauth2_cfg:
+      summary: 👷 Create an OAuth2 configuration entry in the Core.
+      description: |
+        ℹ️️ implemented in firmware 2.2.3.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/createOauth2CfgMsg'
+      x-response:
+        $ref: '#/components/messages/response'
+
+    get_oauth2_token:
+      summary: 👷 Request an OAuth2 access token.
+      description: |
+        ℹ️️ implemented in firmware 2.2.3.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/getOauth2TokenMsg'
+      x-response:
+        $ref: '#/components/messages/oauth2_token'
+    oauth2_token:
+      summary: 👷 OAuth2 access token.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/oauth2TokenMsg'
+
+    oauth2_authorization:
+      summary: 👷 Event that user has authorized the service.
+      description: |
+        This event is sent after the user has authorized the service. If the authorization was successful, the Core
+        retrieves the initial token for the integration to retrieve further information and setup the integration driver.
+        
+        If authorization or token retrieval failed, the error field is set.
+        
+        The returned token is not saved in the Core. An integration driver has to use `create_oauth2_cfg` to persist
+        an OAuth2 authorization for future use.
+        
+        ℹ️️ implemented in firmware 2.2.3.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/oauth2AuthorizedEvent'
+
+    oauth2_refreshed:
+      summary: 👷 Event that the OAuth2 token has been refreshed.
+        
+        ℹ️️ implemented in firmware 2.2.3.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/oauth2RefreshedEvent'
+
+    delete_oauth2_token:
+      summary: 👷 Delete an OAuth2 access token.
+      description: |
+        ℹ️️ implemented in firmware 2.2.3.
+      tags:
+        - name: oauth2
+      payload:
+        $ref: '#/components/schemas/deleteOauth2TokenMsg'
+      x-response:
+        $ref: '#/components/messages/result'
 
     # --- events
     entity_change:
@@ -1362,6 +1473,196 @@ components:
                 - entity_type
                 - entity_id
                 - cmd_id
+          required:
+            - msg
+            - msg_data
+
+    generateOauth2AuthUrlMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: generate_oauth2_auth_url
+            msg_data:
+              type: object
+              properties:
+                client_data:
+                  description: |
+                    Additional key-value pairs which should be encoded into the `state` query parameter of the
+                    authorization request.
+                  type: object
+                  additionalProperties:
+                    type: string
+              required:
+                - client_data
+          required:
+            - msg
+            - msg_data
+
+    oauth2AuthUrlMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: oauth2_auth_url
+            msg_data:
+              type: object
+              properties:
+                auth_url:
+                  type: string
+                  format: uri
+          required:
+            - msg
+            - msg_data
+
+    createOauth2CfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: create_oauth2_cfg
+            msg_data:
+              type: object
+              properties:
+                token_id:
+                  description: Token identifier to use for the OAuth2 token
+                  type: string
+                name:
+                  description: Friendly name of the OAuth2 token
+                  type: string
+                token:
+                  $ref: '#/components/schemas/Oauth2Token'
+              required:
+                - token_id
+                - name
+                - token
+          required:
+            - msg
+            - msg_data
+
+    getOauth2TokenMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_oauth2_token
+            msg_data:
+              type: object
+              properties:
+                token_id:
+                  type: string
+                force_refresh:
+                  description: |
+                    Force a token refresh, no matter if the current token is still valid or not.
+                  type: boolean
+                  default: false
+              required:
+                - token_id
+          required:
+            - msg
+            - msg_data
+
+    oauth2TokenMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: oauth2_token
+            msg_data:
+              type: object
+              properties:
+                token_id:
+                  type: string
+                token:
+                  $ref: '#/components/schemas/Oauth2Token'
+              required:
+                - token_id
+                - token
+          required:
+            - msg
+            - msg_data
+
+    oauth2AuthorizedEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: oauth2_authorization
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              type: object
+              properties:
+                client_data:
+                  description: |
+                    Provided key-value pairs in the authorization request URL.
+                  type: object
+                  additionalProperties:
+                    type: string
+                error_code:
+                  type: string
+                error_description:
+                  type: string
+                token:
+                  $ref: '#/components/schemas/Oauth2Token'
+              required:
+                - client_data
+          required:
+            - msg
+            - msg_data
+
+    oauth2RefreshedEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: oauth2_refreshed
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              type: object
+              properties:
+                error_code:
+                  type: string
+                error_description:
+                  type: string
+                token:
+                  $ref: '#/components/schemas/Oauth2Token'
+          required:
+            - msg
+            - msg_data
+
+    deleteOauth2TokenMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: delete_oauth2_token
+            msg_data:
+              type: object
+              properties:
+                token_id:
+                  type: string
+              required:
+                - token_id
           required:
             - msg
             - msg_data
@@ -2730,3 +3031,27 @@ components:
       enum:
         - PRONTO
         - HEX
+
+    Oauth2Token:
+      type: object
+      description: OAuth token response, based on https://datatracker.ietf.org/doc/html/rfc6749#section-5.1
+      properties:
+        access_token:
+          description: The access token issued by the authorization server.
+          type: string
+        token_type:
+          description: The type of the token issued. E.g. `Bearer`.
+          type: string
+        expires_in:
+          description: The time period (in seconds) for which the `access_token` is valid.
+          type: integer
+        refresh_token:
+          description: |
+            The refresh token, which can be used to obtain new access tokens using the same authorization grant.
+          type: string
+        scope:
+          description: A space-separated list of scopes which have been granted for this `access_token`.
+          type: string
+      required:
+        - access_token
+        - token_type
