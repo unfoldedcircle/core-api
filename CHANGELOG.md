@@ -24,6 +24,7 @@ _Changes in the next release_
 - Dock 3 external port configuration.
 - Voice Assistant support.
 - Select Entity support.
+- Integration-API: OAuth2 support
 
 ---
 
