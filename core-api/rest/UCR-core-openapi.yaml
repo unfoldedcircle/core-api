@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.38.2
+  version: 0.38.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -12720,23 +12720,28 @@ components:
         - Unhealthy
     IconIdentifier:
       type: string
-      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
+      format: '^[a-z][a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
       maxLength: 255
       description: |
         Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
         Available prefixes:
         - `uc:` - integrated icon font 
-        - `custom:` - custom resource
+        - `custom:` - custom icon resource
+        - `ctv:` - custom TV icon resource
+
+        Other prefixes might be rejected by the service.
 
         An empty identifier, while updating the object, removes the existing icon.
     ImageIdentifier:
       type: string
-      format: '^[a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
+      format: '^[a-z][a-z0-9]+:[a-zA-Z0-9\-_\.]+$'
       maxLength: 255
       description: |
         Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
         Available prefixes:
-        - `custom:` - custom resource
+        - `custom:` - custom image resource
+
+        Other prefixes might be rejected by the service.
 
         An empty identifier, while updating the object, removes the existing image.
     IncludedEntities:
@@ -13411,7 +13416,7 @@ components:
           - For example: `3;0x20F0A956;32;0 + 3;0x20F02956;32;0`
           - This works for HEX and PRONTO
         - PRONTO only: 2 toggling codes can be specified with a pipe character `|` as divider.
-          - Only two codes toggling codes are valid. 
+          - Only two toggling codes are valid. 
           - For example: `0000 0068 0001 0000 0002 0800 | 0000 0068 0001 0000 8002 0800`
         - ⚠️ Sequence and toggle divider cannot be mixed.
       type: string

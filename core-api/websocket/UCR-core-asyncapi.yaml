@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.29.0-beta'
+  version: '0.29.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -774,9 +774,54 @@ components:
 
         If the system update hasn't been downloaded yet (`download` state is `PENDING` or `ERROR`), this operation will only
         start the download and return `state: DOWNLOAD`. Once successfully downloaded, it can be installed by this
-        message again.
+        request message again.
+        
+        The download process emits `software_update` progress event messages with `event_type: PROGRESS` and `state: DOWNLOAD`.
+        The payload fields `download_bytes`, `download_percent` and `update_id` are set.  
 
-        ⚠️ Download progress events are not yet implemented!
+        - A successful download is indicated with `download_percent: 100`, without the `download_bytes` field.
+        - The state is set to `FAILURE` if a download fails.
+        - Depending on download speed, `download_percent` might skip certain values or report the same value multiple times.
+        - The famous last percent will take longer due to image validation.
+
+        Example download progress events:    
+        - Download progress event:
+        ```json
+        {
+          "kind": "event",
+          "msg": "software_update",
+          "cat": "REMOTE",
+          "ts": "2024-09-30T16:25:18.668395688Z",
+          "msg_data": {
+            "event_type": "PROGRESS",
+            "progress": {
+              "download_bytes": 256734720,
+              "download_percent": 97,
+              "state": "DOWNLOAD",
+              "update_id": "some-id"
+            },
+            "update_id": "some-id"
+          }
+        }
+        ```
+        - Final success event:
+        ```json
+        {
+          "kind": "event",
+          "msg": "software_update",
+          "cat": "REMOTE",
+          "ts": "2024-09-30T16:25:34.229442566Z",
+          "msg_data": {
+            "event_type": "PROGRESS",
+            "progress": {
+              "download_percent": 100,
+              "state": "DOWNLOAD",
+              "update_id": "some-id"
+            },
+            "update_id": "some-id"
+          }
+        }
+        ```
       payload:
         $ref: '#/components/schemas/updateSystemMsg'
       x-response:
@@ -9352,24 +9397,29 @@ components:
 
     iconIdentifier:
       type: string
-      format: "^[a-z0-9]+:[a-zA-Z0-9\\-_\\.]+$"
+      format: "^[a-z][a-z0-9]+:[a-zA-Z0-9\\-_\\.]+$"
       maxLength: 255
       description: |
         Optional icon identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
         Available prefixes:
         - `uc:` - integrated icon font 
-        - `custom:` - custom resource
+        - `custom:` - custom icon resource
+        - `ctv:` - custom TV icon resource
+
+        Other prefixes might be rejected by the service.
 
         An empty identifier, while updating the object, removes the existing icon.
 
     imageIdentifier:
       type: string
-      format: "^[a-z0-9]+:[a-zA-Z0-9\\-_\\.]+$"
+      format: "^[a-z][a-z0-9]+:[a-zA-Z0-9\\-_\\.]+$"
       maxLength: 255
       description: |
         Optional image identifier. The identifier consists of a prefix and a resource identifier, separated by `:`.  
         Available prefixes:
-        - `custom:` - custom resource
+        - `custom:` - custom image resource
+
+        Other prefixes might be rejected by the service.
         
         An empty identifier, while updating the object, removes the existing image.
 

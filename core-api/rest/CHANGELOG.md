@@ -8,10 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+---
+
+## 0.38.3
+### Changed
+- Icon and image identifier validations
+
+## 0.38.2
 ### Changed
 - Refactor inline enum definitions in Activity, ActivityGroupOptions, Macro, Remote to simplify data model code generation.
-
----
 
 ## 0.38.0
 ### Added
