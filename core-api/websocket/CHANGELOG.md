@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
+---
+
+## 0.29.2-beta
+### Changed
+- Icon and image identifier validations
+
+## 0.29.0-beta
 ### Added
 - Add Wake on WLAN setting to the network configuration.
 - New `active_profile_change` event is emitted whenever the active profile has changed.
-
----
 
 ## 0.28.0-beta
 ### Changed
