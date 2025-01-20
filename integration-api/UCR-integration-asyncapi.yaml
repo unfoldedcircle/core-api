@@ -1901,6 +1901,8 @@ components:
         device_discovery:
           description: Driver supports multi-device discovery. **Not yet supported**.
           type: boolean
+        manifest:
+          $ref: '#/components/schemas/DriverManifest'
         setup_data_schema:
           $ref: '#/components/schemas/SettingsPage'
         release_date:
@@ -1930,6 +1932,54 @@ components:
           type: string
           format: email
           maxLength: 100
+
+    DriverManifest:
+      description: |
+        The driver manifest contains required and optional features for the driver to work.
+        
+        Furthermore, it can also contain additional metadata for the Core service,
+        which is required for certain features.
+        For example OAuth2 configuration data like the authorization and token endpoints.
+        This data may only be transmitted to the core, but won't be exposed in the driver management API endpoints.
+      type: object
+      properties:
+        features:
+          description: |
+            Required features of an integration driver.
+          type: array
+          items:
+            $ref: '#/components/schemas/DriverFeature'
+        iot_class:
+          $ref: '#/components/schemas/IotClass'
+
+    DriverFeature:
+      type: object
+      properties:
+        name:
+          description: Feature name
+          type: string
+          maxLength: 50
+        required:
+          description: Optional or required feature
+          type: boolean
+          default: true
+        data:
+          description: Feature specific data
+          type: object
+      required:
+        - name
+
+    IotClass:
+      description: |
+        How the integration connects and communicates with a device or service.
+        Inspired by [Home Assistant IoT class](https://www.home-assistant.io/blog/2016/02/12/classifying-the-internet-of-things/#classifiers).
+      type: string
+      enum:
+        - assumed_state
+        - cloud_polling
+        - cloud_push
+        - local_polling
+        - local_push
 
     intgAuthMethod:
       type: string
