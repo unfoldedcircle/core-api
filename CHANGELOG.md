@@ -15,7 +15,10 @@ _Changes in the next release_
 - New IR-emitter entity.
 - Core APIs: add Wake on WLAN setting to the network configuration.
 - WS Core API: new `active_profile_change` event is emitted whenever the active profile has changed.
-- REST Core API: control the [Logdy](https://logdy.dev/) web-app. 
+- REST Core API:
+  - Control the [Logdy](https://logdy.dev/) web-app.
+  - New custom TV icon resource identifier: `ctv:`
+  - Add query parameter to resource type endpoint to filter items.
 
 ---
 
