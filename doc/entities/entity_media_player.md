@@ -102,39 +102,39 @@ of the media-player UI on the Remote Two.
 Entity attributes are enabled by features and hold the current value of a feature or provide available options.
 Multiple features can act on the same attribute.
 
-| Attribute                  | Features                   | Type    | Values              | Description                                                                 |
-|----------------------------|----------------------------|---------|---------------------|-----------------------------------------------------------------------------|
-| state                      | on_off                     | enum    | [States](#states)   | State of the media player, influenced by the play and power commands.       |
-|                            | toggle                     |         |                     |                                                                             |
-|                            | play_pause, stop           |         |                     |                                                                             |
-| volume                     | volume                     | number  | 0..100              | Current volume level.                                                       |
-|                            | volume_up_down             |         |                     |                                                                             |
-| muted                      | mute_toggle                | boolean |                     | Flag if the volume is muted.                                                |
-|                            | mute, unmute               |         |                     |                                                                             |
-| media_duration             | media_duration             | number  |                     | Media duration in seconds.                                                  |
-| media_position             | media_position             | number  |                     | Current media position in seconds.                                          |
-|                            | play_pause, stop           |         |                     |                                                                             |
-|                            | fast_forward, rewind, seek |         |                     |                                                                             |
-| media_position_updated_at  | media_position             | string  | datetime (ISO 8601) | Optional timestamp when `media_position` was last updated.                  |
-| media_type                 | media_type                 | enum    | _platform specific_ | The type of media being played.                                             |
-| media_image_url            | media_image_url            | string  |                     | URL to retrieve the album art or an image representing what's being played. |
-|                            | play_pause                 |         |                     |                                                                             |
-|                            | next, previous             |         |                     |                                                                             |
-| media_title                | media_title                | string  |                     | Currently playing media information.                                        |
-|                            | play_pause                 |         |                     |                                                                             |
-|                            | next, previous             |         |                     |                                                                             |
-| media_artist               | media_artist               | string  |                     | Currently playing media information.                                        |
-|                            | play_pause                 |         |                     |                                                                             |
-|                            | next, previous             |         |                     |                                                                             |
-| media_album                | media_album                | string  |                     | Currently playing media information.                                        |
-|                            | play_pause                 |         |                     |                                                                             |
-|                            | next, previous             |         |                     |                                                                             |
-| repeat                     | repeat                     | enum    | `OFF`, `ALL`, `ONE` | Current repeat mode.                                                        |
-| shuffle                    | shuffle                    | boolean |                     | Shuffle mode on or off.                                                     |
-| source                     | select_source              | string  |                     | Currently selected media or input source.                                   |
-| source_list                | select_source              | list    | _text items_        | Available media or input sources.                                           |
-| sound_mode                 | select_sound_mode          | string  |                     | Currently selected sound mode.                                              |
-| sound_mode_list            | select_sound_mode          | list    | _text items_        | Available sound modes.                                                      |
+| Attribute                  | Features                   | Type    | Values              | Description                                                                              |
+|----------------------------|----------------------------|---------|---------------------|------------------------------------------------------------------------------------------|
+| state                      | on_off                     | enum    | [States](#states)   | State of the media player, influenced by the play and power commands.                    |
+|                            | toggle                     |         |                     |                                                                                          |
+|                            | play_pause, stop           |         |                     |                                                                                          |
+| volume                     | volume                     | number  | 0..100              | Current volume level.                                                                    |
+|                            | volume_up_down             |         |                     |                                                                                          |
+| muted                      | mute_toggle                | boolean |                     | Flag if the volume is muted.                                                             |
+|                            | mute, unmute               |         |                     |                                                                                          |
+| media_duration             | media_duration             | number  |                     | Media duration in seconds.                                                               |
+| media_position             | media_position             | number  |                     | Current media position in seconds.                                                       |
+|                            | play_pause, stop           |         |                     |                                                                                          |
+|                            | fast_forward, rewind, seek |         |                     |                                                                                          |
+| media_position_updated_at  | media_position             | string  | datetime (ISO 8601) | Optional timestamp when `media_position` was last updated. Requires integration support. |
+| media_type                 | media_type                 | enum    | _platform specific_ | The type of media being played.                                                          |
+| media_image_url            | media_image_url            | string  |                     | URL to retrieve the album art or an image representing what's being played.              |
+|                            | play_pause                 |         |                     |                                                                                          |
+|                            | next, previous             |         |                     |                                                                                          |
+| media_title                | media_title                | string  |                     | Currently playing media information.                                                     |
+|                            | play_pause                 |         |                     |                                                                                          |
+|                            | next, previous             |         |                     |                                                                                          |
+| media_artist               | media_artist               | string  |                     | Currently playing media information.                                                     |
+|                            | play_pause                 |         |                     |                                                                                          |
+|                            | next, previous             |         |                     |                                                                                          |
+| media_album                | media_album                | string  |                     | Currently playing media information.                                                     |
+|                            | play_pause                 |         |                     |                                                                                          |
+|                            | next, previous             |         |                     |                                                                                          |
+| repeat                     | repeat                     | enum    | `OFF`, `ALL`, `ONE` | Current repeat mode.                                                                     |
+| shuffle                    | shuffle                    | boolean |                     | Shuffle mode on or off.                                                                  |
+| source                     | select_source              | string  |                     | Currently selected media or input source.                                                |
+| source_list                | select_source              | list    | _text items_        | Available media or input sources.                                                        |
+| sound_mode                 | select_sound_mode          | string  |                     | Currently selected sound mode.                                                           |
+| sound_mode_list            | select_sound_mode          | list    | _text items_        | Available sound modes.                                                                   |
 
 ### States
 
