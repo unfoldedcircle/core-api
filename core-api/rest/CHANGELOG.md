@@ -10,9 +10,14 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.38.4
+### Added
+- Add query parameter to resource type endpoint to filter items.
+
 ## 0.38.3
 ### Changed
 - Icon and image identifier validations
+- Increase version length to 40.
 
 ## 0.38.2
 ### Changed

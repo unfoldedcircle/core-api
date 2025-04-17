@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.38.3
+  version: 0.38.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -815,6 +815,7 @@ paths:
       operationId: getResourceTypeItemsCount
       parameters:
         - $ref: '#/components/parameters/resource_type'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
@@ -840,6 +841,7 @@ paths:
         - $ref: '#/components/parameters/resource_type'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
