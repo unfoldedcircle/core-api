@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changed which will be part of an upcoming release. 
 
+### Added
+- New `dock_port_mode` event message for Dock 3 port mode configuration changes.
+
 ---
 
 ## 0.29.2-beta

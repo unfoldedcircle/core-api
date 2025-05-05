@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.38.4
+  version: 0.39.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8627,6 +8627,154 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+  '/docks/devices/{dockId}/ports':
+    get:
+      tags:
+        - dock
+      summary: "\U0001F9EA Get all external port configurations."
+      description: |
+        This operation returns the configuration of all external ports. A connection to the dock must have been established
+        before, to retrieve the current configuration.
+
+        See the `PATCH` operation of an individual port for more information about the external port modes.
+      operationId: getAllDockPortConfigurations
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalPortConfigurations'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: "\U0001F9EA Reset all external ports to their default mode."
+      description: |
+        This feature only works on supported docks. All external dock ports are configured to their default operation mode: 
+        - Dock Two: output ports cannot be reconfigured. This operation has no effect.
+        - Dock 3: all ports are set to `AUTO` mode. The official IR-Blaster and IR-emitter are automatically detected.
+
+        Once a port has been reconfigured, the WebSocket event `dock_port_mode` is sent in the `docks` channel.
+      operationId: resetAllDockPortConfigurations
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  '/docks/devices/{dockId}/ports/{portId}':
+    get:
+      tags:
+        - dock
+      summary: "\U0001F9EA Get external dock port configuration."
+      description: |
+        This operation returns the configuration of a given port. A connection to the dock must have been established
+        before, to retrieve the current configuration.
+
+        See the `PATCH` operation for more information about the external port modes.
+      operationId: getDockPortConfiguration
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - $ref: '#/components/parameters/port_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalPortConfiguration'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    patch:
+      tags:
+        - dock
+      summary: "\U0001F9EA Configure an external dock port."
+      description: "An external dock port is usually a 3.5 mm jack port for connecting IR-extenders and -blasters. Depending on the dock\nmodel, other operation modes are also supported. Use the `GET` operation to retrieve supported modes.\n\nThis feature only works on supported docks:\n- Dock Two: output ports cannot be reconfigured and this operation is not supported.\n- Dock 3: multiple modes are supported:\n  - `NONE`: The output port is disabled and has no function.\n  - `AUTO`: The official IR-Blaster and IR-emitter are automatically detected.\n  - `IR_BLASTER`: Infrared-blaster with a stereo-plug.\n  - `IR_EMITTER_MONO_PLUG`: Infrared-emitter from Dock Two with a mono-plug.\n  - `IR_EMITTER_STEREO_PLUG`: Infrared-emitter from Dock 3 with a stereo-plug.\n  - `TRIGGER_5V`: \U0001F6A7 trigger support is not yet implemented.\n  - `RS232`: \U0001F6A7 RS232 communication is not yet implemented.\n\nThe dock must be connected to the Remote to change its configuration. A manually created dock will show no supported\nmodes until a connection has been established and the supported modes retrieved.\n\nOnce a port has been reconfigured, the WebSocket event `dock_port_mode` is sent in the `docks` channel.\n\nResponse codes:\n- `201`: port configuration has been accepted. Depending on the mode, this operation might take a few seconds.\n- `400`: bad request, for example an unsupported or unknown mode.\n- `404`: either the dock identifier or port number is not valid.\n- `503`: dock connection is not available, configuration cannot be changed at the moment.\n"
+      operationId: updateDockPortConfiguration
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - $ref: '#/components/parameters/port_id'
+      requestBody:
+        description: Entity data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExternalPortConfigurationRequest'
+        required: true
+      responses:
+        '201':
+          description: Successful operation returning the configured port in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalPortConfiguration'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - dock
+      summary: "\U0001F9EA Reset external port configuration to its default mode."
+      description: |
+        This feature only works on supported docks. The specified dock port is configured to its default operation mode: 
+        - Dock Two: output ports cannot be reconfigured. This operation has no effect.
+        - Dock 3: the port is set to `AUTO` mode. The official IR-Blaster and IR-emitter are automatically detected.
+
+        Once a port has been reconfigured, the WebSocket event `dock_port_mode` is sent in the `docks` channel.
+
+        Response codes:
+        - `200`: port reset has been accepted. This operation might take a few seconds.
+        - `404`: either the dock identifier or port number is not valid.
+        - `503`: dock connection is not available, configuration cannot be reset at the moment.    
+      operationId: resetDockPortConfiguration
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - $ref: '#/components/parameters/port_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExternalPortConfiguration'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   /system:
     get:
       tags:
@@ -9104,7 +9252,7 @@ paths:
                 - component: ui
                   installed: true
                   active: true
-                  installation_date: 2023-07-24T07:57:33.000Z
+                  installation_date: '2023-07-24T09:57:33+02:00'
                   release:
                     name:
                       en: Remote UI
@@ -10313,6 +10461,14 @@ components:
       required: true
       schema:
         $ref: '#/components/schemas/SimpleId'
+    port_id:
+      name: portId
+      in: path
+      description: Dock port number
+      required: true
+      schema:
+        type: integer
+        minimum: 1
     profile_id:
       name: profileId
       in: path
@@ -11864,6 +12020,14 @@ components:
         learning_active:
           type: boolean
           description: Dock is in IR learning mode.
+        port_count:
+          type: integer
+          minimum: 0
+        ports:
+          description: 3️⃣ External port mode configuration.
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalPortConfiguration'
         description:
           $ref: '#/components/schemas/Description'
       required:
@@ -12223,6 +12387,115 @@ components:
       type: string
       maxLength: 64
       description: Dock WebSocket URL to override auto-discovery from the service name in `dock_id`.
+    ExternalPortConfigurations:
+      type: array
+      items:
+        $ref: '#/components/schemas/ExternalPortConfiguration'
+    ExternalPortConfiguration:
+      description: |
+        External port configuration.
+        - `mode`: configured operation mode.
+        - `active_mode`: active operation mode, usually only set with the detected peripheral for `mode: AUTO`.
+      type: object
+      properties:
+        port:
+          $ref: '#/components/schemas/ExternalPortNumber'
+          readOnly: true
+        mode:
+          $ref: '#/components/schemas/ExternalPortMode'
+        active_mode:
+          $ref: '#/components/schemas/ExternalPortActiveMode'
+          readOnly: true
+        supported_modes:
+          description: Supported modes of the port.
+          type: array
+          items:
+            $ref: '#/components/schemas/ExternalPortMode'
+          readOnly: true
+        uart:
+          $ref: '#/components/schemas/UartConfiguration'
+      required:
+        - port
+        - mode
+    ExternalPortConfigurationRequest:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/ExternalPortMode'
+        uart:
+          $ref: '#/components/schemas/UartConfiguration'
+      required:
+        - mode
+    ExternalPortNumber:
+      description: 1-based port index number.
+      type: integer
+      minimum: 1
+    ExternalPortMode:
+      type: string
+      enum:
+        - AUTO
+        - NONE
+        - INFRARED
+        - IR_BLASTER
+        - IR_EMITTER_MONO_PLUG
+        - IR_EMITTER_STEREO_PLUG
+        - TRIGGER_5V
+        - RS232
+    ExternalPortActiveMode:
+      type: string
+      enum:
+        - UNKNOWN
+        - NONE
+        - ERROR
+        - INFRARED
+        - IR_BLASTER
+        - IR_EMITTER_MONO_PLUG
+        - IR_EMITTER_STEREO_PLUG
+        - TRIGGER_5V
+        - RS232
+    UartConfiguration:
+      type: object
+      properties:
+        baud_rate:
+          $ref: '#/components/schemas/UartBaudRate'
+        data_bits:
+          $ref: '#/components/schemas/UartDataBits'
+        stop_bits:
+          $ref: '#/components/schemas/UartStopBits'
+        parity:
+          $ref: '#/components/schemas/UartParity'
+      required:
+        - baud_rate
+        - data_bits
+        - stop_bits
+        - parity
+    UartBaudRate:
+      description: |
+        Common baud rate values: 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200
+      type: integer
+      minimum: 300
+      maximum: 115200
+      default: 9600
+    UartDataBits:
+      type: integer
+      minimum: 5
+      maximum: 8
+      default: 8
+    UartStopBits:
+      description: 'Stop bits must be set as string, number format is not supported!'
+      type: string
+      enum:
+        - '1'
+        - '1.5'
+        - '2'
+      default: '1'
+    UartParity:
+      type: string
+      enum:
+        - none
+        - even
+        - odd
+      default: none
     DriverDeveloper:
       type: object
       description: Optional information about the integration developer.

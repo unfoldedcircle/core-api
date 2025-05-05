@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.29.2-beta'
+  version: '0.30.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -531,6 +531,7 @@ channels:
           - $ref: '#/components/messages/ir_learning'
           - $ref: '#/components/messages/dock_change'
           - $ref: '#/components/messages/dock_state'
+          - $ref: '#/components/messages/dock_port_mode'
           - $ref: '#/components/messages/dock_discovery'
           - $ref: '#/components/messages/dock_setup_change'
           - $ref: '#/components/messages/dock_update_change'
@@ -2959,6 +2960,15 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/dockStateEventMsg'
+
+    dock_port_mode:
+      summary: 🧪 Dock port mode change event.
+      description: |
+        Emitted if the external port mode of a dock has changed.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/dockPortModeEventMsg'
 
     dock_discovery:
       summary: 🧪 Docking station discovery event.
@@ -6789,6 +6799,23 @@ components:
             - msg
             - msg_data
 
+    dockPortModeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: dock_port_mode
+            cat:
+              type: string
+              const: DEVICE
+            msg_data:
+              $ref: '#/components/schemas/dockPortMode'
+          required:
+            - msg
+            - msg_data
+
     dockDiscoveryEventMsg:
       type: object
       allOf:
@@ -8589,6 +8616,17 @@ components:
         - RECONNECTING
         - ERROR
 
+    dockPortMode:
+      type: object
+      properties:
+        dock_id:
+          type: string
+        port:
+          $ref: '#/components/schemas/ExternalPortConfiguration'
+      required:
+        - dock_id
+        - port
+
     dockDiscovery:
       type: object
       properties:
@@ -9938,6 +9976,109 @@ components:
         - id
         - success
         - peer
+
+    # --- OpenAPI Dock.yaml
+    ExternalPortConfiguration:
+      description: |
+        External port configuration.
+        - `mode`: configured operation mode.
+        - `active_mode`: active operation mode, usually only set with the detected peripheral for `mode: AUTO`.
+      type: object
+      properties:
+        port:
+          $ref: '#/components/schemas/ExternalPortNumber'
+          readOnly: true # with OpenAPI 3.1 schema definitions support sibling keywords alongside $ref
+        mode:
+          $ref: '#/components/schemas/ExternalPortMode'
+        active_mode:
+          $ref: '#/components/schemas/ExternalPortActiveMode'
+          readOnly: true # with OpenAPI 3.1 schema definitions support sibling keywords alongside $ref
+        supported_modes:
+          description: Supported modes of the port.
+          type: array
+          items:
+            $ref: "#/components/schemas/ExternalPortMode"
+          readOnly: true
+        uart:
+          $ref: '#/components/schemas/UartConfiguration'
+      required:
+        - port
+        - mode
+    
+    ExternalPortNumber:
+      description: 1-based port index number.
+      type: integer
+      minimum: 1
+    
+    ExternalPortMode:
+      type: string
+      enum:
+        - AUTO
+        - NONE
+        - INFRARED
+        - IR_BLASTER
+        - IR_EMITTER_MONO_PLUG
+        - IR_EMITTER_STEREO_PLUG
+        - TRIGGER_5V
+        - RS232
+    
+    ExternalPortActiveMode:
+      type: string
+      enum:
+        - UNKNOWN
+        - NONE
+        - ERROR
+        - INFRARED
+        - IR_BLASTER
+        - IR_EMITTER_MONO_PLUG
+        - IR_EMITTER_STEREO_PLUG
+        - TRIGGER_5V
+        - RS232
+    
+    UartConfiguration:
+      type: object
+      properties:
+        baud_rate:
+          $ref: '#/components/schemas/UartBaudRate'
+        data_bits:
+          $ref: '#/components/schemas/UartDataBits'
+        stop_bits:
+          $ref: '#/components/schemas/UartStopBits'
+        parity:
+          $ref: '#/components/schemas/UartParity'
+      required:
+        - baud_rate
+        - data_bits
+        - stop_bits
+        - parity
+    
+    UartBaudRate:
+      description: |
+        Common baud rate values: 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200
+      type: integer
+      minimum: 300
+      maximum: 115200
+      default: 9600
+    UartDataBits:
+      type: integer
+      minimum: 5
+      maximum: 8
+      default: 8
+    UartStopBits:
+      description: Stop bits must be set as string, number format is not supported!
+      type: string
+      enum:
+        - "1"
+        - "1.5"
+        - "2"
+      default: "1"
+    UartParity:
+      type: string
+      enum:
+        - none
+        - even
+        - odd
+      default: none
 
     # --- OpenAPI Remote.yaml
 

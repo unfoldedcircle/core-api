@@ -20,6 +20,7 @@ _Changes in the next release_
   - New custom TV icon resource identifier: `ctv:`
   - Add query parameter to resource type endpoint to filter items.
 - Media-player entity: new attribute `media_position_updated_at`.
+- Dock 3 external port configuration.
 
 ---
 
