@@ -2,7 +2,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:dock'
 info:
   title: Remote Two/3 WebSocket Dock-API
-  version: '0.7.0-beta'
+  version: '0.7.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -107,6 +107,7 @@ channels:
           - $ref: '#/components/messages/ir_stop'
           - $ref: '#/components/messages/set_config'
           - $ref: '#/components/messages/set_brightness'
+          - $ref: '#/components/messages/set_volume'
           - $ref: '#/components/messages/set_logging'
           - $ref: '#/components/messages/get_port_mode'
           - $ref: '#/components/messages/set_port_mode'
@@ -386,6 +387,12 @@ components:
         Set the maximum brightness of the status LED and ethernet indicator LED.
       payload:
         $ref: '#/components/schemas/setBrightnessMsg'
+      x-response:
+        $ref: '#/components/messages/result'
+    set_volume:
+      summary: 3️⃣️ 🔍 Set speaker volume.
+      payload:
+        $ref: '#/components/schemas/setVolumeMsg'
       x-response:
         $ref: '#/components/messages/result'
     set_logging:
@@ -693,6 +700,9 @@ components:
               type: array
               items:
                 $ref: '#/components/schemas/externalPortConfiguration'
+            volume:
+              description: 3️⃣🔍 Speaker volume.
+              type: integer
             uptime:
               type: string
           required:
@@ -912,6 +922,21 @@ components:
           required:
             - type
             - command
+    setVolumeMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_volume
+            volume:
+              type: integer
+              minimum: 0
+              maximum: 100
     setLogging:
       type: object
       allOf:

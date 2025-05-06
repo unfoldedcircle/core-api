@@ -6,7 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
-This section contains unreleased changed which will be part of an upcoming release. 
+This section contains unreleased changes which will be part of an upcoming release. 
+
+### Added
+- Dock 3 additions:
+  - external port mode configuration.
+  - setting and retrieving trigger state.
+  - events for IR learning on & off, external port mode changes.
+  - setting and retrieving speaker volume.
 
 ---
 ## 0.6.0-beta - 2023-06-29
