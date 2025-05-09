@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.39.0
+  version: 0.39.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -8277,7 +8277,9 @@ paths:
       description: |
         The following `command` values are defined:
         - `SET_LED_BRIGHTNESS`: set the maximum brightness of the front indicator LED. Set the `0..100` percentage as
-           string parameter in the `value` field.  
+           string parameter in the `value` field.
+        - `SET_VOLUME`: 3️⃣ set the speaker volume. Set the `0..100` percentage as
+           string parameter in the `value` field.
         - `IDENTIFY`: identify the dock with blinking the indicator LED.
         - `REMOTE_LOW_BATTERY`: trigger the low battery status indicator on the dock.
         - `REMOTE_CHARGED`: trigger the remote charged indicator on the dock.
@@ -8299,6 +8301,7 @@ paths:
                   type: string
                   enum:
                     - SET_LED_BRIGHTNESS
+                    - SET_VOLUME
                     - IDENTIFY
                     - REMOTE_LOW_BATTERY
                     - REMOTE_CHARGED
@@ -12028,6 +12031,11 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ExternalPortConfiguration'
+        volume:
+          description: 3️⃣ Speaker volume.
+          type: integer
+          minimum: 0
+          maximum: 100
         description:
           $ref: '#/components/schemas/Description'
       required:

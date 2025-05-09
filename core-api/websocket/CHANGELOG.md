@@ -10,6 +10,7 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ### Added
 - New `dock_port_mode` event message for Dock 3 port mode configuration changes.
+- New `SET_VOLUME` dock command for supported docks.
 
 ---
 
