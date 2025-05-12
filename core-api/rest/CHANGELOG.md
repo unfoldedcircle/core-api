@@ -11,6 +11,7 @@ This section contains unreleased changes which will be part of an upcoming relea
 ### Added
 - External dock port management endpoints.
 - New `SET_VOLUME` dock command for supported docks.
+- Enhance IrEmitterPort with `mode` and `state` fields to show port configuration in user interface.
 
 ---
 

@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.39.1
+  version: 0.39.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -13744,21 +13744,11 @@ components:
               $ref: '#/components/schemas/IrEmitterLearningCapability'
         ports:
           description: |
-            Available output ports of the emitter. A simple emitter might only have one IR output, whereas the Remote Two dock
-            has 4 individual outputs.
+            Available output ports of the emitter.
+            A simple emitter might only have one IR output, whereas the Remote Two dock has 4 individual outputs.
           type: array
           items:
-            type: object
-            properties:
-              port_id:
-                description: IR emitter output port identifier.
-                type: string
-              name:
-                description: Friendly name of the output port.
-                type: string
-            required:
-              - port_id
-              - name
+            $ref: '#/components/schemas/IrEmitterPort'
       required:
         - device_id
         - type
@@ -13817,6 +13807,56 @@ components:
         - DOCK
         - INTERNAL
         - IR_BLASTER
+        - OTHER
+    IrEmitterPort:
+      description: |
+        IR emitter output port definition. The optional `mode` and `state` fields can be used for dynamic output ports,
+        if the port can be become unavailable, or re-configured to a non-infrared mode. This allows the UI to show more
+        information in the port selection.
+      type: object
+      properties:
+        port_id:
+          description: IR emitter output port identifier.
+          type: string
+        name:
+          description: Friendly name of the output port.
+          type: string
+        mode:
+          $ref: '#/components/schemas/IrEmitterPortMode'
+        state:
+          $ref: '#/components/schemas/IrEmitterPortState'
+      required:
+        - port_id
+        - name
+    IrEmitterPortMode:
+      type: string
+      description: |
+        Optional IR-emitter output port mode, default is `INFRARED`. Specifies what kind of output it is.
+        - `NONE`: port is not active or disabled
+        - `UNKNOWN`: output is not known, for example if auto-detection is active
+        - `INFRARED`: generic infrared output
+        - `IR_BLASTER`: IR-blaster output
+        - `IR_EMITTER`: IR-emitter output
+        - `OTHER`: port is not configured for infrared output 
+      enum:
+        - NONE
+        - UNKNOWN
+        - INFRARED
+        - IR_BLASTER
+        - IR_EMITTER
+        - OTHER
+    IrEmitterPortState:
+      type: string
+      description: |
+        Optional IR-emitter output port state, default is `ACTIVE`.
+        - `ACTIVE`: IR output is enabled
+        - `ERROR`: output is in error state
+        - `DISABLED`: output is disabled
+        - `OTHER`: output port is not configured for infrared 
+      enum:
+        - ACTIVE
+        - ERROR
+        - DISABLED
         - OTHER
     IrStatus:
       type: object
