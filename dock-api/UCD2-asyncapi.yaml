@@ -1,8 +1,8 @@
 asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:dock'
 info:
-  title: Remote Two WebSocket Dock-API
-  version: '0.6.0-beta'
+  title: Remote Two/3 WebSocket Dock-API
+  version: '0.7.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -10,7 +10,7 @@ info:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: https://creativecommons.org/licenses/by-sa/4.0/
   description: |
-    **Work in progress** API definition of the Remote Two Dock WebSocket API.
+    **Work in progress** API definition of the Remote Two/3 Dock WebSocket API.
     
     API message status legend:
     
@@ -22,10 +22,12 @@ info:
     | 🔍   | API definition review & implementation.                                         |
     | 🧪   | API has been implemented in the Dock and is currently being tested.             |
     | 🚀   | Ready to use - feedback welcomed.                                               |
+    | 2️⃣️   | Only supported on Dock Two.                                                     |
+    | 3️⃣️   | Only supported on Dock 3.                                                       |
     
     ## Overview
 
-    The Remote Two WebSocket Dock-API allows you to interact with the Unfolded Circle smart charging dock and take
+    The Remote Two/3 WebSocket Dock-API allows you to interact with the Unfolded Circle smart charging dock and take
     full control of its features.  
 
     ## 🚧 Missing Features
@@ -34,6 +36,7 @@ info:
     
     Planned features:
     
+    - 3️⃣ RS232 communication.
     - Static network settings for WiFi and ethernet.
     - Additional event messages for a multi-remote setup, e.g. IR learning started.
     
@@ -79,6 +82,12 @@ servers:
     description: |
       Test docking station.
 
+tags:
+  - name: ucd2
+    description: Dock Two only
+  - name: ucd3
+    description: Dock Three only
+
 channels:
   /:
     publish:
@@ -98,7 +107,13 @@ channels:
           - $ref: '#/components/messages/ir_stop'
           - $ref: '#/components/messages/set_config'
           - $ref: '#/components/messages/set_brightness'
+          - $ref: '#/components/messages/set_volume'
           - $ref: '#/components/messages/set_logging'
+          - $ref: '#/components/messages/get_port_mode'
+          - $ref: '#/components/messages/set_port_mode'
+          - $ref: '#/components/messages/get_port_modes'
+          - $ref: '#/components/messages/set_port_trigger'
+          - $ref: '#/components/messages/get_port_trigger'
 
     subscribe:
       description: Dock-API for clients to receive messages from the docking station.
@@ -111,10 +126,15 @@ channels:
           - $ref: '#/components/messages/authentication'
           - $ref: '#/components/messages/result'
           - $ref: '#/components/messages/sysinfo'
+          - $ref: '#/components/messages/port_mode'
+          - $ref: '#/components/messages/port_modes'
+          - $ref: '#/components/messages/port_trigger'
           # --- events
           - $ref: '#/components/messages/auth_required'
           - $ref: '#/components/messages/ir_receive'
-
+          - $ref: '#/components/messages/ir_receive_on_event'
+          - $ref: '#/components/messages/ir_receive_off_event'
+          - $ref: '#/components/messages/port_mode_event'
 
 components:
 
@@ -129,7 +149,7 @@ components:
       payload:
         $ref: '#/components/schemas/commonResp'
     event:
-      summary: 🧪 Generic event message.
+      summary: 🚀 Generic event message.
       payload:
         $ref: '#/components/schemas/commonEvent'
     auth_required:
@@ -162,7 +182,7 @@ components:
         Client can ping the server to determine whether connection is alive. Server responds with pong.
         
         This is an application level ping as opposed to the standard WebSocket ping frames. This is only required if a
-        client framework doesn't support WebSocket ping frames!  
+        client framework doesn't support WebSocket ping frames!
       payload:
         $ref: '#/components/schemas/ping'
       x-response:
@@ -181,7 +201,7 @@ components:
     # =========================================================================
 
     command:
-      summary: 🧪 Perform a system command.
+      summary: 🚀 Perform a system command.
       description: |
         The following system commands can be executed:
         
@@ -218,11 +238,11 @@ components:
       x-response:
         $ref: '#/components/messages/sysinfo'
     sysinfo:
-      summary: 🧪 System information response.
+      summary: 🚀 System information response.
       payload:
         $ref: '#/components/schemas/systemInfoMsg'
     ir_send:
-      summary: 🧪 Send an IR code or continue repeating a previous code.
+      summary: 🚀 Send an IR code or continue repeating a previous code.
       description: |
         Send an IR code on the given output(s), either in Unfolded Circle or PRONTO HEX format.
 
@@ -230,6 +250,8 @@ components:
         - Only one IR code can be transmitted at the same time.  
           It is not possible to send different codes on individual outputs at the same time.
         - IR transmission is blocked while the device is in learning mode.
+        - If no output is specified: `int_side` is used as default output.
+        - 3️⃣ Outputs not configured for IR sending are silently ignored.  
 
         The IR transmission begins after the full message has been received, parsed and validated.
         Depending on the state of the IR device, different actions are taken:
@@ -309,14 +331,43 @@ components:
       x-response:
         $ref: '#/components/messages/result'
     ir_receive:
-      summary: 🧪 IR learning event.
+      summary: 🚀 IR learning event.
       description: |
         Sent whenever an IR code was learned in IR learning mode.
       payload:
         $ref: '#/components/schemas/irReceiveEvent'
+    ir_receive_on_event:
+      summary: 3️⃣️ 🧪 IR-learning active event.
+      description: |
+        Sent when IR-learning has been activated.
+
+        ⚠ currently only available on Dock 3.
+      payload:
+        $ref: '#/components/schemas/irReceiveOnEvent'
+      tags:
+        - name: ucd3
+    ir_receive_off_event:
+      summary: 3️⃣️ 🧪 IR-learning stopped event.
+      description: |
+        Sent when IR-learning has been stopped.
+
+        ⚠ currently only available on Dock 3.
+      payload:
+        $ref: '#/components/schemas/irReceiveOffEvent'
+      tags:
+        - name: ucd3
+
+    port_mode_event:
+      summary: 3️⃣️ 🧪 External port mode change event.
+      description: |
+        Sent when an external port mode was detected.
+      payload:
+        $ref: '#/components/schemas/portModeEvent'
+      tags:
+        - name: ucd3
 
     set_config:
-      summary: 🧪 Configure the dock.
+      summary: 🚀 Configure the dock.
       description: |
         Configure the dock with a custom friendly name, change the API access token and set the WiFi connection.  
         
@@ -338,8 +389,14 @@ components:
         $ref: '#/components/schemas/setBrightnessMsg'
       x-response:
         $ref: '#/components/messages/result'
+    set_volume:
+      summary: 3️⃣️ 🔍 Set speaker volume.
+      payload:
+        $ref: '#/components/schemas/setVolumeMsg'
+      x-response:
+        $ref: '#/components/messages/result'
     set_logging:
-      summary: 🧪 Configure logging parameters.
+      summary: 2️⃣ 🧪 Configure logging parameters.
       description: |
         Set log level and an optional syslog server. Levels:
         - `0`: EMERGENCY, system is unusable
@@ -350,10 +407,101 @@ components:
         - `5`: NOTICE, normal but significant condition
         - `6`: INFO, informational
         - `7`: DEBUG, debug-level messages
+        
+        ⚠️ This feature is currently only available on Dock Two.
       payload:
         $ref: '#/components/schemas/setLogging'
       x-response:
         $ref: '#/components/messages/result'
+      tags:
+        - name: ucd2
+
+    get_port_mode:
+      summary: 3️⃣️ 🧪 Get external port configuration.
+      description: |
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/getPortMode'
+      x-response:
+        $ref: '#/components/messages/port_mode'
+      tags:
+        - name: ucd3
+    port_mode:
+      summary: 3️⃣️ 🧪 External port configuration.
+      description: |
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/portMode'
+      tags:
+        - name: ucd3
+    get_port_modes:
+      summary: 3️⃣️ 🧪 Get all external port configurations.
+      description: |
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/getPortModes'
+      x-response:
+        $ref: '#/components/messages/port_modes'
+      tags:
+        - name: ucd3
+    port_modes:
+      summary: 3️⃣️ 🧪 External port configurations.
+      description: |
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/portModes'
+      tags:
+        - name: ucd3
+    set_port_mode:
+      summary: 3️⃣️ 🧪 Configure an external port.
+      description: |
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/setPortMode'
+      x-response:
+        $ref: '#/components/messages/result'
+      tags:
+        - name: ucd3
+    set_port_trigger:
+      summary: 3️⃣️ 🧪 Set trigger state of an external port.
+      description: |
+        ### Result codes
+        - `200`: trigger has been set.
+        - `400`: invalid port number or unsupported command (on Dock Two).
+        - `404`: port is not configured as trigger. 
+        - `409`: conflict: impulse is already active.
+        - `423`: port is temporarily unavailable. It might be reconfigured or is in use.
+        - `500`: internal error.
+        - `503`: port not available.
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/setPortTrigger'
+      x-response:
+        $ref: '#/components/messages/result'
+      tags:
+        - name: ucd3
+    get_port_trigger:
+      summary: 3️⃣️ 🧪 Get trigger state of an external port.
+      description: |
+        ⚠️ This feature is only available on Dock Three.
+      payload:
+        $ref: '#/components/schemas/getPortTrigger'
+      x-response:
+        $ref: '#/components/messages/port_trigger'
+      tags:
+        - name: ucd3
+    port_trigger:
+      summary: 3️⃣️ 🧪 Trigger state of an external port.
+      description: |
+        ### Result codes
+        - `200`: success.
+        - `400`: invalid port number or unsupported command (on Dock Two).
+        - `404`: port is not configured as trigger. 
+        - `503`: port not available.
+      payload:
+        $ref: '#/components/schemas/portTrigger'
+      tags:
+        - name: ucd3
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -535,6 +683,10 @@ components:
               type: string
             serial:
               type: string
+            led_brightness:
+              type: integer
+            eth_led_brightness:
+              type: integer
             ir_learning:
               type: boolean
             ethernet:
@@ -543,6 +695,14 @@ components:
               type: boolean
             ssid:
               type: string
+            ports:
+              description: 3️⃣ External port mode configuration.
+              type: array
+              items:
+                $ref: '#/components/schemas/externalPortConfiguration'
+            volume:
+              description: 3️⃣🔍 Speaker volume.
+              type: integer
             uptime:
               type: string
           required:
@@ -596,7 +756,7 @@ components:
               description: Enable internal output at the bottom around the dock.
               type: boolean
             int_top:
-              description: Enable top output. This cannot be enabled together with `int_side`!
+              description: Enable top output.
               type: boolean
               default: false
             ext1:
@@ -668,6 +828,37 @@ components:
       - type: event
         msg: ir_receive
         ir_code: "4;0x10;12;0"
+    irReceiveOnEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: ir_receive_on
+          required:
+            - msg
+    irReceiveOffEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: ir_receive_off
+          required:
+            - msg
+    portModeEvent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: port_mode
+          required:
+            - msg
+        - $ref: '#/components/schemas/externalPortConfiguration'
 
     setConfigMsg:
       type: object
@@ -731,6 +922,21 @@ components:
           required:
             - type
             - command
+    setVolumeMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_volume
+            volume:
+              type: integer
+              minimum: 0
+              maximum: 100
     setLogging:
       type: object
       allOf:
@@ -783,6 +989,136 @@ components:
       required:
         - type
         - msg
+    getPortMode:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: get_port_mode
+            port:
+              $ref: '#/components/schemas/externalPortNumber'
+          required:
+            - type
+            - command
+            - port
+    portMode:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            type:
+              type: string
+              const: dock
+            msg:
+              type: string
+              const: get_port_mode
+          required:
+            - type
+            - msg
+        - $ref: '#/components/schemas/externalPortConfiguration'
+    getPortModes:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: get_port_modes
+    portModes:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            type:
+              type: string
+              const: dock
+            msg:
+              type: string
+              const: get_port_modes
+            ports:
+              type: array
+              items:
+                $ref: '#/components/schemas/externalPortConfiguration'
+    setPortMode:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_port_mode
+            port:
+              $ref: '#/components/schemas/externalPortNumber'
+            mode:
+              $ref: '#/components/schemas/externalPortMode'
+            uart:
+              $ref: '#/components/schemas/uartConfiguration'
+          required:
+            - type
+            - command
+            - port
+            - mode
+    setPortTrigger:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: set_port_trigger
+            port:
+              $ref: '#/components/schemas/externalPortNumber'
+            trigger:
+              type: boolean
+            duration:
+              description: Optional trigger time in milliseconds.
+              type: integer
+              minimum: 1
+          required:
+            - type
+            - command
+            - port
+            - trigger
+    getPortTrigger:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            type:
+              type: string
+              const: dock
+            command:
+              type: string
+              const: get_port_trigger
+            port:
+              $ref: '#/components/schemas/externalPortNumber'
+    portTrigger:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            type:
+              type: string
+              const: dock
+            msg:
+              type: string
+              const: get_port_trigger
+            trigger:
+              type: boolean
 
     # =========================================================================
     # Common schemas
@@ -818,3 +1154,85 @@ components:
       type: string
       minLength: 4
       maxLength: 40
+
+    externalPortNumber:
+      description: 1-based port index number.
+      type: integer
+      minimum: 1
+      maximum: 2
+
+    externalPortMode:
+      type: string
+      enum:
+        - AUTO
+        - NONE
+        - IR_BLASTER
+        - IR_EMITTER_MONO_PLUG
+        - IR_EMITTER_STEREO_PLUG
+        - TRIGGER_5V
+        - RS232
+    externalPortConfiguration:
+      description: |
+        External port configuration.
+        - `mode`: configured operation mode.
+        - `active_mode`: active operation mode, usually only set with the detected peripheral for `mode: AUTO`.
+      type: object
+      allOf:
+        - properties:
+            port:
+              $ref: '#/components/schemas/externalPortNumber'
+            mode:
+              $ref: '#/components/schemas/externalPortMode'
+            active_mode:
+              $ref: '#/components/schemas/externalPortMode'
+            supported_modes:
+              $ref: '#/components/schemas/externalPortMode'
+            uart:
+              $ref: '#/components/schemas/uartConfiguration'
+          required:
+            - port
+            - mode
+    uartConfiguration:
+      type: object
+      properties:
+        baud_rate:
+          $ref: '#/components/schemas/baudRate'
+        data_bits:
+          $ref: '#/components/schemas/dataBits'
+        stop_bits:
+          $ref: '#/components/schemas/stopBits'
+        parity:
+          $ref: '#/components/schemas/parity'
+      required:
+        - baud_rate
+        - data_bits
+        - stop_bits
+        - parity
+
+    baudRate:
+      description: |
+        Common baud rate values: 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200
+      type: integer
+      minimum: 300
+      maximum: 115200
+      default: 9600
+    dataBits:
+      type: integer
+      minimum: 5
+      maximum: 8
+      default: 8
+    stopBits:
+      description: Stop bits must be set as string, number format is not supported!
+      type: string
+      enum:
+        - "1"
+        - "1.5"
+        - "2"
+      default: "1"
+    parity:
+      type: string
+      enum:
+        - none
+        - even
+        - odd
+      default: none

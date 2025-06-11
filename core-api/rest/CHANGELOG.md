@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+### Added
+- External dock port management endpoints.
+- New `SET_VOLUME` dock command for supported docks.
+- Enhance IrEmitterPort with `mode` and `state` fields to show port configuration in user interface.
+
 ---
 
 ## 0.38.4
