@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.39.2
+  version: 0.39.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -3436,10 +3436,13 @@ paths:
 
         The overview information doesn't include all details of a macro. The full macro information is retrievable
         with `/macros/{entityId}`.
+
+        The optional text search query searches in the macro name and macro identifier.
       operationId: getMacros
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation

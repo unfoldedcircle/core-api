@@ -9,11 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This section contains unreleased changes which will be part of an upcoming release.
 
 ### Added
+- Query parameter for macro-entity search ([feature-and-bug-tracker#463](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/463)).
+
+---
+
+## 0.39.2
 - External dock port management endpoints.
 - New `SET_VOLUME` dock command for supported docks.
 - Enhance IrEmitterPort with `mode` and `state` fields to show port configuration in user interface.
-
----
 
 ## 0.38.4
 ### Added
