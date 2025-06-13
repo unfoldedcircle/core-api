@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.30.1-beta'
+  version: '0.30.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1299,6 +1299,16 @@ components:
         Returns all configured entities, optionally filtered by one or multiple entity types or integrations.
         
         The text search searches in the entity name, entity identifier and integration name.
+
+        The `exclude` query parameter allows to exclude entities defined in an activity, macro, profile page or group.
+        Supported exclusions:
+          - activity- or macro-entity ID: all included entities
+          - profile page_id: defined entities in the page
+          - profile group_id: defined entities in the group
+        
+        Notes:
+          - Mixing activity/macro and page/group identifiers is not supported!
+          - All non-command entities are also filtered out if an activity or macro identifier is specified.
         
         Attention: pagination is active and can be parameterized to return more items per page if required.
       tags:
@@ -7215,6 +7225,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/entityType'
+        exclude:
+          description: Filter out included entities from an activity, macro, profile page or a group.
+          type: array
+          items:
+            description: Activity-, macro-entity identifier, or a profile page, group identifier.
+            type: string
         text_search:
           type: string
           minLength: 1
