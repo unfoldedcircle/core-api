@@ -8,11 +8,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release. 
 
+---
+
+## 0.30.2-beta
+### Added
+- Enhanced filter option in entity retrieval to prepare for proper paging in web-configurator.
+
+## 0.30.1-beta
 ### Added
 - New `dock_port_mode` event message for Dock 3 port mode configuration changes.
 - New `SET_VOLUME` dock command for supported docks.
-
----
 
 ## 0.29.2-beta
 ### Changed
