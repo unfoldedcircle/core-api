@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.39.4
+  version: 0.40.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7189,6 +7189,8 @@ paths:
       summary: Get network settings.
       description: |
         Retrieve network settings, as WiFi or Bluetooth status.
+
+        ⚠️ The `wake_on_wlan` field is deprecated, please use `wifi.wake_on_wlan` instead.
       operationId: getNetworkSettings
       parameters:
         - name: default
@@ -7203,6 +7205,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CfgNetwork'
+              examples:
+                Normal configuration:
+                  value:
+                    bt_enabled: true
+                    wifi_enabled: true
+                    wifi:
+                      wake_on_wlan:
+                        enabled: false
+                      bands:
+                        - a
+                        - b
+                      band: auto
+                      ipv4_type: DHCP
+                    bt:
+                      address: 'AA:BB:CC:DD:EE:FF'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -7214,12 +7231,15 @@ paths:
       description: |
         Change one or multiple network settings.
 
+        ⚠️ The `wake_on_wlan` field is deprecated, please use `wifi.wake_on_wlan` instead.
+        - If `wake_on_wlan` is specified, it will also be stored in `wifi.wake_on_wlan`! 
+
         ⚠️ The `ws` configuration object is an expert setting intended for support issues. Those settings may not be
         exposed in a user frontend.
         - The `ws` object is only returned, after it has been set manually.
         - Settings stay persisted for PATCH requests not containing the `ws` key.
         - Return and apply current system settings: send a PATCH request with an empty object: `"ws": {}".
-        - The `ws` settings can only be removed with a configuration reset: `DELETE /cfg`
+        - The `ws` settings can be removed with a network configuration reset `DELETE /cfg/network` or through a full configuration reset: `DELETE /cfg`
         - Modifying any `ws` settings requires a system reboot.
       operationId: updateNetworkSettings
       requestBody:
@@ -7227,6 +7247,21 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CfgNetworkUpdate'
+            examples:
+              Enable BT:
+                value:
+                  bt_enabled: true
+              Disable WiFi:
+                value:
+                  wifi_enabled: false
+              Enable WoWLAN:
+                value:
+                  wifi:
+                    wake_on_wlan:
+                      enabled: true
+              Enable expert settings:
+                value:
+                  ws: {}
         required: true
       responses:
         '200':
@@ -7237,6 +7272,125 @@ paths:
                 $ref: '#/components/schemas/CfgNetwork'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    delete:
+      tags:
+        - cfg
+      summary: Reset network settings.
+      description: |
+        Reset all network settings to their defaults.
+
+        The expert settings in the `ws` configuration object will be removed.
+      operationId: resetNetworkSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgNetwork'
+              examples:
+                Default configuration:
+                  value:
+                    bt_enabled: false
+                    wifi_enabled: true
+                    wifi:
+                      bands:
+                        - b
+                      band: auto
+                      ipv4_type: DHCP
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/network/wifi:
+    get:
+      tags:
+        - cfg
+      summary: Get advanced wifi network settings.
+      description: |
+        Retrieve advanced wifi specific settings like which frequency band (2.4 GHz or 5 GHz) to use.
+      operationId: getWifiNetworkSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgNetworkWifi'
+              examples:
+                Auto configuration:
+                  value:
+                    bands:
+                      - a
+                      - b
+                    band: auto
+                    ipv4_type: DHCP
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: Modify advanced wifi network settings.
+      description: |
+        Change one or multiple advanced wifi network settings.
+      operationId: updateWifiNetworkSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgNetworkWifiUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgNetworkWifi'
+              examples:
+                Auto configuration:
+                  value:
+                    bands:
+                      - a
+                      - b
+                    band: auto
+                    ipv4_type: DHCP
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    delete:
+      tags:
+        - cfg
+      summary: Reset advanced wifi network settings.
+      description: |
+        Reset all advanced network settings to their defaults.
+      operationId: resetWifiNetworkSettings
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgNetworkWifi'
+              examples:
+                Default configuration:
+                  value:
+                    band: auto
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -9684,7 +9838,16 @@ paths:
     get:
       tags:
         - system
-      summary: Get current system power mode.
+      summary: Get current system power mode and duration to enter standby.
+      description: |
+        Returns the current power mode of the device, if a power-supply is connected and the duration in seconds until the
+        the device will enter standby.
+
+        - `standby_timeout_sec` is not returned if standby is disabled or the device is currently in the process of entering
+          or exiting standby.
+        - `standby_timeout_sec` can return `0` without the device going into standby.  
+          This is the case if `power_supply: true` is set. As soon as the power supply is offline, the device will enter
+          standby after a few seconds if no input activity is registered.
       operationId: getPowerMode
       responses:
         '200':
@@ -9803,9 +9966,6 @@ paths:
         - Temporary inhibitors set a delay value for which the device doesn't go into standby. After the delay and
           the idle timeouts have expired, the remote goes into standby and the temporary inhibitor will be removed.
         - Blocking inhibitors will prevent the device to go into standby until the inhibitor is removed by the client.
-
-        Note: temporary inhibitors will only be checked and removed during standby events. As long as the device is active,
-        they may still appear in the result.
       responses:
         '200':
           description: List of inhibitors.
@@ -10162,6 +10322,10 @@ paths:
       description: |
         Request a new BSS scan. A scan usually takes a few seconds and the current state is returned with the GET
         operation, together with the already found access points.
+
+        Error responses:
+        - `409` conflict: a scan is already active, please try again later.
+        - `503` service unavailable: wifi is not available.
       operationId: startWifiScan
       responses:
         '200':
@@ -10172,6 +10336,8 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
     delete:
@@ -11558,6 +11724,8 @@ components:
         - time_format_24h
         - measurement_unit
     CfgNetwork:
+      description: |
+        `wake_on_wlan` is deprecated, please use `wifi.wake_on_wlan`
       type: object
       properties:
         bt_enabled:
@@ -11568,6 +11736,8 @@ components:
           type: boolean
         wake_on_wlan:
           $ref: '#/components/schemas/CfgNetworkWoWlan'
+        wifi:
+          $ref: '#/components/schemas/CfgNetworkWifi'
         bt:
           description: Temporary read-only Bluetooth information until dedicated BT management endpoint is provided.
           type: object
@@ -11581,6 +11751,8 @@ components:
         - bt_enabled
         - wifi_enabled
     CfgNetworkUpdate:
+      description: |
+        `wake_on_wlan` is deprecated, please use `wifi.wake_on_wlan`
       type: object
       properties:
         bt_enabled:
@@ -11591,6 +11763,8 @@ components:
           type: boolean
         wake_on_wlan:
           $ref: '#/components/schemas/CfgNetworkWoWlan'
+        wifi:
+          $ref: '#/components/schemas/CfgNetworkWifiUpdate'
         ws:
           $ref: '#/components/schemas/CfgNetworkWs'
     CfgNetworkWs:
@@ -11613,6 +11787,45 @@ components:
           type: boolean
       required:
         - enabled
+    CfgNetworkWifi:
+      type: object
+      properties:
+        wake_on_wlan:
+          $ref: '#/components/schemas/CfgNetworkWoWlan'
+        bands:
+          description: Available WiFi bands
+          type: array
+          items:
+            $ref: '#/components/schemas/WifiBand'
+        band:
+          $ref: '#/components/schemas/WifiBand'
+        scan_interval_sec:
+          description: |
+            Active WiFi scan interval in seconds. A value of 0 disables active scanning. Minimal interval is 10 seconds.
+          minimum: 0
+          type: integer
+        ipv4_type:
+          $ref: '#/components/schemas/CfgIpv4Type'
+        ipv4:
+          $ref: '#/components/schemas/CfgIpv4'
+      required:
+        - bands
+        - band
+    CfgNetworkWifiUpdate:
+      type: object
+      properties:
+        wake_on_wlan:
+          $ref: '#/components/schemas/CfgNetworkWoWlan'
+        band:
+          $ref: '#/components/schemas/WifiBand'
+        scan_interval_sec:
+          $ref: '#/components/schemas/CfgNetworkWifi/properties/scan_interval_sec'
+    CfgIpv4Type:
+      type: string
+      enum:
+        - DHCP
+    CfgIpv4:
+      type: object
     CfgPowerSaving:
       type: object
       properties:
@@ -14176,8 +14389,24 @@ components:
       properties:
         mode:
           $ref: '#/components/schemas/PowerMode'
+        power_supply:
+          description: 'A power supply is online, device doesn''t enter standby while connected.'
+          type: boolean
+        standby_timeout_sec:
+          description: |
+            Time in seconds until the system goes into standby.
+            This is the max value of the regular standby and the longest active standby inhibitor.
+          type: integer
+          minimum: 0
+        standby_inhibitors:
+          description: |
+            There are active standby inhibitors preventing system standby.
+            - A blocking inhibitor will return a constant `standby_timeout_sec` value of `86400` (1 day).
+          type: boolean
       required:
         - mode
+        - power_supply
+        - standby_inhibitors
     Profile:
       type: object
       properties:
@@ -15456,6 +15685,11 @@ components:
     WifiStatus:
       type: object
       properties:
+        bands:
+          description: Available WiFi bands
+          type: array
+          items:
+            $ref: '#/components/schemas/WifiBand'
         wpa_state:
           $ref: '#/components/schemas/WpaState'
         id:
@@ -15505,6 +15739,17 @@ components:
           type: integer
       required:
         - wpa_state
+    WifiBand:
+      description: |
+        WiFi band:
+        - `auto`: auto-configuration
+        - `a`: 5 GHz
+        - `b`: 2.4 GHz
+      type: string
+      enum:
+        - auto
+        - a
+        - b
     CreateWifiNetwork:
       type: object
       properties:

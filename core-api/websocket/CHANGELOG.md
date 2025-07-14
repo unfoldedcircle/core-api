@@ -10,6 +10,17 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.31.0-beta
+### Added
+- New `reset_network_cfg` message.
+- Enhanced `get_power_mode` response with standby counter and power supply flag.
+- WiFi band configuration for Remote 3.
+- Periodic WiFi scan interval option.
+
+### Changed
+- `get_standby_inhibitors` no longer returns expired inhibitors.
+- Refactored advanced WiFi network settings into dedicated `wifi` object in `network_cfg` response.
+
 ## 0.30.2-beta
 ### Added
 - Enhanced filter option in entity retrieval to prepare for proper paging in web-configurator.
