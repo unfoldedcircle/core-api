@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.39.2
+  version: 0.39.4
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2327,6 +2327,7 @@ paths:
       parameters:
         - $ref: '#/components/parameters/entity_types'
         - $ref: '#/components/parameters/intg_ids'
+        - $ref: '#/components/parameters/exclude'
         - $ref: '#/components/parameters/query'
       responses:
         '200':
@@ -2351,10 +2352,21 @@ paths:
 
         Entities can be searched and filtered by one or multiple types and integrations. The text search searches in the
         entity name, entity identifier and integration name.
+
+        The `exclude` query parameter allows to exclude entities defined in an activity, macro, profile page or group.
+        Supported exclusions:
+        - activity- or macro-entity ID: all included entities
+        - profile page_id: defined entities in the page
+        - profile group_id: defined entities in the group
+
+        Notes:
+        - Mixing activity/macro and page/group identifiers is not supported!
+        - All non-command entities are also filtered out if an activity or macro identifier is specified.
       operationId: getEntities
       parameters:
         - $ref: '#/components/parameters/entity_types'
         - $ref: '#/components/parameters/intg_ids'
+        - $ref: '#/components/parameters/exclude'
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
@@ -3414,6 +3426,8 @@ paths:
         The total number of available macros are returned in the `Pagination-Count` header. This allows to prepare the
         retrieval of the macros with the `GET` operation and paging parameters.
       operationId: getMacroCount
+      parameters:
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
@@ -3436,10 +3450,13 @@ paths:
 
         The overview information doesn't include all details of a macro. The full macro information is retrievable
         with `/macros/{entityId}`.
+
+        The optional text search query searches in the macro name and macro identifier.
       operationId: getMacros
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
@@ -6239,7 +6256,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Group'
+              $ref: '#/components/schemas/GroupUpdate'
         required: true
       responses:
         '201':
@@ -10533,6 +10550,13 @@ components:
       name: entity_types
       in: query
       description: 'Filter by multiple entity types, separated by comma.'
+      required: false
+      schema:
+        type: string
+    exclude:
+      name: exclude
+      in: query
+      description: 'Exclude entities from activity, macro, profile page and group identifiers, separated by comma.'
       required: false
       schema:
         type: string
