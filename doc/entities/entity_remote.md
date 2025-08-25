@@ -34,10 +34,11 @@ their current value.
 
 The remote entity provides the following entity `state` values:
 
-| Value | Description                   |
-|-------|-------------------------------|
-| ON    | The controlled device is on.  |
-| OFF   | The controlled device is off. |
+| Value       | Description                                              |
+|-------------|----------------------------------------------------------|
+| ON          | The controlled device is on.                             |
+| OFF         | The controlled device is off.                            |
+| UNAVAILABLE | The controlled device is unavailable / can't be reached. |
 
 See [common entity states](README.md#states).
 

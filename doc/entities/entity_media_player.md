@@ -140,14 +140,15 @@ Multiple features can act on the same attribute.
 
 The entity `state` attribute holds the following values:
 
-| Value     | Description                                             |
-|-----------|---------------------------------------------------------|
-| ON        | The media player is switched on                         |
-| OFF       | The media player is switched off                        |
-| PLAYING   | The media player is playing something                   |
-| PAUSED    | The media player is paused                              |
-| STANDBY   | The device is in low power state and accepting commands |
-| BUFFERING | The media player is buffering to start playback         |
+| Value       | Description                                             |
+|-------------|---------------------------------------------------------|
+| ON          | The media player is switched on                         |
+| OFF         | The media player is switched off                        |
+| PLAYING     | The media player is playing something                   |
+| PAUSED      | The media player is paused                              |
+| STANDBY     | The device is in low power state and accepting commands |
+| BUFFERING   | The media player is buffering to start playback         |
+| UNAVAILABLE | The media player is unavailable / can't be reached      |
 
 See also [common entity states](README.md#states).
 
