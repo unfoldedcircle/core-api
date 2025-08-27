@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.30.2-beta'
+  version: '0.31.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -206,6 +206,7 @@ channels:
           - $ref: '#/components/messages/localization_languages'
           - $ref: '#/components/messages/get_network_cfg'
           - $ref: '#/components/messages/set_network_cfg'
+          - $ref: '#/components/messages/reset_network_cfg'
           - $ref: '#/components/messages/get_software_update_cfg'
           - $ref: '#/components/messages/set_software_update_cfg'
           - $ref: '#/components/messages/reset_software_update_cfg'
@@ -847,7 +848,16 @@ components:
         $ref: '#/components/schemas/systemUpdateProgressMsg'
 
     get_power_mode:
-      summary: 🧪 Get current power mode and battery information.
+      summary: 🧪 Get current power mode, battery information and duration to enter standby.
+      description: |
+        Returns the current power mode of the device, if a power-supply is connected and the duration in seconds until the
+        the device will enter standby.
+
+        - `standby_timeout_sec` is not returned if standby is disabled or the device is currently in the process of entering
+          or exiting standby.
+        - `standby_timeout_sec` can return `0` without the device going into standby.  
+          This is the case if `power_supply: true` is set. As soon as the power supply is offline, the device will enter
+          standby after a few seconds if no input activity is registered.
       payload:
         $ref: '#/components/schemas/getPowerModeMsg'
       x-response:
@@ -895,9 +905,6 @@ components:
         - Temporary inhibitors set a delay value for which the device doesn't go into standby. After the delay and the
           idle timeouts have expired, the remote goes into standby and the temporary inhibitor will be removed.
         - Blocking inhibitors will prevent the device to go into standby until the inhibitor is removed by the client.
-        
-        Note: temporary inhibitors will only be checked and removed during standby events. As long as the device is
-        active, they may still appear in the result.
       payload:
         $ref: '#/components/schemas/getStandbyInhibitorsMsg'
       x-response:
@@ -1115,7 +1122,7 @@ components:
       x-response:
         $ref: '#/components/messages/network_cfg'
     set_network_cfg:
-      summary: 🔍 Modify network settings.
+      summary: 🧪 Modify network settings.
       description: |
         Change one or multiple network settings.
 
@@ -1124,10 +1131,20 @@ components:
         - The `ws` object is only returned, after it has been set manually.
         - Settings stay persisted for PATCH requests not containing the `ws` key.
         - Return and apply current system settings: send a PATCH request with an empty object: `"ws": {}".
-        - The `ws` settings can only be removed with a configuration reset: `DELETE /cfg`
+        - The `ws` settings can be removed with a network configuration reset `reset_network_cfg` or through a full configuration reset: `reset_configuration`
         - Modifying any `ws` settings requires a system reboot.
       payload:
         $ref: '#/components/schemas/setNetworkCfgMsg'
+      x-response:
+        $ref: '#/components/messages/network_cfg'
+    reset_network_cfg:
+      summary: 🧪 Reset network settings.
+      description: |
+        Reset all network settings to their defaults.
+        
+        The expert settings in the `ws` configuration object will be removed.
+      payload:
+        $ref: '#/components/schemas/resetNetworkCfgMsg'
       x-response:
         $ref: '#/components/messages/network_cfg'
     network_cfg:
@@ -3503,8 +3520,24 @@ components:
                   $ref: '#/components/schemas/PowerMode'
                 battery:
                   $ref: '#/components/schemas/batteryStatus'
+                power_supply:
+                  description: A power supply is online, device doesn't enter standby while connected.
+                  type: boolean
+                standby_timeout_sec:
+                  description: |
+                    Time in seconds until the system goes into standby.
+                    This is the max value of the regular standby and the longest active standby inhibitor.
+                  type: integer
+                  minimum: 0
+                standby_inhibitors:
+                  description: |
+                    There are active standby inhibitors preventing system standby.
+                    - A blocking inhibitor will return a constant `standby_timeout_sec` value of `86400` (1 day).
+                  type: boolean
               required:
                 - mode
+                - power_supply
+                - standby_inhibitors
           required:
             - msg
             - msg_data
@@ -4051,6 +4084,16 @@ components:
           required:
             - msg
             - msg_data
+    resetNetworkCfgMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: reset_network_cfg
+          required:
+            - msg
     networkCfgMsg:
       type: object
       allOf:
@@ -7682,6 +7725,8 @@ components:
         - UK
 
     cfgNetwork:
+      description: |
+        `wake_on_wlan` is deprecated, please use `wifi.wake_on_wlan`
       type: object
       properties:
         bt_enabled:
@@ -7692,6 +7737,8 @@ components:
           type: boolean
         wake_on_wlan:
           $ref: '#/components/schemas/cfgNetworkWoWlan'
+        wifi:
+          $ref: '#/components/schemas/CfgNetworkWifi'
         bt:
           description: Temporary read-only Bluetooth information until dedicated BT management endpoint is provided.
           type: object
@@ -7706,6 +7753,8 @@ components:
         - wifi_enabled
 
     cfgNetworkUpdate:
+      description: |
+        `wake_on_wlan` is deprecated, please use `wifi.wake_on_wlan`
       type: object
       properties:
         bt_enabled:
@@ -7716,6 +7765,8 @@ components:
           type: boolean
         wake_on_wlan:
           $ref: '#/components/schemas/cfgNetworkWoWlan'
+        wifi:
+          $ref: '#/components/schemas/CfgNetworkWifiUpdate'
         ws:
           $ref: '#/components/schemas/cfgNetworkWs'
 
@@ -7740,6 +7791,56 @@ components:
           type: boolean
       required:
         - enabled
+
+    CfgNetworkWifi:
+      type: object
+      properties:
+        wake_on_wlan:
+          $ref: '#/components/schemas/cfgNetworkWoWlan'
+        bands:
+          description: Available WiFi bands
+          type: array
+          items:
+            $ref: "#/components/schemas/WifiBand"
+        band:
+          $ref: "#/components/schemas/WifiBand"
+        scan_interval_sec:
+          $ref: "#/components/schemas/WifiScanInterval"
+        ipv4_type:
+          $ref: '#/components/schemas/CfgIpv4Type'
+        ipv4:
+          $ref: '#/components/schemas/CfgIpv4'
+      required:
+        - bands
+        - band
+
+    CfgNetworkWifiUpdate:
+      type: object
+      properties:
+        wake_on_wlan:
+          $ref: '#/components/schemas/cfgNetworkWoWlan'
+        band:
+          $ref: "#/components/schemas/WifiBand"
+        scan_interval_sec:
+          $ref: "#/components/schemas/WifiScanInterval"
+    #    ipv4_type: # not yet finalized
+    #      $ref: '#/CfgIpv4Type'
+
+    WifiScanInterval:
+      description: |
+        Active WiFi scan interval in seconds. A value of 0 disables active scanning. Minimal interval is 10 seconds.
+      minimum: 0
+      type: integer
+
+    CfgIpv4Type:
+      type: string
+      enum:
+        - DHCP
+    #    - STATIC # not yet finalized
+
+    # not yet finalized
+    CfgIpv4:
+      type: object
 
     cfgPowerSaving:
       type: object
@@ -9727,6 +9828,11 @@ components:
     WifiStatus:
       type: object
       properties:
+        bands:
+          description: Available WiFi bands
+          type: array
+          items:
+            $ref: '#/components/schemas/WifiBand'
         wpa_state:
           $ref: '#/components/schemas/WpaState'
         id:
@@ -9776,6 +9882,18 @@ components:
           type: integer
       required:
         - wpa_state
+
+    WifiBand:
+      description: |
+        WiFi band:
+        - `auto`: auto-configuration
+        - `a`: 5 GHz
+        - `b`: 2.4 GHz
+      type: string
+      enum:
+        - auto
+        - a
+        - b
 
     CreateWifiNetwork:
       type: object

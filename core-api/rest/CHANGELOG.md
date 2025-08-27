@@ -10,6 +10,19 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.40.0
+### Added
+- New `DELETE /cfg/network` endpoint to reset all network settings.
+- Enhanced `/system/power` response with standby counter and power supply flag.
+- WiFi band configuration for Remote 3.
+- Periodic WiFi scan interval option.
+
+### Changed
+- `/system/power/standby_inhibitors` no longer returns expired inhibitors.
+- `PUT /system/wifi/scan` returns 409 if a scan is already active.
+- Refactored advanced WiFi network settings into dedicated `wifi` object in `CfgNetwork`.
+  - `wake_on_wlan` is deprecated, please use `wifi.wake_on_wlan`. 
+
 ## 0.39.4
 ### Added
 - Query parameter for macro-entity search ([feature-and-bug-tracker#463](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/463)).
