@@ -6,11 +6,12 @@ A remote entity can send commands to a controllable device.
 
 ## Features
 
-| Name     | R | W  | Description                                                                                                                                          |
-|----------|---|----|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| send_cmd | ❌ | ✅  | Default feature of a remote entity. Always present, even if not specified.                                                                           |
-| on_off   | ✅ | ✅  | Remote has on and off commands.                                                                                                                      |
-| toggle   | ❌ | ✅  | Power toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command. |
+| Name          | R | W  | Description                                                                                                                                          |
+|---------------|---|----|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| send_cmd      | ❌ | ✅  | Default feature of a remote entity. Always present, even if not specified.                                                                           |
+| send_cmd_stop | ❌ | ✅  | Support for the _press-and-hold_ mode.                                                                                                               |
+| on_off        | ✅ | ✅  | Remote has on and off commands.                                                                                                                      |
+| toggle        | ❌ | ✅  | Power toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command. |
 
 - R: readable
     - ✅ Feature has a readable attribute to retrieve the current or available values.
@@ -41,7 +42,7 @@ The remote entity provides the following entity `state` values:
 
 See [common entity states](README.md#states).
 
-### Device classes
+### Device Classes
 
 None.
 
@@ -67,7 +68,7 @@ The automatic button and user interface creation is only done once at the initia
 on the user can independently modify the UI and button mapping. Only changes in the `simple_commands` list will be
 applied to the configured entities in Remote Two, if the available entities are reloaded from the integration driver.
 
-#### Simple commands
+#### Simple Commands
 
 A simple command is fully defined by its name and doesn't have any further arguments or related attributes. It's
 comparable to the simple commands in the media-player entity, with fewer naming restrictions.
@@ -108,7 +109,7 @@ Prefixes for other common functions:
 - `DIGIT_`: additional input digits besides the pre-defined numpad digits, e.g. `DIGIT_10`, `DIGIT_10+`
 - `ZONE_`: multi-room functions, e.g. `ZONE_A`, `ZONE_MULTIROOM`
 
-#### Button mapping
+#### Button Mapping
 
 A default button mapping can be provided in `options.button_mapping`.
 
@@ -196,14 +197,14 @@ Button identifiers for Remote Two:
 
 A detailed button mapping can be retrieved with the Core-API: `GET /api/cfg/device/button_layout`.
 
-#### User interface
+#### User Interface
 
 A default user interface can be provided in `options.user_interface`.
 
 The `UserInterface` object is defined in the [Integration-API](../../integration-api) and is based on the Core-API
 `ActivityUserInterface` definition.
 
-##### UI page example
+##### UI Page Example
 
 ![ui-page-media.png](../img/ui-page-media.png)
 
@@ -306,29 +307,80 @@ The integration driver has to implement a handler for the `entity_command` WebSo
 command requests in `msg_data.cmd_id`. See [Command examples](#command-examples) and [Integration-API](../../integration-api)
 for the full message structure.
 
-| cmd_id            | Parameters | Type         | Description                                                                                  |
-|-------------------|------------|--------------|----------------------------------------------------------------------------------------------|
-| on                | -          |              | Send the on-command to the controlled device.                                                |
-| off               | -          |              | Send the off-command.                                                                        |
-| toggle            | -          |              | Toggle the power state of the controlled device, either from on -> off or from off -> on.    |
-| send_cmd          | command    | String(20)   | A single command.                                                                            |
-|                   | repeat     | Number       | Optional: how many times the command shall be repeated. Defaults to 1 if not specified.      |
-|                   | delay      | Number       | Optional: delay in milliseconds between repeated commands.                                   |
-|                   | hold       | Number       | Optional: time in milliseconds before a command is released. Defaults to 0 if not specified. |
-| send_cmd_sequence | sequence   | String array | Command list. Same defaults are used as for the `send_cmd` command.                          |
-|                   | repeat     | Number       | Optional: how many times each command shall be repeated.                                     |
-|                   | delay      | Number       | Optional: delay in milliseconds between commands.                                            |
-|                   | hold       | Number       | Optional: time in milliseconds before each command is released.                              |
+| cmd_id            | Parameters | Type         | Description                                                                                                  |
+|-------------------|------------|--------------|--------------------------------------------------------------------------------------------------------------|
+| on                | -          |              | Send the on-command to the controlled device.                                                                |
+| off               | -          |              | Send the off-command.                                                                                        |
+| toggle            | -          |              | Toggle the power state of the controlled device, either from on -> off or from off -> on.                    |
+| send_cmd          | command    | String(20)   | A single command: command identifier to execute.                                                             |
+|                   | repeat     | Number       | Optional: number of times to execute the command. Defaults to 1 if not specified.                            |
+|                   | delay      | Number       | Optional: delay in milliseconds between command repetitions. Default: driver-specific.                       |
+|                   | hold       | Number       | Optional: duration in milliseconds to hold the command before release. Defaults to 0 if not specified.       |
+|                   | press      | boolean      | Optional: indicates physical button press-and-hold mode (default: false), `delay` and `hold` can be ignored. |
+| send_cmd_stop     | command    | String(20)   | Stop an active `send_cmd` that is using the repeat or press options.                                         |
+| send_cmd_sequence | sequence   | String array | Command list. Same defaults are used as for the `send_cmd` command.                                          |
+|                   | repeat     | Number       | Optional: how many times each command shall be repeated.                                                     |
+|                   | delay      | Number       | Optional: delay in milliseconds between commands.                                                            |
+|                   | hold       | Number       | Optional: time in milliseconds before each command is released.                                              |
 
 - The `command` and `sequence` parameters will either contain a simple command (if specified in entity options) or a
-  freetext command. It is up to the integration driver to verify and validate commands.
+  free-form command. Integration drivers are responsible for verifying and validating commands.
 - A command name may not include whitespace characters.
 - The maximum length of a command name is 20 characters.
 - A command name may not be any of the defined `cmd_id` commands: on, off, toggle, send_cmd, send_cmd_sequence
 - If no `delay` parameter is included, the integration driver has to choose an appropriate delay based on the command
   and controlled device.
 
-#### Using commands for button mappings and UI elements 
+### Continuous Key Repeat
+
+- Integration drivers are responsible for how to handle continuous key repeat or long presses.
+- This mainly depends on what kind of interface or API the integration driver is using to control its devices.
+
+The remote-entity supports continuous key repeat functionality for two distinct use cases: command repeat mode and
+button press mode.
+
+#### Repeat Mode - Multiple Command Execution
+
+Sending a command multiple times is mainly used for macro sequences or activities.
+
+An example could be to increase or decrease the volume multiple steps at once.
+This is the normal command mode which has been part of the remote-entity commands since the beginning.
+
+- The normal repeat mode is specified with the `repeat` parameter, **without the `press: true` parameter being set**.
+- The `delay` and `hold` parameters are optional.
+- **The `send_cmd_stop` request is not sent**.
+
+Implementation notes:
+- An integration driver is free to determine what to do with the repeat parameter! This depends on what is being controlled how.
+    - Usually it is to simply execute the given command multiple times.
+    - An implementation could also translate a repeat count to a  time (and ignoring the other parameters).
+- The integration driver should acknowledge the `send_cmd` request quickly when it contains a `repeat_count > 2`.  
+  Waiting until all commands are processed will lead to timeouts in the user interface.
+- The repeat count should automatically be reset in the integration driver if a new `send_cmd` request for the same `command`
+  is received, while the previous command is not yet finished repeating.
+
+#### Press Mode - Physical Button Press-and-Hold
+
+‼️ New feature in Integration-API 0.##.##
+
+To have better support for long button presses by a user, the `send_cmd` is enhanced with an additional flag, and once
+the button is released the `send_cmd_stop` request is sent to the integration driver.
+
+- Long button presses on the Remote will trigger continuous `send_cmd` requests with the `press: true` parameter set.
+    - The `repeat` parameter is still set to a value of >= 3 to maintain backward compatibility.
+    - The `delay` and `hold` parameters can be ignored.
+- Once the button is released, a `send_cmd_stop` request is sent.
+
+Implementation notes:
+- **MANDATORY stop conditions:** Integration drivers MUST immediately terminate press-and-hold operations when:
+  - WebSocket connection from the remote device is closed or interrupted
+  - Standby event is received from the remote device
+  - No follow-up `send_cmd` requests received within 300ms (configurable timeout)
+  - `send_cmd_stop` command is received
+- This feature is similar to the [IR-emitter](entity_ir_emitter.md) `send_ir` and `stop_ir` commands, but tailored to
+  regular commands.
+
+### Using Commands for Button Mappings and UI Elements
 
 ‼️ Attention: the `cmd_id` for button mapping and UI item commands is slightly different than the remote-entity 
 [Commands](#commands)!
@@ -395,7 +447,7 @@ The following attributes must be included:
 |---------------|-------------------------------|
 | state         | New entity [state](#states).  |
 
-### Command examples
+### Command Examples
 
 Remote-entity examples of received `entity_command` WebSocket messages in an integration driver.
 
@@ -495,6 +547,46 @@ Remote-entity examples of received `entity_command` WebSocket messages in an int
     "params": {
       "command": "VOLUME_DOWN",
       "repeat": 5
+    }
+  }
+}
+```
+
+#### send press-and-hold command
+
+```json
+{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "send_cmd",
+    "params": {
+      "command": "VOLUME_DOWN",
+      "repeat": 3,
+      "press": true
+    }
+  }
+}
+```
+
+The above command will be repeated about every 100-200ms (with an increasing `id`).
+
+Once the button is released, the `send_cmd_stop` request is sent:
+
+```json
+{
+  "kind": "req",
+  "id": 134,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "send_cmd_stop",
+    "params": {
+      "command": "VOLUME_DOWN"
     }
   }
 }
