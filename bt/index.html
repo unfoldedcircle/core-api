@@ -1,0 +1,339 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Bluetooth HID peripheral support - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="bluetooth-hid-peripheral"><a class="header" href="#bluetooth-hid-peripheral">Bluetooth HID peripheral</a></h1>
+<p>‼️ This is currently a beta feature released in the v1.8.0 beta firmware.</p>
+<ul>
+<li><a href="TODO.html">Restrictions and missing features</a></li>
+<li><a href="known_issues.html">Known issues</a></li>
+<li><a href="suspend_behaviour.html">BT suspend / wakeup patterns</a></li>
+</ul>
+<p>Support articles:</p>
+<ul>
+<li><a href="https://support.unfoldedcircle.com/hc/en-us/articles/14695799302940-How-to-pair-with-a-Bluetooth-LE-device">How to pair with a Bluetooth LE device</a></li>
+</ul>
+<h2 id="virtual-keyboard"><a class="header" href="#virtual-keyboard">Virtual Keyboard</a></h2>
+<p>The virtual keyboard defines the following HID report descriptors:</p>
+<ul>
+<li><a href="hid_keycodes.html">Regular keycodes (Keyboard Keypad Page (0x07))</a></li>
+<li><a href="hid_consumer.html">Consumer codes (Consumer Page (0x0C))</a></li>
+<li><a href="hid_system_controls.html">System Controls (Generic Desktop Page (0x01))</a></li>
+</ul>
+<p>The upper-case <code>Key name</code> in the above usage tables is used for the remote-entity commands.</p>
+<p>HID key codes reference: <a href="https://usb.org/sites/default/files/hut1_2.pdf">https://usb.org/sites/default/files/hut1_2.pdf</a></p>
+<h2 id="devices"><a class="header" href="#devices">Devices</a></h2>
+<p>Consumer devices usually only support a small subset of the HID usage definitions. Furthermore, the HID usage tables
+leave room for interpretation and contain multiple functions with different commands (for example media and volume control).</p>
+<p>The device test reports are located in the <a href="devices">./devices</a> folder. They are used to create the device profiles.</p>
+<p>The <a href="devices/_template.html">template document</a> can be used to submit pull requests for additional devices.</p>
+<h2 id="device-profiles"><a class="header" href="#device-profiles">Device Profiles</a></h2>
+<p>Devices might use different commands or accept different key presses to perform certain actions.
+Therefore, a universal button configuration or UI screen layout would not work the same way.</p>
+<p>Devices profiles are device specific configurations that contain default button mapping and UI configuration for a specific device.</p>
+<p>These configurations are tested to make sure it works with the specific device.</p>
+<p>For Android TV based streaming boxes and TV devices, try the generic Android profile if there's not a specific profile for your device.</p>
+<p>Use the default profile if nothing else matches.</p>
+<p>See <a href="profiles/README.html">BT device profile list</a> for pre-defined profiles and <a href="devices/README.html">BT device test reports</a>
+for tested HID commands.<br />
+The existing device profiles are stored in GitHub at <a href="https://github.com/unfoldedcircle/core-api/tree/main/doc/bt/profiles">https://github.com/unfoldedcircle/core-api/tree/main/doc/bt/profiles</a>.</p>
+<h2 id="send-commands-with-core-api"><a class="header" href="#send-commands-with-core-api">Send commands with Core-API</a></h2>
+<h3 id="send_cmd"><a class="header" href="#send_cmd">send_cmd</a></h3>
+<p>The BT-remote entity supports the same <code>remote.send_cmd</code> command as an external remote-entity.</p>
+<p>The <code>command</code> parameter supports:</p>
+<ul>
+<li>UPPER_CASE HID usage key names: <a href="hid_keycodes.html">regular key codes</a>, <a href="hid_consumer.html">consumer key codes</a>,
+<a href="hid_system_controls.html">system key codes</a> depending on prefix.
+<ul>
+<li>Regular key codes support up to 6 simultaneous keys.<br />
+Separate key names or codes with <code>+</code>, e.g. <code>KEY_A+KEY_B+KEY_C</code></li>
+<li>Regular key codes support the following modifiers:<br />
+<code>LSHIFT</code>, <code>LALT</code>, <code>LCTRL</code>, <code>LGUI</code>, <code>RSHIFT</code>, <code>RALT</code>, <code>RCTRL</code>, <code>RGUI</code>.<br />
+For example: <code>LCTRL+KEY_C</code> or <code>LCTRL+LALT+KEY_DELETE</code></li>
+</ul>
+</li>
+<li>Mouse commands if starting with <code>MOUSE_</code>:
+<ul>
+<li>Buttons: <code>MOUSE_BTN_1</code>, <code>MOUSE_BTN_2</code>, <code>MOUSE_BTN_3</code></li>
+<li>X-movement: <code>MOUSE_X_#</code> where # is the amount of movement within: <code>MOUSE_X_-128</code> .. <code>MOUSE_X_127</code></li>
+<li>Y-movement: <code>MOUSE_Y_#</code> where # is the amount of movement within: <code>MOUSE_Y_-128</code> .. <code>MOUSE_Y_127</code></li>
+<li>Scroll-wheel: <code>MOUSE_WHEEL_#</code> where # is the amount of movement within: <code>MOUSE_WHEEL_-128</code> .. <code>MOUSE_WHEEL_127</code></li>
+</ul>
+</li>
+<li>Hex-codes allow to send an arbitrary usage code, even for keys which are not defined.<br />
+This is intended to simplify testing and for proprietary manufacturer commands.
+<ul>
+<li>2-digit hex-code starting with <code>0x</code>: regular key code, for example <code>0x66</code> for <code>KEY_POWER</code>.</li>
+<li>4-digit hex-code starting with <code>0x</code>: consumer key code, for example <code>0x0030</code> for <code>CONSUMER_POWER</code>.</li>
+</ul>
+</li>
+<li>Text: single character or ASCII 7-Bit text (limited to ~ 20 characters).
+<ul>
+<li>Attention: only US layout is supported (as defined in the USB HID specification), there is no support yet for
+different character maps.</li>
+</ul>
+</li>
+<li>‼️The <code>repeat</code>, <code>delay</code>, and <code>hold</code> parameters are not supported and are ignored.</li>
+</ul>
+<p>Curl example:</p>
+<pre><code>curl --location --request PUT 'http://$IP/api/entities/$ENTITY_ID/command' \
+--header 'Content-Type: application/json' \
+--user 'web-configurator:$PIN' \
+--data '{
+  "cmd_id": "remote.send_cmd",
+  "params": {
+    "command": "LSHIFT+KEY_A"
+  }
+}'
+</code></pre>
+<h3 id="send_key"><a class="header" href="#send_key">send_key</a></h3>
+<p>The BT-remote entity supports an additional command <code>remote.send_key</code> for sending a single, predefined key code oder
+ASCII character. Optionally, the GUI / meta key modifier can be enabled.</p>
+<p>The <code>key</code> parameter supports:</p>
+<ul>
+<li>A predefined <a href="hid_keycodes.html">regular key code</a>, <a href="hid_consumer.html">consumer key code</a>,
+or <a href="hid_system_controls.html">system key code</a> depending on prefix (<code>KEY_</code>, <code>KEYPAD_</code>, <code>CONSUMER_</code>, <code>SYSTEM_</code>).</li>
+<li>Mouse commands if starting with <code>MOUSE_</code>: see <code>send_cmd</code>.</li>
+<li>Single character (US layout).</li>
+</ul>
+<p>For a regular key code, the GUI / meta key modifier can be set in the <code>gui</code> parameter.</p>
+<p>Curl example:</p>
+<pre><code>curl --location --request PUT 'http://$IP/api/entities/$ENTITY_ID/command' \
+--header 'Content-Type: application/json' \
+--user 'web-configurator:$PIN' \
+--data '{
+  "cmd_id": "remote.send_key",
+  "params": {
+    "key": "KEY_E",
+    "gui": true
+  }
+}'
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../discovery.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bt/TODO.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../discovery.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bt/TODO.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

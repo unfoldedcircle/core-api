@@ -1,0 +1,573 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>How to write an integration driver - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="how-to-write-an-integration-driver"><a class="header" href="#how-to-write-an-integration-driver">How to write an integration driver</a></h2>
+<p>The Integration-API allows to develop external integration drivers in any programming language capable of running
+a WebSockets server. Custom integration drivers require Node.js or a statically linked binary.</p>
+<ul>
+<li><code>External integration driver</code>: a driver running on an external device, reachable by the Remote.</li>
+<li><code>Custom integration driver</code>: a driver running on the Remote in a restricted, sandboxed environment.</li>
+</ul>
+<p>ℹ️ Beta release 1.9.0 allows to install custom integration drivers on the Remote.<br />
+This is a developer preview feature to test integrations. See <a href="driver-installation.html">Driver installation on the Remote</a>
+for more information.</p>
+<p>ℹ️ See <a href="https://github.com/unfoldedcircle/integration-node-library">NodeJS API wrapper</a> for a quick start in JavaScript,
+or the <a href="https://github.com/unfoldedcircle/integration-python-library">Python API wrapper</a> if using Python.</p>
+<p>When writing a driver from scratch without using a wrapper library:</p>
+<ol>
+<li>Choose your programming language.</li>
+<li>Choose a WebSockets server library or framework for your language.</li>
+<li>Choose a JSON framework for your language.</li>
+<li>Choose which <a href="../entities/README.html">entities and features</a> the driver should expose.</li>
+<li>Implement the required WebSockets text messages in the <a href="../../integration-api/UCR-integration-asyncapi.yaml">WebSocket Integration API</a>.</li>
+</ol>
+<p>❗️ Using a wrapper library or one of the existing open source drivers as a start will greatly simplify driver development.
+Node.js should be preferred when developing a custom integration driver.</p>
+<h3 id="integration-driver-types"><a class="header" href="#integration-driver-types">Integration Driver Types</a></h3>
+<p>The API defines two different driver types: a simple single-device driver or a multi-device instance driver.</p>
+<p>⚠️ Only the single device instance driver is supported. The multi-device driver type will most likely not be implemented
+in the near future!</p>
+<h4 id="single-device-instance-driver"><a class="header" href="#single-device-instance-driver">Single Device Instance Driver</a></h4>
+<p>The single-device instance driver is the default and easiest driver to develop:</p>
+<ul>
+<li>There is no concept of different or individual devices, just entities that the driver provides.</li>
+<li>The driver offers a list of available entities to the remote. This can be a single media player entity, or a large
+list of different entities from a home automation hub.</li>
+<li>The optional <code>device_id</code> property must be omitted in all messages.</li>
+<li>The driver may still control multiple physical devices, but from the Remote's point of view, these are just different
+entities provided from the same integration driver.</li>
+</ul>
+<p>E.g. if smart WiFi light bulbs can be discovered by the driver and then each bulb can be provided as a
+<a href="../entities/entity_light.html">light entity</a> to the remote.</p>
+<h3 id="authentication"><a class="header" href="#authentication">Authentication</a></h3>
+<p>⚠️ Custom integrations running on the remote do not support authentication.</p>
+<p>An external integration driver can choose if the Remote Two requires authentication or not to connect to the driver.<br />
+Supported are header based token authentication during connection setup or with an application level message after the
+connection has been established.</p>
+<p>See <a href="websocket.html#authentication">WebSocket authentication</a> for more information.</p>
+<h3 id="connection-handling"><a class="header" href="#connection-handling">Connection Handling</a></h3>
+<ul>
+<li>Support multiple Remote sessions
+<ul>
+<li>An external driver should support multiple, independent WebSocket connections at the same time.</li>
+</ul>
+</li>
+<li>Keep alive
+<ul>
+<li>The driver must support WebSocket <a href="https://tools.ietf.org/html/rfc6455#section-5.5.2">Ping Pong control frames</a>.<br />
+Please check your WebSocket library, most libraries support this out of the box.</li>
+<li>The Remote Two continuously sends ping frames and automatically closes the connection if it doesn't receive a pong
+within a certain time frame. The driver may also send ping frames to check if the connection is still alive.</li>
+</ul>
+</li>
+</ul>
+<h3 id="driver-registration"><a class="header" href="#driver-registration">Driver Registration</a></h3>
+<p>⚠️ Custom integrations running on the remote are automatically registered during installation.</p>
+<p>An external integration driver should advertise itself over mDNS for auto-discovery and allow user configuration with
+the web-configurator. See <a href="driver-advertisement.html">mDNS advertisement</a> for more information.</p>
+<p>An external integration driver can optionally register itself at a remote and provide its authentication token.</p>
+<p>See <a href="driver-registration.html">driver registration</a> for more information.</p>
+<h3 id="discover-remote-two-devices"><a class="header" href="#discover-remote-two-devices">Discover Remote Two Devices</a></h3>
+<p>The Remote Two can be discovered with DNS-SD. It announces itself with service type <code>_uc-remote._tcp</code>.</p>
+<p>See <a href="../discovery.html">remote DNS-SD lookup</a> for more information.</p>
+<h3 id="json-messages"><a class="header" href="#json-messages">JSON Messages</a></h3>
+<h4 id="message-format"><a class="header" href="#message-format">Message Format</a></h4>
+<ul>
+<li>Only WebSockets Text message are supported at the moment.<br />
+Binary support might be added in the future.</li>
+<li>All messages are serialized in JSON format.</li>
+<li>Text encoding is UTF-8.</li>
+<li>The application level protocol defines two message interactions with three different message types:
+<ul>
+<li>Request / response messages</li>
+<li>Event messages</li>
+</ul>
+</li>
+</ul>
+<h4 id="request-messages"><a class="header" href="#request-messages">Request Messages</a></h4>
+<ul>
+<li>A request message is of kind <code>req</code>.</li>
+<li>Every request message must include a unique <code>id</code> value, which must be increased for every new request.</li>
+<li>The request message type is specified in property <code>msg</code>.</li>
+<li>An optional <code>msg_data</code> object holds the request specific data.</li>
+<li>A request message is usually answered by a response message if not otherwise stated in the documentation.<br />
+Exceptions are event responses, e.g. if the event can be triggered independently of the request message.</li>
+</ul>
+<p>Example of a request message:</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "button",
+    "entity_id": "button-1",
+    "cmd_id": "push"
+  }
+}
+</code></pre>
+<h4 id="response-messages"><a class="header" href="#response-messages">Response Messages</a></h4>
+<ul>
+<li>A response message is of kind <code>resp</code>.</li>
+<li>The corresponding <code>id</code> of the request message is given in property <code>req_id</code>.</li>
+<li>The response message type is specified in property <code>msg</code>.</li>
+<li>The status of the request operation is given in <code>code</code>.</li>
+<li>The <code>msg_data</code> object holds the response specific data.</li>
+</ul>
+<p>Example of a response message:</p>
+<pre><code class="language-json">{
+  "kind": "resp",
+  "req_id": 11,
+  "msg": "available_entities",
+  "code": 200,
+  "msg_data": {
+    "available_entities": [
+      {
+        "entity_id": "button-1",
+        "entity_type": "button",
+        "name": {
+          "en": "Ring dinner bell"
+        }
+      }
+    ]
+  }
+}
+</code></pre>
+<h4 id="event-messages"><a class="header" href="#event-messages">Event Messages</a></h4>
+<ul>
+<li>An event message is of kind <code>event</code>.</li>
+<li>The event type is specified in property <code>msg</code>.</li>
+<li>The optional <code>cat</code> property denotes the event category.</li>
+<li>The optional <code>ts</code> property holds the timestamp when the event occurred.</li>
+<li>The <code>msg_data</code> object holds the event specific data.</li>
+</ul>
+<p>Example of an event message:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "ts": "2021-04-24T14:15:22Z",
+  "msg_data": {
+    "entity_type": "cover",
+    "entity_id": "blind-1",
+    "attributes": {
+      "position": 72
+    }
+  }
+}
+</code></pre>
+<h3 id="required-messages"><a class="header" href="#required-messages">Required Messages</a></h3>
+<p>For a functioning integration driver not all defined messages and optional features in the integration API have to be
+implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the <a href="../../integration-api/UCR-integration-asyncapi.yaml">WebSocket Integration AsyncAPI definition</a>.</p>
+<p>Required request messages which must be processed and answered by a driver:</p>
+<div class="table-wrapper"><table><thead><tr><th>Request</th><th>Response</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>get_driver_version</code></td><td><code>driver_version</code></td><td>Get version information about the integration driver.</td></tr>
+<tr><td><code>get_device_state</code></td><td><code>device_state</code></td><td>Get the current device state.<br/>This informs the Remote Two if the device is ready or not available.</td></tr>
+<tr><td><code>get_available_entities</code></td><td><code>available_entities</code></td><td>Retrieve the available entities from the integration driver.</td></tr>
+<tr><td><code>subscribe_events</code></td><td><code>result</code></td><td>Subscribe to entity state change events.<br/>This instructs the driver to send entity state changes for specific entities.</td></tr>
+<tr><td><code>get_entity_states</code></td><td><code>entity_states</code></td><td>Get the current state of the entities.<br/>This provides the Remote Two the current entity properties.</td></tr>
+<tr><td><code>entity_command</code></td><td><code>result</code></td><td>Instructs the driver to execute an entity command.<br/>This sets entity properties from user interactions.</td></tr>
+</tbody></table>
+</div>
+<p>Required event messages which must be sent by the driver:</p>
+<div class="table-wrapper"><table><thead><tr><th>Event</th><th>Description</th></tr></thead><tbody>
+<tr><td><code>entity_change</code></td><td>Emitted when an attribute of an entity changes.</td></tr>
+<tr><td><code>device_state</code></td><td>Emitted when the device state changes.</td></tr>
+</tbody></table>
+</div>
+<h3 id="common-message-flow"><a class="header" href="#common-message-flow">Common Message Flow</a></h3>
+<p>The basic message flow between an integration and the remote is as follows:</p>
+<ul>
+<li>The integration driver acts as server and the Remote Two initiates the connection.</li>
+<li>After the WebSocket connection is established to the integration driver, the remote subscribes to events of all
+configured entities.</li>
+<li>Whenever the state of the integration driver changes, the driver sends a device state event.<br />
+This is usually the device which the driver represents or connects / communicates with. E.g. a smart device, home
+automation hub, cloud service, etc.</li>
+<li>Whenever an entity attribute of a subscribed entity changes, the driver sends an entity state event.</li>
+<li>The remote announces when it goes into and out of standby, so the integration driver can act accordingly.<br />
+Note: the WebSocket connection might get disconnected during remote standby!</li>
+</ul>
+<h4 id="establish-connection"><a class="header" href="#establish-connection">Establish Connection</a></h4>
+<pre class="mermaid">sequenceDiagram
+    participant I as Integration
+    participant R as Remote
+
+    R-)+R:     create integration driver session
+
+    critical Establish WS connection
+      R-)+I:     connect         
+      alt header token
+        I-&gt;&gt;I:    authentication &amp; version check etc
+        I--)R:    authentication (OK)
+      else message based auth
+        I--)R:    auth_required
+        R-)I:   auth
+        I--)R:    authentication (OK)
+      end
+      Note over I,R: Authenticated WS session
+      R-)R:    wait for messages
+      Note over I,R: Message exchange until disconnected
+      R--&gt;-I:     disconnect
+    option Authentication timeout
+      R--&gt;I:     disconnect
+    option Credentials rejected
+      I--)R:    authentication (401)
+      R--&gt;I:     disconnect
+    end
+    
+</pre>
+<h4 id="integration-driver-setup"><a class="header" href="#integration-driver-setup">Integration Driver Setup</a></h4>
+<p>See <a href="driver-setup.html">driver setup</a>.</p>
+<h4 id="integration-instance-configuration"><a class="header" href="#integration-instance-configuration">Integration Instance Configuration</a></h4>
+<p>After the driver has been registered and configured, the provided entities can be configured in the Remote Two.</p>
+<p>This consists of requesting all available entities from the driver and subscribing to entity events of the chosen
+entities by the user.</p>
+<ul>
+<li>The <code>subscribe_events</code> message is only sent for entities which are configured in the Remote. I.e. only for entities
+which are used in a profile and placed on a page or group.</li>
+<li>For simplicity reasons the driver may choose to always send events for all entities. The Remote will ignore
+unnecessary events. However, it's recommended to limit the message exchange to entities which are actually used to
+save network &amp; processing resources.</li>
+<li>The configured entities from the user(s) are stored in the remote-core application.<br />
+Whenever the Remote (re)connects to the driver, only those entity identifiers are submitted in the <code>subscribe_events</code>
+message.</li>
+<li>The driver can use the <code>get_version</code> message to retrieve version and model information of the Remote.</li>
+<li>The driver can use the <code>get_localization_cfg</code> message to retrieve localization information from the remote if it deals
+with localized labels, values etc.</li>
+</ul>
+<pre class="mermaid">sequenceDiagram
+    participant D as Device(s)
+    participant I as Integration
+    participant R as Remote
+    participant U as UI
+    participant C as configurator
+    actor User
+
+    User-&gt;&gt;+C: setup new integration
+    C-&gt;&gt;-R:  enable integration instance
+
+    critical Establish a connection. See normal operation.
+        R-)I: connect
+    end
+
+    R-)+I:   get_driver_version
+    I--)-R:  driver_version
+    
+    C-)+R:   get_available_entities(integration)
+    R-)-I:   get_available_entities
+    I--)+R:  available_entities 
+    R-&gt;&gt;R:   cache entities
+    R--)-C:  available entities
+
+    loop
+        User-&gt;&gt;+C: configure entity 
+        C-)+R:   add entity
+        R-&gt;&gt;R:   store entity cfg
+        R-)-I:   subscribe_events
+    end
+</pre>
+<h4 id="normal-operation"><a class="header" href="#normal-operation">Normal Operation</a></h4>
+<p>During normal operation there are only a few different message exchanged between the Remote and the integration driver:</p>
+<ul>
+<li><code>authentication</code>: sent by the driver after WebSocket connection is established</li>
+<li><code>subscribe_events</code>: sent by the Remote after the WebSocket connection is authenticated</li>
+<li><code>entity_command</code>: instruct the driver to perform an action on an entity</li>
+<li><code>entity_change</code>: inform the Remote that an entity changed</li>
+<li><code>get_device_state</code>: request the device state from the driver</li>
+<li><code>get_entity_states</code>: request the current entity attributes and states</li>
+</ul>
+<pre class="mermaid">sequenceDiagram
+    participant D as Device(s)
+    participant I as Integration
+    participant R as Remote
+    participant U as UI
+    actor User
+
+    R-&gt;&gt;R:  startup: lookup enabled integration
+
+    R-)+I:  [WS connection] 
+    I-&gt;&gt;I:  authentication &amp; version check etc
+    I--)-R:  authentication
+
+    R-)+I:  connect
+    loop until connected
+      opt
+          I--&gt;&gt;D:  connect / initialize
+      end
+      I--)-R:  device_state
+    end
+
+    opt
+        I-)+R:  get_version
+        R--)-I: version
+
+        I-)+R:  get_localization_cfg
+        R--)-I: localization_cfg
+    end
+    
+
+    R-)I:   subscribe_events
+
+    R-)I:   get_entity_states
+
+    D--&gt;&gt;I:  external state change
+    I--)+R:  entity_change 
+    R-&gt;&gt;R:   store event
+    R-)+U:   entity change event
+    opt
+        U-)-R:   get entity
+        R--)-U:  entity
+    end
+
+    User-&gt;&gt;+U: interact with entity
+    U-)-R:     entity action
+    R-)+I:     entity_command
+    opt
+        I--&gt;&gt;D:  update
+    end
+    I--)-R:    result
+
+    opt
+        D--&gt;&gt;+I:  state change
+    end
+    I-)-R:   entity_change
+    R-&gt;&gt;+R:  store event
+    R-)-U:   entity change event
+
+    R-)I:    enter_standby
+    R-)I:    exit_standby
+    R-)+I:   get_device_state
+    I--)-R:  device_state
+    R-)+I:   get_entity_states
+    I--)-R:  entity_states
+    R-)I:    [disconnect]
+</pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../integration-api/UCR-integration-asyncapi.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../integration-driver/websocket.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../integration-api/UCR-integration-asyncapi.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../integration-driver/websocket.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

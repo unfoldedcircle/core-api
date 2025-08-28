@@ -1,0 +1,850 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>LG WebOS - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="lg-tv-webos"><a class="header" href="#lg-tv-webos">LG TV WebOS</a></h1>
+<ul>
+<li>Tested with LG OLED77CX6LA</li>
+<li>Supports keyboard and mouse devices.</li>
+</ul>
+<h2 id="known-issues"><a class="header" href="#known-issues">Known issues</a></h2>
+<ul>
+<li>Back key not yet found to exit all menus. Workaround: use home key (<code>KEY_LEFT_GUI</code>), press twice to open home, then
+exit menu.</li>
+</ul>
+<h2 id="regular-keycodes-keyboard-keypad-page-0x07"><a class="header" href="#regular-keycodes-keyboard-keypad-page-0x07">Regular keycodes (Keyboard Keypad Page (0x07))</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Key name</th><th>Usage code</th><th>OK</th><th>Description</th></tr></thead><tbody>
+<tr><td>KEY_A</td><td>4</td><td>x</td><td><sup class="footnote-reference" id="fr-1-1"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_B</td><td>5</td><td>x</td><td><sup class="footnote-reference" id="fr-1-2"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_C</td><td>6</td><td>x</td><td><sup class="footnote-reference" id="fr-1-3"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_D</td><td>7</td><td>x</td><td><sup class="footnote-reference" id="fr-1-4"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_E</td><td>8</td><td>x</td><td><sup class="footnote-reference" id="fr-1-5"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_F</td><td>9</td><td>x</td><td><sup class="footnote-reference" id="fr-1-6"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_G</td><td>10</td><td>x</td><td><sup class="footnote-reference" id="fr-1-7"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_H</td><td>11</td><td>x</td><td><sup class="footnote-reference" id="fr-1-8"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_I</td><td>12</td><td>x</td><td><sup class="footnote-reference" id="fr-1-9"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_J</td><td>13</td><td>x</td><td><sup class="footnote-reference" id="fr-1-10"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_K</td><td>14</td><td>x</td><td><sup class="footnote-reference" id="fr-1-11"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_L</td><td>15</td><td>x</td><td><sup class="footnote-reference" id="fr-1-12"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_M</td><td>16</td><td>x</td><td><sup class="footnote-reference" id="fr-1-13"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_N</td><td>17</td><td>x</td><td><sup class="footnote-reference" id="fr-1-14"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_O</td><td>18</td><td>x</td><td><sup class="footnote-reference" id="fr-1-15"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_P</td><td>19</td><td>x</td><td><sup class="footnote-reference" id="fr-1-16"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_Q</td><td>20</td><td>x</td><td><sup class="footnote-reference" id="fr-1-17"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_R</td><td>21</td><td>x</td><td><sup class="footnote-reference" id="fr-1-18"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_S</td><td>22</td><td>x</td><td><sup class="footnote-reference" id="fr-1-19"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_T</td><td>23</td><td>x</td><td><sup class="footnote-reference" id="fr-1-20"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_U</td><td>24</td><td>x</td><td><sup class="footnote-reference" id="fr-1-21"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_V</td><td>25</td><td>x</td><td><sup class="footnote-reference" id="fr-1-22"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_W</td><td>26</td><td>x</td><td><sup class="footnote-reference" id="fr-1-23"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_X</td><td>27</td><td>x</td><td><sup class="footnote-reference" id="fr-1-24"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_Y</td><td>28</td><td>x</td><td><sup class="footnote-reference" id="fr-1-25"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_Z</td><td>29</td><td>x</td><td><sup class="footnote-reference" id="fr-1-26"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_1</td><td>30</td><td>x</td><td>Enter channel number. <sup class="footnote-reference" id="fr-1-27"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_2</td><td>31</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_3</td><td>32</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_4</td><td>33</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_5</td><td>34</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_6</td><td>35</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_7</td><td>36</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_8</td><td>37</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_9</td><td>38</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_0</td><td>39</td><td>x</td><td>"</td></tr>
+<tr><td>KEY_RETURN</td><td>40</td><td>x</td><td>Select</td></tr>
+<tr><td>KEY_ESC</td><td>41</td><td>x</td><td>Does not exit all menus! E.g. channel list or "insert usb" popup</td></tr>
+<tr><td>KEY_BACKSPACE</td><td>42</td><td>x</td><td><sup class="footnote-reference" id="fr-1-28"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_TAB</td><td>43</td><td>-</td><td></td></tr>
+<tr><td>KEY_SPACE</td><td>44</td><td>x</td><td><sup class="footnote-reference" id="fr-1-29"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_MINUS</td><td>45</td><td>x</td><td><sup class="footnote-reference" id="fr-1-30"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_EQUAL</td><td>46</td><td>x</td><td><sup class="footnote-reference" id="fr-1-31"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_LEFT_BRACE</td><td>47</td><td>x</td><td><sup class="footnote-reference" id="fr-1-32"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_RIGHT_BRACE</td><td>48</td><td>x</td><td><sup class="footnote-reference" id="fr-1-33"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_BACKSLASH</td><td>49</td><td>x</td><td><sup class="footnote-reference" id="fr-1-34"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_HASH_TILDE</td><td>50</td><td>x</td><td><sup class="footnote-reference" id="fr-1-35"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_SEMICOLON</td><td>51</td><td>x</td><td><sup class="footnote-reference" id="fr-1-36"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_APOSTROPHE</td><td>52</td><td>x</td><td><sup class="footnote-reference" id="fr-1-37"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_GRAVE</td><td>53</td><td>x</td><td><sup class="footnote-reference" id="fr-1-38"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_COMMA</td><td>54</td><td>x</td><td><sup class="footnote-reference" id="fr-1-39"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_DOT</td><td>55</td><td>x</td><td><sup class="footnote-reference" id="fr-1-40"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_SLASH</td><td>56</td><td>x</td><td><sup class="footnote-reference" id="fr-1-41"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_CAPSLOCK</td><td>57</td><td></td><td></td></tr>
+<tr><td>KEY_F1</td><td>58</td><td>-</td><td></td></tr>
+<tr><td>KEY_F2</td><td>59</td><td>-</td><td></td></tr>
+<tr><td>KEY_F3</td><td>60</td><td>-</td><td></td></tr>
+<tr><td>KEY_F4</td><td>61</td><td>-</td><td></td></tr>
+<tr><td>KEY_F5</td><td>62</td><td>-</td><td></td></tr>
+<tr><td>KEY_F6</td><td>63</td><td>-</td><td></td></tr>
+<tr><td>KEY_F7</td><td>64</td><td>-</td><td></td></tr>
+<tr><td>KEY_F8</td><td>65</td><td>-</td><td></td></tr>
+<tr><td>KEY_F9</td><td>66</td><td>-</td><td></td></tr>
+<tr><td>KEY_F10</td><td>67</td><td>-</td><td></td></tr>
+<tr><td>KEY_F11</td><td>68</td><td>-</td><td></td></tr>
+<tr><td>KEY_F12</td><td>69</td><td>-</td><td></td></tr>
+<tr><td>KEY_SYSRQ</td><td>70</td><td></td><td></td></tr>
+<tr><td>KEY_SCROLL_LOCK</td><td>71</td><td></td><td></td></tr>
+<tr><td>KEY_PAUSE</td><td>72</td><td>x</td><td>Pause live TV (requires USB storage). Works in Plex</td></tr>
+<tr><td>KEY_INSERT</td><td>73</td><td></td><td></td></tr>
+<tr><td>KEY_HOME</td><td>74</td><td>-</td><td>TODO test in apps. NOK: Plex</td></tr>
+<tr><td>KEY_PAGE_UP</td><td>75</td><td>x</td><td>Channel up</td></tr>
+<tr><td>KEY_DELETE</td><td>76</td><td></td><td></td></tr>
+<tr><td>KEY_END</td><td>77</td><td>-</td><td>TODO test in apps</td></tr>
+<tr><td>KEY_PAGE_DOWN</td><td>78</td><td>x</td><td>Channel down</td></tr>
+<tr><td>KEY_RIGHT_ARROW</td><td>79</td><td>x</td><td>Navigation</td></tr>
+<tr><td>KEY_LEFT_ARROW</td><td>80</td><td>x</td><td></td></tr>
+<tr><td>KEY_DOWN_ARROW</td><td>81</td><td>x</td><td></td></tr>
+<tr><td>KEY_UP_ARROW</td><td>82</td><td>x</td><td></td></tr>
+<tr><td>KEYPAD_NUMLOCK</td><td>83</td><td></td><td></td></tr>
+<tr><td>KEYPAD_SLASH</td><td>84</td><td>x</td><td><sup class="footnote-reference" id="fr-1-42"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_ASTERISK</td><td>85</td><td>x</td><td><sup class="footnote-reference" id="fr-1-43"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_MINUS</td><td>86</td><td>x</td><td><sup class="footnote-reference" id="fr-1-44"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_PLUS</td><td>87</td><td>x</td><td><sup class="footnote-reference" id="fr-1-45"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_ENTER</td><td>88</td><td>x</td><td>Does not work, use KEY_RETURN instead. Works in Plex</td></tr>
+<tr><td>KEYPAD_1</td><td>89</td><td>x</td><td><sup class="footnote-reference" id="fr-1-46"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_2</td><td>90</td><td>x</td><td><sup class="footnote-reference" id="fr-1-47"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_3</td><td>91</td><td>x</td><td><sup class="footnote-reference" id="fr-1-48"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_4</td><td>92</td><td>x</td><td><sup class="footnote-reference" id="fr-1-49"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_5</td><td>93</td><td>x</td><td><sup class="footnote-reference" id="fr-1-50"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_6</td><td>94</td><td>x</td><td><sup class="footnote-reference" id="fr-1-51"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_7</td><td>95</td><td>x</td><td><sup class="footnote-reference" id="fr-1-52"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_8</td><td>96</td><td>x</td><td><sup class="footnote-reference" id="fr-1-53"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_9</td><td>97</td><td>x</td><td><sup class="footnote-reference" id="fr-1-54"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_0</td><td>98</td><td>x</td><td><sup class="footnote-reference" id="fr-1-55"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEYPAD_DOT</td><td>99</td><td>x</td><td><sup class="footnote-reference" id="fr-1-56"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_102ND</td><td>100</td><td>x</td><td><sup class="footnote-reference" id="fr-1-57"><a href="#footnote-1">1</a></sup></td></tr>
+<tr><td>KEY_APPLICATION</td><td>101</td><td>-</td><td></td></tr>
+<tr><td>KEY_POWER</td><td>102</td><td>x</td><td>Only power off.</td></tr>
+<tr><td>KEYPAD_EQUAL</td><td>103</td><td>-</td><td></td></tr>
+<tr><td>KEY_F13</td><td>104</td><td>-</td><td></td></tr>
+<tr><td>KEY_F14</td><td>105</td><td>-</td><td></td></tr>
+<tr><td>KEY_F15</td><td>106</td><td>-</td><td></td></tr>
+<tr><td>KEY_F16</td><td>107</td><td>-</td><td></td></tr>
+<tr><td>KEY_F17</td><td>108</td><td>-</td><td></td></tr>
+<tr><td>KEY_F18</td><td>109</td><td>-</td><td></td></tr>
+<tr><td>KEY_F19</td><td>110</td><td>-</td><td></td></tr>
+<tr><td>KEY_F20</td><td>111</td><td>-</td><td></td></tr>
+<tr><td>KEY_F21</td><td>112</td><td>-</td><td></td></tr>
+<tr><td>KEY_F22</td><td>113</td><td>-</td><td></td></tr>
+<tr><td>KEY_F23</td><td>114</td><td>-</td><td></td></tr>
+<tr><td>KEY_F24</td><td>115</td><td>-</td><td></td></tr>
+<tr><td>KEY_EXECUTE</td><td>116</td><td>-</td><td></td></tr>
+<tr><td>KEY_HELP</td><td>117</td><td>-</td><td></td></tr>
+<tr><td>KEY_MENU</td><td>118</td><td>-</td><td>TODO test in apps. NOK: Plex</td></tr>
+<tr><td>KEY_SELECT</td><td>119</td><td>-</td><td>NOK: Plex</td></tr>
+<tr><td>KEY_STOP</td><td>120</td><td>x</td><td>Works in Plex</td></tr>
+<tr><td>KEY_AGAIN</td><td>121</td><td>-</td><td></td></tr>
+<tr><td>KEY_UNDO</td><td>122</td><td>-</td><td></td></tr>
+<tr><td>KEY_CUT</td><td>123</td><td>-</td><td></td></tr>
+<tr><td>KEY_COPY</td><td>124</td><td>-</td><td></td></tr>
+<tr><td>KEY_PASTE</td><td>125</td><td>-</td><td></td></tr>
+<tr><td>KEY_FIND</td><td>126</td><td>-</td><td></td></tr>
+<tr><td>KEY_MUTE</td><td>127</td><td>x</td><td></td></tr>
+<tr><td>KEY_VOLUME_UP</td><td>128</td><td>x</td><td></td></tr>
+<tr><td>KEY_VOLUME_DOWN</td><td>129</td><td>x</td><td></td></tr>
+<tr><td>KEYPAD_COMMA</td><td>133</td><td>-</td><td></td></tr>
+<tr><td>KEY_RO</td><td>135</td><td>-</td><td></td></tr>
+<tr><td>KEY_KATAKANA_HIRAGANA</td><td>136</td><td>-</td><td></td></tr>
+<tr><td>KEY_YEN</td><td>137</td><td>-</td><td></td></tr>
+<tr><td>KEY_HENKAN</td><td>138</td><td>-</td><td></td></tr>
+<tr><td>KEY_MUHENKAN</td><td>139</td><td>-</td><td></td></tr>
+<tr><td>KEYPAD_JPCOMMA</td><td>140</td><td>-</td><td></td></tr>
+<tr><td>KEY_INTERNATIONAL7</td><td>141</td><td>-</td><td></td></tr>
+<tr><td>KEY_INTERNATIONAL8</td><td>142</td><td>-</td><td></td></tr>
+<tr><td>KEY_INTERNATIONAL9</td><td>143</td><td>-</td><td></td></tr>
+<tr><td>KEY_HANGEUL</td><td>144</td><td>-</td><td></td></tr>
+<tr><td>KEY_HANJA</td><td>145</td><td>-</td><td></td></tr>
+<tr><td>KEY_KATAKANA</td><td>146</td><td>-</td><td></td></tr>
+<tr><td>KEY_HIRAGANA</td><td>147</td><td>-</td><td></td></tr>
+<tr><td>KEY_ZENKAKU_HANKAKU</td><td>148</td><td>-</td><td></td></tr>
+<tr><td>KEY_FURIGANA</td><td>149</td><td>-</td><td></td></tr>
+<tr><td>KEY_LANG7</td><td>150</td><td>-</td><td></td></tr>
+<tr><td>KEY_LANG8</td><td>151</td><td>-</td><td></td></tr>
+<tr><td>KEY_LANG9</td><td>152</td><td>-</td><td></td></tr>
+<tr><td>KEY_LEFT_CONTROL</td><td>224</td><td>-</td><td></td></tr>
+<tr><td>KEY_LEFT_SHIFT</td><td>225</td><td>-</td><td></td></tr>
+<tr><td>KEY_LEFT_ALT</td><td>226</td><td>-</td><td></td></tr>
+<tr><td>KEY_LEFT_GUI</td><td>227</td><td>x</td><td>Home button</td></tr>
+<tr><td>KEY_RIGHT_CONTROL</td><td>228</td><td>-</td><td></td></tr>
+<tr><td>KEY_RIGHT_SHIFT</td><td>229</td><td>-</td><td></td></tr>
+<tr><td>KEY_RIGHT_ALT</td><td>230</td><td>-</td><td></td></tr>
+<tr><td>KEY_RIGHT_GUI</td><td>231</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_PLAY_PAUSE</td><td>232</td><td>-</td><td>TODO test in apps. NOK: Plex</td></tr>
+<tr><td>KEY_MEDIA_STOP_CD</td><td>233</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_PREVIOUS_SONG</td><td>234</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_NEXT_SONG</td><td>235</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_EJECT_CD</td><td>236</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_VOLUME_UP</td><td>237</td><td>x</td><td>Same as KEY_VOLUME_UP</td></tr>
+<tr><td>KEY_MEDIA_VOLUME_DOWN</td><td>238</td><td>x</td><td>Same as KEY_VOLUME_DOWN</td></tr>
+<tr><td>KEY_MEDIA_MUTE</td><td>239</td><td>x</td><td>Same as KEY_MUTE</td></tr>
+<tr><td>KEY_MEDIA_WWW</td><td>240</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_BACK</td><td>241</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_FORWARD</td><td>242</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_STOP</td><td>243</td><td>x</td><td>Same as KEY_STOP. Works in Plex</td></tr>
+<tr><td>KEY_MEDIA_FIND</td><td>244</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_SCROLL_UP</td><td>245</td><td>-</td><td>Use KEY_PAGE_UP instead</td></tr>
+<tr><td>KEY_MEDIA_SCROLL_DOWN</td><td>246</td><td>-</td><td>Use KEY_PAGE_DOWN instead</td></tr>
+<tr><td>KEY_MEDIA_EDIT</td><td>247</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_SLEEP</td><td>248</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_COFFEE</td><td>249</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_REFRESH</td><td>250</td><td>-</td><td></td></tr>
+<tr><td>KEY_MEDIA_CALC</td><td>251</td><td>-</td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="consumer-codes-consumer-page-0x0c"><a class="header" href="#consumer-codes-consumer-page-0x0c">Consumer codes (Consumer Page (0x0C))</a></h2>
+<p>It seems that no consumer codes are supported.</p>
+<div class="table-wrapper"><table><thead><tr><th>key name</th><th>usage code</th><th>OK</th><th>Description</th></tr></thead><tbody>
+<tr><td>CONSUMER_INCREMENT_10</td><td>0x020</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_INCREMENT_100</td><td>0x021</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_AM_PM</td><td>0x022</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_POWER</td><td>0x030</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_RESET</td><td>0x031</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SLEEP</td><td>0x032</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SLEEP_AFTER</td><td>0x033</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SLEEP_MODE</td><td>0x034</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_ILLUMINATION</td><td>0x035</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_FUNCTION_BUTTONS</td><td>0x036</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU</td><td>0x040</td><td>-</td><td>TODO test in apps</td></tr>
+<tr><td>CONSUMER_MENU_PICK</td><td>0x041</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU_UP</td><td>0x042</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU_DOWN</td><td>0x043</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU_LEFT</td><td>0x044</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU_RIGHT</td><td>0x045</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU_ESCAPE</td><td>0x046</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MENU_VALUE_INCREASE</td><td>0x047</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MENU_VALUE_DECREASE</td><td>0x048</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DATA_ON_SCREEN</td><td>0x060</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_CLOSED_CAPTION</td><td>0x061</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_CLOSED_CAPTION_SELECT</td><td>0x062</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_VCR_TV</td><td>0x063</td><td></td><td></td></tr>
+<tr><td>CONSUMER_BROADCAST_MODE</td><td>0x064</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SNAPSHOT</td><td>0x065</td><td></td><td></td></tr>
+<tr><td>CONSUMER_STILL</td><td>0x066</td><td></td><td></td></tr>
+<tr><td>CONSUMER_PICTURE_IN_PICTURE_TOGGLE</td><td>0x067</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_PICTURE_IN_PICTURE_SWAP</td><td>0x068</td><td></td><td></td></tr>
+<tr><td>CONSUMER_RED_MENU_BUTTON</td><td>0x069</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_GREEN_MENU_BUTTON</td><td>0x06A</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_BLUE_MENU_BUTTON</td><td>0x06B</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_YELLOW_MENU_BUTTON</td><td>0x06C</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_ASPECT</td><td>0x06D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MODE_SELECT_3D</td><td>0x06E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_BRIGHTNESS_INCREMENT</td><td>0x06F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_BRIGHTNESS_DECREMENT</td><td>0x070</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_BRIGHTNESS</td><td>0x071</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_BACKLIGHT_TOGGLE</td><td>0x072</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MINIMUM</td><td>0x073</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_SET_BRIGHTNESS_TO_MAXIMUM</td><td>0x074</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DISPLAY_SET_AUTO_BRIGHTNESS</td><td>0x075</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CAMERA_ACCESS_ENABLED</td><td>0x076</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CAMERA_ACCESS_DISABLED</td><td>0x077</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CAMERA_ACCESS_TOGGLE</td><td>0x078</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BRIGHTNESS_INCREMENT</td><td>0x079</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BRIGHTNESS_DECREMENT</td><td>0x07A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BACKLIGHT_SET_LEVEL</td><td>0x07B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BACKLIGHT_OOC</td><td>0x07C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BACKLIGHT_SET_MINIMUM</td><td>0x07D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BACKLIGHT_SET_MAXIMUM</td><td>0x07E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_BACKLIGHT_AUTO</td><td>0x07F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SELECTION</td><td>0x080</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ASSIGN_SELECTION</td><td>0x081</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MODE_STEP</td><td>0x082</td><td></td><td></td></tr>
+<tr><td>CONSUMER_RECALL_LAST</td><td>0x083</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ENTER_CHANNEL</td><td>0x084</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ORDER_MOVIE</td><td>0x085</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL</td><td>0x086</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECTION</td><td>0x087</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_COMPUTER</td><td>0x088</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_TV</td><td>0x089</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_WWW</td><td>0x08A</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_DVD</td><td>0x08B</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_TELEPHONE</td><td>0x08C</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_PROGRAM_GUIDE</td><td>0x08D</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_VIDEO_PHONE</td><td>0x08E</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_GAMES</td><td>0x08F</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_MESSAGES</td><td>0x090</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_CD</td><td>0x091</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_VCR</td><td>0x092</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_TUNER</td><td>0x093</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_QUIT</td><td>0x094</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_HELP</td><td>0x095</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_TAPE</td><td>0x096</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_CABLE</td><td>0x097</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_SATELLITE</td><td>0x098</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_SECURITY</td><td>0x099</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_HOME</td><td>0x09A</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_CALL</td><td>0x09B</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_INCREMENT</td><td>0x09C</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_DECREMENT</td><td>0x09D</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MEDIA_SELECT_SAP</td><td>0x09E</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_VCR_PLUS</td><td>0x0A0</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_ONCE</td><td>0x0A1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DAILY</td><td>0x0A2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_WEEKLY</td><td>0x0A3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MONTHLY</td><td>0x0A4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_PLAY</td><td>0x0B0</td><td>-</td><td>TODO test in apps. NOK: Plex</td></tr>
+<tr><td>CONSUMER_PAUSE</td><td>0x0B1</td><td>-</td><td>Use KEY_PAUSE instead</td></tr>
+<tr><td>CONSUMER_RECORD</td><td>0x0B2</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_FAST_FORWARD</td><td>0x0B3</td><td>-</td><td>NOK: Plex</td></tr>
+<tr><td>CONSUMER_REWIND</td><td>0x0B4</td><td>-</td><td>NOK: Plex</td></tr>
+<tr><td>CONSUMER_SCAN_NEXT_TRACK</td><td>0x0B5</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SCAN_PREVIOUS_TRACK</td><td>0x0B6</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_STOP</td><td>0x0B7</td><td>-</td><td>Use KEY_STOP instead</td></tr>
+<tr><td>CONSUMER_EJECT</td><td>0x0B8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_RANDOM_PLAY</td><td>0x0B9</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SELECT_DISC</td><td>0x0BA</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ENTER_DISC</td><td>0x0BB</td><td></td><td></td></tr>
+<tr><td>CONSUMER_REPEAT</td><td>0x0BC</td><td></td><td></td></tr>
+<tr><td>CONSUMER_TRACKING</td><td>0x0BD</td><td></td><td></td></tr>
+<tr><td>CONSUMER_TRACK_NORMAL</td><td>0x0BE</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SLOW_TRACKING</td><td>0x0BF</td><td></td><td></td></tr>
+<tr><td>CONSUMER_FRAME_FORWARD</td><td>0x0C0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_FRAME_BACK</td><td>0x0C1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MARK</td><td>0x0C2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CLEAR_MARK</td><td>0x0C3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_REPEAT_FROM_MARK</td><td>0x0C4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_RETURN_TO_MARK</td><td>0x0C5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SEARCH_MARK_FORWARD</td><td>0x0C6</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SEARCH_MARK_BACKWARDS</td><td>0x0C7</td><td></td><td></td></tr>
+<tr><td>CONSUMER_COUNTER_RESET</td><td>0x0C8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SHOW_COUNTER</td><td>0x0C9</td><td></td><td></td></tr>
+<tr><td>CONSUMER_TRACKING_INCREMENT</td><td>0x0CA</td><td></td><td></td></tr>
+<tr><td>CONSUMER_TRACKING_DECREMENT</td><td>0x0CB</td><td></td><td></td></tr>
+<tr><td>CONSUMER_STOP_EJECT</td><td>0x0CC</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_PLAY_PAUSE</td><td>0x0CD</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_PLAY_SKIP</td><td>0x0CE</td><td></td><td></td></tr>
+<tr><td>CONSUMER_VOICE_COMMAND</td><td>0x0CF</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_INVOKE_CAPTURE_INTERFACE</td><td>0x0D0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_START_OR_STOP_GAME_RECORDING</td><td>0x0D1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_HISTORICAL_GAME_CAPTURE</td><td>0x0D2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CAPTURE_GAME_SCREENSHOT</td><td>0x0D3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SHOW_OR_HIDE_RECORDING_INDICATOR</td><td>0x0D4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_START_OR_STOP_MICROPHONE_CAPTURE</td><td>0x0D5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_START_OR_STOP_CAMERA_CAPTURE</td><td>0x0D6</td><td></td><td></td></tr>
+<tr><td>CONSUMER_START_OR_STOP_GAME_BROADCAST</td><td>0x0D7</td><td></td><td></td></tr>
+<tr><td>CONSUMER_VOLUME</td><td>0x0E0</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_BALANCE</td><td>0x0E1</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MUTE</td><td>0x0E2</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_BASS</td><td>0x0E3</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_TREBLE</td><td>0x0E4</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_BASS_BOOST</td><td>0x0E5</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SURROUND_MODE</td><td>0x0E6</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_LOUDNESS</td><td>0x0E7</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_MPX</td><td>0x0E8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_VOLUME_INCREMENT</td><td>0x0E9</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_VOLUME_DECREMENT</td><td>0x0EA</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_SPEED_SELECT</td><td>0x0F0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_PLAYBACK_SPEED</td><td>0x0F1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_STANDARD_PLAY</td><td>0x0F2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_LONG_PLAY</td><td>0x0F3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_EXTENDED_PLAY</td><td>0x0F4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SLOW</td><td>0x0F5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_FAN_ENABLE</td><td>0x100</td><td></td><td></td></tr>
+<tr><td>CONSUMER_FAN_SPEED</td><td>0x101</td><td></td><td></td></tr>
+<tr><td>CONSUMER_LIGHT_ENABLE</td><td>0x102</td><td></td><td></td></tr>
+<tr><td>CONSUMER_LIGHT_ILLUMINATION_LEVEL</td><td>0x103</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CLIMATE_CONTROL_ENABLE</td><td>0x104</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ROOM_TEMPERATURE</td><td>0x105</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SECURITY_ENABLE</td><td>0x106</td><td></td><td></td></tr>
+<tr><td>CONSUMER_FIRE_ALARM</td><td>0x107</td><td></td><td></td></tr>
+<tr><td>CONSUMER_POLICE_ALARM</td><td>0x108</td><td></td><td></td></tr>
+<tr><td>CONSUMER_PROXIMITY</td><td>0x109</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MOTION</td><td>0x10A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_DURESS_ALARM</td><td>0x10B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_HOLDUP_ALARM</td><td>0x10C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_MEDICAL_ALARM</td><td>0x10D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_BALANCE_RIGHT</td><td>0x150</td><td></td><td></td></tr>
+<tr><td>CONSUMER_BALANCE_LEFT</td><td>0x151</td><td></td><td></td></tr>
+<tr><td>CONSUMER_BASS_INCREMENT</td><td>0x152</td><td></td><td></td></tr>
+<tr><td>CONSUMER_BASS_DECREMENT</td><td>0x153</td><td></td><td></td></tr>
+<tr><td>CONSUMER_TREBLE_INCREMENT</td><td>0x154</td><td></td><td></td></tr>
+<tr><td>CONSUMER_TREBLE_DECREMENT</td><td>0x155</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SPEAKER_SYSTEM</td><td>0x160</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_LEFT</td><td>0x161</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_RIGHT</td><td>0x162</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_CENTER</td><td>0x163</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_FRONT</td><td>0x164</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_CENTER_FRONT</td><td>0x165</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_SIDE</td><td>0x166</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_SURROUND</td><td>0x167</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_LOW_FREQUENCY_ENHANCEMENT</td><td>0x168</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_TOP</td><td>0x169</td><td></td><td></td></tr>
+<tr><td>CONSUMER_CHANNEL_UNKNOWN</td><td>0x16A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SUB_CHANNEL</td><td>0x170</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SUB_CHANNEL_INCREMENT</td><td>0x171</td><td></td><td></td></tr>
+<tr><td>CONSUMER_SUB_CHANNEL_DECREMENT</td><td>0x172</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ALTERNATE_AUDIO_INCREMENT</td><td>0x173</td><td></td><td></td></tr>
+<tr><td>CONSUMER_ALTERNATE_AUDIO_DECREMENT</td><td>0x174</td><td></td><td></td></tr>
+<tr><td>CONSUMER_APPLICATION_LAUNCH_BUTTONS</td><td>0x180</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LAUNCH_BUTTON_CONFIGURATION_TOOL</td><td>0x181</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_PROGRAMMABLE_BUTTON_CONFIGURATION</td><td>0x182</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CONSUMER_CONTROL_CONFIGURATION</td><td>0x183</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_WORD_PROCESSOR</td><td>0x184</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_TEXT_EDITOR</td><td>0x185</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_SPREADSHEET</td><td>0x186</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_GRAPHICS_EDITOR</td><td>0x187</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_PRESENTATION_APP</td><td>0x188</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_DATABASE_APP</td><td>0x189</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_EMAIL_READER</td><td>0x18A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_NEWSREADER</td><td>0x18B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_VOICEMAIL</td><td>0x18C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CONTACTS_ADDRESS_BOOK</td><td>0x18D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CALENDAR_SCHEDULE</td><td>0x18E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_TASK_PROJECT_MANAGER</td><td>0x18F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LOG_JOURNAL_TIMECARD</td><td>0x190</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CHECKBOOK_FINANCE</td><td>0x191</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CALCULATOR</td><td>0x192</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_A_V_CAPTURE_PLAYBACK</td><td>0x193</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LOCAL_MACHINE_BROWSER</td><td>0x194</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LAN_WAN_BROWSER</td><td>0x195</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_INTERNET_BROWSER</td><td>0x196</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_REMOTE_NETWORKING_ISP_CONNECT</td><td>0x197</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_NETWORK_CONFERENCE</td><td>0x198</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_NETWORK_CHAT</td><td>0x199</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_TELEPHONY_DIALER</td><td>0x19A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LOGON</td><td>0x19B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LOGOFF</td><td>0x19C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_LOGON_LOGOFF</td><td>0x19D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_TERMINAL_LOCK_SCREENSAVER</td><td>0x19E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CONTROL_PANEL</td><td>0x19F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_COMMAND_LINE_PROCESSOR_RUN</td><td>0x1A0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_PROCESS_TASK_MANAGER</td><td>0x1A1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_SELECT_TASK_APPLICATION</td><td>0x1A2</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_AL_NEXT_TASK_APPLICATION</td><td>0x1A3</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_AL_PREVIOUS_TASK_APPLICATION</td><td>0x1A4</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_AL_PREEMPTIVE_HALT_TASK_APPLICATION</td><td>0x1A5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_INTEGRATED_HELP_CENTER</td><td>0x1A6</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_DOCUMENTS</td><td>0x1A7</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_THESAURUS</td><td>0x1A8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_DICTIONARY</td><td>0x1A9</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_DESKTOP</td><td>0x1AA</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_SPELL_CHECK</td><td>0x1AB</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_GRAMMAR_CHECK</td><td>0x1AC</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_WIRELESS_STATUS</td><td>0x1AD</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_KEYBOARD_LAYOUT</td><td>0x1AE</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_VIRUS_PROTECTION</td><td>0x1AF</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_ENCRYPTION</td><td>0x1B0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_SCREEN_SAVER</td><td>0x1B1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_ALARMS</td><td>0x1B2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CLOCK</td><td>0x1B3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_FILE_BROWSER</td><td>0x1B4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_POWER_STATUS</td><td>0x1B5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_IMAGE_BROWSER</td><td>0x1B6</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_AUDIO_BROWSER</td><td>0x1B7</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_MOVIE_BROWSER</td><td>0x1B8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_DIGITAL_RIGHTS_MANAGER</td><td>0x1B9</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_DIGITAL_WALLET</td><td>0x1BA</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_INSTANT_MESSAGING</td><td>0x1BC</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_OEM_FEATURES_TIPS_TUTORIAL_BROWSER</td><td>0x1BD</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_OEM_HELP</td><td>0x1BE</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_ONLINE_COMMUNITY</td><td>0x1BF</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_ENTERTAINMENT_CONTENT_BROWSER</td><td>0x1C0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_ONLINE_SHOPPING_BROWSER</td><td>0x1C1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_SMARTCARD_INFORMATION_HELP</td><td>0x1C2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_MARKET_MONITOR_FINANCE_BROWSER</td><td>0x1C3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CUSTOMIZED_CORPORATE_NEWS_BROWSER</td><td>0x1C4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_ONLINE_ACTIVITY_BROWSER</td><td>0x1C5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_RESEARCH_SEARCH_BROWSER</td><td>0x1C6</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_AUDIO_PLAYER</td><td>0x1C7</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_MESSAGE_STATUS</td><td>0x1C8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CONTACT_SYNC</td><td>0x1C9</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_NAVIGATION</td><td>0x1CA</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AL_CONTEXT_AWARE_DESKTOP_ASSISTANT</td><td>0x1CB</td><td></td><td></td></tr>
+<tr><td>CONSUMER_GENERIC_GUI_APPLICATION_CONTROLS</td><td>0x200</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NEW</td><td>0x201</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_OPEN</td><td>0x202</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_CLOSE</td><td>0x203</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_EXIT</td><td>0x204</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_MAXIMIZE</td><td>0x205</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_MINIMIZE</td><td>0x206</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SAVE</td><td>0x207</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PRINT</td><td>0x208</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PROPERTIES</td><td>0x209</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_UNDO</td><td>0x21A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_COPY</td><td>0x21B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_CUT</td><td>0x21C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PASTE</td><td>0x21D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_ALL</td><td>0x21E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FIND</td><td>0x21F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FIND_AND_REPLACE</td><td>0x220</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SEARCH</td><td>0x221</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_GO_TO</td><td>0x222</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_HOME</td><td>0x223</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_AC_BACK</td><td>0x224</td><td>-</td><td></td></tr>
+<tr><td>CONSUMER_AC_FORWARD</td><td>0x225</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_STOP</td><td>0x226</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_REFRESH</td><td>0x227</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PREVIOUS_LINK</td><td>0x228</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NEXT_LINK</td><td>0x229</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_BOOKMARKS</td><td>0x22A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_HISTORY</td><td>0x22B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SUBSCRIPTIONS</td><td>0x22C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ZOOM_IN</td><td>0x22D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ZOOM_OUT</td><td>0x22E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ZOOM</td><td>0x22F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FULL_SCREEN_VIEW</td><td>0x230</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NORMAL_VIEW</td><td>0x231</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_VIEW_TOGGLE</td><td>0x232</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SCROLL_UP</td><td>0x233</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SCROLL_DOWN</td><td>0x234</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SCROLL</td><td>0x235</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PAN_LEFT</td><td>0x236</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PAN_RIGHT</td><td>0x237</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PAN</td><td>0x238</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NEW_WINDOW</td><td>0x239</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_TILE_HORIZONTALLY</td><td>0x23A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_TILE_VERTICALLY</td><td>0x23B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FORMAT</td><td>0x23C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_EDIT</td><td>0x23D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_BOLD</td><td>0x23E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ITALICS</td><td>0x23F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_UNDERLINE</td><td>0x240</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_STRIKETHROUGH</td><td>0x241</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SUBSCRIPT</td><td>0x242</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SUPERSCRIPT</td><td>0x243</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ALL_CAPS</td><td>0x244</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ROTATE</td><td>0x245</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_RESIZE</td><td>0x246</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FLIP_HORIZONTAL</td><td>0x247</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FLIP_VERTICAL</td><td>0x248</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_MIRROR_HORIZONTAL</td><td>0x249</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_MIRROR_VERTICAL</td><td>0x24A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FONT_SELECT</td><td>0x24B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FONT_COLOR</td><td>0x24C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FONT_SIZE</td><td>0x24D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_LEFT</td><td>0x24E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_CENTER_H</td><td>0x24F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_RIGHT</td><td>0x250</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_BLOCK_H</td><td>0x251</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_TOP</td><td>0x252</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_CENTER_V</td><td>0x253</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_BOTTOM</td><td>0x254</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_JUSTIFY_BLOCK_V</td><td>0x255</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INDENT_DECREASE</td><td>0x256</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INDENT_INCREASE</td><td>0x257</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NUMBERED_LIST</td><td>0x258</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_RESTART_NUMBERING</td><td>0x259</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_BULLETED_LIST</td><td>0x25A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PROMOTE</td><td>0x25B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DEMOTE</td><td>0x25C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_YES</td><td>0x25D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NO</td><td>0x25E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_CANCEL</td><td>0x25F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_CATALOG</td><td>0x260</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_BUY_CHECKOUT</td><td>0x261</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ADD_TO_CART</td><td>0x262</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_EXPAND</td><td>0x263</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_EXPAND_ALL</td><td>0x264</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_COLLAPSE</td><td>0x265</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_COLLAPSE_ALL</td><td>0x266</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PRINT_PREVIEW</td><td>0x267</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PASTE_SPECIAL</td><td>0x268</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_MODE</td><td>0x269</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DELETE</td><td>0x26A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_LOCK</td><td>0x26B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_UNLOCK</td><td>0x26C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_PROTECT</td><td>0x26D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_UNPROTECT</td><td>0x26E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ATTACH_COMMENT</td><td>0x26F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DELETE_COMMENT</td><td>0x270</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_VIEW_COMMENT</td><td>0x271</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_WORD</td><td>0x272</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_SENTENCE</td><td>0x273</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_PARAGRAPH</td><td>0x274</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_COLUMN</td><td>0x275</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_ROW</td><td>0x276</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_TABLE</td><td>0x277</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_OBJECT</td><td>0x278</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_REDO_REPEAT</td><td>0x279</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SORT</td><td>0x27A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SORT_ASCENDING</td><td>0x27B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SORT_DESCENDING</td><td>0x27C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FILTER</td><td>0x27D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SET_CLOCK</td><td>0x27E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_VIEW_CLOCK</td><td>0x27F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SELECT_TIME_ZONE</td><td>0x280</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_EDIT_TIME_ZONES</td><td>0x281</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SET_ALARM</td><td>0x282</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_CLEAR_ALARM</td><td>0x283</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SNOOZE_ALARM</td><td>0x284</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_RESET_ALARM</td><td>0x285</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SYNCHRONIZE</td><td>0x286</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SEND_RECEIVE</td><td>0x287</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SEND_TO</td><td>0x288</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_REPLY</td><td>0x289</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_REPLY_ALL</td><td>0x28A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_FORWARD_MSG</td><td>0x28B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SEND</td><td>0x28C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_ATTACH_FILE</td><td>0x28D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_UPLOAD</td><td>0x28E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DOWNLOAD_SAVE_TARGET_AS</td><td>0x28F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SET_BORDERS</td><td>0x290</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_ROW</td><td>0x291</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_COLUMN</td><td>0x292</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_FILE</td><td>0x293</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_PICTURE</td><td>0x294</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_OBJECT</td><td>0x295</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_INSERT_SYMBOL</td><td>0x296</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SAVE_AND_CLOSE</td><td>0x297</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_RENAME</td><td>0x298</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_MERGE</td><td>0x299</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SPLIT</td><td>0x29A</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DISRIBUTE_HORIZONTALLY</td><td>0x29B</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DISTRIBUTE_VERTICALLY</td><td>0x29C</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NEXT_KEYBOARD_LAYOUT_SELECT</td><td>0x29D</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_NAVIGATION_GUIDANCE</td><td>0x29E</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DESKTOP_SHOW_ALL_WINDOWS</td><td>0x29F</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SOFT_KEY_LEFT</td><td>0x2A0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_SOFT_KEY_RIGHT</td><td>0x2A1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_DESKTOP_SHOW_ALL_APPLICATIONS</td><td>0x2A2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_AC_IDLE_KEEP_ALIVE</td><td>0x2B0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_EXTENDED_KEYBOARD_ATTRIBUTES_COLLECTION</td><td>0x2C0</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_FORM_FACTOR</td><td>0x2C1</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_KEY_TYPE</td><td>0x2C2</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_PHYSICAL_LAYOUT</td><td>0x2C3</td><td></td><td></td></tr>
+<tr><td>CONSUMER_VENDOR_SPECIFIC_KEYBOARD_PHYSICAL_LAYOUT</td><td>0x2C4</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_IETF_LANGUAGE_TAG_INDEX</td><td>0x2C5</td><td></td><td></td></tr>
+<tr><td>CONSUMER_IMPLEMENTED_KEYBOARD_INPUT_ASSIST_CONTROLS</td><td>0x2C6</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_INPUT_ASSIST_PREVIOUS</td><td>0x2C7</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_INPUT_ASSIST_NEXT</td><td>0x2C8</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_INPUT_ASSIST_PREVIOUS_GROUP</td><td>0x2C9</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_INPUT_ASSIST_NEXT_GROUP</td><td>0x2CA</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_INPUT_ASSIST_ACCEPT</td><td>0x2CB</td><td></td><td></td></tr>
+<tr><td>CONSUMER_KEYBOARD_INPUT_ASSIST_CANCEL</td><td>0x2CC</td><td></td><td></td></tr>
+</tbody></table>
+</div>
+<h2 id="system-controls-generic-desktop-page-0x01"><a class="header" href="#system-controls-generic-desktop-page-0x01">System Controls (Generic Desktop Page (0x01))</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Key name</th><th>Usage code</th><th>Ok</th><th>Comment</th></tr></thead><tbody>
+<tr><td>SYSTEM_POWER_DOWN</td><td>0x81</td><td>-</td><td></td></tr>
+<tr><td>SYSTEM_SLEEP</td><td>0x82</td><td>-</td><td></td></tr>
+<tr><td>SYSTEM_WAKE_UP</td><td>0x83</td><td>-</td><td></td></tr>
+</tbody></table>
+</div><hr>
+<ol class="footnote-definition"><li id="footnote-1">
+<p>Works for text entry <a href="#fr-1-1">↩</a> <a href="#fr-1-2">↩2</a> <a href="#fr-1-3">↩3</a> <a href="#fr-1-4">↩4</a> <a href="#fr-1-5">↩5</a> <a href="#fr-1-6">↩6</a> <a href="#fr-1-7">↩7</a> <a href="#fr-1-8">↩8</a> <a href="#fr-1-9">↩9</a> <a href="#fr-1-10">↩10</a> <a href="#fr-1-11">↩11</a> <a href="#fr-1-12">↩12</a> <a href="#fr-1-13">↩13</a> <a href="#fr-1-14">↩14</a> <a href="#fr-1-15">↩15</a> <a href="#fr-1-16">↩16</a> <a href="#fr-1-17">↩17</a> <a href="#fr-1-18">↩18</a> <a href="#fr-1-19">↩19</a> <a href="#fr-1-20">↩20</a> <a href="#fr-1-21">↩21</a> <a href="#fr-1-22">↩22</a> <a href="#fr-1-23">↩23</a> <a href="#fr-1-24">↩24</a> <a href="#fr-1-25">↩25</a> <a href="#fr-1-26">↩26</a> <a href="#fr-1-27">↩27</a> <a href="#fr-1-28">↩28</a> <a href="#fr-1-29">↩29</a> <a href="#fr-1-30">↩30</a> <a href="#fr-1-31">↩31</a> <a href="#fr-1-32">↩32</a> <a href="#fr-1-33">↩33</a> <a href="#fr-1-34">↩34</a> <a href="#fr-1-35">↩35</a> <a href="#fr-1-36">↩36</a> <a href="#fr-1-37">↩37</a> <a href="#fr-1-38">↩38</a> <a href="#fr-1-39">↩39</a> <a href="#fr-1-40">↩40</a> <a href="#fr-1-41">↩41</a> <a href="#fr-1-42">↩42</a> <a href="#fr-1-43">↩43</a> <a href="#fr-1-44">↩44</a> <a href="#fr-1-45">↩45</a> <a href="#fr-1-46">↩46</a> <a href="#fr-1-47">↩47</a> <a href="#fr-1-48">↩48</a> <a href="#fr-1-49">↩49</a> <a href="#fr-1-50">↩50</a> <a href="#fr-1-51">↩51</a> <a href="#fr-1-52">↩52</a> <a href="#fr-1-53">↩53</a> <a href="#fr-1-54">↩54</a> <a href="#fr-1-55">↩55</a> <a href="#fr-1-56">↩56</a> <a href="#fr-1-57">↩57</a></p>
+</li>
+</ol>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../bt/devices/Google-Chromecast.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../bt/devices/onn-StreamingDevice.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../bt/devices/Google-Chromecast.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../bt/devices/onn-StreamingDevice.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../mermaid.min.js"></script>
+        <script src="../../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

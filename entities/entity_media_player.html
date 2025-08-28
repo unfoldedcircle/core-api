@@ -1,0 +1,705 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Media Player - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="media-player-entity"><a class="header" href="#media-player-entity">Media Player Entity</a></h1>
+<!-- TOC -->
+<ul>
+<li><a href="#features">Features</a>
+<ul>
+<li><a href="#attributes">Attributes</a></li>
+<li><a href="#states">States</a></li>
+<li><a href="#device-classes">Device Classes</a></li>
+<li><a href="#options">Options</a></li>
+</ul>
+</li>
+<li><a href="#integration-api">Integration API</a>
+<ul>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#simple-commands">Simple Commands</a>
+<ul>
+<li><a href="#command-name-patterns">Command Name Patterns</a></li>
+</ul>
+</li>
+<li><a href="#events">Events</a>
+<ul>
+<li><a href="#media-types">Media types</a></li>
+<li><a href="#media-images">Media images</a></li>
+</ul>
+</li>
+<li><a href="#command-examples">Command examples</a>
+<ul>
+<li><a href="#on">on</a></li>
+<li><a href="#play_pause">play_pause</a></li>
+<li><a href="#volume">volume</a></li>
+<li><a href="#seek">seek</a></li>
+<li><a href="#repeat">repeat</a></li>
+<li><a href="#shuffle">shuffle</a></li>
+<li><a href="#select_sound_mode">select_sound_mode</a></li>
+<li><a href="#custom-simple-command">Custom simple command</a></li>
+</ul>
+</li>
+<li><a href="#event-examples">Event examples</a>
+<ul>
+<li><a href="#state-change-event">State change event</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#open-issues-and-missing-features">Open issues and missing features</a></li>
+</ul>
+<!-- TOC -->
+<hr />
+<p>A media player entity controls playback of media on a device. This could be an online music streaming service, a TV,
+a stereo or a video player.</p>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<p>Media-player features define the capabilities of the controlled device. For example the <code>dpad</code> feature will enable the
+four directional commands and the enter command. Furthermore, certain features control the appearance and functionality
+of the media-player UI on the Remote Two.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>R</th><th>W</th><th>Description</th></tr></thead><tbody>
+<tr><td>on_off</td><td>✅</td><td>✅</td><td>The media player can be switched on and off.</td></tr>
+<tr><td>toggle</td><td>❌</td><td>✅</td><td>The media player's power state can be toggled.</td></tr>
+<tr><td>volume</td><td>✅</td><td>✅</td><td>The volume level can be set to a specific level.</td></tr>
+<tr><td>volume_up_down</td><td>❌</td><td>✅</td><td>The volume can be adjusted up (louder) and down.</td></tr>
+<tr><td>mute_toggle</td><td>❌</td><td>✅</td><td>The mute state can be toggled.</td></tr>
+<tr><td>mute</td><td>✅</td><td>✅</td><td>The volume can be muted.</td></tr>
+<tr><td>unmute</td><td>✅</td><td>✅</td><td>The volume can be un-muted.</td></tr>
+<tr><td>play_pause</td><td>❌</td><td>✅</td><td>The player supports starting and pausing media playback.</td></tr>
+<tr><td>stop</td><td>❌</td><td>✅</td><td>The player supports stopping media playback.</td></tr>
+<tr><td>next</td><td>❌</td><td>✅</td><td>The player supports skipping to the next track.</td></tr>
+<tr><td>previous</td><td>❌</td><td>✅</td><td>The player supports returning to the previous track.</td></tr>
+<tr><td>fast_forward</td><td>❌</td><td>✅</td><td>The player supports fast-forwarding the current track.</td></tr>
+<tr><td>rewind</td><td>❌</td><td>✅</td><td>The player supports rewinding the current track.</td></tr>
+<tr><td>repeat</td><td>✅</td><td>✅</td><td>The current track or playlist can be repeated.</td></tr>
+<tr><td>shuffle</td><td>✅</td><td>✅</td><td>The player supports random playback / shuffling the current playlist.</td></tr>
+<tr><td>seek</td><td>❌</td><td>✅</td><td>The player supports seeking the playback position.</td></tr>
+<tr><td>media_duration</td><td>✅</td><td>❌</td><td>The player announces the duration of the current media being played.</td></tr>
+<tr><td>media_position</td><td>✅</td><td>❌</td><td>The player announces the current position of the media being played.</td></tr>
+<tr><td>media_title</td><td>✅</td><td>❌</td><td>The player announces the media title.</td></tr>
+<tr><td>media_artist</td><td>✅</td><td>❌</td><td>The player announces the media artist.</td></tr>
+<tr><td>media_album</td><td>✅</td><td>❌</td><td>The player announces the media album if music is being played.</td></tr>
+<tr><td>media_image_url</td><td>✅</td><td>❌</td><td>The player provides an image url of the media being played.</td></tr>
+<tr><td>media_type</td><td>✅</td><td>❌</td><td>The player announces the type of media being played.</td></tr>
+<tr><td>dpad</td><td>❌</td><td>✅</td><td>Directional pad navigation, provides up / down / left / right / enter commands.</td></tr>
+<tr><td>numpad</td><td>❌</td><td>✅</td><td>Number pad, provides digit_0, .. , digit_9 commands.</td></tr>
+<tr><td>home</td><td>❌</td><td>✅</td><td>Home navigation support with home &amp; back commands.</td></tr>
+<tr><td>menu</td><td>❌</td><td>✅</td><td>Menu navigation support with menu &amp; back commands.</td></tr>
+<tr><td>context_menu</td><td>❌</td><td>✅</td><td>Context menu (for example right clicking or long pressing an item).</td></tr>
+<tr><td>guide</td><td>❌</td><td>✅</td><td>Program guide support with guide &amp; back commands.</td></tr>
+<tr><td>info</td><td>❌</td><td>✅</td><td>Information popup / menu support with info &amp; back commands.</td></tr>
+<tr><td>color_buttons</td><td>❌</td><td>✅</td><td>Color button support for red / green / yellow / blue function commands.</td></tr>
+<tr><td>channel_switcher</td><td>❌</td><td>✅</td><td>Channel zapping support with channel up and down commands.</td></tr>
+<tr><td>select_source</td><td>✅</td><td>✅</td><td>Media playback sources or inputs can be selected.</td></tr>
+<tr><td>select_sound_mode</td><td>✅</td><td>✅</td><td>Sound modes can be selected, e.g. stereo or surround.</td></tr>
+<tr><td>eject</td><td>❌</td><td>✅</td><td>The media can be ejected, e.g. a slot-in CD or USB stick.</td></tr>
+<tr><td>open_close</td><td>❌</td><td>✅</td><td>The player supports opening and closing, e.g. a disc tray.</td></tr>
+<tr><td>audio_track</td><td>❌</td><td>✅</td><td>The player supports selecting or switching the audio track.</td></tr>
+<tr><td>subtitle</td><td>❌</td><td>✅</td><td>The player supports selecting or switching subtitles.</td></tr>
+<tr><td>record</td><td>❌</td><td>✅</td><td>The player has recording capabilities with record, my_recordings, live commands</td></tr>
+<tr><td>settings</td><td>❌</td><td>✅</td><td>The player supports a settings menu.</td></tr>
+</tbody></table>
+</div>
+<ul>
+<li>R: readable
+<ul>
+<li>✅ Feature has a readable attribute to retrieve the current or available values.</li>
+<li>❌ Feature value(s) cannot be read.</li>
+</ul>
+</li>
+<li>W: writeable
+<ul>
+<li>✅ Feature has one or multiple commands to trigger an action or set a value.</li>
+<li>❌ No corresponding command(s), only the current value(s) of the feature can be read.</li>
+</ul>
+</li>
+</ul>
+<p>🚧 Planned features are playlist handling, media browsing and searching.</p>
+<p>🧑‍💻 Integration driver developers:</p>
+<ul>
+<li>If certain features or commands are missing for your device, they can be defined with <a href="#simple-commands">"simple commands"</a>.</li>
+<li>If a feature doesn't fully match your device, for example it only has a <code>record</code> function but no <code>my_recordings</code> or
+<code>live</code> functions, then the desired command(s) should also be defined as a <a href="#simple-commands">"simple command"</a>.
+<ul>
+<li>For the command name use the corresponding <code>cmd_id</code> in uppercase to keep any command related automations.<br />
+(This would be <code>RECORD</code> for the record-only feature example).</li>
+</ul>
+</li>
+</ul>
+<h3 id="attributes"><a class="header" href="#attributes">Attributes</a></h3>
+<p>Entity attributes are enabled by features and hold the current value of a feature or provide available options.
+Multiple features can act on the same attribute.</p>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Features</th><th>Type</th><th>Values</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>on_off</td><td>enum</td><td><a href="#states">States</a></td><td>State of the media player, influenced by the play and power commands.</td></tr>
+<tr><td></td><td>toggle</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>play_pause, stop</td><td></td><td></td><td></td></tr>
+<tr><td>volume</td><td>volume</td><td>number</td><td>0..100</td><td>Current volume level.</td></tr>
+<tr><td></td><td>volume_up_down</td><td></td><td></td><td></td></tr>
+<tr><td>muted</td><td>mute_toggle</td><td>boolean</td><td></td><td>Flag if the volume is muted.</td></tr>
+<tr><td></td><td>mute, unmute</td><td></td><td></td><td></td></tr>
+<tr><td>media_duration</td><td>media_duration</td><td>number</td><td></td><td>Media duration in seconds.</td></tr>
+<tr><td>media_position</td><td>media_position</td><td>number</td><td></td><td>Current media position in seconds.</td></tr>
+<tr><td></td><td>play_pause, stop</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>fast_forward, rewind, seek</td><td></td><td></td><td></td></tr>
+<tr><td>media_position_updated_at</td><td>media_position</td><td>string</td><td>datetime (ISO 8601)</td><td>Optional timestamp when <code>media_position</code> was last updated. Requires integration support.</td></tr>
+<tr><td>media_type</td><td>media_type</td><td>enum</td><td><em>platform specific</em></td><td>The type of media being played.</td></tr>
+<tr><td>media_image_url</td><td>media_image_url</td><td>string</td><td></td><td>URL to retrieve the album art or an image representing what's being played.</td></tr>
+<tr><td></td><td>play_pause</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
+<tr><td>media_title</td><td>media_title</td><td>string</td><td></td><td>Currently playing media information.</td></tr>
+<tr><td></td><td>play_pause</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
+<tr><td>media_artist</td><td>media_artist</td><td>string</td><td></td><td>Currently playing media information.</td></tr>
+<tr><td></td><td>play_pause</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
+<tr><td>media_album</td><td>media_album</td><td>string</td><td></td><td>Currently playing media information.</td></tr>
+<tr><td></td><td>play_pause</td><td></td><td></td><td></td></tr>
+<tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
+<tr><td>repeat</td><td>repeat</td><td>enum</td><td><code>OFF</code>, <code>ALL</code>, <code>ONE</code></td><td>Current repeat mode.</td></tr>
+<tr><td>shuffle</td><td>shuffle</td><td>boolean</td><td></td><td>Shuffle mode on or off.</td></tr>
+<tr><td>source</td><td>select_source</td><td>string</td><td></td><td>Currently selected media or input source.</td></tr>
+<tr><td>source_list</td><td>select_source</td><td>list</td><td><em>text items</em></td><td>Available media or input sources.</td></tr>
+<tr><td>sound_mode</td><td>select_sound_mode</td><td>string</td><td></td><td>Currently selected sound mode.</td></tr>
+<tr><td>sound_mode_list</td><td>select_sound_mode</td><td>list</td><td><em>text items</em></td><td>Available sound modes.</td></tr>
+</tbody></table>
+</div>
+<h3 id="states"><a class="header" href="#states">States</a></h3>
+<p>The entity <code>state</code> attribute holds the following values:</p>
+<div class="table-wrapper"><table><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody>
+<tr><td>ON</td><td>The media player is switched on</td></tr>
+<tr><td>OFF</td><td>The media player is switched off</td></tr>
+<tr><td>PLAYING</td><td>The media player is playing something</td></tr>
+<tr><td>PAUSED</td><td>The media player is paused</td></tr>
+<tr><td>STANDBY</td><td>The device is in low power state and accepting commands</td></tr>
+<tr><td>BUFFERING</td><td>The media player is buffering to start playback</td></tr>
+</tbody></table>
+</div>
+<p>See also <a href="README.html#states">common entity states</a>.</p>
+<h3 id="device-classes"><a class="header" href="#device-classes">Device Classes</a></h3>
+<p>Optional: the media player can be classified what kind of device it represents. This can be used by the UI to represent
+the media player with a different icon, behaviour etc.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>
+<tr><td>receiver</td><td>Audio-video receiver.</td></tr>
+<tr><td>set_top_box</td><td>Set-top box for multichannel video and media playback</td></tr>
+<tr><td>speaker</td><td>Smart speakers or stereo device.</td></tr>
+<tr><td>streaming_box</td><td>Device for media streaming services.</td></tr>
+<tr><td>tv</td><td>Television device.</td></tr>
+</tbody></table>
+</div>
+<h3 id="options"><a class="header" href="#options">Options</a></h3>
+<p>Optional features of the media-player entity.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Values</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td>simple_commands</td><td>array</td><td>string</td><td>[]</td><td>Additional commands the media-player supports, which are not covered in the feature list. See <a href="#simple-commands">simple commands</a>.<br/>Example: <code>["EXIT", "THUMBS_UP", "THUMBS_DOWN"]</code></td></tr>
+<tr><td>volume_steps</td><td>number</td><td>2..100</td><td>100</td><td>Number of available volume steps for the set volume command and UI controls.<br/>Examples: 100 = any value between 0..100, 50 = only odd numbers, 3 = [33, 67, 100] etc. Value 0 = mute.<br/>Note: if the integration receives an "unexpected" number it is required to round up or down to the next matching value.</td></tr>
+</tbody></table>
+</div>
+<h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
+<h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
+<p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
+requests in <code>msg_data.cmd_id</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>cmd_id</th><th>Parameters</th><th>Description</th></tr></thead><tbody>
+<tr><td>on</td><td>-</td><td>Switch on media player.</td></tr>
+<tr><td>off</td><td>-</td><td>Switch off media player.</td></tr>
+<tr><td>toggle</td><td>-</td><td>Toggle the current power state, either from on -&gt; off or from off -&gt; on.</td></tr>
+<tr><td>play_pause</td><td>-</td><td>Toggle play / pause.</td></tr>
+<tr><td>stop</td><td>-</td><td>Stop playback.</td></tr>
+<tr><td>previous</td><td>-</td><td>Go back to previous track.</td></tr>
+<tr><td>next</td><td>-</td><td>Skip to next track.</td></tr>
+<tr><td>fast_forward</td><td>-</td><td>Fast forward current track.</td></tr>
+<tr><td>rewind</td><td>-</td><td>Rewind current track.</td></tr>
+<tr><td>seek</td><td>media_position</td><td>Seek to given position in current track. Position is given in seconds.</td></tr>
+<tr><td>volume</td><td>volume</td><td>Set volume to given level.</td></tr>
+<tr><td>volume_up</td><td>-</td><td>Increase volume.</td></tr>
+<tr><td>volume_down</td><td>-</td><td>Decrease volume.</td></tr>
+<tr><td>mute_toggle</td><td>-</td><td>Toggle mute state.</td></tr>
+<tr><td>mute</td><td>-</td><td>Mute volume.</td></tr>
+<tr><td>unmute</td><td>-</td><td>Unmute volume.</td></tr>
+<tr><td>repeat</td><td>repeat</td><td>Repeat track or playlist.</td></tr>
+<tr><td>shuffle</td><td>shuffle</td><td>Shuffle playlist or start random playback.</td></tr>
+<tr><td>channel_up</td><td>-</td><td>Channel up.</td></tr>
+<tr><td>channel_down</td><td>-</td><td>Channel down.</td></tr>
+<tr><td>cursor_up</td><td>-</td><td>Directional pad up.</td></tr>
+<tr><td>cursor_down</td><td>-</td><td>Directional pad down.</td></tr>
+<tr><td>cursor_left</td><td>-</td><td>Directional pad left.</td></tr>
+<tr><td>cursor_right</td><td>-</td><td>Directional pad right.</td></tr>
+<tr><td>cursor_enter</td><td>-</td><td>Directional pad enter.</td></tr>
+<tr><td>digit_0 - digit_9</td><td>-</td><td>Number pad digits 0..9.</td></tr>
+<tr><td>function_red</td><td>-</td><td>Function red.</td></tr>
+<tr><td>function_green</td><td>-</td><td>Function green.</td></tr>
+<tr><td>function_yellow</td><td>-</td><td>Function yellow.</td></tr>
+<tr><td>function_blue</td><td>-</td><td>Function blue.</td></tr>
+<tr><td>home</td><td>-</td><td>Home menu</td></tr>
+<tr><td>menu</td><td>-</td><td>Menu</td></tr>
+<tr><td>context_menu</td><td>-</td><td>Context menu</td></tr>
+<tr><td>guide</td><td>-</td><td>Program guide menu.</td></tr>
+<tr><td>info</td><td>-</td><td>Information menu / what's playing.</td></tr>
+<tr><td>back</td><td>-</td><td>Back / exit function for menu navigation (to exit menu, guide, info).</td></tr>
+<tr><td>select_source</td><td>source</td><td>Select an input source from the available sources.</td></tr>
+<tr><td>select_sound_mode</td><td>mode</td><td>Select a sound mode from the available modes.</td></tr>
+<tr><td>record</td><td>-</td><td>Start, stop or open recording menu (device dependant).</td></tr>
+<tr><td>my_recordings</td><td>-</td><td>Open recordings.</td></tr>
+<tr><td>live</td><td>-</td><td>Switch to live view.</td></tr>
+<tr><td>eject</td><td>-</td><td>Eject media.</td></tr>
+<tr><td>open_close</td><td>-</td><td>Open or close.</td></tr>
+<tr><td>audio_track</td><td>-</td><td>Switch or select audio track.</td></tr>
+<tr><td>subtitle</td><td>-</td><td>Switch or select subtitle.</td></tr>
+<tr><td>settings</td><td>-</td><td>Settings menu</td></tr>
+<tr><td>🚧 search</td><td></td><td></td></tr>
+</tbody></table>
+</div>
+<h3 id="simple-commands"><a class="header" href="#simple-commands">Simple Commands</a></h3>
+<p>Additional commands can be enabled with the <code>simple_commands</code> options. A device exposing a media-player entity can
+support all additional device commands, not covered with the standard features, as so-called "simple commands".
+These commands are comparable with the infrared remote-entity commands, where keys trigger an action on the device:</p>
+<ul>
+<li>The command is fully defined by its name and doesn't have any further arguments or related attributes.</li>
+<li>Command names must be upper case and may not contain spaces.
+<ul>
+<li>The upper case restriction makes them distinguishable from the pre-defined feature commands.</li>
+<li>Only a subset of the 7-bit ASCII printable characters are allowed: <code>-/_.:+#*°@%()?</code></li>
+<li>Maximum length is 20 characters.</li>
+<li>Command name regex: <code>^[A-Z0-9\/_.:+#*°@%()?-]{1,20}$</code></li>
+</ul>
+</li>
+<li>🚧 Simple commands cannot be translated yet. In the web-configurator they show up as defined.</li>
+</ul>
+<h4 id="command-name-patterns"><a class="header" href="#command-name-patterns">Command Name Patterns</a></h4>
+<p>Even though command names can be freely defined with the allowed characters, the following prefixes should be used.
+This allows better integration into Remote Two, like default UI mappings and grouping of similar commands.</p>
+<ul>
+<li><code>INPUT_</code>: source inputs, e.g. <code>INPUT_AUX1</code>, <code>INPUT_TV</code>, <code>INPUT_RADIO</code></li>
+<li><code>APP_</code>: applications, e.g. <code>APP_MY_TV_STREAMING</code>, <code>APP_INTERNET</code></li>
+<li><code>MODE_</code>: mode changing functions, e.g. <code>MODE_16/9</code>, <code>MODE_SURROUND</code>, <code>MODE_FOOTBALL</code></li>
+<li><code>MENU_</code>: additional menus, e.g. <code>MENU_SMART_HOME</code>, <code>MENU_QUICK</code></li>
+<li><code>DIGIT_</code>: additional input digits besides the pre-defined numpad digits, e.g. <code>DIGIT_10</code>, <code>DIGIT_10+</code></li>
+<li><code>ZONE_</code>: multi-room functions, e.g. <code>ZONE_A</code>, <code>ZONE_MULTIROOM</code></li>
+</ul>
+<h3 id="events"><a class="header" href="#events">Events</a></h3>
+<p>The <code>entity_change</code> event must be emitted by the integration driver if the state or an attribute of the media player
+changes.</p>
+<p>The following attributes are supported:</p>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>New entity <a href="#states">state</a>.</td></tr>
+<tr><td>volume</td><td>Current volume.</td></tr>
+<tr><td>muted</td><td>Mute state.</td></tr>
+<tr><td>media_position</td><td>Current playback position.</td></tr>
+<tr><td>media_duration</td><td>Duration of current media.</td></tr>
+<tr><td>media_title</td><td>Current media title.</td></tr>
+<tr><td>media_artist</td><td>Current media artist.</td></tr>
+<tr><td>media_album</td><td>Current media artist.</td></tr>
+<tr><td>media_image_url</td><td>Current media image url, which will be resized for small and medium representations.<br/>If the player already has multiple sizes it's recommended to use the <code>_small</code>, <code>_med</code>, <code>_large</code> attributes.</td></tr>
+<tr><td>media_image_url_small</td><td>Current media image url for the small image.</td></tr>
+<tr><td>media_image_url_medium</td><td>Current media image url for the medium size image.</td></tr>
+<tr><td>media_image_url_large</td><td>Current media image url for the large image.</td></tr>
+<tr><td>media_type</td><td>Current media type.</td></tr>
+<tr><td>repeat</td><td>Current repeat mode.</td></tr>
+<tr><td>shuffle</td><td>Current shuffle mode.</td></tr>
+<tr><td>source</td><td>Selected source.</td></tr>
+<tr><td>source_list</td><td>List of available media sources or inputs.</td></tr>
+<tr><td>sound_mode</td><td>Selected sound mode.</td></tr>
+<tr><td>sound_mode_list</td><td>Available sound modes.</td></tr>
+</tbody></table>
+</div>
+<p>At least one attribute must be specified in the <code>entity_change</code> message. If the entity <code>state</code> and another attribute
+changed at the same time, for example if a new track starts playing, they may both be included in the same message.
+It's also valid to always send every attribute.</p>
+<h4 id="media-types"><a class="header" href="#media-types">Media types</a></h4>
+<p>The <code>media_type</code> attribute specifies the media being played:</p>
+<ul>
+<li><code>MUSIC</code></li>
+<li><code>RADIO</code></li>
+<li><code>TVSHOW</code></li>
+<li><code>MOVIE</code></li>
+<li><code>VIDEO</code></li>
+</ul>
+<p>The integration may return other values, but the UI will most likely handle them as an "unknown media".</p>
+<h4 id="media-images"><a class="header" href="#media-images">Media images</a></h4>
+<ul>
+<li>Supported image formats: jpg and png.</li>
+<li>The album art image can either be provided as a single image or as three matching image sizes.
+<ul>
+<li>Images will automatically be resized to the required sizes.<br />
+Either from the single image in <code>media_image_url</code> or from the individual sizes.</li>
+<li>Images too large in pixel or file size will be rejected due to resource constraints on the remote.</li>
+</ul>
+</li>
+<li>Preferred image sizes in pixel:
+<ul>
+<li>Large, for full screen album art: 420 x 420</li>
+<li>Medium: 100 x 100</li>
+<li>Small, for thumbnails: 60 x 60</li>
+</ul>
+</li>
+</ul>
+<h3 id="command-examples"><a class="header" href="#command-examples">Command examples</a></h3>
+<h4 id="on"><a class="header" href="#on">on</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "on"
+  }
+}
+</code></pre>
+<h4 id="play_pause"><a class="header" href="#play_pause">play_pause</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "play_pause"
+  }
+}
+</code></pre>
+<h4 id="volume"><a class="header" href="#volume">volume</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "volume",
+    "params": {
+      "volume": 40
+    }
+  }
+}
+</code></pre>
+<h4 id="seek"><a class="header" href="#seek">seek</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "seek",
+    "params": {
+      "media_position": 180
+    }
+  }
+}
+</code></pre>
+<h4 id="repeat"><a class="header" href="#repeat">repeat</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "repeat",
+    "params": {
+      "repeat": "ALL"
+    }
+  }
+}
+</code></pre>
+<h4 id="shuffle"><a class="header" href="#shuffle">shuffle</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "shuffle",
+    "params": {
+      "shuffle": true
+    }
+  }
+}
+</code></pre>
+<h4 id="select_sound_mode"><a class="header" href="#select_sound_mode">select_sound_mode</a></h4>
+<p>Specify a sound mode value contained in the <code>sound_mode_list</code> attribute array.</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "select_sound_mode",
+    "params": {
+      "mode": "MOVIE"
+    }
+  }
+}
+</code></pre>
+<h4 id="custom-simple-command"><a class="header" href="#custom-simple-command">Custom simple command</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "THUMBS_UP"
+  }
+}
+</code></pre>
+<h3 id="event-examples"><a class="header" href="#event-examples">Event examples</a></h3>
+<h4 id="state-change-event"><a class="header" href="#state-change-event">State change event</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "attributes": {
+      "state": "PLAYING",
+      "media_duration": 245,
+      "media_position": 1,
+      "media_position_updated_at": "2025-03-18T07:30:00.000Z",
+      "media_title": "Some title",
+      "media_artist": "My artist",
+      "media_album": "Best of",
+      "media_image_url_large": "http://192.168.1.100/player/current/album_l.png",
+      "media_image_url_medium": "http://192.168.1.100/player/current/album_m.png",
+      "media_image_url_small": "http://192.168.1.100/player/current/album_s.png"
+    }
+  }
+}
+</code></pre>
+<h2 id="open-issues-and-missing-features"><a class="header" href="#open-issues-and-missing-features">Open issues and missing features</a></h2>
+<ul>
+<li>Define album art image limits</li>
+<li>Define media types</li>
+<li>Playlist handling</li>
+<li>Media browsing</li>
+<li>Searching</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../entities/entity_light.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../entities/entity_remote.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../entities/entity_light.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../entities/entity_remote.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

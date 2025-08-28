@@ -1,0 +1,737 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Remote - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="remote-entity"><a class="header" href="#remote-entity">Remote Entity</a></h1>
+<p>A remote entity can send commands to a controllable device.</p>
+<p>ℹ️ Supported in remote-core / Core Simulator from version 0.43.0.</p>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>R</th><th>W</th><th>Description</th></tr></thead><tbody>
+<tr><td>send_cmd</td><td>❌</td><td>✅</td><td>Default feature of a remote entity. Always present, even if not specified.</td></tr>
+<tr><td>on_off</td><td>✅</td><td>✅</td><td>Remote has on and off commands.</td></tr>
+<tr><td>toggle</td><td>❌</td><td>✅</td><td>Power toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command.</td></tr>
+</tbody></table>
+</div>
+<ul>
+<li>R: readable
+<ul>
+<li>✅ Feature has a readable attribute to retrieve the current or available values.</li>
+<li>❌ Feature value(s) cannot be read.</li>
+</ul>
+</li>
+<li>W: writeable
+<ul>
+<li>✅ Feature has one or multiple commands to trigger an action or set a value.</li>
+<li>❌ No corresponding command(s), only the current value(s) of the feature can be read.</li>
+</ul>
+</li>
+</ul>
+<h3 id="attributes"><a class="header" href="#attributes">Attributes</a></h3>
+<p>Entity attributes are controlled by features. Multiple features can act on the same attribute. See Events on how to
+notify the remote about an updated attribute. The attributes have to be listed as properties under <code>attributes</code> with
+their current value.</p>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Features</th><th>Type</th><th>Values</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>on_off</td><td>enum</td><td><a href="#states">States</a></td><td>State of the controlled device, it's either on or off.</td></tr>
+<tr><td></td><td>toggle</td><td></td><td></td><td>Toggle inverts the current state. If the driver doesn't provide the toggle feature, the remote uses the current value and calls on or off.</td></tr>
+</tbody></table>
+</div>
+<h3 id="states"><a class="header" href="#states">States</a></h3>
+<p>The remote entity provides the following entity <code>state</code> values:</p>
+<div class="table-wrapper"><table><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody>
+<tr><td>ON</td><td>The controlled device is on.</td></tr>
+<tr><td>OFF</td><td>The controlled device is off.</td></tr>
+</tbody></table>
+</div>
+<p>See <a href="README.html#states">common entity states</a>.</p>
+<h3 id="device-classes"><a class="header" href="#device-classes">Device classes</a></h3>
+<p>None.</p>
+<h3 id="options"><a class="header" href="#options">Options</a></h3>
+<p>Optional features of the remote entity.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Values</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td>simple_commands</td><td>array</td><td>string(20)</td><td>[]</td><td>Optional list of supported commands. If not provided, the integration driver has to document the available commands for the user.</td></tr>
+<tr><td>button_mapping</td><td>array</td><td>DeviceButtonMapping</td><td>[]</td><td>Optional command mapping for the physical buttons.</td></tr>
+<tr><td>user_interface</td><td>object</td><td>UserInterface</td><td>{}</td><td>Optional user interface definition for the supported commands.</td></tr>
+</tbody></table>
+</div>
+<p>If the available commands are known by the integration driver, they should be made available in the <code>simple_commands</code>
+option. This allows the Remote Two configuration in the web-configurator to show all supported commands to the user.
+Otherwise, the user has to know the command names and has to enter them manually for each command.</p>
+<p>If <code>button_mapping</code> or <code>user_interface</code> options are not provided, an automatic mapping is attempted based on the command
+names in <code>simple_commands</code>. The mapping logic is similar to the infrared codesets in the internal IR-remotes.
+See <a href="#command-name-patterns">Command name patterns</a> below on how commands should be named.</p>
+<p>The automatic button and user interface creation is only done once at the initial entity configuration. From that point
+on the user can independently modify the UI and button mapping. Only changes in the <code>simple_commands</code> list will be
+applied to the configured entities in Remote Two, if the available entities are reloaded from the integration driver.</p>
+<h4 id="simple-commands"><a class="header" href="#simple-commands">Simple commands</a></h4>
+<p>A simple command is fully defined by its name and doesn't have any further arguments or related attributes. It's
+comparable to the simple commands in the media-player entity, with fewer naming restrictions.</p>
+<p>Restrictions:</p>
+<ul>
+<li>A command name may not include whitespace characters.</li>
+<li>The maximum length of a command name is 20 characters.</li>
+<li>A command name may not be any of the defined <code>cmd_id</code> commands: on, off, toggle, send_cmd, send_cmd_sequence.</li>
+<li>Commands cannot have any further parameters. For example, it's not possible to have a <code>switch_channel</code> command with
+the channel number as parameter.</li>
+</ul>
+<p>Command naming recommendations:</p>
+<ul>
+<li>Command names should be short and follow naming patterns.</li>
+<li>Uppercase naming is preferred.</li>
+<li>Dedicated power on/off or toggle commands should not be added. Use the <code>on_off</code> and <code>toggle</code> features with the defined
+<code>on</code>, <code>off</code> and <code>toggle</code> commands.</li>
+</ul>
+<h4 id="command-name-patterns"><a class="header" href="#command-name-patterns">Command Name Patterns</a></h4>
+<p>Even though command names can be freely defined, it's highly recommended to follow a naming pattern and use the
+recommended names for common commands. This allows better integration into Remote Two, like default UI mappings and
+grouping of similar commands.</p>
+<ul>
+<li>Navigation: <code>CURSOR_UP</code>, <code>CURSOR_DOWN</code>, <code>CURSOR_LEFT</code>, <code>CURSOR_RIGHT</code>, <code>CURSOR_ENTER</code>, <code>BACK</code>, <code>EXIT</code></li>
+<li>Menus: <code>HOME</code>, <code>MENU</code>, <code>CONTEXT_MENU</code>, <code>GUIDE</code>, <code>INFO</code>, <code>SETTINGS</code></li>
+<li>Volume control: <code>VOLUME_UP</code>, <code>VOLUME_DOWN</code>, <code>MUTE_TOGGLE</code>, <code>MUTE</code>, <code>UNMUTE</code></li>
+<li>Media playback: <code>PLAY_PAUSE</code>, <code>STOP</code>, <code>PREVIOUS</code>, <code>NEXT</code>, <code>FAST_FORWARD</code>, <code>REWIND</code></li>
+</ul>
+<p>See <a href="entity_media_player.html#commands">media-player entity commands</a> for further commands.</p>
+<p>Prefixes for other common functions:</p>
+<ul>
+<li><code>INPUT_</code>: source inputs, e.g. <code>INPUT_AUX1</code>, <code>INPUT_TV</code>, <code>INPUT_RADIO</code></li>
+<li><code>APP_</code>: applications, e.g. <code>APP_MY_TV_STREAMING</code>, <code>APP_INTERNET</code></li>
+<li><code>MODE_</code>: mode changing functions, e.g. <code>MODE_16/9</code>, <code>MODE_SURROUND</code>, <code>MODE_FOOTBALL</code></li>
+<li><code>MENU_</code>: additional menus, e.g. <code>MENU_SMART_HOME</code>, <code>MENU_QUICK</code></li>
+<li><code>DIGIT_</code>: additional input digits besides the pre-defined numpad digits, e.g. <code>DIGIT_10</code>, <code>DIGIT_10+</code></li>
+<li><code>ZONE_</code>: multi-room functions, e.g. <code>ZONE_A</code>, <code>ZONE_MULTIROOM</code></li>
+</ul>
+<h4 id="button-mapping"><a class="header" href="#button-mapping">Button mapping</a></h4>
+<p>A default button mapping can be provided in <code>options.button_mapping</code>.</p>
+<p>The <code>DeviceButtonMapping</code> object is defined in the <a href="../../integration-api">Integration-API</a> and is based on the same
+definition in the Core-API.</p>
+<p>Example of <code>entity.options</code> object:</p>
+<pre><code class="language-json">{
+  "simple_commands": [
+    "VOLUME_UP",
+    "VOLUME_DOWN",
+    "HOME",
+    "CURSOR_UP",
+    "CURSOR_DOWN",
+    "CURSOR_LEFT",
+    "CURSOR_RIGHT",
+    "CURSOR_ENTER"
+  ],
+  "button_mapping": [
+    {
+      "button": "POWER",
+      "short_press": {
+        "cmd_id": "remote.toggle"
+      }
+    },
+    {
+      "button": "RED",
+      "short_press": {
+        "cmd_id": "remote.send_cmd",
+        "params": {
+          "command": "VOLUME_DOWN",
+          "repeat": 10
+        }
+      }
+    },
+    {
+      "button": "DPAD_UP",
+      "short_press": {
+        "cmd_id": "CURSOR_UP"
+      }
+    },
+    {
+      "button": "DPAD_MIDDLE",
+      "short_press": {
+        "cmd_id": "CURSOR_ENTER"
+      },
+      "long_press": {
+        "cmd_id": "MENU"
+      }
+    },
+    {
+      "button": "DPAD_DOWN",
+      "short_press": {
+        "cmd_id": "CURSOR_DOWN"
+      }
+    },
+    {
+      "button": "BLUE",
+      "short_press": {
+        "cmd_id": "remote.send_cmd_sequence",
+        "params": {
+          "sequence": "HOME,CURSOR_DOWN,CURSOR_RIGHT,CURSOR_ENTER",
+          "delay": 200
+        }
+      }
+    }
+  ]
+}
+</code></pre>
+<p>See <a href="#commands">Commands</a> about entity commands and their short vs fully qualified syntax. For example <code>on</code> and <code>off</code> vs
+<code>remote.on</code> and <code>remote.off</code>.</p>
+<p>Button identifiers for Remote Two:</p>
+<ul>
+<li><code>BACK</code></li>
+<li><code>HOME</code></li>
+<li><code>VOICE</code></li>
+<li><code>VOLUME_UP</code>, <code>VOLUME_DOWN</code>, <code>MUTE</code></li>
+<li><code>DPAD_UP</code>, <code>DPAD_DOWN</code>, <code>DPAD_LEFT</code>, <code>DPAD_RIGHT</code>, <code>DPAD_MIDDLE</code></li>
+<li><code>GREEN</code>, <code>YELLOW</code>, <code>RED</code>, <code>BLUE</code></li>
+<li><code>CHANNEL_UP</code>, <code>CHANNEL_DOWN</code></li>
+<li><code>PREV</code>, <code>PLAY</code>, <code>NEXT</code></li>
+<li><code>POWER</code></li>
+</ul>
+<p>A detailed button mapping can be retrieved with the Core-API: <code>GET /api/cfg/device/button_layout</code>.</p>
+<h4 id="user-interface"><a class="header" href="#user-interface">User interface</a></h4>
+<p>A default user interface can be provided in <code>options.user_interface</code>.</p>
+<p>The <code>UserInterface</code> object is defined in the <a href="../../integration-api">Integration-API</a> and is based on the Core-API
+<code>ActivityUserInterface</code> definition.</p>
+<h5 id="ui-page-example"><a class="header" href="#ui-page-example">UI page example</a></h5>
+<p><img src="../img/ui-page-media.png" alt="ui-page-media.png" /></p>
+<p><code>entity.options</code> object:</p>
+<pre><code class="language-json">{
+  "simple_commands": [
+    "MY_RECORDINGS",
+    "MY_APPS",
+    "REVERSE",
+    "PLAY",
+    "PAUSE",
+    "FORWARD",
+    "RECORD"
+  ],
+  "user_interface": {
+    "pages": [
+      {
+        "page_id": "media",
+        "name": "Media",
+        "grid": { "width": 4, "height": 6 },
+        "items": [
+          {
+            "type": "text",
+            "text": "Recordings",
+            "command": {
+              "cmd_id": "MY_RECORDINGS"
+            },
+            "location": { "x": 0, "y": 2 },
+            "size": { "width": 2, "height": 1 }
+          },
+          {
+            "type": "text",
+            "text": "Apps",
+            "command": {
+              "cmd_id": "MY_APPS"
+            },
+            "location": { "x": 2, "y": 2 },
+            "size": { "width": 2, "height": 1 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:bw",
+            "command": {
+              "cmd_id": "REVERSE"
+            },
+            "location": { "x": 0, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:play",
+            "command": {
+              "cmd_id": "PLAY"
+            },
+            "location": { "x": 1, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:pause",
+            "command": {
+              "cmd_id": "PAUSE"
+            },
+            "location": { "x": 2, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:ff",
+            "command": {
+              "cmd_id": "FORWARD"
+            },
+            "location": { "x": 3, "y": 5 }
+          },
+          {
+            "type": "icon",
+            "icon": "uc:rec",
+            "command": {
+              "cmd_id": "RECORD"
+            },
+            "location": { "x": 2, "y": 4 }
+          }
+        ]
+      }
+    ]
+  }
+}
+</code></pre>
+<p>Screen grid sizes for Remote Two:</p>
+<ul>
+<li>Minimal size: 1 x 1</li>
+<li>Maximum size: 8 x 12</li>
+<li>Default: 4 x 6</li>
+</ul>
+<p>The screen layout grid definition can be retrieved with the Core-API: <code>GET /api/cfg/device/screen_layout</code>.</p>
+<h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
+<h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
+<p>The integration driver has to implement a handler for the <code>entity_command</code> WebSocket message to process the following
+command requests in <code>msg_data.cmd_id</code>. See <a href="#command-examples">Command examples</a> and <a href="../../integration-api">Integration-API</a>
+for the full message structure.</p>
+<div class="table-wrapper"><table><thead><tr><th>cmd_id</th><th>Parameters</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>on</td><td>-</td><td></td><td>Send the on-command to the controlled device.</td></tr>
+<tr><td>off</td><td>-</td><td></td><td>Send the off-command.</td></tr>
+<tr><td>toggle</td><td>-</td><td></td><td>Toggle the power state of the controlled device, either from on -&gt; off or from off -&gt; on.</td></tr>
+<tr><td>send_cmd</td><td>command</td><td>String(20)</td><td>A single command.</td></tr>
+<tr><td></td><td>repeat</td><td>Number</td><td>Optional: how many times the command shall be repeated. Defaults to 1 if not specified.</td></tr>
+<tr><td></td><td>delay</td><td>Number</td><td>Optional: delay in milliseconds between repeated commands.</td></tr>
+<tr><td></td><td>hold</td><td>Number</td><td>Optional: time in milliseconds before a command is released. Defaults to 0 if not specified.</td></tr>
+<tr><td>send_cmd_sequence</td><td>sequence</td><td>String array</td><td>Command list. Same defaults are used as for the <code>send_cmd</code> command.</td></tr>
+<tr><td></td><td>repeat</td><td>Number</td><td>Optional: how many times each command shall be repeated.</td></tr>
+<tr><td></td><td>delay</td><td>Number</td><td>Optional: delay in milliseconds between commands.</td></tr>
+<tr><td></td><td>hold</td><td>Number</td><td>Optional: time in milliseconds before each command is released.</td></tr>
+</tbody></table>
+</div>
+<ul>
+<li>The <code>command</code> and <code>sequence</code> parameters will either contain a simple command (if specified in entity options) or a
+freetext command. It is up to the integration driver to verify and validate commands.</li>
+<li>A command name may not include whitespace characters.</li>
+<li>The maximum length of a command name is 20 characters.</li>
+<li>A command name may not be any of the defined <code>cmd_id</code> commands: on, off, toggle, send_cmd, send_cmd_sequence</li>
+<li>If no <code>delay</code> parameter is included, the integration driver has to choose an appropriate delay based on the command
+and controlled device.</li>
+</ul>
+<h4 id="using-commands-for-button-mappings-and-ui-elements"><a class="header" href="#using-commands-for-button-mappings-and-ui-elements">Using commands for button mappings and UI elements</a></h4>
+<p>‼️ Attention: the <code>cmd_id</code> for button mapping and UI item commands is slightly different than the remote-entity
+<a href="#commands">Commands</a>!</p>
+<ul>
+<li>Core-API button mapping and UI item commands:
+<ul>
+<li>The <code>cmd_id</code> value is either a simple command or an entity command with the entity type prefix.</li>
+</ul>
+</li>
+<li>Integration-API entity commands:
+<ul>
+<li>The <code>cmd_id</code> value refers to the defined <a href="#commands">Commands</a> without the entity type prefix.</li>
+<li>A simple command will always be wrapped into the remote-entity command <code>send_cmd</code>.</li>
+</ul>
+</li>
+</ul>
+<p>When defining commands in button mappings or UI elements, either entity commands or simple commands can be used.</p>
+<ul>
+<li>Entity commands are all the commands an entity defines (see <code>cmd_id</code> column in <a href="#commands">Commands</a> above). Example:</li>
+</ul>
+<pre><code class="language-json">{
+  "cmd_id": "toggle"
+}
+</code></pre>
+<ul>
+<li>If the integration driver provides the <code>simple_commands</code> option, the specified commands can be directly used in
+<code>cmd_id</code>. Example:</li>
+</ul>
+<pre><code class="language-json">{
+  "cmd_id": "PLAY"
+}
+</code></pre>
+<ul>
+<li>Specified simple commands can also be used in the <code>send_cmd</code> entity command.</li>
+<li>The <code>command</code> parameter of <code>send_cmd</code> allows any command name ("free-text") and it's up to the integration driver to
+validate the received commands.<br />
+Example of a simple command used in <code>send_cmd</code>:</li>
+</ul>
+<pre><code class="language-json">{
+  "cmd_id": "send_cmd",
+  "params": {
+    "command": "PLAY"
+  }
+}
+</code></pre>
+<ul>
+<li>If an entity command is used it's recommended to prefix it with the entity type to use the same naming convention as
+in the Core-API.
+<ul>
+<li>Using the fully qualified command name might make it easier in the integration driver to distinguish the commands.</li>
+<li>A missing entity type prefix is automatically added when an available remote-entity is configured in Remote Two.</li>
+<li>When working with the Core-API, for example reconfiguring a button mapping, the fully qualified command name is
+required.</li>
+</ul>
+</li>
+</ul>
+<p>Recommended fully-qualified entity command name:</p>
+<pre><code class="language-json">{
+  "cmd_id": "remote.send_cmd",
+  "params": {
+    "command": "PLAY"
+  }
+}
+</code></pre>
+<h3 id="events"><a class="header" href="#events">Events</a></h3>
+<p>The <code>entity_change</code> event must be emitted by the integration driver if the state or an attribute of the remote device
+changes.</p>
+<p>The following attributes must be included:</p>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>New entity <a href="#states">state</a>.</td></tr>
+</tbody></table>
+</div>
+<h3 id="command-examples"><a class="header" href="#command-examples">Command examples</a></h3>
+<p>Remote-entity examples of received <code>entity_command</code> WebSocket messages in an integration driver.</p>
+<h4 id="on"><a class="header" href="#on">on</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "on"
+  }
+}
+</code></pre>
+<h4 id="off"><a class="header" href="#off">off</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "off"
+  }
+}
+</code></pre>
+<h4 id="toggle"><a class="header" href="#toggle">toggle</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "toggle"
+  }
+}
+</code></pre>
+<h4 id="send-command"><a class="header" href="#send-command">send command</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "send_cmd",
+    "params": {
+      "command": "DPAD_UP"
+    }
+  }
+}
+</code></pre>
+<h4 id="send-long-press-command"><a class="header" href="#send-long-press-command">send long-press command</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "send_cmd",
+    "params": {
+      "command": "CURSOR_ENTER",
+      "hold": 800
+    }
+  }
+}
+</code></pre>
+<h4 id="send-repeated-command"><a class="header" href="#send-repeated-command">send repeated command</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "send_cmd",
+    "params": {
+      "command": "VOLUME_DOWN",
+      "repeat": 5
+    }
+  }
+}
+</code></pre>
+<h4 id="send-sequence"><a class="header" href="#send-sequence">send sequence</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "cmd_id": "send_cmd_sequence",
+    "params": {
+      "sequence": ["1", "2", "3", "ENTER"],
+      "delay": 100
+    }
+  }
+}
+</code></pre>
+<h3 id="event-examples"><a class="header" href="#event-examples">Event examples</a></h3>
+<h4 id="device-was-turned-on"><a class="header" href="#device-was-turned-on">device was turned on</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "attributes": {
+      "state": "on"
+    }
+  }
+}
+</code></pre>
+<h4 id="device-was-turned-off"><a class="header" href="#device-was-turned-off">device was turned off</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "remote",
+    "entity_id": "remote-1",
+    "attributes": {
+      "state": "off"
+    }
+  }
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../entities/entity_media_player.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../entities/entity_sensor.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../entities/entity_media_player.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../entities/entity_sensor.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

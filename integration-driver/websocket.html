@@ -1,0 +1,315 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>WebSockets handling - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="websocket"><a class="header" href="#websocket">WebSocket</a></h2>
+<p><a href="https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API">WebSocket</a> is a bidirectional communication
+channel to exchange messages.<br />
+These messages are all events, which can be sent by the client or server at any time.<br />
+There's no support for synchronous calls or transactions. Message relations must be handled in the application level
+protocol and are designed with message exchange patterns.</p>
+<h3 id="authentication"><a class="header" href="#authentication">Authentication</a></h3>
+<p>⚠️ Custom integrations running on the remote do not support authentication.</p>
+<p>An external integration driver may require a token for authentication, or no authentication at all.</p>
+<ul>
+<li>During driver registration the preferred authentication type and the token can be specified.</li>
+<li>Default authentication method: message based if a token has been set.</li>
+</ul>
+<h4 id="header-authentication"><a class="header" href="#header-authentication">Header Authentication</a></h4>
+<p>If header based authentication has been specified for the integration driver in the remote configuration, the remote
+will send the token in the <code>auth-token</code> header field while establishing the connection.</p>
+<p>The WebSocket connection should then only be established by the driver if the token matches. Otherwise, the integration
+driver (which is the WebSocket server) must respond with http status code <code>401 Unauthorized</code> and not upgrading the
+connection to WebSockets.</p>
+<p>If the integration driver upgrades the WebSocket connection, the remote assumes the connection as authenticated.</p>
+<h4 id="message-authentication"><a class="header" href="#message-authentication">Message Authentication</a></h4>
+<p>For integration drivers not able to use header based authentication with WebSockets (due to framework or runtime
+restrictions), a fallback option with text messages exists. See AsyncAPI specification for the message definitions.</p>
+<ol>
+<li>Right after the WebSocket connection is established, the integration driver must send the <code>auth_required</code> event as
+first message:</li>
+</ol>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "auth_required",
+  "msg_data": {
+    "name": "my-integration",
+    "version": {
+      "api": "0.5.0",
+      "driver": "1.0.0"
+    }
+  }
+}
+</code></pre>
+<ol start="2">
+<li>The remote sends an authentication message:</li>
+</ol>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 1,
+  "msg": "auth",
+  "msg_data": {
+    "token": "$TOKEN"
+  }
+}
+</code></pre>
+<ol start="3">
+<li>
+<p>The integration driver replies with the <code>authentication</code> event including the result code of the authentication:</p>
+<ul>
+<li><code>200</code>: authentication succeeded, driver can be used, all API messages are accepted.</li>
+<li><code>401</code>: invalid token and the driver must close the connection. The remote will mark the integration as
+unauthorized and stop auto-reconnect.</li>
+</ul>
+</li>
+</ol>
+<pre><code class="language-json">{
+  "kind": "resp",
+  "req_id": 1,
+  "msg": "authentication",
+  "code": 200
+}
+</code></pre>
+<p>The remote will close the connection if the integration sends any other code than 200 or 401.</p>
+<h4 id="no-authentication"><a class="header" href="#no-authentication">No Authentication</a></h4>
+<p>If the driver doesn't support authentication tokens, it still needs to send the <code>authentication</code> message with code 200
+right after a connection has been established by a client.</p>
+<h3 id="keep-alive"><a class="header" href="#keep-alive">Keep Alive</a></h3>
+<p>The integration should automatically close idle connections.<br />
+In order to keep a connection open, the remote sends WebSocket <a href="https://tools.ietf.org/html/rfc6455#section-5.5.2">Ping Pong control frames</a>
+at least every 60 seconds. Furthermore, an integration should also send pings to the remote to detect stale
+connections and handle the standby events from the remote.</p>
+<h3 id="error-handling"><a class="header" href="#error-handling">Error Handling</a></h3>
+<ul>
+<li>All response messages include a status code property.<br />
+This code corresponds to the standard http status codes as main success / error indication.</li>
+</ul>
+<p><strong>TODO</strong> <em>Disconnection standard status code in WebSockets: <a href="https://tools.ietf.org/html/rfc6455#section-7.4">rfc6455</a></em></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../integration-driver/write-integration-driver.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../integration-driver/driver-advertisement.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../integration-driver/write-integration-driver.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../integration-driver/driver-advertisement.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

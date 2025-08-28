@@ -1,0 +1,490 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Regular keycodes - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon.svg">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="highlight-css" href="../highlight.css">
+        <link rel="stylesheet" id="tomorrow-night-css" href="../tomorrow-night.css">
+        <link rel="stylesheet" id="ayu-highlight-css" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <i class="fa fa-spinner fa-spin"></i>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h2 id="regular-keycodes-keyboard-keypad-page-0x07"><a class="header" href="#regular-keycodes-keyboard-keypad-page-0x07">Regular keycodes (Keyboard Keypad Page (0x07))</a></h2>
+<ul>
+<li>HID usage table: chapter 10 <a href="https://usb.org/sites/default/files/hut1_2.pdf">https://usb.org/sites/default/files/hut1_2.pdf</a></li>
+</ul>
+<div class="table-wrapper"><table><thead><tr><th>Key name</th><th>Usage code</th><th>Comment</th></tr></thead><tbody>
+<tr><td>KEY_A</td><td>4</td><td></td></tr>
+<tr><td>KEY_B</td><td>5</td><td></td></tr>
+<tr><td>KEY_C</td><td>6</td><td></td></tr>
+<tr><td>KEY_D</td><td>7</td><td></td></tr>
+<tr><td>KEY_E</td><td>8</td><td></td></tr>
+<tr><td>KEY_F</td><td>9</td><td></td></tr>
+<tr><td>KEY_G</td><td>10</td><td></td></tr>
+<tr><td>KEY_H</td><td>11</td><td></td></tr>
+<tr><td>KEY_I</td><td>12</td><td></td></tr>
+<tr><td>KEY_J</td><td>13</td><td></td></tr>
+<tr><td>KEY_K</td><td>14</td><td></td></tr>
+<tr><td>KEY_L</td><td>15</td><td></td></tr>
+<tr><td>KEY_M</td><td>16</td><td></td></tr>
+<tr><td>KEY_N</td><td>17</td><td></td></tr>
+<tr><td>KEY_O</td><td>18</td><td></td></tr>
+<tr><td>KEY_P</td><td>19</td><td></td></tr>
+<tr><td>KEY_Q</td><td>20</td><td></td></tr>
+<tr><td>KEY_R</td><td>21</td><td></td></tr>
+<tr><td>KEY_S</td><td>22</td><td></td></tr>
+<tr><td>KEY_T</td><td>23</td><td></td></tr>
+<tr><td>KEY_U</td><td>24</td><td></td></tr>
+<tr><td>KEY_V</td><td>25</td><td></td></tr>
+<tr><td>KEY_W</td><td>26</td><td></td></tr>
+<tr><td>KEY_X</td><td>27</td><td></td></tr>
+<tr><td>KEY_Y</td><td>28</td><td></td></tr>
+<tr><td>KEY_Z</td><td>29</td><td></td></tr>
+<tr><td>KEY_1</td><td>30</td><td></td></tr>
+<tr><td>KEY_2</td><td>31</td><td></td></tr>
+<tr><td>KEY_3</td><td>32</td><td></td></tr>
+<tr><td>KEY_4</td><td>33</td><td></td></tr>
+<tr><td>KEY_5</td><td>34</td><td></td></tr>
+<tr><td>KEY_6</td><td>35</td><td></td></tr>
+<tr><td>KEY_7</td><td>36</td><td></td></tr>
+<tr><td>KEY_8</td><td>37</td><td></td></tr>
+<tr><td>KEY_9</td><td>38</td><td></td></tr>
+<tr><td>KEY_0</td><td>39</td><td></td></tr>
+<tr><td>KEY_RETURN</td><td>40</td><td></td></tr>
+<tr><td>KEY_ESC</td><td>41</td><td></td></tr>
+<tr><td>KEY_BACKSPACE</td><td>42</td><td></td></tr>
+<tr><td>KEY_TAB</td><td>43</td><td></td></tr>
+<tr><td>KEY_SPACE</td><td>44</td><td></td></tr>
+<tr><td>KEY_MINUS</td><td>45</td><td></td></tr>
+<tr><td>KEY_EQUAL</td><td>46</td><td></td></tr>
+<tr><td>KEY_LEFT_BRACE</td><td>47</td><td></td></tr>
+<tr><td>KEY_RIGHT_BRACE</td><td>48</td><td></td></tr>
+<tr><td>KEY_BACKSLASH</td><td>49</td><td></td></tr>
+<tr><td>KEY_HASH_TILDE</td><td>50</td><td></td></tr>
+<tr><td>KEY_SEMICOLON</td><td>51</td><td></td></tr>
+<tr><td>KEY_APOSTROPHE</td><td>52</td><td></td></tr>
+<tr><td>KEY_GRAVE</td><td>53</td><td></td></tr>
+<tr><td>KEY_COMMA</td><td>54</td><td></td></tr>
+<tr><td>KEY_DOT</td><td>55</td><td></td></tr>
+<tr><td>KEY_SLASH</td><td>56</td><td></td></tr>
+<tr><td>KEY_CAPSLOCK</td><td>57</td><td></td></tr>
+<tr><td>KEY_F1</td><td>58</td><td></td></tr>
+<tr><td>KEY_F2</td><td>59</td><td></td></tr>
+<tr><td>KEY_F3</td><td>60</td><td></td></tr>
+<tr><td>KEY_F4</td><td>61</td><td></td></tr>
+<tr><td>KEY_F5</td><td>62</td><td></td></tr>
+<tr><td>KEY_F6</td><td>63</td><td></td></tr>
+<tr><td>KEY_F7</td><td>64</td><td></td></tr>
+<tr><td>KEY_F8</td><td>65</td><td></td></tr>
+<tr><td>KEY_F9</td><td>66</td><td></td></tr>
+<tr><td>KEY_F10</td><td>67</td><td></td></tr>
+<tr><td>KEY_F11</td><td>68</td><td></td></tr>
+<tr><td>KEY_F12</td><td>69</td><td></td></tr>
+<tr><td>KEY_SYSRQ</td><td>70</td><td></td></tr>
+<tr><td>KEY_SCROLL_LOCK</td><td>71</td><td></td></tr>
+<tr><td>KEY_PAUSE</td><td>72</td><td></td></tr>
+<tr><td>KEY_INSERT</td><td>73</td><td></td></tr>
+<tr><td>KEY_HOME</td><td>74</td><td></td></tr>
+<tr><td>KEY_PAGE_UP</td><td>75</td><td></td></tr>
+<tr><td>KEY_DELETE</td><td>76</td><td></td></tr>
+<tr><td>KEY_END</td><td>77</td><td></td></tr>
+<tr><td>KEY_PAGE_DOWN</td><td>78</td><td></td></tr>
+<tr><td>KEY_RIGHT_ARROW</td><td>79</td><td></td></tr>
+<tr><td>KEY_LEFT_ARROW</td><td>80</td><td></td></tr>
+<tr><td>KEY_DOWN_ARROW</td><td>81</td><td></td></tr>
+<tr><td>KEY_UP_ARROW</td><td>82</td><td></td></tr>
+<tr><td>KEYPAD_NUMLOCK</td><td>83</td><td></td></tr>
+<tr><td>KEYPAD_SLASH</td><td>84</td><td></td></tr>
+<tr><td>KEYPAD_ASTERISK</td><td>85</td><td></td></tr>
+<tr><td>KEYPAD_MINUS</td><td>86</td><td></td></tr>
+<tr><td>KEYPAD_PLUS</td><td>87</td><td></td></tr>
+<tr><td>KEYPAD_ENTER</td><td>88</td><td></td></tr>
+<tr><td>KEYPAD_1</td><td>89</td><td></td></tr>
+<tr><td>KEYPAD_2</td><td>90</td><td></td></tr>
+<tr><td>KEYPAD_3</td><td>91</td><td></td></tr>
+<tr><td>KEYPAD_4</td><td>92</td><td></td></tr>
+<tr><td>KEYPAD_5</td><td>93</td><td></td></tr>
+<tr><td>KEYPAD_6</td><td>94</td><td></td></tr>
+<tr><td>KEYPAD_7</td><td>95</td><td></td></tr>
+<tr><td>KEYPAD_8</td><td>96</td><td></td></tr>
+<tr><td>KEYPAD_9</td><td>97</td><td></td></tr>
+<tr><td>KEYPAD_0</td><td>98</td><td></td></tr>
+<tr><td>KEYPAD_DOT</td><td>99</td><td></td></tr>
+<tr><td>KEY_102ND</td><td>100</td><td></td></tr>
+<tr><td>KEY_APPLICATION</td><td>101</td><td></td></tr>
+<tr><td>KEY_POWER</td><td>102</td><td></td></tr>
+<tr><td>KEYPAD_EQUAL</td><td>103</td><td></td></tr>
+<tr><td>KEY_F13</td><td>104</td><td></td></tr>
+<tr><td>KEY_F14</td><td>105</td><td></td></tr>
+<tr><td>KEY_F15</td><td>106</td><td></td></tr>
+<tr><td>KEY_F16</td><td>107</td><td></td></tr>
+<tr><td>KEY_F17</td><td>108</td><td></td></tr>
+<tr><td>KEY_F18</td><td>109</td><td></td></tr>
+<tr><td>KEY_F19</td><td>110</td><td></td></tr>
+<tr><td>KEY_F20</td><td>111</td><td></td></tr>
+<tr><td>KEY_F21</td><td>112</td><td></td></tr>
+<tr><td>KEY_F22</td><td>113</td><td></td></tr>
+<tr><td>KEY_F23</td><td>114</td><td></td></tr>
+<tr><td>KEY_F24</td><td>115</td><td></td></tr>
+<tr><td>KEY_EXECUTE</td><td>116</td><td></td></tr>
+<tr><td>KEY_HELP</td><td>117</td><td></td></tr>
+<tr><td>KEY_MENU</td><td>118</td><td></td></tr>
+<tr><td>KEY_SELECT</td><td>119</td><td></td></tr>
+<tr><td>KEY_STOP</td><td>120</td><td></td></tr>
+<tr><td>KEY_AGAIN</td><td>121</td><td></td></tr>
+<tr><td>KEY_UNDO</td><td>122</td><td></td></tr>
+<tr><td>KEY_CUT</td><td>123</td><td></td></tr>
+<tr><td>KEY_COPY</td><td>124</td><td></td></tr>
+<tr><td>KEY_PASTE</td><td>125</td><td></td></tr>
+<tr><td>KEY_FIND</td><td>126</td><td></td></tr>
+<tr><td>KEY_MUTE</td><td>127</td><td></td></tr>
+<tr><td>KEY_VOLUME_UP</td><td>128</td><td></td></tr>
+<tr><td>KEY_VOLUME_DOWN</td><td>129</td><td></td></tr>
+<tr><td>-</td><td>130</td><td></td></tr>
+<tr><td>-</td><td>131</td><td></td></tr>
+<tr><td>-</td><td>132</td><td></td></tr>
+<tr><td>KEYPAD_COMMA</td><td>133</td><td></td></tr>
+<tr><td>-</td><td>134</td><td></td></tr>
+<tr><td>KEY_RO</td><td>135</td><td></td></tr>
+<tr><td>KEY_KATAKANA_HIRAGANA</td><td>136</td><td></td></tr>
+<tr><td>KEY_YEN</td><td>137</td><td></td></tr>
+<tr><td>KEY_HENKAN</td><td>138</td><td></td></tr>
+<tr><td>KEY_MUHENKAN</td><td>139</td><td></td></tr>
+<tr><td>KEYPAD_JPCOMMA</td><td>140</td><td></td></tr>
+<tr><td>KEY_INTERNATIONAL7</td><td>141</td><td></td></tr>
+<tr><td>KEY_INTERNATIONAL8</td><td>142</td><td></td></tr>
+<tr><td>KEY_INTERNATIONAL9</td><td>143</td><td></td></tr>
+<tr><td>KEY_HANGEUL</td><td>144</td><td></td></tr>
+<tr><td>KEY_HANJA</td><td>145</td><td></td></tr>
+<tr><td>KEY_KATAKANA</td><td>146</td><td></td></tr>
+<tr><td>KEY_HIRAGANA</td><td>147</td><td></td></tr>
+<tr><td>KEY_ZENKAKU_HANKAKU</td><td>148</td><td></td></tr>
+<tr><td>KEY_FURIGANA</td><td>149</td><td></td></tr>
+<tr><td>KEY_LANG7</td><td>150</td><td></td></tr>
+<tr><td>KEY_LANG8</td><td>151</td><td></td></tr>
+<tr><td>KEY_LANG9</td><td>152</td><td></td></tr>
+<tr><td>KEY_ALTERNATE_ERASE</td><td>153</td><td></td></tr>
+<tr><td>KEY_SYS_REQ_ATTENTION</td><td>154</td><td></td></tr>
+<tr><td>KEY_CANCEL</td><td>155</td><td></td></tr>
+<tr><td>KEY_CLEAR</td><td>156</td><td></td></tr>
+<tr><td>KEY_PRIOR</td><td>157</td><td></td></tr>
+<tr><td>-</td><td>158</td><td></td></tr>
+<tr><td>KEY_SEPARATOR</td><td>159</td><td></td></tr>
+<tr><td>KEY_OUT</td><td>160</td><td></td></tr>
+<tr><td>KEY_OPER</td><td>161</td><td></td></tr>
+<tr><td>KEY_CLEAR_AGAIN</td><td>162</td><td></td></tr>
+<tr><td>KEY_CR_SEL_PROPS</td><td>163</td><td></td></tr>
+<tr><td>KEY_EX_SEL</td><td>164</td><td></td></tr>
+<tr><td>-</td><td>165</td><td></td></tr>
+<tr><td>-</td><td>166</td><td></td></tr>
+<tr><td>-</td><td>167</td><td></td></tr>
+<tr><td>-</td><td>168</td><td></td></tr>
+<tr><td>-</td><td>169</td><td></td></tr>
+<tr><td>-</td><td>170</td><td></td></tr>
+<tr><td>-</td><td>171</td><td></td></tr>
+<tr><td>-</td><td>172</td><td></td></tr>
+<tr><td>-</td><td>173</td><td></td></tr>
+<tr><td>-</td><td>174</td><td></td></tr>
+<tr><td>-</td><td>175</td><td></td></tr>
+<tr><td>KEYPAD_00</td><td>176</td><td></td></tr>
+<tr><td>KEYPAD_000</td><td>177</td><td></td></tr>
+<tr><td>KEY_THOUSANDS_SEPARATOR</td><td>178</td><td></td></tr>
+<tr><td>KEY_DECIMAL_SEPARATOR</td><td>179</td><td></td></tr>
+<tr><td>KEY_CURRENCY_UNIT</td><td>180</td><td></td></tr>
+<tr><td>KEY_CURRENCY_SUB_UNIT</td><td>181</td><td></td></tr>
+<tr><td>KEYPAD_LEFT_PARENTHESIS</td><td>182</td><td></td></tr>
+<tr><td>KEYPAD_RIGHT_PARENTHESIS</td><td>183</td><td></td></tr>
+<tr><td>KEYPAD_LEFT_BRACE</td><td>184</td><td></td></tr>
+<tr><td>KEYPAD_RIGHT_BRACE</td><td>185</td><td></td></tr>
+<tr><td>KEYPAD_TAB</td><td>186</td><td></td></tr>
+<tr><td>KEYPAD_BACKSPACE</td><td>187</td><td></td></tr>
+<tr><td>KEYPAD_A</td><td>188</td><td></td></tr>
+<tr><td>KEYPAD_B</td><td>189</td><td></td></tr>
+<tr><td>KEYPAD_C</td><td>190</td><td></td></tr>
+<tr><td>KEYPAD_D</td><td>191</td><td></td></tr>
+<tr><td>KEYPAD_E</td><td>192</td><td></td></tr>
+<tr><td>KEYPAD_F</td><td>193</td><td></td></tr>
+<tr><td>KEYPAD_XOR</td><td>194</td><td></td></tr>
+<tr><td>KEYPAD_CARET</td><td>195</td><td></td></tr>
+<tr><td>KEYPAD_PERCENT</td><td>196</td><td></td></tr>
+<tr><td>KEYPAD_LESS_THAN</td><td>197</td><td></td></tr>
+<tr><td>KEYPAD_GREATER_THAN</td><td>198</td><td></td></tr>
+<tr><td>KEYPAD_AMPERSAND</td><td>199</td><td></td></tr>
+<tr><td>KEYPAD_AMPERSAND_AMPERSAND</td><td>200</td><td></td></tr>
+<tr><td>KEYPAD_PIPE</td><td>201</td><td></td></tr>
+<tr><td>KEYPAD_PIPE_PIPE</td><td>202</td><td></td></tr>
+<tr><td>KEYPAD_COLON</td><td>203</td><td></td></tr>
+<tr><td>KEYPAD_HASH</td><td>204</td><td></td></tr>
+<tr><td>KEYPAD_SPACE</td><td>205</td><td></td></tr>
+<tr><td>KEYPAD_AT</td><td>206</td><td></td></tr>
+<tr><td>KEYPAD_EXCLAMATION</td><td>207</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_STORE</td><td>208</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_RECALL</td><td>209</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_CLEAR</td><td>210</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_ADD</td><td>211</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_SUBTRACT</td><td>212</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_MULTIPLY</td><td>213</td><td></td></tr>
+<tr><td>KEYPAD_MEMORY_DIVIDE</td><td>214</td><td></td></tr>
+<tr><td>KEYPAD_PLUS_MINUS</td><td>215</td><td></td></tr>
+<tr><td>KEYPAD_CLEAR</td><td>216</td><td></td></tr>
+<tr><td>KEYPAD_CLEAR_ENTRY</td><td>217</td><td></td></tr>
+<tr><td>KEYPAD_BINARY</td><td>218</td><td></td></tr>
+<tr><td>KEYPAD_OCTAL</td><td>229</td><td></td></tr>
+<tr><td>KEYPAD_DECIMAL</td><td>220</td><td></td></tr>
+<tr><td>KEYPAD_HEXADECIMAL</td><td>221</td><td></td></tr>
+<tr><td>-</td><td>222</td><td></td></tr>
+<tr><td>-</td><td>223</td><td></td></tr>
+<tr><td>KEY_LEFT_CONTROL</td><td>224</td><td></td></tr>
+<tr><td>KEY_LEFT_SHIFT</td><td>225</td><td></td></tr>
+<tr><td>KEY_LEFT_ALT</td><td>226</td><td></td></tr>
+<tr><td>KEY_LEFT_GUI</td><td>227</td><td></td></tr>
+<tr><td>KEY_RIGHT_CONTROL</td><td>228</td><td></td></tr>
+<tr><td>KEY_RIGHT_SHIFT</td><td>229</td><td></td></tr>
+<tr><td>KEY_RIGHT_ALT</td><td>230</td><td></td></tr>
+<tr><td>KEY_RIGHT_GUI</td><td>231</td><td></td></tr>
+<tr><td>KEY_MEDIA_PLAY_PAUSE</td><td>232</td><td>Not specified in official HID Usage Table specification.</td></tr>
+<tr><td>KEY_MEDIA_STOP_CD</td><td>233</td><td>Applies to all "KEY_MEDIA_" keys.</td></tr>
+<tr><td>KEY_MEDIA_PREVIOUS_SONG</td><td>234</td><td>--&gt; found in Android sources</td></tr>
+<tr><td>KEY_MEDIA_NEXT_SONG</td><td>235</td><td></td></tr>
+<tr><td>KEY_MEDIA_EJECT_CD</td><td>236</td><td></td></tr>
+<tr><td>KEY_MEDIA_VOLUME_UP</td><td>237</td><td></td></tr>
+<tr><td>KEY_MEDIA_VOLUME_DOWN</td><td>238</td><td></td></tr>
+<tr><td>KEY_MEDIA_MUTE</td><td>239</td><td></td></tr>
+<tr><td>KEY_MEDIA_WWW</td><td>240</td><td></td></tr>
+<tr><td>KEY_MEDIA_BACK</td><td>241</td><td></td></tr>
+<tr><td>KEY_MEDIA_FORWARD</td><td>242</td><td></td></tr>
+<tr><td>KEY_MEDIA_STOP</td><td>243</td><td></td></tr>
+<tr><td>KEY_MEDIA_FIND</td><td>244</td><td></td></tr>
+<tr><td>KEY_MEDIA_SCROLL_UP</td><td>245</td><td></td></tr>
+<tr><td>KEY_MEDIA_SCROLL_DOWN</td><td>246</td><td></td></tr>
+<tr><td>KEY_MEDIA_EDIT</td><td>247</td><td></td></tr>
+<tr><td>KEY_MEDIA_SLEEP</td><td>248</td><td></td></tr>
+<tr><td>KEY_MEDIA_COFFEE</td><td>249</td><td></td></tr>
+<tr><td>KEY_MEDIA_REFRESH</td><td>250</td><td></td></tr>
+<tr><td>KEY_MEDIA_CALC</td><td>251</td><td></td></tr>
+<tr><td>-</td><td>252</td><td></td></tr>
+<tr><td>-</td><td>253</td><td></td></tr>
+<tr><td>-</td><td>254</td><td></td></tr>
+<tr><td>-</td><td>255</td><td></td></tr>
+</tbody></table>
+</div>
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../bt/virtual_keyboard.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../bt/hid_consumer.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../bt/virtual_keyboard.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../bt/hid_consumer.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid.min.js"></script>
+        <script src="../mermaid-init.js"></script>
+
+
+
+    </div>
+    </body>
+</html>
