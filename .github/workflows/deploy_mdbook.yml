@@ -1,0 +1,43 @@
+name: Deploy mdbook
+on:
+  push:
+# FIXME disabled for testing new feature branch!
+   branches:
+     - docs/mdbook
+#     - main
+   paths:
+      - 'book.toml'
+      - 'doc/**'
+      - '.github/workflows/deploy_mdbook.yml'
+
+jobs:
+  deploy:
+    name: Deploy mdbook
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # To push a branch
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install latest mdbook
+        run: |
+          tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
+          url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          mkdir mdbook
+          curl -sSL $url | tar -xz --directory=./mdbook
+          echo `pwd`/mdbook >> $GITHUB_PATH
+      - name: Install mdbook mermaid extension
+        run: |
+          tag=v0.15.0
+          url="https://github.com/badboy/mdbook-mermaid/releases/download/${tag}/mdbook-mermaid-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -sSL $url | tar -xz --directory=./mdbook
+
+      - name: Build Book
+        run: mdbook build
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: book

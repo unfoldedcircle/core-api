@@ -3,3 +3,8 @@
 
 /dock-api/html/
 /integration-api/html/
+
+# mdbook output
+/book
+/mermaid-init.js
+/mermaid.min.js

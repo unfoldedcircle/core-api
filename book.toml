@@ -1,0 +1,15 @@
+[book]
+authors = ["Markus Zehnder"]
+language = "en"
+src = "doc"
+title = "Unfolded Circle API Documentation"
+
+[preprocessor]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+[output]
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
