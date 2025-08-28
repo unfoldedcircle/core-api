@@ -1,6 +1,6 @@
 ## Consumer codes (Consumer Page (0x0C))
 
-- Consumer Control. HID usage table: chapter 15 https://usb.org/sites/default/files/hut1_2.pdf
+- Consumer Control. HID usage table: chapter 15 <https://usb.org/sites/default/files/hut1_2.pdf>
 
 | Key name                                            | Usage code | Comment                                          |
 |-----------------------------------------------------|------------|--------------------------------------------------|

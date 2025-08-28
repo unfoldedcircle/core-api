@@ -1,6 +1,6 @@
 ## System Controls (Generic Desktop Page (0x01))
 
-- System Control. HID usage table: chapter 4 https://usb.org/sites/default/files/hut1_2.pdf
+- System Control. HID usage table: chapter 4 <https://usb.org/sites/default/files/hut1_2.pdf>
 
 | Key name            | Usage code | Comment                                                                          |
 |---------------------|------------|----------------------------------------------------------------------------------|
