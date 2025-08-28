@@ -34,7 +34,9 @@ jobs:
           curl -sSL $url | tar -xz --directory=./mdbook
 
       - name: Build Book
-        run: mdbook build
+        run: |
+          mdbook-mermaid install .
+          mdbook build
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
