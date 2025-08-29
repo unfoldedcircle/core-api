@@ -1,5 +1,10 @@
 # Remote Two/3 API Documentation
 
+Visit the [core-api GitHub project site](https://github.com/unfoldedcircle/core-api) where this documentation was built
+from and where you can find further technical information.
+
+## Introduction
+
 - [Remote Two user interface](remote-ui.md)
 - [Remote Two entities](entities/README.md)
 - [Bluetooth HID peripheral support](bt/README.md)
@@ -66,3 +71,25 @@ The WebSocket communication is using text messages with JSON payload.
 - [Driver registration](integration-driver/driver-registration.md)
 - [Driver setup](integration-driver/driver-setup.md)
 - [Install integration driver on the device](integration-driver/driver-installation.md)
+
+## Contact us
+
+There are a few different ways to reach us:
+
+- [Visit our GitHub site](https://github.com/unfoldedcircle/)
+- [Reach out to us on X](https://x.com/unfoldedcircle)
+- [Visit our community forum](http://unfolded.community/)
+- [Chat with us in our Discord channel](http://unfolded.chat/)
+- [Send us a message on our website](https://unfoldedcircle.com/contact)
+
+## Contributions
+
+Please read our [contribution guidelines](https://github.com/unfoldedcircle/core-api/blob/main/CONTRIBUTING.md)
+before opening a pull request.
+
+## License
+
+We have published the API specifications and documentations under the [CC-BY-AS-4.0](https://creativecommons.org/licenses/by-sa/4.0/)
+(Creative Commons Attribution-ShareAlike 4.0 International) license.  
+All code examples in this repository are licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0).  
+All graphics copyright © Unfolded Circle ApS 2022.

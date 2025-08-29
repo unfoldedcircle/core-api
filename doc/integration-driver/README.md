@@ -1,5 +1,14 @@
 # Integration Drivers
 
+Since we are providing an API and not an SDK for a specific programming language, one can develop external integrations
+in any language which is capable running a WebSockets server and handling JSON data.
+
+The downside of an API is that more low-level coding is required. In our case this involves running a WebSocket server,
+handling the connections from the Remote device, and parsing the JSON payload in the WebSocket text messages.
+However, once this is done, the required API message interactions are rather simple to handle.
+
+See examples below for integration libraries and existing open source integrations.
+
 - [How to write an integration driver](write-integration-driver.md)
 - [WebSockets handling](websocket.md)
 - [Driver mDNS advertisement](driver-advertisement.md)
