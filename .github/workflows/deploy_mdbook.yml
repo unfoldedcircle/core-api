@@ -38,6 +38,19 @@ jobs:
           url="https://github.com/badboy/mdbook-mermaid/releases/download/${tag}/mdbook-mermaid-${tag}-x86_64-unknown-linux-gnu.tar.gz"
           curl -sSL $url | tar -xz --directory=./mdbook
 
+      - name: Cache cargo install
+        id: cache-cargo-install
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-install
+
+      - name: Install mdbook yapp extension
+        if: steps.cache-cargo-install.outputs.cache-hit != 'true'
+        run: |
+          cargo install mdbook-yapp
+
       - name: Build Book
         run: |
           mdbook-mermaid install .
