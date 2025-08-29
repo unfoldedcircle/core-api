@@ -175,10 +175,8 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="websocket-integration-api"><a class="header" href="#websocket-integration-api">WebSocket Integration API</a></h1>
+                        <h1 id="integration-drivers"><a class="header" href="#integration-drivers">Integration Drivers</a></h1>
 <ul>
-<li><a href="https://unfoldedcircle.github.io/core-api/integration/">AsyncAPI definition</a></li>
-<li><a href="../entities/README.html">Remote Two entities</a></li>
 <li><a href="write-integration-driver.html">How to write an integration driver</a></li>
 <li><a href="websocket.html">WebSockets handling</a></li>
 <li><a href="driver-advertisement.html">Driver mDNS advertisement</a></li>
@@ -186,23 +184,42 @@
 <li><a href="driver-setup.html">Driver setup</a></li>
 <li><a href="driver-installation.html">Install integration driver on the device</a></li>
 </ul>
-<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h2 id="websocket-integration-api"><a class="header" href="#websocket-integration-api">WebSocket Integration API</a></h2>
+<p>The Unfolded Circle WebSocket Integration-API allows writing device integration drivers for the Unfolded Circle Remotes.</p>
+<p>The API specification is defined with <a href="https://www.asyncapi.com/">AsyncAPI</a> in YAML format.
+The WebSocket communication is using text messages with JSON payload.</p>
 <ul>
-<li><a href="https://github.com/unfoldedcircle/integration-node-library">Node.js API wrapper for the UC Integration API</a><br />
-Integrations using the Node.js API wrapper:
+<li><a href="https://unfoldedcircle.github.io/core-api/integration/">Integration AsyncAPI viewer</a>
+<ul>
+<li><a href="https://unfoldedcircle.github.io/core-api/integration/">Integration AsyncAPI YAML definition</a></li>
+<li>View with <a href="https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/integration-api/UCR-integration-asyncapi.yaml">AsyncAPI Studio online tool</a>.<br />
+The link will directly load the yaml definition file from GitHub and display it together with the HTML documentation
+in the browser.</li>
+</ul>
+</li>
+</ul>
+<h2 id="examples"><a class="header" href="#examples">Examples</a></h2>
+<h3 id="nodejs"><a class="header" href="#nodejs">Node.js</a></h3>
+<ul>
+<li><a href="https://github.com/unfoldedcircle/integration-node-library">Node.js API wrapper for the UC Integration API</a></li>
+</ul>
+<p>Integrations using the Node.js API wrapper:</p>
 <ul>
 <li><a href="https://github.com/unfoldedcircle/integration-globalcache">Global Caché IR integration</a></li>
 <li><a href="https://github.com/unfoldedcircle/integration-roon">Roon integration</a></li>
 </ul>
-</li>
-<li><a href="https://github.com/unfoldedcircle/integration-python-library">Python API wrapper library for the UC Integration API</a><br />
-Integrations using the Python API wrapper:
+<h3 id="python"><a class="header" href="#python">Python</a></h3>
+<ul>
+<li><a href="https://github.com/unfoldedcircle/integration-python-library">Python API wrapper library for the UC Integration API</a></li>
+</ul>
+<p>Integrations using the Python API wrapper:</p>
 <ul>
 <li><a href="https://github.com/unfoldedcircle/integration-androidtv">Android TV integration</a></li>
 <li><a href="https://github.com/unfoldedcircle/integration-appletv">Apple TV integration</a></li>
 <li><a href="https://github.com/unfoldedcircle/integration-denonavr">Denon AVR integration</a></li>
 </ul>
-</li>
+<h3 id="rust"><a class="header" href="#rust">Rust</a></h3>
+<ul>
 <li><a href="https://github.com/unfoldedcircle/api-model-rs">API models in Rust</a></li>
 <li><a href="https://github.com/unfoldedcircle/integration-home-assistant">Home Assistant integration</a> written in Rust</li>
 </ul>
