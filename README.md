@@ -6,7 +6,7 @@
 
 This repository contains API specifications of [Unfolded Circle Remote](https://www.unfoldedcircle.com/) products.
 
-Read the **[Developer Guide](https://unfoldedcircle.github.io/core-api)** which contains the `./doc` content in a
+Read the **[Developer Guide](https://unfoldedcircle.github.io/core-api)** which presents the [./doc](doc) content in a
 structured and searchable book format.
 
 ## Overview
