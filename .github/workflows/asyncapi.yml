@@ -15,10 +15,17 @@ on:
       - 'integration-api/**'
       - '.github/workflows/asyncapi.yml'
 
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
 jobs:
   validate:
     name: Validate AsyncAPI
     runs-on: ubuntu-latest
+    permissions:
+      contents: write  # To push a branch
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -64,21 +71,21 @@ jobs:
           ag ./dock-api/UCD2-asyncapi.yaml @asyncapi/html-template -o ./static/api/dock --force-write
 
       - name: Deploy core API GH page
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: ./static/api/ws
           target-folder: ./ws
 
       - name: Deploy integration API GH page
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: ./static/api/integration
           target-folder: ./integration
 
       - name: Deploy dock API GH page
-        uses: JamesIves/github-pages-deploy-action@v4.5.0
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: ./static/api/dock
