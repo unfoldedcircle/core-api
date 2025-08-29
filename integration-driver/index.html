@@ -176,6 +176,12 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="integration-drivers"><a class="header" href="#integration-drivers">Integration Drivers</a></h1>
+<p>Since we are providing an API and not an SDK for a specific programming language, one can develop external integrations
+in any language which is capable running a WebSockets server and handling JSON data.</p>
+<p>The downside of an API is that more low-level coding is required. In our case this involves running a WebSocket server,
+handling the connections from the Remote device, and parsing the JSON payload in the WebSocket text messages.
+However, once this is done, the required API message interactions are rather simple to handle.</p>
+<p>See examples below for integration libraries and existing open source integrations.</p>
 <ul>
 <li><a href="write-integration-driver.html">How to write an integration driver</a></li>
 <li><a href="websocket.html">WebSockets handling</a></li>

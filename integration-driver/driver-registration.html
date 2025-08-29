@@ -203,7 +203,7 @@ firewalls, VLAN etc.).</p>
 </pre>
 <h3 id="registration-rest-api"><a class="header" href="#registration-rest-api">Registration REST API</a></h3>
 <p>Driver registration is only possible through the Remote core REST API.</p>
-<p>See: <a href="https://github.com/unfoldedcircle/core-simulator/tree/main/core-api">https://github.com/unfoldedcircle/core-simulator/tree/main/core-api</a></p>
+<p>See: <a href="https://github.com/unfoldedcircle/core-api/tree/main/core-api">https://github.com/unfoldedcircle/core-api/tree/main/core-api</a></p>
 <h4 id="example"><a class="header" href="#example">Example</a></h4>
 <p>Register the <a href="https://github.com/unfoldedcircle/integration-node-library/tree/main/examples/simulated-light">simulated-light driver</a>
 using the <a href="https://github.com/unfoldedcircle/core-simulator/tree/main/docker">Core-Simulator Docker setup</a>.
@@ -211,7 +211,7 @@ This also works using the Simulator VM running with bridge networking:</p>
 <ul>
 <li>The integration driver is accessible at <code>192.168.1.115</code> and listens on port <code>9988</code>. Adapt to your environment!</li>
 <li>Register driver with <code>"driver_url:" "ws://192.168.1.115:9988"</code></li>
-<li>Use the <a href="https://github.com/unfoldedcircle/core-simulator/tree/main/core-api/rest">predefined Postman collection</a>
+<li>Use the <a href="https://github.com/unfoldedcircle/core-api/tree/main/core-api/rest">predefined Postman collection</a>
 to interact with the Simulator from the host, or use a curl call:</li>
 </ul>
 <pre><code class="language-bash">curl --location 'http://localhost:8080/api/intg/drivers' \
