@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Validate
         uses: mbowman100/swagger-validator-action@master
         with:
@@ -34,7 +34,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: [ validate ]
     steps:
-      - name: prepare GH page deployment
+      - name: Checkout repository
+        uses: actions/checkout@v5
+      - name: Prepare GH page deployment
         run: |
           cp ./core-api/rest/UCR-core-openapi.yaml ./core-api/rest/swagger-ui
       - name: Deploy core API GH page
