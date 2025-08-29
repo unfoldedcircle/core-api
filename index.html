@@ -175,16 +175,50 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="remote-two-api-documentation"><a class="header" href="#remote-two-api-documentation">Remote Two API Documentation</a></h1>
+                        <h1 id="remote-two3-api-documentation"><a class="header" href="#remote-two3-api-documentation">Remote Two/3 API Documentation</a></h1>
 <ul>
 <li><a href="remote-ui.html">Remote Two user interface</a></li>
+<li><a href="entities/README.html">Remote Two entities</a></li>
 <li><a href="bt/README.html">Bluetooth HID peripheral support</a></li>
 <li><a href="discovery.html">Remote Two DNS-SD lookup</a></li>
 </ul>
+<h2 id="core-api"><a class="header" href="#core-api">Core API</a></h2>
+<p>The Unfolded Circle Remote WebSocket &amp; REST Core-APIs allow you to interact with the Unfolded Circle remote-core service
+and take full control of its features.</p>
+<p>The focus of the Core-APIs is to provide all functionality for the UI application and the web-configurator.
+The APIs are specialized for certain tasks, but otherwise contain the same functionality and data models.</p>
+<ul>
+<li>The UCR REST Core-API adds:
+<ul>
+<li>Custom resource handling for uploading icons, images etc.</li>
+<li>Installing custom remote-ui and web-configurator components.</li>
+<li>Installing custom integration drivers.</li>
+<li>User management and authentication handling.</li>
+</ul>
+</li>
+<li>The UCR WS Core-API adds:
+<ul>
+<li>Event subscription with asynchronous notifications.</li>
+</ul>
+</li>
+</ul>
+<p>The Core-APIs may also be used by other external systems and integration drivers, if specific configuration or
+interaction features are required, which are not present in the UCR Integration-API.</p>
+<p>The API specifications are defined with <a href="https://swagger.io/specification/">OpenAPI</a> &amp; <a href="https://www.asyncapi.com/">AsyncAPI</a>
+in YAML format.</p>
+<ul>
+<li><a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core-API</a></li>
+<li><a href="https://unfoldedcircle.github.io/core-api/ws/">WebSocket Core-API</a></li>
+</ul>
 <h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
 <ul>
-<li><a href="https://unfoldedcircle.github.io/core-api/integration/">Integration AsyncAPI YAML definition</a></li>
-<li><a href="entities/README.html">Remote Two entities</a></li>
+<li><a href="https://unfoldedcircle.github.io/core-api/integration/">Integration AsyncAPI definition</a></li>
+<li>View with <a href="https://studio.asyncapi.com/?url=https://raw.githubusercontent.com/unfoldedcircle/core-api/main/integration-api/UCR-integration-asyncapi.yaml">AsyncAPI Studio online tool</a>.<br />
+The link will directly load the yaml definition file from GitHub and display it together with the HTML documentation in
+the browser.</li>
+</ul>
+<h3 id="integration-driver"><a class="header" href="#integration-driver">Integration Driver</a></h3>
+<ul>
 <li><a href="integration-driver/write-integration-driver.html">How to write an integration driver</a></li>
 <li><a href="integration-driver/websocket.html">WebSockets handling</a></li>
 <li><a href="integration-driver/driver-registration.html">Driver registration</a></li>

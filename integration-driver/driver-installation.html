@@ -430,7 +430,7 @@ a native binary for the Remote.</p>
 --user 'web-configurator:$PIN' \
 --form 'file=@"custom-intg.tar.gz"'
 </code></pre>
-<p>See <a href="../../core-api/rest/README.html">REST Core API</a> for more details.</p>
+<p>See <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a> for more details.</p>
 <h2 id="delete-driver"><a class="header" href="#delete-driver">Delete driver</a></h2>
 <p>To delete a custom integration, use the regular endpoints to delete an integration instance and driver.
 These are the same endpoints as for an external network integration driver:</p>
@@ -438,7 +438,7 @@ These are the same endpoints as for an external network integration driver:</p>
 <li>Delete integration instance <code>DELETE /api/intg/instances/:intgId</code>.</li>
 <li>Delete driver and installation files: <code>DELETE /api/intg/drivers/:driverId</code>.</li>
 </ul>
-<p>See <a href="../../core-api/rest/README.html">REST Core API</a> for more details.</p>
+<p>See <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a> for more details.</p>
 <p>The instance and driver can also be deleted in the web-configurator.</p>
 <h2 id="log-access"><a class="header" href="#log-access">Log access</a></h2>
 <p>Output to stdout and stderr are automatically stored with a timestamp and accessible as the other system logs:</p>
@@ -446,7 +446,7 @@ These are the same endpoints as for an external network integration driver:</p>
 <li>Get log services: <code>GET /api/system/logs/services</code>.</li>
 <li>Query logs: <code>GET /api/system/logs?...</code>.</li>
 </ul>
-<p>See <a href="../../core-api/rest/README.html">REST Core API</a> for more details.</p>
+<p>See <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a> for more details.</p>
 <p>Log files can also be downloaded in the web-configurator: <em>Settings, Development: Logs</em></p>
 <h3 id="web-app-log-viewer"><a class="header" href="#web-app-log-viewer">Web-app log viewer</a></h3>
 <p>⚠️ Available from firmware release v2.1.0</p>
@@ -455,7 +455,7 @@ near real time.</p>
 <ul>
 <li>URL: <code>http://$IP/log/</code></li>
 <li>This function is deactivated by default and the endpoint returns 503.</li>
-<li>The log viewer must be started using the <a href="../../core-api/rest/README.html">REST Core API</a>
+<li>The log viewer must be started using the <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a>
 with the <code>/api/system/logs/web</code> endpoint:
 <ul>
 <li><code>GET</code> request returns the current state.</li>
