@@ -351,11 +351,11 @@ This is the normal command mode which has been part of the remote-entity command
 - **The `send_cmd_stop` request is not sent**.
 
 Implementation notes:
-- An integration driver is free to determine what to do with the repeat parameter! This depends on what is being controlled how.
+- An integration driver is free to determine what to do with the repeat parameter! This depends on what is being controlled and how.
     - Usually it is to simply execute the given command multiple times.
     - An implementation could also translate a repeat count to a  time (and ignoring the other parameters).
 - The integration driver should acknowledge the `send_cmd` request quickly when it contains a `repeat_count > 2`.  
-  Waiting until all commands are processed will lead to timeouts in the user interface.
+  Waiting until all commands are processed can lead to timeouts in the user interface.
 - The repeat count should automatically be reset in the integration driver if a new `send_cmd` request for the same `command`
   is received, while the previous command is not yet finished repeating.
 
