@@ -96,7 +96,7 @@ All entities share a set of common attributes like `name` and the `UNAVAILABLE`,
 An entity implementation defines additional features, attributes, states and options which need to be handled in the
 driver implementation.
 
-Please see [Integration AsyncAPI definition](../../integration-api/UCR-integration-asyncapi.yaml) for more information and additional options.
+Please see [Integration AsyncAPI definition](https://unfoldedcircle.github.io/core-api/integration/) for more information and additional options.
 
 ### Common entity definition
 

@@ -76,13 +76,13 @@ After a successful registration the driver will show up in the web-configurator:
 
 Click on the driver and start the setup:
 
-![driver-add.png](img%2Fdriver-add.png)
+![driver-add.png](img/driver-add.png)
 
 The above example has an empty `setup_data_schema`, so there won't be a user interaction and the setup only consists
 of connecting to the driver and fetching the driver information.
 
-![driver-setup-ok.png](img%2Fdriver-setup-ok.png)
+![driver-setup-ok.png](img/driver-setup-ok.png)
 
 The driver is now registered and the available entities will show up in the driver configuration:
 
-![driver.png](img%2Fdriver.png)
+![driver.png](img/driver.png)

@@ -112,7 +112,7 @@ Prefixes for other common functions:
 
 A default button mapping can be provided in `options.button_mapping`.
 
-The `DeviceButtonMapping` object is defined in the [Integration-API](../../integration-api) and is based on the same
+The `DeviceButtonMapping` object is defined in the [Integration-API](https://unfoldedcircle.github.io/core-api/integration/) and is based on the same
 definition in the Core-API.
 
 Example of `entity.options` object:
@@ -200,7 +200,7 @@ A detailed button mapping can be retrieved with the Core-API: `GET /api/cfg/devi
 
 A default user interface can be provided in `options.user_interface`.
 
-The `UserInterface` object is defined in the [Integration-API](../../integration-api) and is based on the Core-API
+The `UserInterface` object is defined in the [Integration-API](https://unfoldedcircle.github.io/core-api/integration/) and is based on the Core-API
 `ActivityUserInterface` definition.
 
 ##### UI page example
@@ -303,7 +303,7 @@ The screen layout grid definition can be retrieved with the Core-API: `GET /api/
 ### Commands
 
 The integration driver has to implement a handler for the `entity_command` WebSocket message to process the following
-command requests in `msg_data.cmd_id`. See [Command examples](#command-examples) and [Integration-API](../../integration-api)
+command requests in `msg_data.cmd_id`. See [Command examples](#command-examples) and [Integration-API](https://unfoldedcircle.github.io/core-api/integration/)
 for the full message structure.
 
 | cmd_id            | Parameters | Type         | Description                                                                                  |

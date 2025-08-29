@@ -1,6 +1,6 @@
 # WebSocket Integration API
 
-- [AsyncAPI definition](../../integration-api/UCR-integration-asyncapi.yaml)
+- [AsyncAPI definition](https://unfoldedcircle.github.io/core-api/integration/)
 - [Remote Two entities](../entities/README.md)
 - [How to write an integration driver](write-integration-driver.md)
 - [WebSockets handling](websocket.md)

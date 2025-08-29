@@ -43,7 +43,6 @@
 # Integration Drivers
 
 - [Integration Drivers](integration-driver/README.md)
-  - [Integration AsyncAPI YAML definition](../integration-api/UCR-integration-asyncapi.yaml)
   - [How to write an integration driver](integration-driver/write-integration-driver.md)
   - [WebSockets handling](integration-driver/websocket.md)
   - [Driver mDNS advertisement](integration-driver/driver-advertisement.md)
