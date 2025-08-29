@@ -19,7 +19,7 @@ When writing a driver from scratch without using a wrapper library:
 2. Choose a WebSockets server library or framework for your language.
 3. Choose a JSON framework for your language.
 4. Choose which [entities and features](../entities/README.md) the driver should expose.
-5. Implement the required WebSockets text messages in the [WebSocket Integration API](../../integration-api/UCR-integration-asyncapi.yaml).
+5. Implement the required WebSockets text messages in the [WebSocket Integration API](https://unfoldedcircle.github.io/core-api/integration/).
 
 ❗️ Using a wrapper library or one of the existing open source drivers as a start will greatly simplify driver development.
 Node.js should be preferred when developing a custom integration driver.
@@ -177,7 +177,7 @@ Example of an event message:
 ### Required Messages
 
 For a functioning integration driver not all defined messages and optional features in the integration API have to be
-implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the [WebSocket Integration AsyncAPI definition](../../integration-api/UCR-integration-asyncapi.yaml).
+implemented. The mandatory messages are tagged with a pizza 🍕 emoji in the [WebSocket Integration AsyncAPI definition](https://unfoldedcircle.github.io/core-api/integration/).
 
 Required request messages which must be processed and answered by a driver:
 

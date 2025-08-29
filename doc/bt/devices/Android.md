@@ -9,7 +9,7 @@ Notes:
 
 ## Regular keycodes (Keyboard Keypad Page (0x07))
 
-Source: https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-14.0.0_r0.78/drivers/hid/hid-input.c#39
+Source: <https://android.googlesource.com/kernel/msm.git/+/refs/tags/android-14.0.0_r0.78/drivers/hid/hid-input.c#39>
 
 | Key name                | Usage code | Android key code     | Comment                                                  |
 |-------------------------|------------|----------------------|----------------------------------------------------------|

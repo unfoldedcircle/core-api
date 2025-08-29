@@ -1,6 +1,6 @@
 ## Regular keycodes (Keyboard Keypad Page (0x07))
 
-- HID usage table: chapter 10 https://usb.org/sites/default/files/hut1_2.pdf
+- HID usage table: chapter 10 <https://usb.org/sites/default/files/hut1_2.pdf>
 
 | Key name                   | Usage code | Comment                                                                   |
 |----------------------------|------------|---------------------------------------------------------------------------|

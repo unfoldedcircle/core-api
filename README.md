@@ -1,9 +1,13 @@
 [![AsyncAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml) 
 [![OpenAPI Validation](https://github.com/unfoldedcircle/core-api/actions/workflows/openapi.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/asyncapi.yml)
+[![GH Pages mdBook deploy](https://github.com/unfoldedcircle/core-api/actions/workflows/deploy_mdbook.yml/badge.svg)](https://github.com/unfoldedcircle/core-api/actions/workflows/deploy_mdbook.yml)
 
 # Unfolded Circle Core APIs
 
 This repository contains API specifications of [Unfolded Circle Remote](https://www.unfoldedcircle.com/) products.
+
+Read the **[Developer Guide](https://unfoldedcircle.github.io/core-api)** which presents the [./doc](doc) content in a
+structured and searchable book format.
 
 ## Overview
 

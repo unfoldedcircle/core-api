@@ -1,0 +1,20 @@
+[book]
+authors = ["Markus Zehnder"]
+language = "en"
+src = "doc"
+title = "Unfolded Circle API Documentation"
+
+[preprocessor]
+
+[preprocessor.mermaid]
+command = "mdbook-mermaid"
+
+# Replace text (mainly README.md Markdown links). See yapp.config
+[preprocessor.yapp]
+
+[output]
+
+[output.html]
+additional-js = ["mermaid.min.js", "mermaid-init.js"]
+
+#[output.linkcheck]

@@ -1,0 +1,36 @@
+<!-- HTML for static distribution bundle build -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Remote Two/3 Core OpenAPI</title>
+    <!-- Get latest Swagger UI code and style from npm: https://unpkg.com/swagger-ui-dist@4/ -->
+    <script src="./swagger-ui-bundle.js" charset="UTF-8"> </script>
+    <link rel="stylesheet" type="text/css" href="./swagger-ui.css" />
+    <link rel="stylesheet" type="text/css" href="index.css" />
+    <link rel="icon" href="./favicon.ico" />
+    <link rel="icon" type="image/png" href="./favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="./favicon-16x16.png" sizes="16x16" />
+  </head>
+
+  <body>
+    <div id="swagger-ui"></div>
+    <script>
+        window.onload = function () {
+            const ui = SwaggerUIBundle({
+                url: "UCR-core-openapi.yaml",
+                dom_id: '#swagger-ui',
+                deepLinking: true,
+                presets: [
+                    SwaggerUIBundle.presets.apis,
+                    SwaggerUIBundle.SwaggerUIStandalonePreset
+                ],
+                plugins: [
+                    SwaggerUIBundle.plugins.DownloadUrl
+                ],
+            })
+            window.ui = ui
+        }
+    </script>
+  </body>
+</html>

@@ -202,7 +202,7 @@ Note: it seems that any CONSUMER_ key can be used to wake up the device from sta
 | CONSUMER_MENU_DOWN                                  | 0x043      | x  | Navigation                                  |
 | CONSUMER_MENU_LEFT                                  | 0x044      | x  | Navigation                                  |
 | CONSUMER_MENU_RIGHT                                 | 0x045      | x  | Navigation                                  |
-| CONSUMER_MENU_ESCAPE                                | 0x046      | x  | Back button                                 |
+| CONSUMER_MENU_ESCAPE                                | 0x046      | x  | Back button - TODO replace CONSUMER_AC_HOME |
 | CONSUMER_MENU_VALUE_INCREASE                        | 0x047      |    |                                             |
 | CONSUMER_MENU_VALUE_DECREASE                        | 0x048      |    |                                             |
 | CONSUMER_DATA_ON_SCREEN                             | 0x060      | x  | TV button                                   |

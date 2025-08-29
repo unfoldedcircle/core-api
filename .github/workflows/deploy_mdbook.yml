@@ -1,0 +1,67 @@
+name: Deploy mdbook
+on:
+  push:
+   branches:
+     - main
+   paths:
+     - 'book.toml'
+     - 'doc/**'
+     - '.github/workflows/deploy_mdbook.yml'
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+jobs:
+  deploy:
+    name: Deploy mdbook
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # To push a branch
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install latest mdbook
+        run: |
+          tag=$(curl 'https://api.github.com/repos/rust-lang/mdbook/releases/latest' | jq -r '.tag_name')
+          url="https://github.com/rust-lang/mdbook/releases/download/${tag}/mdbook-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          mkdir mdbook
+          curl -sSL $url | tar -xz --directory=./mdbook
+          echo `pwd`/mdbook >> $GITHUB_PATH
+      - name: Install mdbook mermaid extension
+        run: |
+          tag=v0.15.0
+          url="https://github.com/badboy/mdbook-mermaid/releases/download/${tag}/mdbook-mermaid-${tag}-x86_64-unknown-linux-gnu.tar.gz"
+          curl -sSL $url | tar -xz --directory=./mdbook
+
+      - name: Cache cargo install
+        id: cache-cargo-install
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-install
+
+      - name: Install mdbook yapp extension
+        if: steps.cache-cargo-install.outputs.cache-hit != 'true'
+        run: |
+          cargo install mdbook-yapp
+
+      - name: Build Book
+        run: |
+          mdbook-mermaid install .
+          mdbook build
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: book
+          # keep AsyncAPI & OpenAPI deployments
+          clean-exclude: |
+            dock
+            integration
+            rest
+            ws

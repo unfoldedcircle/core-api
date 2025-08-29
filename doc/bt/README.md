@@ -32,34 +32,21 @@ The [template document](devices/_template.md) can be used to submit pull request
 
 ## Device Profiles
 
-Device profiles are tailored device configurations with ready-to-use key-mappings and prepared default UI screens.
-The known working key codes are defined as simple commands and directly usable in the web-configurator.
+Devices might use different commands or accept different key presses to perform certain actions.
+Therefore, a universal button configuration or UI screen layout would not work the same way.
 
-All other commands can still be used manually with the `send_cmd` command. Only the filtered simple commands in the
-profile are visible.
+Devices profiles are device specific configurations that contain default button mapping and UI configuration for a specific device.
 
-The remote firmware includes a set of device profiles. New profiles will be included with firmware updates. It's also
-possible to load custom profiles without waiting for firmware updates. Custom profiles can be uploaded with the resource
-endpoint in the REST Core-API. Support in the web-configurator will be added in the future.
+These configurations are tested to make sure it works with the specific device.
 
-The existing device profiles are located in the [./profiles](profiles) folder.
+For Android TV based streaming boxes and TV devices, try the generic Android profile if there's not a specific profile for your device.
 
-Support articles:
-- [Device profiles](https://support.unfoldedcircle.com/hc/en-us/articles/14696263809436-Device-profiles)
-- [How to change a device profile for a Bluetooth remote](https://support.unfoldedcircle.com/hc/en-us/articles/14696318441628-How-to-change-device-profiles-for-a-Bluetooth-remote)
+Use the default profile if nothing else matches.
 
-### Upload custom device profiles
+See [BT device profile list](profiles/README.md) for pre-defined profiles and [BT device test reports](devices/README.md)
+for tested HID commands.  
+The existing device profiles are stored in GitHub at <https://github.com/unfoldedcircle/core-api/tree/main/doc/bt/profiles>.
 
-Custom profiles can be uploaded and managed with the existing `/resources` REST Core-API endpoints.
-
-- New resource type: `BtDeviceProfile`
-- Upload: `POST /api/resources/BtDeviceProfile`
-  - The filename should be the value of the `id` field and will automatically be renamed.
-  - Included profiles can be overwritten when using the same `id`.
-- Retrieve custom profiles: `GET /api/resources/BtDeviceProfile?page=1&limit=100`
-- Delete: `DELETE /api/resources/BtDeviceProfile/:resourceId`
-
-See [REST Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/rest) for more information.
 
 ## Send commands with Core-API
 

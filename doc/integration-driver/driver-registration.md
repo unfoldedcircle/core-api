@@ -32,7 +32,7 @@ sequenceDiagram
 
 Driver registration is only possible through the Remote core REST API.
 
-See: <https://github.com/unfoldedcircle/core-simulator/tree/main/core-api>
+See: <https://github.com/unfoldedcircle/core-api/tree/main/core-api>
 
 #### Example
 
@@ -42,7 +42,7 @@ This also works using the Simulator VM running with bridge networking:
 
 - The integration driver is accessible at `192.168.1.115` and listens on port `9988`. Adapt to your environment!
 - Register driver with `"driver_url:" "ws://192.168.1.115:9988"`
-- Use the [predefined Postman collection](https://github.com/unfoldedcircle/core-simulator/tree/main/core-api/rest)
+- Use the [predefined Postman collection](https://github.com/unfoldedcircle/core-api/tree/main/core-api/rest)
   to interact with the Simulator from the host, or use a curl call:
 
 ```bash
@@ -76,13 +76,13 @@ After a successful registration the driver will show up in the web-configurator:
 
 Click on the driver and start the setup:
 
-![driver-add.png](img%2Fdriver-add.png)
+![driver-add.png](img/driver-add.png)
 
 The above example has an empty `setup_data_schema`, so there won't be a user interaction and the setup only consists
 of connecting to the driver and fetching the driver information.
 
-![driver-setup-ok.png](img%2Fdriver-setup-ok.png)
+![driver-setup-ok.png](img/driver-setup-ok.png)
 
 The driver is now registered and the available entities will show up in the driver configuration:
 
-![driver.png](img%2Fdriver.png)
+![driver.png](img/driver.png)
