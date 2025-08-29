@@ -215,7 +215,7 @@ curl --location 'http://$IP/api/intg/install' \
 --form 'file=@"custom-intg.tar.gz"'
 ```
 
-See [REST Core API](../../core-api/rest/README.md) for more details.
+See [REST Core API](https://unfoldedcircle.github.io/core-api/rest/) for more details.
 
 ## Delete driver
 
@@ -225,7 +225,7 @@ These are the same endpoints as for an external network integration driver:
 - Delete integration instance `DELETE /api/intg/instances/:intgId`.
 - Delete driver and installation files: `DELETE /api/intg/drivers/:driverId`.
 
-See [REST Core API](../../core-api/rest/README.md) for more details.
+See [REST Core API](https://unfoldedcircle.github.io/core-api/rest/) for more details.
 
 The instance and driver can also be deleted in the web-configurator.
 
@@ -236,7 +236,7 @@ Output to stdout and stderr are automatically stored with a timestamp and access
 - Get log services: `GET /api/system/logs/services`.
 - Query logs: `GET /api/system/logs?...`.
 
-See [REST Core API](../../core-api/rest/README.md) for more details.
+See [REST Core API](https://unfoldedcircle.github.io/core-api/rest/) for more details.
 
 Log files can also be downloaded in the web-configurator: _Settings, Development: Logs_
 
@@ -249,7 +249,7 @@ near real time.
 
 - URL: `http://$IP/log/`
 - This function is deactivated by default and the endpoint returns 503.
-- The log viewer must be started using the [REST Core API](../../core-api/rest/README.md)
+- The log viewer must be started using the [REST Core API](https://unfoldedcircle.github.io/core-api/rest/)
   with the `/api/system/logs/web` endpoint:
   - `GET` request returns the current state.
   - `PUT` request allows to start, stop or to permanently enable the log app. A password can be set to restrict access
