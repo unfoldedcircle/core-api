@@ -6,12 +6,12 @@ A remote entity can send commands to a controllable device.
 
 ## Features
 
-| Name          | R | W  | Description                                                                                                                                          |
-|---------------|---|----|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| send_cmd      | ❌ | ✅  | Default feature of a remote entity. Always present, even if not specified.                                                                           |
-| send_cmd_stop | ❌ | ✅  | Support for the _press-and-hold_ mode.                                                                                                               |
-| on_off        | ✅ | ✅  | Remote has on and off commands.                                                                                                                      |
-| toggle        | ❌ | ✅  | Power toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command. |
+| Name      | R | W  | Description                                                                                                                                          |
+|-----------|---|----|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| send_cmd  | ❌ | ✅  | Default feature of a remote entity. Always present, even if not specified.                                                                           |
+| stop_send | ❌ | ✅  | Support for the _press-and-hold_ mode.                                                                                                               |
+| on_off    | ✅ | ✅  | Remote has on and off commands.                                                                                                                      |
+| toggle    | ❌ | ✅  | Power toggle support. If there's no native support, the remote will use the current state of the remote to send the corresponding on or off command. |
 
 - R: readable
     - ✅ Feature has a readable attribute to retrieve the current or available values.
@@ -317,7 +317,7 @@ for the full message structure.
 |                   | delay      | Number       | Optional: delay in milliseconds between command repetitions. Default: driver-specific.                       |
 |                   | hold       | Number       | Optional: duration in milliseconds to hold the command before release. Defaults to 0 if not specified.       |
 |                   | press      | boolean      | Optional: indicates physical button press-and-hold mode (default: false), `delay` and `hold` can be ignored. |
-| send_cmd_stop     | command    | String(20)   | Stop an active `send_cmd` that is using the repeat or press options.                                         |
+| stop_send         | command    | String(20)   | Stop an active `send_cmd` that is using the repeat or press options. TODO with command parameter?            |
 | send_cmd_sequence | sequence   | String array | Command list. Same defaults are used as for the `send_cmd` command.                                          |
 |                   | repeat     | Number       | Optional: how many times each command shall be repeated.                                                     |
 |                   | delay      | Number       | Optional: delay in milliseconds between commands.                                                            |
@@ -348,7 +348,7 @@ This is the normal command mode which has been part of the remote-entity command
 
 - The normal repeat mode is specified with the `repeat` parameter, **without the `press: true` parameter being set**.
 - The `delay` and `hold` parameters are optional.
-- **The `send_cmd_stop` request is not sent**.
+- **The `stop_send` request is not sent**.
 
 Implementation notes:
 - An integration driver is free to determine what to do with the repeat parameter! This depends on what is being controlled and how.
@@ -364,19 +364,19 @@ Implementation notes:
 ‼️ New feature in Integration-API 0.##.##
 
 To have better support for long button presses by a user, the `send_cmd` is enhanced with an additional flag, and once
-the button is released the `send_cmd_stop` request is sent to the integration driver.
+the button is released the `stop_send` request is sent to the integration driver.
 
 - Long button presses on the Remote will trigger continuous `send_cmd` requests with the `press: true` parameter set.
     - The `repeat` parameter is still set to a value of >= 3 to maintain backward compatibility.
     - The `delay` and `hold` parameters can be ignored.
-- Once the button is released, a `send_cmd_stop` request is sent.
+- Once the button is released, a `stop_send` request is sent.
 
 Implementation notes:
 - **MANDATORY stop conditions:** Integration drivers MUST immediately terminate press-and-hold operations when:
   - WebSocket connection from the remote device is closed or interrupted
   - Standby event is received from the remote device
   - No follow-up `send_cmd` requests received within 300ms (configurable timeout)
-  - `send_cmd_stop` command is received
+  - `stop_send` command is received
 - This feature is similar to the [IR-emitter](entity_ir_emitter.md) `send_ir` and `stop_ir` commands, but tailored to
   regular commands.
 
@@ -419,14 +419,14 @@ When defining commands in button mappings or UI elements, either entity commands
 }
 ```
 
-- If an entity command is used it's recommended to prefix it with the entity type to use the same naming convention as
+- If an entity command is used, it's recommended to prefix it with the entity type to use the same naming convention as
   in the Core-API.
   - Using the fully qualified command name might make it easier in the integration driver to distinguish the commands.
   - A missing entity type prefix is automatically added when an available remote-entity is configured in Remote Two.
   - When working with the Core-API, for example reconfiguring a button mapping, the fully qualified command name is
     required.
 
-Recommended fully-qualified entity command name:
+Recommended fully qualified entity command name:
 ```json
 {
   "cmd_id": "remote.send_cmd",
@@ -574,7 +574,7 @@ Remote-entity examples of received `entity_command` WebSocket messages in an int
 
 The above command will be repeated about every 100-200ms (with an increasing `id`).
 
-Once the button is released, the `send_cmd_stop` request is sent:
+Once the button is released, the `stop_send` request is sent:
 
 ```json
 {
@@ -584,7 +584,7 @@ Once the button is released, the `send_cmd_stop` request is sent:
   "msg_data": {
     "entity_type": "remote",
     "entity_id": "remote-1",
-    "cmd_id": "send_cmd_stop",
+    "cmd_id": "stop_send",
     "params": {
       "command": "VOLUME_DOWN"
     }
