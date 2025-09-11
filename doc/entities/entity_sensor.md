@@ -37,7 +37,7 @@ The sensor entity only supports the `ON` state and the [common entity states](RE
 |-------|-----------------------------------------------------|
 | ON    | The sensor is available and providing measurements. |
 
-### Device classes
+### Device Classes
 
 The device class specifies the type of sensor. Default if not specified: `custom`.
 
@@ -51,6 +51,19 @@ The device class specifies the type of sensor. Default if not specified: `custom
 | power       | W            | Power in watt or kilowatt                                                                                                                  |
 | temperature | °C           | Temperature with automatic °C, °F conversion, depending on remote settings. Use `native_unit` option if the temperature is measured in °F. |
 | voltage     | V            | Voltage in volt                                                                                                                            |
+| binary      |              | Binary sensor. The binary specific device class is stored in the `unit` attribute.                                                         |
+
+#### Binary Device Class
+
+The `binary` device class allows specifying a binary sensor with two states in the `value` attribute: `on` and `off`.
+
+These values can mean different things depending on the `unit` attribute. For example, a binary sensor with the `unit`
+attribute set to `sound`: `on` means sound detected and `off` means no sound detected. For `unit` set to `window`: `on`
+means the window is open and `off` means the window is closed.
+
+If the `unit` attribute is not specified, the binary sensor is a generic on/off sensor.
+
+🚧 Supported unit values are the Home Assistant binary sensor device classes: <https://www.home-assistant.io/integrations/binary_sensor/#device-class>
 
 ### Options
 
@@ -86,9 +99,9 @@ The following attributes are supported:
 - Only sending the `unit` attribute is not valid.
 - If the state is never sent, the sensor is considered available (`ON`).
 
-### Event examples
+### Event Examples
 
-#### State change event
+#### State Change Event
 
 Sensor with a number value:
 
@@ -140,6 +153,25 @@ Sensor coming online with the current value:
       "state": "ON",
       "value": 21.5,
       "unit": "°C"
+    }
+  }
+}
+```
+
+Binary sensor event:
+
+```json
+{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-bin1",
+    "attributes": {
+      "state": "ON",
+      "value": "off",
+      "unit": "running"
     }
   }
 }
