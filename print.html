@@ -2298,7 +2298,7 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 <tr><td>ON</td><td>The sensor is available and providing measurements.</td></tr>
 </tbody></table>
 </div>
-<h3 id="device-classes-8"><a class="header" href="#device-classes-8">Device classes</a></h3>
+<h3 id="device-classes-8"><a class="header" href="#device-classes-8">Device Classes</a></h3>
 <p>The device class specifies the type of sensor. Default if not specified: <code>custom</code>.</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Default unit</th><th>Description</th></tr></thead><tbody>
 <tr><td>custom</td><td></td><td>Generic sensor with custom unit</td></tr>
@@ -2309,8 +2309,16 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 <tr><td>power</td><td>W</td><td>Power in watt or kilowatt</td></tr>
 <tr><td>temperature</td><td>°C</td><td>Temperature with automatic °C, °F conversion, depending on remote settings. Use <code>native_unit</code> option if the temperature is measured in °F.</td></tr>
 <tr><td>voltage</td><td>V</td><td>Voltage in volt</td></tr>
+<tr><td>binary</td><td></td><td>Binary sensor. The binary specific device class is stored in the <code>unit</code> attribute.</td></tr>
 </tbody></table>
 </div>
+<h4 id="binary-device-class"><a class="header" href="#binary-device-class">Binary Device Class</a></h4>
+<p>The <code>binary</code> device class allows specifying a binary sensor with two states in the <code>value</code> attribute: <code>on</code> and <code>off</code>.</p>
+<p>These values can mean different things depending on the <code>unit</code> attribute. For example, a binary sensor with the <code>unit</code>
+attribute set to <code>sound</code>: <code>on</code> means sound detected and <code>off</code> means no sound detected. For <code>unit</code> set to <code>window</code>: <code>on</code>
+means the window is open and <code>off</code> means the window is closed.</p>
+<p>If the <code>unit</code> attribute is not specified, the binary sensor is a generic on/off sensor.</p>
+<p>🚧 Supported unit values are the Home Assistant binary sensor device classes: <a href="https://www.home-assistant.io/integrations/binary_sensor/#device-class">https://www.home-assistant.io/integrations/binary_sensor/#device-class</a></p>
 <h3 id="options-8"><a class="header" href="#options-8">Options</a></h3>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
 <tr><td>custom_unit</td><td>text</td><td></td><td>Unit label for a custom sensor if <code>device_class</code> is not specified or to override a default unit.</td></tr>
@@ -2342,8 +2350,8 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 <li>Only sending the <code>unit</code> attribute is not valid.</li>
 <li>If the state is never sent, the sensor is considered available (<code>ON</code>).</li>
 </ul>
-<h3 id="event-examples-6"><a class="header" href="#event-examples-6">Event examples</a></h3>
-<h4 id="state-change-event-3"><a class="header" href="#state-change-event-3">State change event</a></h4>
+<h3 id="event-examples-6"><a class="header" href="#event-examples-6">Event Examples</a></h3>
+<h4 id="state-change-event-3"><a class="header" href="#state-change-event-3">State Change Event</a></h4>
 <p>Sensor with a number value:</p>
 <pre><code class="language-json">{
   "kind": "event",
@@ -2386,6 +2394,22 @@ available entity definition as <code>options.custom_unit</code> and then omitted
       "state": "ON",
       "value": 21.5,
       "unit": "°C"
+    }
+  }
+}
+</code></pre>
+<p>Binary sensor event:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-bin1",
+    "attributes": {
+      "state": "ON",
+      "value": "off",
+      "unit": "running"
     }
   }
 }
