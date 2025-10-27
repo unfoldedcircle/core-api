@@ -155,8 +155,6 @@ Example of a Node.js based integration driver archive (contents of bin/node_modu
   - Workaround: remove and re-install.
 - [ ] Resource usage: provide memory and CPU usage per integration.
   - Only the overall resource usage can be monitored with `GET /api/pub/status`.
-- [ ] Web-Configurator support: install custom integration drivers.
-  - Custom integration drivers can already be deleted in the web-configurator.
 
 ### Runtime environment
 
