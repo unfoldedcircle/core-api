@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.40.0
+  version: 0.41.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2601,7 +2601,7 @@ paths:
         the total number of defined activities.
 
         The optional text search query searches in the activity name and activity identifier.
-            
+
         The overview information doesn't include all details of an activity. The full activity information is retrievable
         with `/activities/{entityId}`.
       operationId: getActivities
@@ -2654,7 +2654,7 @@ paths:
         integration driver.
 
         To create a new activity at least a name must be provided. The `icon`, `description` and `options.entity_ids`
-        are optional and can be set later with the `PUT` update operation.
+        are optional and can be set later with the `PATCH` update operation.
 
         When setting a text in a multilingual field, like name or description, the default `en` identifier should always be
         included.
@@ -2662,9 +2662,12 @@ paths:
         An activity can be cloned from another activity-, macro- or remote-entity identifier in `clone_from`. 
         All applicable configuration will be copied, except a new activity name must be specified. The `icon` and
         `description` fields can still be specified and will override the copied data. The `options.entity_ids` is
-        not allowed when cloning data, additional entities can be added later with the `PUT` update operation.
+        not allowed when cloning data, additional entities can be added later with the `PATCH` update operation.
 
         The `entity_ids` may be omitted when creating a new activity and specified later when updating the activity.
+
+        The newly created activity will automatically be included in the default activity group (requires Core version 0.64
+        or newer).
       operationId: createActivity
       requestBody:
         content:
@@ -2817,6 +2820,68 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DeviceButtonMappings'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Merge multiple physical button mappings.
+      description: |
+        Update multiple button mappings at once. This merges the provided mappings with the existing mappings.
+        If a button object is provided it will be added to the mappings, or an existing mapping be updated.
+        If a short or long press entity command is missing, it will be removed from an existing mapping.
+      operationId: mergeActivityButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceButtonMappings'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - activities
+      summary: Replace physical button mappings.
+      description: |
+        Replace all button mappings with the provided mappings.
+      operationId: updateActivityButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceButtonMappings'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -3334,7 +3399,7 @@ paths:
         - activities
       summary: Delete all activity groups.
       description: |
-        ⚠️ All defined activity groups will be irrevocably deleted!
+        ⚠️ All defined activity groups except the default group will be irrevocably deleted!
       operationId: deleteAllActivityGroups
       responses:
         '200':
@@ -3405,6 +3470,9 @@ paths:
       summary: Delete an activity group.
       description: |
         ⚠️ The given activity group is irrevocably deleted.
+
+        The default activity group cannot be deleted and will return a `409` conflict error (requires Core version 0.64
+        or newer).
       operationId: deleteActivityGroup
       parameters:
         - $ref: '#/components/parameters/group_id'
@@ -3417,6 +3485,8 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
   /macros:
     head:
       tags:
@@ -5373,6 +5443,68 @@ paths:
                 - button: DPAD_UP
                   short_press:
                     cmd_id: CURSOR_UP
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - remotes
+      summary: Merge multiple physical button mappings.
+      description: |
+        Update multiple button mappings at once. This merges the provided mappings with the existing mappings.
+        If a button object is provided it will be added to the mappings, or an existing mapping be updated.
+        If a short or long press entity command is missing, it will be removed from an existing mapping.
+      operationId: mergeRemoteButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceButtonMappings'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - remotes
+      summary: Replace physical button mappings.
+      description: |
+        Replace all button mappings with the provided mappings.
+      operationId: updateRemoteButtonMappings
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeviceButtonMappings'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceButtonMappings'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
