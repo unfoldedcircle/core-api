@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.41.0
+  version: 0.41.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -15524,30 +15524,21 @@ components:
       description: Unique user interface identifier.
     UserInterfaceItem:
       description: |
-        A user interface item is either an icon, text or media information from a media-player entity.
+        A user interface item is either an icon, text, sensor value or media information from a media-player entity.
         - Icon and text items can be static or linked to a command specified in the `command` field.
         - Default size is 1x1 if not specified.
       type: object
       properties:
         type:
-          description: |
-            Type of the user interface item:
-            - `icon`: show an icon, either a UC icon or a custom icon. Field `icon` must contain the icon identifier.
-            - `text`: show text only from field `text`.
-            - `media_player`: show media information from the specified media-player entity specified in `media_player_id`.  
-              The specified entity_id must be part of the included entities in the activity and of type media-player.
-          type: string
-          enum:
-            - icon
-            - text
-            - numpad
-            - media_player
+          $ref: '#/components/schemas/UserInterfaceItemType'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
         text:
           type: string
         media_player_id:
           $ref: '#/components/schemas/EntityId'
+        sensor:
+          $ref: '#/components/schemas/UserInterfaceItemSensor'
         command:
           $ref: '#/components/schemas/EntityCommand'
         location:
@@ -15557,6 +15548,40 @@ components:
       required:
         - type
         - location
+    UserInterfaceItemType:
+      description: |
+        Type of the user interface item:
+        - `icon`: show an icon, either a UC icon or a custom icon. Field `icon` must contain the icon identifier.
+        - `text`: show text only from field `text`.
+        - `media_player`: show media information from the specified media-player entity specified in `media_player_id`.  
+          The specified entity_id must be part of the included entities in the activity and of type media-player.
+        - `sensor`: show sensor value from the specified sensor entity specified in the `sensor` configuration object.
+      type: string
+      enum:
+        - icon
+        - text
+        - numpad
+        - media_player
+        - sensor
+    UserInterfaceItemSensor:
+      description: |
+        Sensor item configuration.
+        By default only the sensor value and unit is shown from the specified sensor entity.
+        If the user interface `text` field is set, it is used as sensor label, except if `show_label` is set to true.
+      type: object
+      properties:
+        sensor_id:
+          $ref: '#/components/schemas/EntityId'
+        show_label:
+          description: Show the sensor label instead of the user interface item's `text` field.
+          type: boolean
+          default: false
+        show_unit:
+          description: Show sensor unit if available. Not shown for binary sensors.
+          type: boolean
+          default: true
+      required:
+        - sensor_id
     AvailableSystemUpdateResponse:
       type: object
       properties:
