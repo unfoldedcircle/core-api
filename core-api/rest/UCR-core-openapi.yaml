@@ -15535,6 +15535,8 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         text:
           type: string
+          minLength: 1
+          maxLength: 50
         media_player_id:
           $ref: '#/components/schemas/EntityId'
         sensor:
