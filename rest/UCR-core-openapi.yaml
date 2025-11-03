@@ -2833,7 +2833,7 @@ paths:
       description: |
         Update multiple button mappings at once. This merges the provided mappings with the existing mappings.
         If a button object is provided it will be added to the mappings, or an existing mapping be updated.
-        If a short or long press entity command is missing, it will be removed from an existing mapping.
+        If a short or long press entity command is missing in the update, the existing command will be kept.
       operationId: mergeActivityButtonMappings
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -5456,7 +5456,7 @@ paths:
       description: |
         Update multiple button mappings at once. This merges the provided mappings with the existing mappings.
         If a button object is provided it will be added to the mappings, or an existing mapping be updated.
-        If a short or long press entity command is missing, it will be removed from an existing mapping.
+        If a short or long press entity command is missing in the update, the existing command will be kept.
       operationId: mergeRemoteButtonMappings
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -15526,6 +15526,7 @@ components:
       description: |
         A user interface item is either an icon, text, sensor value or media information from a media-player entity.
         - Icon and text items can be static or linked to a command specified in the `command` field.
+        - The command object can only be used for `icon` and `text` items.
         - Default size is 1x1 if not specified.
       type: object
       properties:
@@ -15568,8 +15569,9 @@ components:
     UserInterfaceItemSensor:
       description: |
         Sensor item configuration.
-        By default only the sensor value and unit is shown from the specified sensor entity.
+        By default, only the sensor value and unit is shown from the specified sensor entity.
         If the user interface `text` field is set, it is used as sensor label, except if `show_label` is set to true.
+        If no label should be shown, omit the item's `text` field and set `show_label` to false.
       type: object
       properties:
         sensor_id:
