@@ -1,0 +1,83 @@
+// Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+//
+// Binary voice data definition of the Unfolded Circle WebSocket Integration-API for Remote Two/3.
+// These messages are received in binary WebSocket messages, if the integration supports the voice assistant feature.
+
+syntax = "proto3";
+
+package integration;
+option java_package = "com.unfoldedcircle.integration";
+
+// All available integration messages.
+//
+// Allows direct binary WebSocket message serialization and deserialization.
+message IntegrationMessage {
+  oneof message {
+    // Start of an audio stream session.
+    RemoteVoiceBegin voice_begin = 1;
+    // Audio chunk in an audio stream session.
+    RemoteVoiceData voice_data = 2;
+    // End of an audio stream session.
+    RemoteVoiceEnd voice_end = 3;
+  }
+}
+
+// Supported audio frame formats.
+enum SampleFormat {
+  SAMPLE_FORMAT_UNKNOWN = 0;
+  // Signed 8 bit
+  I8 = 1;
+  // Signed 16 bit
+  I16 = 2;
+  // Signed 32 bit
+  I32 = 3;
+  // Unsigned 8 bit
+  U8 = 4;
+  // Unsigned 16 bit
+  U16 = 5;
+  // Unsigned 32 bit
+  U32 = 6;
+  // Float 32 bit
+  F32 = 7;
+}
+
+// Supported audio codec formats.
+enum AudioFormat {
+  AUDIO_FORMAT_UNKNOWN = 0;
+  PCM = 1;
+}
+
+// Audio stream specification.
+message AudioConfiguration {
+  // Optional. Number of audio channels. Default: 1
+  uint32 channels = 1;
+  // Audio sample rate in Hz.
+  uint32 sample_rate = 2;
+  // Audio sample format.
+  SampleFormat sample_format = 3;
+  // Optional. Default: PCM
+  AudioFormat format = 4;
+}
+
+// Start of an audio stream session.
+// As long as the stream is active, `RemoteVoiceData` messages are sent containing audio chunks.
+message RemoteVoiceBegin {
+  // Audio session identifier that will be used in follow-up RemoteVoicePayload and RemoteVoiceEnd messages.
+  uint32 session_id = 1;
+  // Audio stream specification for data sent in the follow-up RemoteVoicePayload messages.
+  AudioConfiguration configuration = 2;
+}
+
+// Audio chunk in an audio stream session.
+message RemoteVoiceData {
+  // Audio session identifier from RemoteVoiceBegin.
+  uint32 session_id = 1;
+  // Audio chunk.
+  bytes samples = 2;
+}
+
+// End of an audio stream session.
+message RemoteVoiceEnd {
+  // Audio session identifier from RemoteVoiceBegin.
+  uint32 session_id = 1;
+}

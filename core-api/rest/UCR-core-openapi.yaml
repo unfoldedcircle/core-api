@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.42.0
+  version: 0.43.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -7816,13 +7816,15 @@ paths:
         - cfg
       summary: Modify voice control settings.
       description: |
-        Change one or multiple voice control settings.
+        Change one or multiple voice control settings. A missing field will in the request object will keep the old value.
+
+        If the specified voice control entity does not exist, the voice assistant configuration will be removed.
       operationId: updateVoiceControlSettings
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CfgVoiceControl'
+              $ref: '#/components/schemas/CfgVoiceControlUpdate'
         required: true
       responses:
         '200':
@@ -7838,10 +7840,30 @@ paths:
         '403':
           $ref: '#/components/responses/Err403Forbidden'
   /cfg/voice_control/voice_assistants:
+    head:
+      tags:
+        - cfg
+      summary: Get total number of voice assistants.
+      operationId: getVoiceAssistantCount
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
     get:
       tags:
         - cfg
       summary: Get available voice assistants.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
       operationId: getVoiceAssistants
       responses:
         '200':
@@ -7849,9 +7871,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  type: string
+                $ref: '#/components/schemas/VoiceAssistants'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -11480,7 +11500,13 @@ components:
           type: string
           description: Status message describing the result or error. This message is intended for error analysis and should not directly shown to the end user.
     AvailableEntity:
-      description: Provided entity from an integration which can be configured to be used in the remote.
+      description: |
+        Provided entity from an integration which can be configured to be used in the remote.
+
+        See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
+        for more information.
+
+        If no icon identifier is specified, the default icon for the entity type is used.
       type: object
       properties:
         entity_id:
@@ -11498,6 +11524,8 @@ components:
           type: string
         name:
           $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
         features:
           description: |
             Supported features of the entity. See entity documentation for available features.
@@ -11689,7 +11717,7 @@ components:
           $ref: '#/components/schemas/CfgSoftwareUpdate'
         sound:
           $ref: '#/components/schemas/CfgSound'
-        voice_control:
+        voice:
           $ref: '#/components/schemas/CfgVoiceControl'
         restart_required:
           description: A configuration change requires a restart.
@@ -12080,6 +12108,9 @@ components:
         - enabled
         - volume
     CfgVoiceControl:
+      description: |
+        Voice control settings with enriched voice assistant configuration.
+        No voice assistant is enabled if the `voice_assistant.active` object is missing.
       type: object
       properties:
         microphone:
@@ -12088,15 +12119,52 @@ components:
             with the remote or integrations.
           type: boolean
         voice_assistant:
-          description: |
-            The main voice assistant to use for voice control, if no other voice assistant is configured for a specific
-            screen, for example in an activity.
-            - `None`: no voice assistant is enabled.
-          type: string
-          default: None
+          $ref: '#/components/schemas/CfgVoiceAssistant'
       required:
         - microphone
         - voice_assistant
+    CfgVoiceAssistant:
+      description: |
+        The main voice assistant to use for voice control, if no other voice assistant is configured for a specific
+        screen, for example, in an activity.
+      type: object
+      properties:
+        active:
+          $ref: '#/components/schemas/VoiceAssistant'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        speech_response:
+          description: Enable speech response if supported by the voice assistant. Disabled by default.
+          type: boolean
+          default: false
+    CfgVoiceControlUpdate:
+      description: |
+        Update object for voice control settings. A missing field will keep the old value.
+      type: object
+      properties:
+        microphone:
+          description: |
+            Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
+            with the remote or integrations.
+          type: boolean
+        voice_assistant:
+          $ref: '#/components/schemas/CfgVoiceAssistantUpdate'
+    CfgVoiceAssistantUpdate:
+      description: |
+        The main voice assistant to use for voice control, if no other voice assistant is configured for a specific
+        screen, for example, in an activity.
+      type: object
+      properties:
+        entity_id:
+          description: 'Voice assistant entity id to use, empty for removing a configured voice assistant.'
+          type: string
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        speech_response:
+          description: Enable speech response if supported by the voice assistant. Disabled by default.
+          type: boolean
+      required:
+        - entity_id
     CommandSequence:
       description: Sequence of commands to execute.
       type: array
@@ -12917,7 +12985,10 @@ components:
         $ref: '#/components/schemas/Entity'
     Entity:
       description: |
-        Configured entity in the remote to be used in one or more profiles.
+        Configured entity in the remote to be used in one or more user profiles.
+
+        See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
+        for more information.
       type: object
       properties:
         entity_id:
@@ -13174,6 +13245,7 @@ components:
         - macro
         - remote
         - ir_emitter
+        - voice_assistant
     ExternalSystems:
       type: array
       items:
@@ -15861,6 +15933,88 @@ components:
           $ref: '#/components/schemas/SimpleId'
       required:
         - entity_id
+    VoiceAssistants:
+      type: array
+      items:
+        $ref: '#/components/schemas/VoiceAssistant'
+    VoiceAssistant:
+      description: |
+        Voice assistant definition.
+
+        This is a tailored representation of the voice_assistant entity, which can be used to display voice assistant
+        information to users.
+
+        - `profiles` specify optional parameters that can be used by starting a voice command.
+        - `features` are the default features supported by the voice assistant.  
+           If multiple profiles are supported, this should be the feature list of the preferred profile.
+        - `preferred_profile` is the preferred profile specified by the integration.  
+           The user can select another default profile in the voice assistant settings.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        state:
+          type: string
+        features:
+          $ref: '#/components/schemas/VoiceAssistantFeatures'
+        profiles:
+          $ref: '#/components/schemas/VoiceAssistantProfiles'
+        preferred_profile:
+          $ref: '#/components/schemas/SimpleId'
+      required:
+        - entity_id
+        - name
+    VoiceAssistantFeatures:
+      type: array
+      items:
+        $ref: '#/components/schemas/VoiceAssistantFeature'
+    VoiceAssistantFeature:
+      description: |
+        Supported voice assistant or profile features.
+        - transcription: Supports voice command transcription.
+        - response_text: Supports textual response about the performed action.
+        - response_speech: Supports speech response about the performed action.
+      type: string
+      enum:
+        - transcription
+        - response_text
+        - response_speech
+    VoiceAssistantProfiles:
+      type: array
+      items:
+        $ref: '#/components/schemas/VoiceAssistantProfile'
+    VoiceAssistantProfile:
+      description: |
+        Profiles are optional and allow parameterizing voice input. A regular voice-capable device usually just accepts voice
+        input without additional parameters. Home automation systems can offer multi-language support or an option to use
+        local or cloud processing.
+
+        For example, Home Assistant allows configuring multiple Assist pipelines for voice commands.
+        These pipelines can offer different languages or speech recognition engines.
+
+        - `language` is an optional language code if the profile represents a specific language for speech recognition.
+        - `features` is optional and overwrites the voice assistant features, for example, if a profile has less or more features.
+        - An empty `features` array means "no features".
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          description: Friendly name to show in UI.
+          type: string
+          minLength: 1
+          maxLength: 50
+        language:
+          $ref: '#/components/schemas/LanguageCode'
+        features:
+          $ref: '#/components/schemas/VoiceAssistantFeatures'
+      required:
+        - id
+        - name
     ApScanStatus:
       type: object
       properties:

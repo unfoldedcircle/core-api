@@ -1,6 +1,7 @@
 # WebSocket Integration API
 
 - [AsyncAPI YAML definition](UCR-integration-asyncapi.yaml).
+- [Voice-related protobuf definition](ucr_integration_voice.proto).
 
 - See [/doc folder](../doc/README.md) for the API documentation and further information.
 
@@ -18,12 +19,11 @@ tool with the instructions provided from the generator tool.
 The provided Bash wrapper script [`create-html-docker.sh`](create-html-docker.sh) creates the html documentation in the
 `./html` sub folder.
 
-ℹ️ We will look into using GitHub Pages for publishing the html documentation.
-
 ## API Versions
 
-| Integration API | UCR2 Firmware | Core Simulator |
+| Integration API | UCR Firmware  | Core Simulator |
 |-----------------|---------------|----------------|
+| 0.13.0          | 2.8.0-beta    | 0.64.4         |
 | 0.12.1          | 2.2.4-beta    | 0.58.3         |
 | 0.12.0          | 1.9.3-beta    | 0.48.0         |
 | 0.11.0          | 1.9.2-beta    | 0.47.0         |

@@ -8,10 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release. 
 
-### Changed
-- Initial voice assistant configuration refactoring.
-
 ---
+
+## 0.33.0-beta
+### Changed
+- Voice assistant configuration refactoring.
+### Added
+- New entity type `voice_assistant`.
+- New event: `assistant_event`.
 
 ## 0.31.0-beta
 ### Added
