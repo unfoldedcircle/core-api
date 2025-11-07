@@ -1,6 +1,7 @@
 # WebSocket Integration API
 
 - [AsyncAPI YAML definition](UCR-integration-asyncapi.yaml).
+- [Voice-related protobuf definition](ucr_integration_voice.proto).
 
 - See [/doc folder](../doc/README.md) for the API documentation and further information.
 
@@ -17,8 +18,6 @@ The easiest way to generate the HTML documentation from the AsyncAPI definition 
 tool with the instructions provided from the generator tool.
 The provided Bash wrapper script [`create-html-docker.sh`](create-html-docker.sh) creates the html documentation in the
 `./html` sub folder.
-
-ℹ️ We will look into using GitHub Pages for publishing the html documentation.
 
 ## API Versions
 
