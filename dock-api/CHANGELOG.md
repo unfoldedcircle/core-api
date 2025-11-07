@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release. 
 
+### Added
+- Feature flags. Allows disabling the response message for `ir_send` repeat request messages.
+
 ---
 
 ## 0.7.1-beta - 2025-06-11
