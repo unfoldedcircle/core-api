@@ -24,6 +24,7 @@ Supported entities:
 - [Remote](entity_remote.md)
 - [Sensor](entity_sensor.md)
 - [IR-Emitter](entity_ir_emitter.md)
+- [Voice Assistant](entity_voice_assistant.md)
 
 The 🚧 icon within the entity descriptions indicates a planned feature.
 

@@ -65,6 +65,7 @@ jobs:
       - name: Generate integration AsyncAPI HTML doc
         run: |
           ag ./integration-api/UCR-integration-asyncapi.yaml @asyncapi/html-template -o ./static/api/integration --force-write
+          cp ./integration-api/*.proto ./static/api/integration/ 
 
       - name: Generate dock AsyncAPI HTML doc
         run: |
