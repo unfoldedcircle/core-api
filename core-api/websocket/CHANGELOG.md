@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release. 
 
+### Changed
+- Voice assistant configuration refactoring.
+
 ---
 
 ## 0.31.0-beta
