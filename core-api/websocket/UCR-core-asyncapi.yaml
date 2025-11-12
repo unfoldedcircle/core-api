@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.31.0-beta'
+  version: '0.32.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7970,23 +7970,19 @@ components:
             Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
             with the remote or integrations.
           type: boolean
-        enabled:
-          description: |
-            Enable voice control. Disabling voice control will still let you use voice dictation with integrations. 
-            Disable the microphone to completely switch off any microphone related functionality.
-          type: boolean
         voice_assistant:
           $ref: '#/components/schemas/voiceAssistant'
       required:
         - microphone
-        - enabled
         - voice_assistant
 
     voiceAssistant:
-      description: 🚧 Supported voice assistants. TODO not yet implemented.
+      description: |
+        The main voice assistant to use for voice control, if no other voice assistant is configured for a specific
+        screen, for example in an activity.
+        - `None`: no voice assistant is enabled.
       type: string
-      enum:
-        - None
+      default: None
 
     integrationStatus:
       type: object
