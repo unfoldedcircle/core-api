@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.41.1
+  version: 0.42.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -11004,6 +11004,10 @@ components:
                 prevent_sleep:
                   description: Prevent the device to go to sleep while activity is on.
                   type: boolean
+                touch_slider:
+                  $ref: '#/components/schemas/TouchSliderUiCfg'
+                voice_assistant:
+                  $ref: '#/components/schemas/VoiceAssistantUiCfg'
                 included_entities:
                   $ref: '#/components/schemas/IncludedEntities'
                 sequences:
@@ -11118,6 +11122,7 @@ components:
         - If the client removes a configured entity from the system which is included in an activity, it must make sure to
           also remove all references in the activity. See `IncludedEntity.available` property in the included entities
           object when retrieving an activity.
+        - Remote 3: The `touch_slider` configuration requires an entity included in `entity_ids`.
       type: object
       properties:
         name:
@@ -11132,6 +11137,10 @@ components:
             prevent_sleep:
               description: Prevent the device to go to sleep while activity is on.
               type: boolean
+            touch_slider:
+              $ref: '#/components/schemas/TouchSliderUiCfg'
+            voice_assistant:
+              $ref: '#/components/schemas/VoiceAssistantUiCfg'
             entity_ids:
               type: array
               items:
@@ -12078,19 +12087,15 @@ components:
             Enable microphone. Disabling the microphone will completely turn it off. Voice control and dictation won't work
             with the remote or integrations.
           type: boolean
-        enabled:
-          description: |
-            Enable voice control. Disabling voice control will still let you use voice dictation with integrations. 
-            Disable the microphone to completely switch off any microphone related functionality.
-          type: boolean
         voice_assistant:
           description: |
-            TODO
+            The main voice assistant to use for voice control, if no other voice assistant is configured for a specific
+            screen, for example in an activity.
+            - `None`: no voice assistant is enabled.
           type: string
           default: None
       required:
         - microphone
-        - enabled
         - voice_assistant
     CommandSequence:
       description: Sequence of commands to execute.
@@ -15516,6 +15521,36 @@ components:
             An empty value will disable the password, a missing field doesn't change an existing password.
           type: string
           pattern: '^[\w*@^(){}\[\]:,.=-]{6,30}$'
+    TouchSliderUiCfg:
+      description: |
+        Remote 3 touch slider configuration. Assign the touch slider to a specific entity feature on a UI screen.
+
+        If no target is specified the default slider feature is active, unless disabled with the `enabled` property.
+      type: object
+      properties:
+        enabled:
+          description: |
+            Enables or disables the touch slider. If set to false the slider is not active.
+            This affects the optional `target` configuration and the default slider feature.
+          type: boolean
+          default: true
+        target:
+          $ref: '#/components/schemas/TouchSliderTarget'
+      required:
+        - enabled
+    TouchSliderTarget:
+      description: The target entity feature to control.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        feature:
+          description: |
+            The feature to control. One of the listed entity features.
+            The default slider feature is controlled if not specified.
+          type: string
+      required:
+        - entity_id
     UiId:
       type: string
       format: '^[a-zA-Z0-9\-_]+$'
@@ -15801,6 +15836,34 @@ components:
           type: object
           additionalProperties:
             type: string
+    VoiceAssistantUiCfg:
+      description: |
+        Voice assistant configuration. Assigns the voice button to a specific voice assistant.
+
+        - If no target is specified the default voice assistant is active.
+        - If a voice assistant is configured, the voice button command mapping is ignored.
+      type: object
+      properties:
+        enabled:
+          description: |
+            Enables or disables the voice assistant.
+            If disabled, the voice button can be mapped to custom commands.
+          type: boolean
+          default: false
+        target:
+          $ref: '#/components/schemas/VoiceAssistantTarget'
+      required:
+        - enabled
+    VoiceAssistantTarget:
+      description: The specific voice assistant to use.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        language_code:
+          $ref: '#/components/schemas/LanguageCode'
+      required:
+        - entity_id
     ApScanStatus:
       type: object
       properties:
