@@ -15525,7 +15525,11 @@ components:
       description: |
         Remote 3 touch slider configuration. Assign the touch slider to a specific entity feature on a UI screen.
 
-        If no target is specified the default slider feature is active, unless disabled with the `enabled` property.
+        If no target is specified, the default slider feature is active, unless disabled with the `enabled` property.
+
+        - `enabled: false`: disables the touch slider on the UI screen. Any `target` configuration is removed during update.
+        - `enabled: true` and no `target`: the default slider feature is active on the UI screen.
+        - `enabled: true` and `target`: the `target` entity feature is active on the UI screen.
       type: object
       properties:
         enabled:
@@ -15838,22 +15842,15 @@ components:
             type: string
     VoiceAssistantUiCfg:
       description: |
-        Voice assistant configuration. Assigns the voice button to a specific voice assistant.
+        UI-specific voice assistant configuration. Overrides the global voice assistant.
 
-        - If no target is specified the default voice assistant is active.
-        - If a voice assistant is configured, the voice button command mapping is ignored.
+        - The default voice assistant is used if no target is specified.
+        - The voice assistant is activated with the voice button.
+        - A custom voice button command mapping is ignored if a global or a UI-specific voice assistant is configured.
       type: object
       properties:
-        enabled:
-          description: |
-            Enables or disables the voice assistant.
-            If disabled, the voice button can be mapped to custom commands.
-          type: boolean
-          default: false
         target:
           $ref: '#/components/schemas/VoiceAssistantTarget'
-      required:
-        - enabled
     VoiceAssistantTarget:
       description: The specific voice assistant to use.
       type: object
