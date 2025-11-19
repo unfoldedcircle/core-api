@@ -15857,8 +15857,8 @@ components:
       properties:
         entity_id:
           $ref: '#/components/schemas/EntityId'
-        language_code:
-          $ref: '#/components/schemas/LanguageCode'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
       required:
         - entity_id
     ApScanStatus:
