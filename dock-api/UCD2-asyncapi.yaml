@@ -1254,7 +1254,7 @@ components:
         Bit-field encoded feature flags. These are new or optional features a client can use.
         They also allow an easy way to keep backward compatibility.
         Available features:
-        - Bit 0: support for disabling IR repeat response messages. Default: disabled.
+        - Bit 0: support for disabling IR repeat response messages. Default: messages are acknowledged with a 202 response.
         - Bit 1: `ir_send` command supports the `hold` parameter to send ir command for x milliseconds.
       type: integer
       minimum: 0
