@@ -19,6 +19,7 @@ _Changes in the next release_
   - Control the [Logdy](https://logdy.dev/) web-app.
   - New custom TV icon resource identifier: `ctv:`
   - Add query parameter to resource type endpoint to filter items.
+  - New `sensor` widget for the activity user interface.
 - Media-player entity: new attribute `media_position_updated_at`.
 - Dock 3 external port configuration.
 

@@ -14,6 +14,13 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.41.1
+### Added
+- New multi-button merge and replace endpoints for activities and remote-entities:
+  - Merge multiple button mappings: `PATCH /activities/{entityId}/buttons`, `PATCH /remotes/{entityId}/buttons`
+  - Replace button mappings: `POST /activities/{entityId}/buttons`, `POST /remotes/{entityId}/buttons`
+- New sensor widget in the activity user interface.
+
 ## 0.40.0
 ### Added
 - New `DELETE /cfg/network` endpoint to reset all network settings.
