@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+### Added
+- Touch slider configuration in an activity.
+- Voice assistant configuration in an activity.
+
 ---
 
 ## 0.41.1
