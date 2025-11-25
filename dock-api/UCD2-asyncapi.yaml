@@ -2,7 +2,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:dock'
 info:
   title: Remote Two/3 WebSocket Dock-API
-  version: '0.7.1-beta'
+  version: '0.8.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -281,6 +281,8 @@ components:
         - Depending on the IR `format`, a repeat value might be already part of the `code`.
           - ⚠️ The `repeat` value will override the embedded repeat information.
           - See _IR formats_ below.
+        - Each repeat request will be acknowledged with a response message and a `202` status code, unless it gets
+          disabled with the feature flag in bit 0.
 
         If not specified (or set to zero):
         - The provided `code` is sent as is, with the contained repeat information (depending on IR format).
@@ -311,7 +313,7 @@ components:
 
         ### Result codes
         - `200`: IR command has been sent. Either a single command, or after an IR repeat has finished.
-        - `202`: IR repeat command accepted.
+        - `202`: IR repeat command accepted. Default behavior, except the response message has been disabled with the feature flag.
         - `400`: Cannot send command: invalid data or format.
         - `429`: Cannot send command: last IR command is still being sent.
         - `503`: IR sending not possible because learning is active.
@@ -582,6 +584,8 @@ components:
         version:
           description: Dock firmware version
           type: string
+        features:
+          $ref: '#/components/schemas/features'
       required:
         - type
       examples:
@@ -683,6 +687,8 @@ components:
               type: string
             serial:
               type: string
+            features:
+              $ref: '#/components/schemas/features'
             led_brightness:
               type: integer
             eth_led_brightness:
@@ -752,6 +758,12 @@ components:
               type: integer
               minimum: 0
               maximum: 20
+            f:
+              description: |
+                Optional feature flag for sending IR repeat signals.
+                - Bit 0: do not send a response message if an active IR repeat sequence is extended.
+              type: integer
+              minimum: 0
             int_side:
               description: Enable internal output at the bottom around the dock.
               type: boolean
@@ -1236,3 +1248,13 @@ components:
         - even
         - odd
       default: none
+
+    features:
+      description: |
+        Bit-field encoded feature flags. These are new or optional features a client can use.
+        They also allow an easy way to keep backward compatibility.
+        Available features:
+        - Bit 0: support for disabling IR repeat response messages. Default: messages are acknowledged with a 202 response.
+        - Bit 1: `ir_send` command supports the `hold` parameter to send ir command for x milliseconds.
+      type: integer
+      minimum: 0

@@ -16,5 +16,3 @@ The easiest way to generate the HTML documentation from the AsyncAPI definition 
 tool with the instructions provided from the generator tool.
 The provided Bash wrapper script [`create-html-docker.sh`](create-html-docker.sh) creates the html documentation in the
 `./html` sub folder.
-
-ℹ️ We will look into using GitHub Pages for publishing the html documentation.
