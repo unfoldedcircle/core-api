@@ -7978,6 +7978,8 @@ components:
 
     voiceAssistant:
       description: |
+        🚧 Not yet finalized!
+        
         The main voice assistant to use for voice control, if no other voice assistant is configured for a specific
         screen, for example in an activity.
         - `None`: no voice assistant is enabled.
