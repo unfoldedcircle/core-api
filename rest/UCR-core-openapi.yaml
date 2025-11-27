@@ -7816,7 +7816,9 @@ paths:
         - cfg
       summary: Modify voice control settings.
       description: |
-        Change one or multiple voice control settings.
+        Change one or multiple voice control settings. A missing field will in the request object will keep the old value.
+
+        If the specified voice control entity does not exist, the voice assistant configuration will be removed.
       operationId: updateVoiceControlSettings
       requestBody:
         content:
@@ -7838,10 +7840,30 @@ paths:
         '403':
           $ref: '#/components/responses/Err403Forbidden'
   /cfg/voice_control/voice_assistants:
+    head:
+      tags:
+        - cfg
+      summary: Get total number of voice assistants.
+      operationId: getVoiceAssistantCount
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
     get:
       tags:
         - cfg
       summary: Get available voice assistants.
+      parameters:
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
       operationId: getVoiceAssistants
       responses:
         '200':
@@ -15924,7 +15946,9 @@ components:
 
         - `profiles` specify optional parameters that can be used by starting a voice command.
         - `features` are the default features supported by the voice assistant.  
-           If multiple profiles are supported, it should be the feature list of the preferred profile.
+           If multiple profiles are supported, this should be the feature list of the preferred profile.
+        - `preferred_profile` is the preferred profile specified by the integration.  
+           The user can select another default profile in the voice assistant settings.
       type: object
       properties:
         entity_id:
