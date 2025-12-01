@@ -124,6 +124,10 @@ for the full message structure.
 |             | timeout         | Number             | Optional: processing timeout in seconds.                                       |
 |             | profile_id      | String             | Optional: profile used for the voice assistant command.                        |
 
+Notes:
+- The Integration-API only defines the `voice_start` Websocket command.
+- The end-of-stream notification is sent with the Protobuf message `RemoteVoiceEnd`.
+- The Core-API defines `voice_start` and `voice_end` commands. 
 
 #### voice_start
 
@@ -191,17 +195,19 @@ Example:
 The `assistant_event` must be emitted by the integration driver to start the audio stream and for providing optional
 feedback about the voice command processing and outcome.
 
-| Event           | Data          | Type   | Description                                                    |
-|-----------------|---------------|--------|----------------------------------------------------------------|
-| ready           |               |        | Integration is ready to receive voice audio stream.            |
-| stt_response    | text          | string | Optional. Transcribed text from voice audio stream.            |
-| text_response   | text          | string | Optional. Textual response about the performed action.         |
-|                 | response_type | enum   | Action result type: `action_done`, `query_answer`, `error`     |
-| speech_response | url           | string | Optional. Speech response about the performed action.          |
-|                 | mime_type     | string |                                                                |
-| finished        |               |        | Voice processing finished.                                     |
-| error           | code          | string | Processing error while sending or processing the audio stream. |
-|                 | message       | string |                                                                |
+| Event           | Data      | Type   | Description                                                    |
+|-----------------|-----------|--------|----------------------------------------------------------------|
+| ready           |           |        | Integration is ready to receive voice audio stream.            |
+| stt_response    | text      | string | Optional. Transcribed text from voice audio stream.            |
+| text_response   | text      | string | Optional. Textual response about the performed action.         |
+|                 | success   | bool   | Action result.                                                 |
+| speech_response | url       | string | Optional. Speech response about the performed action.          |
+|                 | mime_type | string |                                                                |
+| finished        |           |        | Voice processing finished.                                     |
+| error           | code      | string | Processing error while sending or processing the audio stream. |
+|                 | message   | string |                                                                |
+
+See the [Integration-API](https://unfoldedcircle.github.io/core-api/integration/) for the full event definitions.
 
 #### Ready event
 
@@ -252,7 +258,7 @@ The `session_id` is used to identify the audio stream.
     "entity_id": "va-1",
     "session_id": 8,
     "data": {
-      "response_type": "action_done",
+      "success": true,
       "text": "Switched off living room lights"
     }
   }
@@ -296,3 +302,13 @@ The `session_id` is used to identify the audio stream.
   }
 }
 ```
+
+Defined error codes:
+- NO_TEXT_RECOGNIZED
+- SERVICE_UNAVAILABLE
+- INVALID_AUDIO
+- NO_TEXT_RECOGNIZED
+- INTENT_FAILED
+- TTS_FAILED
+- TIMEOUT
+- UNEXPECTED_ERROR
