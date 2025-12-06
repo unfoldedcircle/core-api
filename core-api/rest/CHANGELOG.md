@@ -8,11 +8,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+---
+
+## 0.43.1
 ### Added
 - Touch slider configuration in an activity.
 - Voice assistant configuration in an activity.
+- New entity type `voice_assistant`.
 
----
+### Changed
+- Refactored `CfgVoiceControl` data model for `/cfg/voice_control` and `/cfg/voice_control/voice_assistants` endpoints.
+- Refactored `CfgAll` model: `voice_control` -> `voice`
+- Available entity from integration can now include an icon
 
 ## 0.41.1
 ### Added

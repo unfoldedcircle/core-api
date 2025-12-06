@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.12.1-beta'
+  version: '0.13.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -156,6 +156,7 @@ channels:
           - $ref: '#/components/messages/entity_change'
           - $ref: '#/components/messages/entity_available'
           - $ref: '#/components/messages/entity_removed'
+          - $ref: '#/components/messages/assistant_event'
           # --- metadata & configuration requests
           - $ref: '#/components/messages/get_version'
           - $ref: '#/components/messages/get_supported_entity_types'
@@ -780,6 +781,17 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/entityRemovedEvent'
+
+    assistant_event:
+      summary: 🔍 Assistant event.
+      description: |
+        The `assistant_event` message must be emitted by the integration driver to start the audio
+        stream and for providing optional feedback about the voice command processing and outcome.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/assistantEventMsg'
+
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -1538,6 +1550,23 @@ components:
             - msg
             - msg_data
 
+    assistantEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonEvent'
+        - properties:
+            msg:
+              type: string
+              const: assistant_event
+            cat:
+              type: string
+              const: ENTITY
+            msg_data:
+              $ref: '#/components/schemas/AssistantEvent'
+          required:
+            - msg
+            - msg_data
+
     # =========================================================================
     # Common schemas
     # =========================================================================
@@ -1668,7 +1697,7 @@ components:
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `ir_emitter`, `light`,
-        `media_player`, `remote`,`sensor`, `switch`. 
+        `media_player`, `remote`,`sensor`, `switch`, `voice_assistant`. 
 
         See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
         for more information.
@@ -1679,6 +1708,8 @@ components:
         the ability to open / close, or a venetian blind with position and tilting features.  
         See [polymorphism support in AsyncAPI specification](https://www.asyncapi.com/docs/specifications/v2.2.0#schemaComposition)
         for more information.
+        
+        If no icon identifier is specified, the default icon for the entity type is used.
       discriminator: entity_type
       type: object
       properties:
@@ -1701,6 +1732,8 @@ components:
           description: |
             Display name of the entity in the UI. An english text should always be provided as fallback option.
           $ref: '#/components/schemas/languageText'
+        icon:
+          $ref: '#/components/schemas/iconIdentifier'
         area:
           description: |
             Optional area if supported by the integration, e.g. `Living room`. This information might be used by the UI
@@ -2141,6 +2174,245 @@ components:
                     🚧 Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.
                   type: number
 
+    voice_assistant:
+      description: |
+        A voice assistant entity can be used to receive a microphone input stream suitable to send voice commands
+        to a voice assistant.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              $ref: '#/components/schemas/VoiceAssistantFeatures'
+            options:
+              $ref: '#/components/schemas/VoiceAssistantOptions'
+
+    VoiceAssistantFeatures:
+      type: array
+      items:
+        $ref: '#/components/schemas/VoiceAssistantFeature'
+
+    VoiceAssistantFeature:
+      description: |
+        Supported voice assistant or profile features.
+        - transcription: Supports voice command transcription.
+        - response_text: Supports textual response about the performed action.
+        - response_speech: Supports speech response about the performed action.
+      type: string
+      enum:
+        - transcription
+        - response_text
+        - response_speech
+
+    VoiceAssistantOptions:
+      type: object
+      properties:
+        audio_cfg:
+          $ref: '#/components/schemas/VaAudioConfiguration'
+        profiles:
+          $ref: '#/components/schemas/VoiceAssistantProfiles'
+        preferred_profile:
+          $ref: '#/components/schemas/simpleId'
+
+    VaAudioConfiguration:
+      description: |
+        The audio format to be sent to the integration.
+
+        If an unsupported audio stream is requested, the default setting is used. For example, if a sample rate of
+        4 kHz is requested, the default sample rate of 16 kHz is used.
+      type: object
+      properties:
+        channels:
+          description: Number of audio channels
+          type: integer
+          default: 1
+          minimum: 1
+          maximum: 2
+        sample_rate:
+          description: |
+            Sample rate of the audio stream in Hz.
+          type: integer
+          enum:
+            - 8000
+            - 11025
+            - 16000
+            - 22050
+            - 24000
+            - 44100
+            - 48000
+          default: 16000
+        sample_format:
+          description: Audio frame format.
+          type: string
+          enum:
+            - I16
+            - I32
+            - U16
+            - U32
+            - F32
+          default: I16
+
+    VoiceAssistantProfiles:
+      type: array
+      items:
+        $ref: '#/components/schemas/VoiceAssistantProfile'
+
+    VoiceAssistantProfile:
+      description: |
+        Profiles are optional and allow parameterizing voice input. A regular voice-capable device usually just accepts voice
+        input without additional parameters. Home automation systems can offer multi-language support or an option to use
+        local or cloud processing.
+
+        For example, Home Assistant allows configuring multiple Assist pipelines for voice commands.
+        These pipelines can offer different languages or speech recognition engines.
+
+        - `language` is an optional language code if the profile represents a specific language for speech recognition.
+        - `features` is optional and overwrites the voice assistant features, for example, if a profile has less or more features.
+        - An empty `features` array means "no features".
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/simpleId'
+        name:
+          description: Friendly name to show in UI.
+          type: string
+          minLength: 1
+          maxLength: 50
+        language:
+          $ref: '#/components/schemas/languageCode'
+        features:
+          $ref: '#/components/schemas/VoiceAssistantFeatures'
+      required:
+        - id
+        - name
+
+    AssistantEvent:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - ready
+            - stt_response
+            - text_response
+            - speech_response
+            - finished
+            - error
+        entity_id:
+          type: string
+        session_id:
+          type: integer
+          minimum: 0
+        data:
+          type: object
+      required:
+        - type
+        - entity_id
+        - session_id
+      discriminator: type
+      oneOf:
+        - title: Ready
+          properties:
+            type:
+              const: ready
+        - title: SttResponse
+          properties:
+            type:
+              const: stt_response
+            data:
+              $ref: '#/components/schemas/AssistantSttResponse'
+          required:
+            - data
+        - title: TextResponse
+          properties:
+            type:
+              const: text_response
+            data:
+              $ref: '#/components/schemas/AssistantTextResponse'
+          required:
+            - data
+        - title: SpeechResponse
+          properties:
+            type:
+              const: speech_response
+            data:
+              $ref: '#/components/schemas/AssistantSpeechResponse'
+          required:
+            - data
+        - title: Finished
+          properties:
+            type:
+              const: finished
+        - title: Error
+          properties:
+            type:
+              const: error
+            data:
+              $ref: '#/components/schemas/AssistantError'
+          required:
+            - data
+
+    AssistantSttResponse:
+      type: object
+      properties:
+        text:
+          type: string
+      required:
+        - text
+    AssistantTextResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        text:
+          type: string
+      required:
+        - success
+        - text
+    AssistantSpeechResponse:
+      type: object
+      properties:
+        url:
+          type: string
+          format: url
+        mime_type:
+          description: |
+            MIME type of the audio stream. Supported mime types in the UI application:
+            - `audio/mpeg`
+            - `audio/mp3`
+            - `audio/wav`
+            - `audio/x-wav`
+            - `audio/ogg`
+            - `audio/opus`
+            - `audio/webm`
+            - `audio/flac`
+            - `audio/aac`
+            Unsupported types will be ignored by the UI.
+          type: string
+      required:
+        - url
+        - mime_type
+    AssistantError:
+      type: object
+      properties:
+        code:
+          $ref: '#/components/schemas/AssistantErrorCode'
+        message:
+          type: string
+      required:
+        - code
+        - message
+    AssistantErrorCode:
+      type: string
+      enum:
+        - SERVICE_UNAVAILABLE
+        - INVALID_AUDIO
+        - NO_TEXT_RECOGNIZED
+        - INTENT_FAILED
+        - TTS_FAILED
+        - TIMEOUT
+        - UNEXPECTED_ERROR
+
     entityType:
       description: |
         Supported entities, defined as extensible enum: already known entity types are in the enum, but other string
@@ -2157,6 +2429,7 @@ components:
             - sensor
             - remote
             - ir_emitter
+            - voice_assistant
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
 
     SimpleCommand:
@@ -2579,6 +2852,13 @@ components:
       description: |
         Optional icon identifier. If specified the icon will be set. An empty identifier while updating the object
         removes the existing icon.
+
+    simpleId:
+      type: string
+      format: "^[a-zA-Z0-9\\-_\\.]+$"
+      minLength: 1
+      maxLength: 36
+      description: Simple string identifier, also usable as URL parameter or file identifier.
 
     DeviceButtonMapping:
       type: object
