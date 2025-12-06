@@ -1,11 +1,8 @@
-# DRAFT Voice Assistant Entity
-
-> [!CAUTION]
-> This is a work in progress. Entity definition and data structures might still change.  
-> Verification is required by at least one reference implementation.  
+# Voice Assistant Entity
 
 > [!NOTE]
-> Home Assistant integration is used as the first reference implementation, followed by Android TV.
+> The [Home Assistant integration](https://github.com/unfoldedcircle/integration-home-assistant) is used as the first
+> reference implementation, followed by Android TV.
 
 A voice assistant entity interacts with a voice assistant or sends voice commands to voice-capable devices.
 It can request an audio stream from the Remote's microphone when the user pushes the voice button.
@@ -206,6 +203,17 @@ feedback about the voice command processing and outcome.
 | finished        |           |        | Voice processing finished.                                     |
 | error           | code      | string | Processing error while sending or processing the audio stream. |
 |                 | message   | string |                                                                |
+
+Supported audio mime types for the `speech_response` event:
+- `audio/mpeg`
+- `audio/mp3`
+- `audio/wav`
+- `audio/x-wav`
+- `audio/ogg`
+- `audio/opus`
+- `audio/webm`
+- `audio/flac`
+- `audio/aac`
 
 See the [Integration-API](https://unfoldedcircle.github.io/core-api/integration/) for the full event definitions.
 

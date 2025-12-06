@@ -22,6 +22,7 @@ _Changes in the next release_
   - New `sensor` widget for the activity user interface.
 - Media-player entity: new attribute `media_position_updated_at`.
 - Dock 3 external port configuration.
+- Voice Assistant support.
 
 ---
 
