@@ -357,6 +357,7 @@ message back to the remote to notify it about the updated state or attribute(s).
 <li><a href="entities/entity_remote.html">Remote</a></li>
 <li><a href="entities/entity_sensor.html">Sensor</a></li>
 <li><a href="entities/entity_ir_emitter.html">IR-Emitter</a></li>
+<li><a href="entities/entity_voice_assistant.html">Voice Assistant</a></li>
 </ul>
 <p>The 🚧 icon within the entity descriptions indicates a planned feature.</p>
 <h2 id="integration-api-1"><a class="header" href="#integration-api-1">Integration API</a></h2>
@@ -2616,6 +2617,340 @@ or empty):</p>
   }
 }
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="voice-assistant-entity"><a class="header" href="#voice-assistant-entity">Voice Assistant Entity</a></h1>
+<blockquote>
+<p>[!NOTE]
+The <a href="https://github.com/unfoldedcircle/integration-home-assistant">Home Assistant integration</a> is used as the first
+reference implementation, followed by Android TV.</p>
+</blockquote>
+<p>A voice assistant entity interacts with a voice assistant or sends voice commands to voice-capable devices.
+It can request an audio stream from the Remote's microphone when the user pushes the voice button.</p>
+<p>This allows forwarding voice commands to the voice control feature of a device, or to a cloud-based voice assistant like
+Amazon Alexa or Google Home.</p>
+<p>Please note that an integration does not have direct access to the microphone and cannot initiate voice recording.
+This is only possible by the user pressing the voice button.</p>
+<h2 id="features-10"><a class="header" href="#features-10">Features</a></h2>
+<p>The features describe the capabilities of the voice assistant.</p>
+<p>Some devices only offer simple one-way voice command features, where the result of the command is shown or signaled on
+the device itself, for example, with a speech response on a smart speaker.
+The Android TV is such a device; a voice command can be sent, then the result is only shown or played on the TV.</p>
+<p>Smart home systems can offer two-way voice command features, where the result(s) of the command is also returned to the
+client.
+Home Assistant offers such functionality with the assist pipeline. The individual processing steps like speech-to-text,
+intent recognition and speech feedback are accessible.</p>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>R</th><th>W</th><th>Description</th></tr></thead><tbody>
+<tr><td>transcription</td><td>✅</td><td>❌</td><td>Speech to text response of the transcribed voice command</td></tr>
+<tr><td>response_text</td><td>✅</td><td>❌</td><td>Textual response of the performed action</td></tr>
+<tr><td>response_speech</td><td>✅</td><td>❌</td><td>Voice response of the performed action</td></tr>
+</tbody></table>
+</div>
+<h3 id="attributes-9"><a class="header" href="#attributes-9">Attributes</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Features</th><th>Type</th><th>Values</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td></td><td>enum</td><td><a href="entities/entity_voice_assistant.html#states">States</a></td><td>Default entity state attribute.</td></tr>
+</tbody></table>
+</div>
+<h3 id="states-10"><a class="header" href="#states-10">States</a></h3>
+<p>The entity <code>state</code> attribute holds the following values:</p>
+<div class="table-wrapper"><table><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody>
+<tr><td>OFF</td><td>The device is ready but the voice feature is not available</td></tr>
+<tr><td>ON</td><td>Ready for voice commands</td></tr>
+</tbody></table>
+</div>
+<p>Also includes the <a href="entities/index.html#states">common entity states</a>.</p>
+<h3 id="device-classes-10"><a class="header" href="#device-classes-10">Device Classes</a></h3>
+<p>None.</p>
+<h3 id="options-10"><a class="header" href="#options-10">Options</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td>audio_cfg</td><td>AudioConfiguration</td><td>{}</td><td>Audio stream format</td></tr>
+<tr><td>profiles</td><td>Profile</td><td>[]</td><td>List of supported profiles</td></tr>
+<tr><td>preferred_profile</td><td>String</td><td></td><td>Preferred profile to use as default</td></tr>
+</tbody></table>
+</div>
+<h4 id="audio-configuration"><a class="header" href="#audio-configuration">Audio Configuration</a></h4>
+<p>The default audio stream the integration receives from the Remote is in PCM 16 kHz mono 16-bit signed format.
+Audio chunks are sent every 100–200 ms.</p>
+<p>The <code>audio_cfg</code> option can specify a different audio format to be sent to the integration.
+If an unsupported audio stream is requested, the default setting is used. For example, if a sample rate of 4 kHz is
+requested, the default sample rate of 16 kHz is used.</p>
+<p>The <code>AudioConfiguration</code> object of the <code>audio_stream</code> option has the following properties:</p>
+<div class="table-wrapper"><table><thead><tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
+<tr><td>channels</td><td>Number</td><td>1</td><td>Number of audio channels: 1 or 2</td></tr>
+<tr><td>sample_rate</td><td>Number</td><td>16000</td><td>Sample rate of the audio stream in Hz.</td></tr>
+<tr><td>sample_format</td><td>enum</td><td>I16</td><td>Audio frame format.</td></tr>
+</tbody></table>
+</div>
+<p>The actual audio stream format is included in the <code>voice_start</code> command and in the first
+<a href="https://github.com/unfoldedcircle/core-api/tree/main/integration-api/ucr_integration_voice.proto"><code>RemoteVoiceBegin</code> protobuf message</a> when the audio stream is
+started. See the <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a> for the full definition.</p>
+<h4 id="profiles-1"><a class="header" href="#profiles-1">Profiles</a></h4>
+<p>The <code>profiles</code> option allows specifying a list of voice assistant profiles that can be used by starting a voice command.
+Profiles are optional and allow parameterizing voice input. A regular voice-capable device usually just accepts voice
+input without additional parameters. Home automation systems can offer multi-language support or an option to use
+local or cloud processing.</p>
+<p>For example, Home Assistant allows configuring multiple Assist pipelines for voice commands. These pipelines can offer
+different languages or speech recognition engines.</p>
+<p>The <code>Profile</code> object has the following properties:</p>
+<div class="table-wrapper"><table><thead><tr><th>Property</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>id</td><td>String</td><td>Profile identifier</td></tr>
+<tr><td>name</td><td>String</td><td>Friendly name to show in UI</td></tr>
+<tr><td>language</td><td>String</td><td>Optional: language code for speech recognition if the profile represents a specific language</td></tr>
+<tr><td>transcription</td><td>bool</td><td>Optional: supports voice command transcription. Entity feature is used if not specified.</td></tr>
+<tr><td>response_text</td><td>bool</td><td>Optional: Supports textual response about the performed action. Entity feature is used if not specified.</td></tr>
+<tr><td>response_speech</td><td>bool</td><td>Optional: Supports speech response about the performed action. Entity feature is used if not specified.</td></tr>
+</tbody></table>
+</div>
+<p>The profile identifier can be specified in the <code>profile_id</code> parameter of the <code>voice_start</code> command.</p>
+<h2 id="integration-api-11"><a class="header" href="#integration-api-11">Integration API</a></h2>
+<p>The following sequence diagram shows the happy message flow of a voice command initiated by the UI. It's a simplified
+representation of the communication between the various components, showing the relevant Core-API and Integration-API
+messages. The interaction between an integration driver and the voice assistant depends on the involved system and
+available features.</p>
+<pre class="mermaid">sequenceDiagram
+    participant U as UI
+    participant R as Remote
+    participant I as Integration
+    participant V as Voice Assistant
+
+    U-)R: voice_start
+    activate R
+    R--&gt;R: check microphone enabled
+    R-)I:  voice_start
+    activate I
+    I--)R: result (ok)
+    R--)U: result (ok)
+    deactivate R
+
+    I-&gt;&gt;V: initiate voice command
+    I--)R: assistant_event (ready)
+    deactivate I
+    activate R
+    R--)U: assistant_event (ready)
+    U--&gt;U: show ready
+
+    R-)I:  protobuf: voice_begin
+    activate I
+    I-&gt;&gt;V: start voice command
+    loop microphone button pressed
+        R--&gt;R:  get microphone audio chunk
+        R-)I:   protobuf: voice_data
+        I-)V:   relay audio stream
+    end
+    deactivate R
+    
+    U-)+R:  voice_end
+    R--)U: result (ok)
+    R-)-I:  protobuf: voice_end
+    I-&gt;&gt;V: stop voice command
+    deactivate I
+    V--&gt;V: processing
+    
+    opt stt_response feature
+        V--)I: STT response
+        I--)R: assistant_event (stt_response)
+        R--)U: assistant_event (stt_response)
+        U--&gt;U: show response
+    end
+    opt text_response feature
+        V--)I: intent response
+        I--)R: assistant_event (text_response)
+        R--)U: assistant_event (text_response)
+        U--&gt;U: show response
+    end
+    opt speech_response feature
+        V--)I: speech response
+        I--)R: assistant_event (speech_response)
+        R--)U: assistant_event (speech_response)
+        U--&gt;U: play audio response
+    end
+    I--)R: assistant_event (finished)
+    R--)U: assistant_event (finished)
+</pre>
+<h3 id="commands-10"><a class="header" href="#commands-10">Commands</a></h3>
+<p>The integration driver has to implement a handler for the <code>entity_command</code> WebSocket message to process the following
+command requests in <code>msg_data.cmd_id</code>. See <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a>
+for the full message structure.</p>
+<div class="table-wrapper"><table><thead><tr><th>cmd_id</th><th>Parameters</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>voice_start</td><td>session_id</td><td>Number</td><td>Audio session identifier that will be used in follow-up binary voice messages.</td></tr>
+<tr><td></td><td>audio_cfg</td><td>AudioConfiguration</td><td>Audio stream format used in WS binary messages.</td></tr>
+<tr><td></td><td>speech_response</td><td>bool</td><td>Optional: enable voice response of the performed action.</td></tr>
+<tr><td></td><td>timeout</td><td>Number</td><td>Optional: processing timeout in seconds.</td></tr>
+<tr><td></td><td>profile_id</td><td>String</td><td>Optional: profile used for the voice assistant command.</td></tr>
+</tbody></table>
+</div>
+<p>Notes:</p>
+<ul>
+<li>The Integration-API only defines the <code>voice_start</code> Websocket command.</li>
+<li>The end-of-stream notification is sent with the Protobuf message <code>RemoteVoiceEnd</code>.</li>
+<li>The Core-API defines <code>voice_start</code> and <code>voice_end</code> commands.</li>
+</ul>
+<h4 id="voice_start"><a class="header" href="#voice_start">voice_start</a></h4>
+<p>After confirming the <code>voice_start</code> command, the audio stream is started and transmitted as binary WebSocket messages
+in protocol buffer format (see <a href="https://github.com/unfoldedcircle/core-api/tree/main/integration-api/ucr_integration_voice.proto">protobuf messages</a>).</p>
+<ul>
+<li>The confirmation message must be sent within 2 seconds, or the user interface might abort the command.</li>
+<li>If the integration already knows that it can't process voice commands, it needs to send a negative response.</li>
+<li>The integration must send the <code>start</code> event with the provided <code>session_id</code>, when it is ready to receive the audio stream.</li>
+<li>The audio stream is stopped if an <code>error</code> event is sent by the integration.</li>
+</ul>
+<p>Example:</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 123,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "voice_assistant",
+    "entity_id": "va-1",
+    "cmd_id": "voice_start",
+    "params": {
+      "session_id": 8,
+      "audio_cfg": {
+        "channels": 1,
+        "sample_rate": 8000,
+        "sample_format": "I16"
+      }
+    }
+  }
+}
+</code></pre>
+<h3 id="events-10"><a class="header" href="#events-10">Events</a></h3>
+<h4 id="entity-change-event"><a class="header" href="#entity-change-event">Entity change event</a></h4>
+<p>The regular <code>entity_change</code> event must be emitted by the integration driver if the state of the voice assistant changes.
+For example, if a voice assistant becomes unavailable because a required cloud service is no longer responding.</p>
+<p>The following attributes must be included:</p>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>New entity <a href="entities/entity_voice_assistant.html#states">state</a>.</td></tr>
+</tbody></table>
+</div>
+<p>Example:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "voice_assistant",
+    "entity_id": "va-1",
+    "attributes": {
+      "state": "ON"
+    }
+  }
+}
+</code></pre>
+<h4 id="assistant-event"><a class="header" href="#assistant-event">Assistant event</a></h4>
+<p>The <code>assistant_event</code> must be emitted by the integration driver to start the audio stream and for providing optional
+feedback about the voice command processing and outcome.</p>
+<div class="table-wrapper"><table><thead><tr><th>Event</th><th>Data</th><th>Type</th><th>Description</th></tr></thead><tbody>
+<tr><td>ready</td><td></td><td></td><td>Integration is ready to receive voice audio stream.</td></tr>
+<tr><td>stt_response</td><td>text</td><td>string</td><td>Optional. Transcribed text from voice audio stream.</td></tr>
+<tr><td>text_response</td><td>text</td><td>string</td><td>Optional. Textual response about the performed action.</td></tr>
+<tr><td></td><td>success</td><td>bool</td><td>Action result.</td></tr>
+<tr><td>speech_response</td><td>url</td><td>string</td><td>Optional. Speech response about the performed action.</td></tr>
+<tr><td></td><td>mime_type</td><td>string</td><td></td></tr>
+<tr><td>finished</td><td></td><td></td><td>Voice processing finished.</td></tr>
+<tr><td>error</td><td>code</td><td>string</td><td>Processing error while sending or processing the audio stream.</td></tr>
+<tr><td></td><td>message</td><td>string</td><td></td></tr>
+</tbody></table>
+</div>
+<p>Supported audio mime types for the <code>speech_response</code> event:</p>
+<ul>
+<li><code>audio/mpeg</code></li>
+<li><code>audio/mp3</code></li>
+<li><code>audio/wav</code></li>
+<li><code>audio/x-wav</code></li>
+<li><code>audio/ogg</code></li>
+<li><code>audio/opus</code></li>
+<li><code>audio/webm</code></li>
+<li><code>audio/flac</code></li>
+<li><code>audio/aac</code></li>
+</ul>
+<p>See the <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a> for the full event definitions.</p>
+<h4 id="ready-event"><a class="header" href="#ready-event">Ready event</a></h4>
+<p>The <code>ready</code> event is emitted after the <code>voice_start</code> command has been confirmed.
+The <code>session_id</code> is used to identify the audio stream.</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "assistant_event",
+  "cat": "ENTITY",
+  "msg_data": {
+    "type": "ready",
+    "entity_id": "va-1",
+    "session_id": 8
+  }
+}
+</code></pre>
+<h5 id="speech-to-text-event"><a class="header" href="#speech-to-text-event">Speech to text event</a></h5>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "assistant_event",
+  "cat": "ENTITY",
+  "msg_data": {
+    "type": "stt_response",
+    "entity_id": "va-1",
+    "session_id": 8,
+    "data": {
+      "text": "Switch off the living room lights"
+    }
+  }
+}
+</code></pre>
+<h4 id="text-response-event"><a class="header" href="#text-response-event">Text response event</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "assistant_event",
+  "cat": "ENTITY",
+  "msg_data": {
+    "type": "text_response",
+    "entity_id": "va-1",
+    "session_id": 8,
+    "data": {
+      "success": true,
+      "text": "Switched off living room lights"
+    }
+  }
+}
+</code></pre>
+<h4 id="speech-response-event"><a class="header" href="#speech-response-event">Speech response event</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "assistant_event",
+  "cat": "ENTITY",
+  "msg_data": {
+    "type": "speech_response",
+    "entity_id": "va-1",
+    "session_id": 8,
+    "data": {
+      "url": "https://smart.home/api/tts_proxy/6ZZGII-UgUfEEI8CbH1TNg.mp3",
+      "media_type": "audio/mpeg"
+    }
+  }
+}
+</code></pre>
+<h5 id="error-event"><a class="header" href="#error-event">Error event</a></h5>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "assistant_event",
+  "cat": "ENTITY",
+  "msg_data": {
+    "type": "error",
+    "entity_id": "va-1",
+    "session_id": 8,
+    "data": {
+      "code": "NO_TEXT_RECOGNIZED",
+      "message": "I did not understand"
+    }
+  }
+}
+</code></pre>
+<p>Defined error codes:</p>
+<ul>
+<li>NO_TEXT_RECOGNIZED</li>
+<li>SERVICE_UNAVAILABLE</li>
+<li>INVALID_AUDIO</li>
+<li>NO_TEXT_RECOGNIZED</li>
+<li>INTENT_FAILED</li>
+<li>TTS_FAILED</li>
+<li>TIMEOUT</li>
+<li>UNEXPECTED_ERROR</li>
+</ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="integration-drivers"><a class="header" href="#integration-drivers">Integration Drivers</a></h1>
 <p>Since we are providing an API and not an SDK for a specific programming language, one can develop external integrations
 in any language which is capable running a WebSockets server and handling JSON data.</p>
