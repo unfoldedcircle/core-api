@@ -25,8 +25,9 @@ in YAML format.
 
 ## API Versions
 
-| UCR2 Firmware | Core Simulator | REST API | WS API |
+| UCR Firmware  | Core Simulator | REST API | WS API |
 |---------------|----------------|----------|--------|
+| 2.8.0-beta    | 0.66.4         | 0.43.1   | 0.33.0 |
 | 2.7.2-beta    | 0.65.1         | 0.42.0   | 0.32.0 |
 | 2.6.2-beta    | 0.62.0         | 0.40.0   | 0.31.0 |
 | 2.6.0-beta    | 0.61.5         | 0.39.4   | 0.30.2 |
