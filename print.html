@@ -357,6 +357,7 @@ message back to the remote to notify it about the updated state or attribute(s).
 <li><a href="entities/entity_remote.html">Remote</a></li>
 <li><a href="entities/entity_sensor.html">Sensor</a></li>
 <li><a href="entities/entity_ir_emitter.html">IR-Emitter</a></li>
+<li><a href="entities/entity_select.html">Select</a></li>
 <li><a href="entities/entity_voice_assistant.html">Voice Assistant</a></li>
 </ul>
 <p>The 🚧 icon within the entity descriptions indicates a planned feature.</p>
@@ -2617,6 +2618,159 @@ or empty):</p>
   }
 }
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="select-entity"><a class="header" href="#select-entity">Select Entity</a></h1>
+<blockquote>
+<p>[!NOTE]
+The <a href="https://github.com/unfoldedcircle/integration-home-assistant">Home Assistant integration</a> is used as the first
+reference implementation.</p>
+</blockquote>
+<p>The select entity offers a limited set of selectable options.
+The available options are defined by the integration driver. They can be a static list or dynamically generated and
+changed at runtime.</p>
+<h2 id="features-10"><a class="header" href="#features-10">Features</a></h2>
+<p>The select entity has no features.</p>
+<h3 id="attributes-9"><a class="header" href="#attributes-9">Attributes</a></h3>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Type</th><th>Values</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>enum</td><td><a href="entities/entity_select.html#states">States</a></td><td>Optional state of the select entity.</td></tr>
+<tr><td>current_option</td><td>string</td><td></td><td>The currently selected option.</td></tr>
+<tr><td>options</td><td>list</td><td><em>text</em></td><td>The available options to choose from.</td></tr>
+</tbody></table>
+</div>
+<h3 id="states-10"><a class="header" href="#states-10">States</a></h3>
+<p>The <code>state</code> attribute is optional for a select entity and defaults to <code>ON</code> if not specified.</p>
+<p>The select entity only supports the <code>ON</code> state and the <a href="entities/index.html#states">common entity states</a>.</p>
+<div class="table-wrapper"><table><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody>
+<tr><td>ON</td><td>The selection is available.</td></tr>
+</tbody></table>
+</div>
+<h3 id="device-classes-10"><a class="header" href="#device-classes-10">Device Classes</a></h3>
+<p>None.</p>
+<h3 id="options-10"><a class="header" href="#options-10">Options</a></h3>
+<p>None.</p>
+<h2 id="integration-api-11"><a class="header" href="#integration-api-11">Integration API</a></h2>
+<h3 id="commands-10"><a class="header" href="#commands-10">Commands</a></h3>
+<p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
+requests in <code>msg_data.cmd_id</code>.</p>
+<div class="table-wrapper"><table><thead><tr><th>cmd_id</th><th>Parameters</th><th>Description</th></tr></thead><tbody>
+<tr><td>select_option</td><td>option</td><td>Select a specific option. The <code>option</code> parameter must be one of the values in the <code>options</code> attribute.</td></tr>
+<tr><td>select_first</td><td>-</td><td>Select the first option in the list.</td></tr>
+<tr><td>select_last</td><td>-</td><td>Select the last option in the list.</td></tr>
+<tr><td>select_next</td><td>cycle</td><td>Select the next option in the list. If <code>cycle</code> is true, it wraps around to the first option.</td></tr>
+<tr><td>select_previous</td><td>cycle</td><td>Select the previous option in the list. If <code>cycle</code> is true, it wraps around to the last option.</td></tr>
+</tbody></table>
+</div>
+<h3 id="events-10"><a class="header" href="#events-10">Events</a></h3>
+<p>The <code>entity_change</code> event must be emitted by the integration driver if the state or an attribute of the select entity changes.</p>
+<p>The following attributes are supported:</p>
+<div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Description</th></tr></thead><tbody>
+<tr><td>state</td><td>New entity <a href="entities/entity_select.html#states">state</a>.</td></tr>
+<tr><td>current_option</td><td>Currently selected option changed.</td></tr>
+<tr><td>options</td><td>Available options changed.</td></tr>
+</tbody></table>
+</div>
+<p>At least one attribute must be specified in the <code>entity_change</code> message. If the entity <code>state</code> and a <code>select-entity</code>
+attribute changed at the same time, they may both be included in the same message. It's also valid to always send every
+attribute.</p>
+<h3 id="command-examples-8"><a class="header" href="#command-examples-8">Command examples</a></h3>
+<h4 id="select_option"><a class="header" href="#select_option">select_option</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "cmd_id": "select_option",
+    "params": {
+      "option": "foobar"
+    }
+  }
+}
+</code></pre>
+<h4 id="select_first"><a class="header" href="#select_first">select_first</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "cmd_id": "select_first"
+  }
+}
+</code></pre>
+<h4 id="select_last"><a class="header" href="#select_last">select_last</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "cmd_id": "select_last"
+  }
+}
+</code></pre>
+<h4 id="select_next"><a class="header" href="#select_next">select_next</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "cmd_id": "select_next",
+    "params": {
+      "cycle": true
+    }
+  }
+}
+</code></pre>
+<h4 id="select_previous"><a class="header" href="#select_previous">select_previous</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "cmd_id": "select_previous",
+    "params": {
+      "cycle": false
+    }
+  }
+}
+</code></pre>
+<h3 id="event-examples-8"><a class="header" href="#event-examples-8">Event examples</a></h3>
+<h4 id="option-changed"><a class="header" href="#option-changed">Option changed</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "attributes": {
+      "current_option": "Foobar"
+    }
+  }
+}
+</code></pre>
+<h4 id="options-list-and-current-option-changed"><a class="header" href="#options-list-and-current-option-changed">Options list and current option changed</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "select",
+    "entity_id": "select-1",
+    "attributes": {
+      "options": ["Foo", "Bar", "Foobar"],
+      "current_option": "Bar"
+    }
+  }
+}
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="voice-assistant-entity"><a class="header" href="#voice-assistant-entity">Voice Assistant Entity</a></h1>
 <blockquote>
 <p>[!NOTE]
@@ -2629,7 +2783,7 @@ It can request an audio stream from the Remote's microphone when the user pushes
 Amazon Alexa or Google Home.</p>
 <p>Please note that an integration does not have direct access to the microphone and cannot initiate voice recording.
 This is only possible by the user pressing the voice button.</p>
-<h2 id="features-10"><a class="header" href="#features-10">Features</a></h2>
+<h2 id="features-11"><a class="header" href="#features-11">Features</a></h2>
 <p>The features describe the capabilities of the voice assistant.</p>
 <p>Some devices only offer simple one-way voice command features, where the result of the command is shown or signaled on
 the device itself, for example, with a speech response on a smart speaker.
@@ -2644,12 +2798,12 @@ intent recognition and speech feedback are accessible.</p>
 <tr><td>response_speech</td><td>✅</td><td>❌</td><td>Voice response of the performed action</td></tr>
 </tbody></table>
 </div>
-<h3 id="attributes-9"><a class="header" href="#attributes-9">Attributes</a></h3>
+<h3 id="attributes-10"><a class="header" href="#attributes-10">Attributes</a></h3>
 <div class="table-wrapper"><table><thead><tr><th>Attribute</th><th>Features</th><th>Type</th><th>Values</th><th>Description</th></tr></thead><tbody>
 <tr><td>state</td><td></td><td>enum</td><td><a href="entities/entity_voice_assistant.html#states">States</a></td><td>Default entity state attribute.</td></tr>
 </tbody></table>
 </div>
-<h3 id="states-10"><a class="header" href="#states-10">States</a></h3>
+<h3 id="states-11"><a class="header" href="#states-11">States</a></h3>
 <p>The entity <code>state</code> attribute holds the following values:</p>
 <div class="table-wrapper"><table><thead><tr><th>Value</th><th>Description</th></tr></thead><tbody>
 <tr><td>OFF</td><td>The device is ready but the voice feature is not available</td></tr>
@@ -2657,9 +2811,9 @@ intent recognition and speech feedback are accessible.</p>
 </tbody></table>
 </div>
 <p>Also includes the <a href="entities/index.html#states">common entity states</a>.</p>
-<h3 id="device-classes-10"><a class="header" href="#device-classes-10">Device Classes</a></h3>
+<h3 id="device-classes-11"><a class="header" href="#device-classes-11">Device Classes</a></h3>
 <p>None.</p>
-<h3 id="options-10"><a class="header" href="#options-10">Options</a></h3>
+<h3 id="options-11"><a class="header" href="#options-11">Options</a></h3>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
 <tr><td>audio_cfg</td><td>AudioConfiguration</td><td>{}</td><td>Audio stream format</td></tr>
 <tr><td>profiles</td><td>Profile</td><td>[]</td><td>List of supported profiles</td></tr>
@@ -2700,7 +2854,7 @@ different languages or speech recognition engines.</p>
 </tbody></table>
 </div>
 <p>The profile identifier can be specified in the <code>profile_id</code> parameter of the <code>voice_start</code> command.</p>
-<h2 id="integration-api-11"><a class="header" href="#integration-api-11">Integration API</a></h2>
+<h2 id="integration-api-12"><a class="header" href="#integration-api-12">Integration API</a></h2>
 <p>The following sequence diagram shows the happy message flow of a voice command initiated by the UI. It's a simplified
 representation of the communication between the various components, showing the relevant Core-API and Integration-API
 messages. The interaction between an integration driver and the voice assistant depends on the involved system and
@@ -2765,7 +2919,7 @@ available features.</p>
     I--)R: assistant_event (finished)
     R--)U: assistant_event (finished)
 </pre>
-<h3 id="commands-10"><a class="header" href="#commands-10">Commands</a></h3>
+<h3 id="commands-11"><a class="header" href="#commands-11">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> WebSocket message to process the following
 command requests in <code>msg_data.cmd_id</code>. See <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a>
 for the full message structure.</p>
@@ -2812,7 +2966,7 @@ in protocol buffer format (see <a href="https://github.com/unfoldedcircle/core-a
   }
 }
 </code></pre>
-<h3 id="events-10"><a class="header" href="#events-10">Events</a></h3>
+<h3 id="events-11"><a class="header" href="#events-11">Events</a></h3>
 <h4 id="entity-change-event"><a class="header" href="#entity-change-event">Entity change event</a></h4>
 <p>The regular <code>entity_change</code> event must be emitted by the integration driver if the state of the voice assistant changes.
 For example, if a voice assistant becomes unavailable because a required cloud service is no longer responding.</p>
