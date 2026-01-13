@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.34.0-beta
+### Added
+- New entity type `select`.
+
 ## 0.33.0-beta
 ### Changed
 - Voice assistant configuration refactoring.

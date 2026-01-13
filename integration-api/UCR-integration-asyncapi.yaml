@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.13.0-beta'
+  version: '0.14.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -747,6 +747,16 @@ components:
               entity_type: cover
               entity_id: blind-2_cover-only
               cmd_id: close
+        - payload:
+            kind: req
+            id: 128
+            msg: entity_command
+            msg_data:
+              entity_type: select
+              entity_id: select-1
+              cmd_id: select_option
+              params:
+                option: "Option 1"
 
     # --- events
     entity_change:
@@ -1696,8 +1706,8 @@ components:
 
     entity:
       description: |
-        Common definition of an entity. Concrete entities are: `cover`, `button`, `climate`, `ir_emitter`, `light`,
-        `media_player`, `remote`,`sensor`, `switch`, `voice_assistant`. 
+        Common definition of an entity. Concrete entities are: `button`, `switch`, `light`, `cover`, `media_player`,
+        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `voice_assistant`. 
 
         See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
         for more information.
@@ -2174,6 +2184,25 @@ components:
                     🚧 Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.
                   type: number
 
+    select:
+      description: |
+        The select entity offers a limited set of selectable options.
+        The available options are defined by the integration driver. They can be a static list or dynamically generated
+        and changed at runtime.
+
+        See [select entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_select.md)
+        for more information.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              description: The select entity has no features.
+              type: array
+            options:
+              description: The select entity has no options.
+              type: object
+
     voice_assistant:
       description: |
         A voice assistant entity can be used to receive a microphone input stream suitable to send voice commands
@@ -2429,6 +2458,7 @@ components:
             - sensor
             - remote
             - ir_emitter
+            - select
             - voice_assistant
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
 

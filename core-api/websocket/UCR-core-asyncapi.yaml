@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.33.0-beta'
+  version: '0.34.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -6730,6 +6730,7 @@ components:
             - entity_activity
             - entity_macro
             - entity_remote
+            - entity_select
             - activity_groups
             - integrations
             - profiles
@@ -7462,6 +7463,7 @@ components:
         - macro
         - remote
         - ir_emitter
+        - select
         - voice_assistant
 
     ActivityGroup:
@@ -8261,6 +8263,7 @@ components:
       properties:
         url:
           type: string
+          format: url
         mime_type:
           type: string
       required:

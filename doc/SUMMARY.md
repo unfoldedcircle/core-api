@@ -19,6 +19,7 @@
   - [Remote](entities/entity_remote.md)
   - [Sensor](entities/entity_sensor.md)
   - [IR-Emitter](entities/entity_ir_emitter.md)
+  - [Select](entities/entity_select.md)
   - [Voice Assistant](entities/entity_voice_assistant.md)
 
 # Integration Drivers
