@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.43.0
+  version: 0.44.0
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -13245,6 +13245,7 @@ components:
         - macro
         - remote
         - ir_emitter
+        - select
         - voice_assistant
     ExternalSystems:
       type: array
@@ -15929,6 +15930,10 @@ components:
       properties:
         entity_id:
           $ref: '#/components/schemas/EntityId'
+        available:
+          description: |
+            Flag indicating if the referenced `entity_id` is still available or is a dangling reference.
+          type: boolean
         profile_id:
           $ref: '#/components/schemas/SimpleId'
       required:
