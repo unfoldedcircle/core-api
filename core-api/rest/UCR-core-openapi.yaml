@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.44.0
+  version: 0.44.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -15652,6 +15652,8 @@ components:
           maxLength: 50
         media_player_id:
           $ref: '#/components/schemas/EntityId'
+        select:
+          $ref: '#/components/schemas/UserInterfaceItemSelect'
         sensor:
           $ref: '#/components/schemas/UserInterfaceItemSensor'
         command:
@@ -15670,6 +15672,7 @@ components:
         - `text`: show text only from field `text`.
         - `media_player`: show media information from the specified media-player entity specified in `media_player_id`.  
           The specified entity_id must be part of the included entities in the activity and of type media-player.
+        - `select`: show a select box with the specified options from the select entity's `options` attribute.
         - `sensor`: show sensor value from the specified sensor entity specified in the `sensor` configuration object.
       type: string
       enum:
@@ -15677,13 +15680,31 @@ components:
         - text
         - numpad
         - media_player
+        - select
         - sensor
+    UserInterfaceItemSelect:
+      description: |
+        Select item configuration.
+        By default, only the selected option value in the `current_option` attribute is shown from the specified
+        select-entity.
+        If the user interface `text` field is set, it is used as a widget label, except if `show_name` is set to true.
+        If no widget label should be shown, omit the item's `text` field and set `show_name` to false.
+      type: object
+      properties:
+        select_id:
+          $ref: '#/components/schemas/EntityId'
+        show_name:
+          description: Show the select-entity name as widget label instead of the user interface item's `text` field.
+          type: boolean
+          default: false
+      required:
+        - select_id
     UserInterfaceItemSensor:
       description: |
         Sensor item configuration.
         By default, only the sensor value and unit is shown from the specified sensor entity.
         If the user interface `text` field is set, it is used as sensor label, except if `show_label` is set to true.
-        If no label should be shown, omit the item's `text` field and set `show_label` to false.
+        If no widget label should be shown, omit the item's `text` field and set `show_label` to false.
       type: object
       properties:
         sensor_id:
