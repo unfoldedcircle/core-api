@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.44.1
+### Added
+- New user interface widget `select`.
+
 ## 0.44.0
 ### Added
 - New entity type `select`.
