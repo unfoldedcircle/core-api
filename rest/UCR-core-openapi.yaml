@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.44.1
+  version: 0.44.2
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -88,19 +88,19 @@ paths:
                     properties:
                       total_memory:
                         type: integer
-                        description: Amount of available RAM in KB
+                        description: Amount of available RAM in bytes
                       available_memory:
                         type: integer
-                        description: Amount of available RAM in KB for (re)use
+                        description: Amount of available RAM in bytes for (re)use
                       used_memory:
                         type: integer
-                        description: Amount of used RAM in KB
+                        description: Amount of used RAM in bytes
                       total_swap:
                         type: integer
-                        description: SWAP size in KB
+                        description: SWAP size in bytes
                       used_swap:
                         type: integer
-                        description: Free SWAP in KB
+                        description: Free SWAP in bytes
                   load_avg:
                     type: object
                     description: System load average
@@ -123,10 +123,10 @@ paths:
                         properties:
                           available:
                             type: integer
-                            description: Amount of available disk space in KB
+                            description: Amount of available disk space in bytes
                           used:
                             type: integer
-                            description: Amount of used disk space in KB
+                            description: Amount of used disk space in bytes
       security: []
   /pub/health_check:
     get:
