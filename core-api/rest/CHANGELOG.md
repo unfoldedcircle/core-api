@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.44.2
+### Fixed
+- The `/public/status` endpoint returns bytes not KBytes.
+
 ## 0.44.1
 ### Added
 - New user interface widget `select`.
