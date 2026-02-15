@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.44.2
+  version: 0.44.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -11024,6 +11024,12 @@ components:
                 prevent_sleep:
                   description: Prevent the device to go to sleep while activity is on.
                   type: boolean
+                ready_check:
+                  description: |
+                    Readiness check when turning the activity on or off.
+                    Checks if entities in the on- or off-sequence are available before running the sequence.
+                  type: boolean
+                  default: true
                 touch_slider:
                   $ref: '#/components/schemas/TouchSliderUiCfg'
                 voice_assistant:
@@ -11156,6 +11162,11 @@ components:
           properties:
             prevent_sleep:
               description: Prevent the device to go to sleep while activity is on.
+              type: boolean
+            ready_check:
+              description: |
+                Readiness check when turning the activity on or off.
+                Checks if entities in the on- or off-sequence are available before running the sequence.
               type: boolean
             touch_slider:
               $ref: '#/components/schemas/TouchSliderUiCfg'
