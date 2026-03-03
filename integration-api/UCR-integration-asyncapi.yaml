@@ -1506,6 +1506,7 @@ components:
         
         Note: common values are defined as enum variants, but integrations can define additional values!
       type: string
+      maxLength: 255
       anyOf:
         - enum:
             - album
@@ -1536,6 +1537,7 @@ components:
         
         Note: common values are defined as enum variants, but integrations can define additional values!
       type: string
+      maxLength: 255
       anyOf:
         - enum:
             - album
@@ -1561,6 +1563,13 @@ components:
             - video
         - { }  # extensible enum: integration can define additional values
 
+    MediaPlayerRepeatMode:
+      type: string
+      enum:
+        - OFF
+        - ALL
+        - ONE
+
     MediaPlayAction:
       type: string
       enum:
@@ -1575,15 +1584,19 @@ components:
         media_id:
           description: Unique identifier of the media item.
           type: string
+          maxLength: 255
         title:
           description: Display name.
           type: string
+          maxLength: 255
         artist:
           description: Optional artist name.
           type: string
+          maxLength: 255
         album:
           description: Optional album name.
           type: string
+          maxLength: 255
         media_class:
           $ref: '#/components/schemas/MediaClass'
         media_type:
@@ -2296,6 +2309,7 @@ components:
                   - record
                   - settings
                   - play_media
+                  - play_media_action
                   - clear_playlist
                   - browse_media
                   - search_media

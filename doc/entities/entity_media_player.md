@@ -12,6 +12,7 @@
     * [Command Name Patterns](#command-name-patterns)
   * [Media Browsing](#media-browsing)
   * [Media Searching](#media-searching)
+  * [Media Playback](#media-playback)
   * [Events](#events)
     * [Media Content Types](#media-content-types)
     * [Media Classes](#media-classes)
@@ -84,6 +85,7 @@ of the media-player UI on the Remote Two.
 | record                  | ❌ | ✅ | The player has recording capabilities with record, my_recordings, live commands |
 | settings                | ❌ | ✅ | The player supports a settings menu.                                            |
 | play_media              | ❌ | ✅ | The player supports playing a specific media item.                              |
+| play_media_action       | ❌ | ✅ | The player supports the play_media action parameter to either play or enqueue.  |
 | clear_playlist          | ❌ | ✅ | The player allows clearing the active playlist.                                 |
 | browse_media            | ❌ | ✅ | The player supports browsing media containers.                                  |
 | 🚧 search_media         | ❌ | ✅ | The player supports searching for media items.                                  |
@@ -192,56 +194,57 @@ Optional features of the media-player entity.
 The integration driver has to implement a handler for the `entity_command` message to process the following command
 requests in `msg_data.cmd_id`.
 
-| cmd_id                  | Parameters                    | Description                                                                                                                                                                                                                                       |
-|-------------------------|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| on                      | -                             | Switch on media player.                                                                                                                                                                                                                           |
-| off                     | -                             | Switch off media player.                                                                                                                                                                                                                          |
-| toggle                  | -                             | Toggle the current power state, either from on -> off or from off -> on.                                                                                                                                                                          |
-| play_pause              | -                             | Toggle play / pause.                                                                                                                                                                                                                              |
-| stop                    | -                             | Stop playback.                                                                                                                                                                                                                                    |
-| previous                | -                             | Go back to previous track.                                                                                                                                                                                                                        |
-| next                    | -                             | Skip to next track.                                                                                                                                                                                                                               |
-| fast_forward            | -                             | Fast forward current track.                                                                                                                                                                                                                       |
-| rewind                  | -                             | Rewind current track.                                                                                                                                                                                                                             |
-| seek                    | media_position                | Seek to given position in current track. Position is given in seconds.                                                                                                                                                                            |
-| volume                  | volume                        | Set volume to given level.                                                                                                                                                                                                                        |
-| volume_up               | -                             | Increase volume.                                                                                                                                                                                                                                  |
-| volume_down             | -                             | Decrease volume.                                                                                                                                                                                                                                  |
-| mute_toggle             | -                             | Toggle mute state.                                                                                                                                                                                                                                |
-| mute                    | -                             | Mute volume.                                                                                                                                                                                                                                      |
-| unmute                  | -                             | Unmute volume.                                                                                                                                                                                                                                    |
-| repeat                  | repeat                        | Repeat track or playlist.                                                                                                                                                                                                                         |
-| shuffle                 | shuffle                       | Shuffle playlist or start random playback.                                                                                                                                                                                                        |
-| channel_up              | -                             | Channel up.                                                                                                                                                                                                                                       |
-| channel_down            | -                             | Channel down.                                                                                                                                                                                                                                     |
-| cursor_up               | -                             | Directional pad up.                                                                                                                                                                                                                               |
-| cursor_down             | -                             | Directional pad down.                                                                                                                                                                                                                             |
-| cursor_left             | -                             | Directional pad left.                                                                                                                                                                                                                             |
-| cursor_right            | -                             | Directional pad right.                                                                                                                                                                                                                            |
-| cursor_enter            | -                             | Directional pad enter.                                                                                                                                                                                                                            |
-| digit_0 - digit_9       | -                             | Number pad digits 0..9.                                                                                                                                                                                                                           |
-| function_red            | -                             | Function red.                                                                                                                                                                                                                                     |
-| function_green          | -                             | Function green.                                                                                                                                                                                                                                   |
-| function_yellow         | -                             | Function yellow.                                                                                                                                                                                                                                  |
-| function_blue           | -                             | Function blue.                                                                                                                                                                                                                                    |
-| home                    | -                             | Home menu                                                                                                                                                                                                                                         |
-| menu                    | -                             | Menu                                                                                                                                                                                                                                              |
-| context_menu            | -                             | Context menu                                                                                                                                                                                                                                      |
-| guide                   | -                             | Program guide menu.                                                                                                                                                                                                                               |
-| info                    | -                             | Information menu / what's playing.                                                                                                                                                                                                                |
-| back                    | -                             | Back / exit function for menu navigation (to exit menu, guide, info).                                                                                                                                                                             |
-| select_source           | source                        | Select an input source from the available sources.                                                                                                                                                                                                |
-| select_sound_mode       | mode                          | Select a sound mode from the available modes.                                                                                                                                                                                                     |
-| record                  | -                             | Start, stop or open recording menu (device dependant).                                                                                                                                                                                            |
-| my_recordings           | -                             | Open recordings.                                                                                                                                                                                                                                  |
-| live                    | -                             | Switch to live view.                                                                                                                                                                                                                              |
-| eject                   | -                             | Eject media.                                                                                                                                                                                                                                      |
-| open_close              | -                             | Open or close.                                                                                                                                                                                                                                    |
-| audio_track             | -                             | Switch or select audio track.                                                                                                                                                                                                                     |
-| subtitle                | -                             | Switch or select subtitle.                                                                                                                                                                                                                        |
-| settings                | -                             | Settings menu                                                                                                                                                                                                                                     |
-| play_media              | media_id, media_type, action  | Play or enqueue a media item.                                                                                                                                                                                                                     |
-| 🚧 clear_playlist       | -                             | Removes all items from the playback queue. Current playback behaviour is integration dependant (keep playing the current item or clearing everything).                                                                                            |
+| cmd_id            | Parameters           | Description                                                                                                                                            |
+|-------------------|----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------|
+| on                | -                    | Switch on media player.                                                                                                                                |
+| off               | -                    | Switch off media player.                                                                                                                               |
+| toggle            | -                    | Toggle the current power state, either from on -> off or from off -> on.                                                                               |
+| play_pause        | -                    | Toggle play / pause.                                                                                                                                   |
+| stop              | -                    | Stop playback.                                                                                                                                         |
+| previous          | -                    | Go back to previous track.                                                                                                                             |
+| next              | -                    | Skip to next track.                                                                                                                                    |
+| fast_forward      | -                    | Fast forward current track.                                                                                                                            |
+| rewind            | -                    | Rewind current track.                                                                                                                                  |
+| seek              | media_position       | Seek to given position in current track. Position is given in seconds.                                                                                 |
+| volume            | volume               | Set volume to given level.                                                                                                                             |
+| volume_up         | -                    | Increase volume.                                                                                                                                       |
+| volume_down       | -                    | Decrease volume.                                                                                                                                       |
+| mute_toggle       | -                    | Toggle mute state.                                                                                                                                     |
+| mute              | -                    | Mute volume.                                                                                                                                           |
+| unmute            | -                    | Unmute volume.                                                                                                                                         |
+| repeat            | repeat               | Repeat track or playlist.                                                                                                                              |
+| shuffle           | shuffle              | Shuffle playlist or start random playback.                                                                                                             |
+| channel_up        | -                    | Channel up.                                                                                                                                            |
+| channel_down      | -                    | Channel down.                                                                                                                                          |
+| cursor_up         | -                    | Directional pad up.                                                                                                                                    |
+| cursor_down       | -                    | Directional pad down.                                                                                                                                  |
+| cursor_left       | -                    | Directional pad left.                                                                                                                                  |
+| cursor_right      | -                    | Directional pad right.                                                                                                                                 |
+| cursor_enter      | -                    | Directional pad enter.                                                                                                                                 |
+| digit_0 - digit_9 | -                    | Number pad digits 0..9.                                                                                                                                |
+| function_red      | -                    | Function red.                                                                                                                                          |
+| function_green    | -                    | Function green.                                                                                                                                        |
+| function_yellow   | -                    | Function yellow.                                                                                                                                       |
+| function_blue     | -                    | Function blue.                                                                                                                                         |
+| home              | -                    | Home menu                                                                                                                                              |
+| menu              | -                    | Menu                                                                                                                                                   |
+| context_menu      | -                    | Context menu                                                                                                                                           |
+| guide             | -                    | Program guide menu.                                                                                                                                    |
+| info              | -                    | Information menu / what's playing.                                                                                                                     |
+| back              | -                    | Back / exit function for menu navigation (to exit menu, guide, info).                                                                                  |
+| select_source     | source               | Select an input source from the available sources.                                                                                                     |
+| select_sound_mode | mode                 | Select a sound mode from the available modes.                                                                                                          |
+| record            | -                    | Start, stop or open recording menu (device dependant).                                                                                                 |
+| my_recordings     | -                    | Open recordings.                                                                                                                                       |
+| live              | -                    | Switch to live view.                                                                                                                                   |
+| eject             | -                    | Eject media.                                                                                                                                           |
+| open_close        | -                    | Open or close.                                                                                                                                         |
+| audio_track       | -                    | Switch or select audio track.                                                                                                                          |
+| subtitle          | -                    | Switch or select subtitle.                                                                                                                             |
+| settings          | -                    | Settings menu                                                                                                                                          |
+| play_media        | media_id, media_type | Play or enqueue a media item.                                                                                                                          |
+|                   | action               | Optional `MediaPlayAction` enum if feature `play_media_action` is supported. Play now, next or enqueue.                                                |
+| clear_playlist    | -                    | Removes all items from the playback queue. Current playback behaviour is integration-dependent (keep playing the current item or clearing everything). |
 
 ### Simple Commands
 
@@ -533,6 +536,41 @@ Empty strings must be preserved and echoed back as-is. Only omit a field if it w
 🚧 The `filter.artist` and `filter.album` fields are examples of possible future filters.
 They are **not** required or currently standardized in the Integration-API.
 
+### Media Playback
+
+Starting a media playback is an optional feature and uses a standard `entity_command` request with the `play_media`
+command identifier.
+
+The `media_id` and `media_type` parameters must be the exact same values as returned by `browse_media` or `search_media`.
+The integration can support other identifiers for directly playing a specific media item  in activity sequences or
+UI commands. 
+
+```json
+{
+  "kind": "req",
+  "id": 125,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "play_media",
+    "params": {
+      "media_id": "track-456",
+      "media_type": "track",
+      "action": "PLAY_NOW"
+    }
+  }
+}
+```
+
+The `action` parameter is of type `MediaPlayAction` enum and is defined in the Integration-API:
+
+- `PLAY_NOW`: Start playback immediately.
+- `PLAY_NEXT`: Add to the queue after the current item.
+- `ADD_TO_QUEUE`: Add to the end of the queue.
+
+The `PLAY_NOW` action is the default if no action is specified.
+
 ### Events
 
 The `entity_change` event must be emitted by the integration driver if the state or an attribute of the media player
@@ -768,26 +806,6 @@ Specify a sound mode value contained in the `sound_mode_list` attribute array.
     "cmd_id": "select_sound_mode",
     "params": {
       "mode": "MOVIE"
-    }
-  }
-}
-```
-
-#### play_media
-
-```json
-{
-  "kind": "req",
-  "id": 125,
-  "msg": "entity_command",
-  "msg_data": {
-    "entity_type": "media_player",
-    "entity_id": "media-1",
-    "cmd_id": "play_media",
-    "params": {
-      "media_id": "track-456",
-      "media_type": "track",
-      "action": "PLAY_NOW"
     }
   }
 }
