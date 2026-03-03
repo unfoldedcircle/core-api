@@ -155,6 +155,7 @@ channels:
           - $ref: '#/components/messages/entity_states'
           - $ref: '#/components/messages/available_entities'
           - $ref: '#/components/messages/media_browse'
+          - $ref: '#/components/messages/media_search'
           # ------ events
           - $ref: '#/components/messages/entity_change'
           - $ref: '#/components/messages/entity_available'
@@ -830,13 +831,22 @@ components:
         $ref: '#/components/messages/media_browse'
 
     media_browse:
-      summary: 👷 Media browse/search result.
+      summary: 👷 Media browse result.
       description: |
-        Response message for `browse_media` and `search_media` requests.
+        Response message for `browse_media` requests.
       tags:
         - name: entity
       payload:
         $ref: '#/components/schemas/mediaBrowseRespMsg'
+
+    media_search:
+      summary: 👷 Media search result.
+      description: |
+        Response message for `search_media` requests.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/mediaSearchRespMsg'
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -1499,6 +1509,20 @@ components:
             - msg
             - msg_data
 
+    mediaSearchRespMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: media_search
+            msg_data:
+              $ref: '#/components/schemas/mediaSearchResponse'
+          required:
+            - msg
+            - msg_data
+
     MediaClass:
       description: |
         The media class is for browser/structure semantics.
@@ -1616,8 +1640,11 @@ components:
           type: boolean
           default: false
         thumbnail:
-          description: URL to download the media artwork, or a base64 encoded PNG or JPG image.
+          description: |
+            URL to download the media artwork, or a base64 encoded PNG or JPG image.
+            Please use a URL whenever possible. Encoded images should be as small as possible.
           type: string
+          maxLength: 32768
         duration:
           description: Duration in seconds.
           type: integer
@@ -1639,6 +1666,21 @@ components:
           $ref: '#/components/schemas/BrowseMediaItem'
         pagination:
           $ref: '#/components/schemas/Pagination'
+      required:
+        - pagination
+
+    mediaSearchResponse:
+      type: object
+      properties:
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowseMediaItem'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+        - media
+        - pagination
 
     # =========================================================================
     # Event message schemas
