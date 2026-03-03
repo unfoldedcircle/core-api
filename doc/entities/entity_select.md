@@ -45,13 +45,13 @@ None.
 The integration driver has to implement a handler for the `entity_command` message to process the following command
 requests in `msg_data.cmd_id`.
 
-| cmd_id          | Parameters | Description                                                                                            |
-|-----------------|------------|--------------------------------------------------------------------------------------------------------|
-| select_option   | option     | Select a specific option. The `option` parameter must be one of the values in the `options` attribute. |
-| select_first    | -          | Select the first option in the list.                                                                   |
-| select_last     | -          | Select the last option in the list.                                                                    |
-| select_next     | cycle      | Select the next option in the list. If `cycle` is true, it wraps around to the first option.           |
-| select_previous | cycle      | Select the previous option in the list. If `cycle` is true, it wraps around to the last option.        |
+| cmd_id          | Parameters | Description                                                                                               |
+|-----------------|------------|-----------------------------------------------------------------------------------------------------------|
+| select_option   | option     | Select a specific option. The `option` parameter must be one of the values in the `options` attribute.    |
+| select_first    | -          | Select the first option in the list.                                                                      |
+| select_last     | -          | Select the last option in the list.                                                                       |
+| select_next     | cycle      | Select the next option in the list. If `cycle` is true (default), it wraps around to the first option.    |
+| select_previous | cycle      | Select the previous option in the list. If `cycle` is true (default), it wraps around to the last option. |
 
 ### Events
 
@@ -129,13 +129,12 @@ attribute.
   "msg_data": {
     "entity_type": "select",
     "entity_id": "select-1",
-    "cmd_id": "select_next",
-    "params": {
-      "cycle": true
-    }
+    "cmd_id": "select_next"
   }
 }
 ```
+
+If the `cycle` parameter is not specified, the default value is `true` and the integration driver should wrap around.
 
 #### select_previous
 
@@ -154,6 +153,9 @@ attribute.
   }
 }
 ```
+
+If the `cycle` parameter is set to `false` in the `select_previous` command, the integration driver should not wrap
+around to the last option if the first option is currently selected.
 
 ### Event examples
 
