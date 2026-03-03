@@ -2655,8 +2655,8 @@ requests in <code>msg_data.cmd_id</code>.</p>
 <tr><td>select_option</td><td>option</td><td>Select a specific option. The <code>option</code> parameter must be one of the values in the <code>options</code> attribute.</td></tr>
 <tr><td>select_first</td><td>-</td><td>Select the first option in the list.</td></tr>
 <tr><td>select_last</td><td>-</td><td>Select the last option in the list.</td></tr>
-<tr><td>select_next</td><td>cycle</td><td>Select the next option in the list. If <code>cycle</code> is true, it wraps around to the first option.</td></tr>
-<tr><td>select_previous</td><td>cycle</td><td>Select the previous option in the list. If <code>cycle</code> is true, it wraps around to the last option.</td></tr>
+<tr><td>select_next</td><td>cycle</td><td>Select the next option in the list. If <code>cycle</code> is true (default), it wraps around to the first option.</td></tr>
+<tr><td>select_previous</td><td>cycle</td><td>Select the previous option in the list. If <code>cycle</code> is true (default), it wraps around to the last option.</td></tr>
 </tbody></table>
 </div>
 <h3 id="events-10"><a class="header" href="#events-10">Events</a></h3>
@@ -2719,13 +2719,11 @@ attribute.</p>
   "msg_data": {
     "entity_type": "select",
     "entity_id": "select-1",
-    "cmd_id": "select_next",
-    "params": {
-      "cycle": true
-    }
+    "cmd_id": "select_next"
   }
 }
 </code></pre>
+<p>If the <code>cycle</code> parameter is not specified, the default value is <code>true</code> and the integration driver should wrap around.</p>
 <h4 id="select_previous"><a class="header" href="#select_previous">select_previous</a></h4>
 <pre><code class="language-json">{
   "kind": "req",
@@ -2741,6 +2739,8 @@ attribute.</p>
   }
 }
 </code></pre>
+<p>If the <code>cycle</code> parameter is set to <code>false</code> in the <code>select_previous</code> command, the integration driver should not wrap
+around to the last option if the first option is currently selected.</p>
 <h3 id="event-examples-8"><a class="header" href="#event-examples-8">Event examples</a></h3>
 <h4 id="option-changed"><a class="header" href="#option-changed">Option changed</a></h4>
 <pre><code class="language-json">{
