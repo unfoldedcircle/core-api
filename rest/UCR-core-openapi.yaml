@@ -433,24 +433,22 @@ paths:
       tags:
         - external-token
       summary: "\U0001F9EA Get registered external systems."
-      description: |
-        External systems cannot be created manually. They are automatically being created if a custom integration driver
-        requests to use the "external tokens" feature. This is enabled with the driver feature `auth.external_tokens`.
-
-        ⚠️ External integration drivers cannot use this feature.
-
-        If the expected system name is not returned by this call, all operations on the `/auth/external/{system}` endpoints
-        with that system name will fail.
-        Therefore, it's advisable to either call this method first or react on the 404 error while providing or updating an
-        external system token, to inform the client user, that the integration is not available on the remote.
+      description: "An external system is a device or service requiring authentication. This is used in integration drivers to\nauthenticate with online services requiring either a long-lived access token or OAuth2 authorization code flow.\n\nExternal systems cannot be created manually. They are automatically being created if an integration driver requests\none of the following driver features:\n\n- `auth.external_tokens`: Enables generic token support for an integration driver running on the Remote. \n  - The provided token value will be made available in a secrets file. This is usually a long-lived access token.\n  - ⚠️ External integration drivers cannot use this feature.\n- `auth.oauth2.authorization_code`: Enables OAuth2 authorization code flow support for an integration driver.\n  -  \U0001F6A7 under development\n\nIf an external system is used in an integration driver, the `system` field refers to the integration driver ID.\n\nIf the expected system name is not returned by this call, all operations on the `/auth/external/{system}` endpoints\nwith that system name will fail.\nTherefore, it's advisable to either call this method first or react on the 404 error while providing or updating an\nexternal system token, to inform the client user, that the integration is not available on the remote.\n\nThe `type` parameter can be used to filter the list of external systems by token type:\n\n- If no `type` parameter is specified, all external systems are returned.\n- If a token `type` is specified, only external systems are returned having at least one token of the specified type.\n"
       operationId: getExternalSystems
+      parameters:
+        - name: type
+          in: query
+          description: Token type.
+          required: false
+          schema:
+            $ref: '#/components/schemas/ExtTokenType'
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExternalSystems'
+                $ref: '#/components/schemas/ExternalSystemInfos'
     delete:
       tags:
         - external-token
@@ -473,9 +471,15 @@ paths:
       description: |
         An access token is usually required to connect to external systems like Home Assistant.
         This method allows the external system to automatically provide the access token for the corresponding Remote
-        integration instead of forcing the user to type it in. If the token name already exists for the given system,
-        error `422` is returned.
+        integration instead of forcing the user to type it in. Another use case is to provide application credentials for
+        an OAuth2 flow.
+
+        If the token name already exists for the given system, error `422` is returned.
         Use the PUT method to update an existing token.
+
+        ### Token type `TOKEN`
+
+        This is the default generic token type.
 
         Required fields are:
         - `token_id`: the main identifier for a given system. It must be unique within that system and may not end in
@@ -506,6 +510,24 @@ paths:
         - Optional files are created for the `url` and `data` fields:
           - `{token_id}-URL` contains the `url` value. Example: `${UC_TOKENS_HOME}/foobar-URL`
           - `{token_id}-DATA` contains the `data` value. Example: `${UC_TOKENS_HOME}/foobar-DATA`
+
+        ### Token type `OAUTH2_APP`
+
+        This token type is used for OAuth2 applications and represents a client credential.
+
+        - `name`: a friendly name to show in a user interface. It must be unique within that system.  
+          This is usually the linked integration name or something to identify the target app where OAuth2 is used,
+          for example, an account name.
+        - `token_id`: OAuth client ID
+        - `token`: OAuth client secret
+
+        The `url` and `data` fields are not used for OAuth2 applications.
+
+        ⚠️ The secret token value cannot be retrieved anymore with the API and is only available in the corresponding driver
+        runtime with the defined OAuth2 specific Integration-API messages.
+
+        To use OAuth2 application credentials an integration driver has to request the driver feature `auth.oauth2.authorization_code`.
+        If enabled, an external system is automatically created with the `system` identifier matching the `driver_id`.
       operationId: addExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
@@ -600,6 +622,12 @@ paths:
       operationId: deleteExternalAccessTokensBySystem
       parameters:
         - $ref: '#/components/parameters/system'
+        - name: system
+          in: query
+          description: Also delete the external system entry.
+          required: false
+          schema:
+            type: boolean
       responses:
         '200':
           description: Successful operation
@@ -13258,17 +13286,31 @@ components:
         - ir_emitter
         - select
         - voice_assistant
-    ExternalSystems:
+    ExternalSystemInfos:
       type: array
       items:
-        $ref: '#/components/schemas/ExternalSystem'
-    ExternalSystem:
+        $ref: '#/components/schemas/ExternalSystemInfo'
+    ExternalSystemInfo:
+      description: |
+        Information about an external system. The `token_id` and `intg_name` fields are only returned if the
+        `token_type: OAUTH2_APP` was requested.
       type: object
       properties:
         system:
           $ref: '#/components/schemas/ExternalSystemId'
         name:
           $ref: '#/components/schemas/ExtSystemName'
+        token_count:
+          description: |
+            Number of tokens associated with this external system.
+            The count reflects the requested token type, or the overall token count if no token type is specified.
+          type: integer
+        token_id:
+          $ref: '#/components/schemas/TokenId'
+        intg_name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
       required:
         - system
         - name
@@ -13285,6 +13327,12 @@ components:
       maxLength: 36
       description: |
         Unique token identifier, used for later token management through the external system or management ui.
+    ExtTokenType:
+      type: string
+      enum:
+        - TOKEN
+        - OAUTH2_APP
+        - OAUTH2_TOKEN
     ExtSystemName:
       type: string
       minLength: 1
@@ -13325,6 +13373,8 @@ components:
           $ref: '#/components/schemas/ExternalSystemId'
         token_id:
           $ref: '#/components/schemas/TokenId'
+        token_type:
+          $ref: '#/components/schemas/ExtTokenType'
         name:
           $ref: '#/components/schemas/ExtSystemName'
         description:
@@ -13339,14 +13389,20 @@ components:
       required:
         - system
         - token_id
+        - token_type
         - name
         - creation_date
     ExternalAccessTokenRequest:
       type: object
       description: |
-        The token_id can be provided by the external system. If omitted, an UUID is generated and returned in the
-        ExternalAccessToken response. It may not end in `-DATA` or `-URL`.
+        - The `token_type` is set to `TOKEN` if not provided.
+        - For `token_type: OAUTH2_APP`, the `token_id` field is required and corresponds to the OAuth client ID.
+        - For `token_type: TOKEN`, the `token_id` is optional and can be provided by the external system.
+          - If omitted, an UUID is generated and returned in the `ExternalAccessToken` response.
+          - The `token_id` may not end in `-DATA` or `-URL`.
       properties:
+        token_type:
+          $ref: '#/components/schemas/ExtTokenType'
         token_id:
           $ref: '#/components/schemas/TokenId'
         name:
