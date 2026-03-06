@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.34.0-beta'
+  version: '0.35.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -50,7 +50,7 @@ info:
 
     ## 🚧 Missing Features
     
-    **This API is a work-in-progress and does not yet contain all functionality of the REST API.**
+    **This API does not yet contain all functionality of the REST API.**
     
     The following features will be continuously added (in no particular order):
     
@@ -233,6 +233,8 @@ channels:
           - $ref: '#/components/messages/update_entity'
           - $ref: '#/components/messages/delete_entity'
           - $ref: '#/components/messages/delete_entities'
+          - $ref: '#/components/messages/browse_media'
+          - $ref: '#/components/messages/search_media'
 
           # --- Dock handling
           - $ref: '#/components/messages/get_dock_count'
@@ -328,6 +330,8 @@ channels:
           - $ref: '#/components/messages/available_entities'
           - $ref: '#/components/messages/entity_commands'
           - $ref: '#/components/messages/entity'
+          - $ref: '#/components/messages/media_browse'
+          - $ref: '#/components/messages/media_search'
 
           # --- Dock handling
           - $ref: '#/components/messages/dock_count'
@@ -1503,6 +1507,49 @@ components:
         $ref: '#/components/schemas/deleteEntitiesMsg'
       x-response:
         $ref: '#/components/messages/result'
+
+    browse_media:
+      summary: 🔍 Browse media containers of a media_player entity.
+      description: |
+        Retrieves the content of a media container or the root if no `media_id` is specified.
+        Requires the `media_browser` feature on the target `media_player` entity.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/browseMediaMsg'
+      x-response:
+        $ref: '#/components/messages/media_browse'
+
+    search_media:
+      summary: 🔍 Search media items of a media_player entity.
+      description: |
+        Searches for media items within the active system of the `media_player` entity.
+        Requires the `media_search` feature on the target `media_player` entity.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/searchMediaMsg'
+      x-response:
+        $ref: '#/components/messages/media_browse'
+
+    media_browse:
+      summary: 🔍 Media browse result.
+      description: |
+        Response message for `browse_media` requests.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/mediaBrowseRespMsg'
+
+    media_search:
+      summary: 🔍 Media search result.
+      description: |
+        Response message for `search_media` requests.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/mediaSearchRespMsg'
+
 
     # --- Dock handling
 
@@ -4672,6 +4719,123 @@ components:
           required:
             - msg
             - msg_data
+
+    browseMediaMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: browse_media
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  description: The entity id of the media player to browse.
+                  type: string
+                media_id:
+                  description: Optional media content ID to restrict browsing. Integration dependent.
+                  type: string
+                media_type:
+                  description: |
+                    Optional media content type to restrict browsing.
+                    Either a defined MediaContentType value or an integration dependent identifier.
+                  type: string
+                paging:
+                  $ref: '#/components/schemas/paging'
+              required:
+                - entity_id
+          required:
+            - msg
+            - msg_data
+
+    searchMediaMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: search_media
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  description: The entity id of the media player to search
+                  type: string
+                query:
+                  description: The search string.
+                  type: string
+                media_id:
+                  description: Optional media container to scope the search. Integration dependent.
+                  type: string
+                media_type:
+                  description: |
+                    Optional media content type to restrict browsing.
+                    Either a defined MediaContentType value or an integration dependent identifier.
+                  type: string
+                filter:
+                  $ref: '#/components/schemas/MediaSearchFilter'
+                paging:
+                  $ref: '#/components/schemas/paging'
+              required:
+                - entity_id
+                - query
+          required:
+            - msg
+            - msg_data
+
+    mediaBrowseRespMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: media_browse
+            msg_data:
+              $ref: '#/components/schemas/mediaBrowseResponse'
+          required:
+            - msg
+            - msg_data
+
+    mediaSearchRespMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: media_search
+            msg_data:
+              $ref: '#/components/schemas/mediaSearchResponse'
+          required:
+            - msg
+            - msg_data
+
+    mediaBrowseResponse:
+      type: object
+      properties:
+        media:
+          $ref: '#/components/schemas/BrowseMediaItem'
+        pagination:
+          $ref: '#/components/schemas/pagination'
+      required:
+        - pagination
+
+    mediaSearchResponse:
+      type: object
+      properties:
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowseMediaItem'
+        pagination:
+          $ref: '#/components/schemas/pagination'
+      required:
+        - media
+        - pagination
 
     # --- Dock handling
 
@@ -10730,3 +10894,162 @@ components:
           minimum: 1
       required:
         - who
+
+    # --- OpenAPI Media.yaml
+    MediaSearchFilter:
+      description: Media search filter
+      type: object
+      properties:
+        media_classes:
+          description: Optional list of media classes to filter the results.
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaClass'
+        artist:
+          description: Optional artist filter.
+          type: string
+        album:
+          description: Optional album filter.
+          type: string
+
+    MediaClass:
+      description: |
+        The media class is for browser/structure semantics.
+        It represents how a media item should be presented and organized in the media browser hierarchy.
+        
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show media type
+          specific information like icons. 
+        - Integrations can use their custom values. Short identifiers like URIs are recommended.
+      type: string
+      maxLength: 255
+      anyOf:
+        - enum:
+            - album
+            - app
+            - artist
+            - channel
+            - composer
+            - directory
+            - episode
+            - game
+            - genre
+            - image
+            - movie
+            - music
+            - playlist
+            - podcast
+            - season
+            - track
+            - tv_show
+            - url
+            - video
+        - { }  # extensible enum: integration can define additional values
+
+    MediaContentType:
+      description: |
+        The media content type is for playback/content semantics.
+        It represents the type of the media content to play or that is currently playing.
+        
+        Notes:
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show media type
+          specific information like icons. 
+        - Integrations can use their custom values. Short identifiers like URIs are recommended.
+      type: string
+      maxLength: 255
+      anyOf:
+        - enum:
+            - album
+            - app
+            - apps
+            - artist
+            - channel
+            - channels
+            - composer
+            - episode
+            - game
+            - genre
+            - image
+            - movie
+            - music
+            - playlist
+            - podcast
+            - radio
+            - season
+            - track
+            - tv_show
+            - url
+            - video
+        - { }  # extensible enum: integration can define additional values
+
+    MediaPlayerRepeatMode:
+      type: string
+      enum:
+        - OFF
+        - ALL
+        - ONE
+
+    MediaPlayAction:
+      type: string
+      enum:
+        - PLAY_NOW
+        - PLAY_NEXT
+        - ADD_TO_QUEUE
+      default: PLAY_NOW
+
+    BrowseMediaItem:
+      type: object
+      properties:
+        media_id:
+          description: Unique identifier of the media item. Integration dependent.
+          type: string
+          maxLength: 255
+        title:
+          description: Display name.
+          type: string
+          maxLength: 255
+        artist:
+          description: Optional artist name.
+          type: string
+          maxLength: 255
+        album:
+          description: Optional album name.
+          type: string
+          maxLength: 255
+        media_class:
+          $ref: '#/components/schemas/MediaClass'
+        media_type:
+          $ref: '#/components/schemas/MediaContentType'
+        can_browse:
+          description: If `true`, the item can be browsed (is a container) by using `media_id` and `media_type`.
+          type: boolean
+          default: false
+        can_play:
+          description: |
+            If `true`, the item can be played directly using the `play_media` command with `media_id` and `media_type`.
+          type: boolean
+          default: false
+        can_search:
+          description: |
+            If `true`, a search can be performed on the item using `search_media` with `media_id` and `media_type`.
+          type: boolean
+          default: false
+        thumbnail:
+          description: |
+            URL to download the media artwork, or a base64 encoded PNG or JPG image.
+            Please use a URL whenever possible. Encoded images should be as small as possible.
+          type: string
+          maxLength: 32768
+        duration:
+          description: Duration in seconds.
+          type: integer
+        items:
+          description: |
+            Child items if this item is a container. Child items may not contain further child items (only one level
+            of nesting is supported). A new browse request must be sent for deeper levels.
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowseMediaItem'
+      required:
+        - media_id
+        - title
+
