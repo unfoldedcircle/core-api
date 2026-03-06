@@ -2559,7 +2559,7 @@ paths:
     get:
       tags:
         - entities
-      summary: Browse media containers.
+      summary: "\U0001F50D Browse media containers."
       description: |
         This endpoint allows browsing media containers within supported media-player entities.
 
@@ -2634,7 +2634,7 @@ paths:
     get:
       tags:
         - entities
-      summary: Search for media items.
+      summary: "\U0001F50D Search for media items."
       description: |
         This endpoint allows searching for media within supported media-player entities.
 
@@ -14768,6 +14768,7 @@ components:
             - music
             - playlist
             - podcast
+            - radio
             - season
             - track
             - tv_show

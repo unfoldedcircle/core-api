@@ -671,6 +671,7 @@ The following media classes are pre-defined:
 - `music`
 - `playlist`
 - `podcast`
+- `radio`
 - `season`
 - `track`
 - `tv_show`
