@@ -88,8 +88,9 @@ of the media-player UI on the Remote Two.
 | play_media_action       | ❌ | ✅ | The player supports the play_media action parameter to either play or enqueue.  |
 | clear_playlist          | ❌ | ✅ | The player allows clearing the active playlist.                                 |
 | browse_media            | ❌ | ✅ | The player supports browsing media containers.                                  |
-| 🚧 search_media         | ❌ | ✅ | The player supports searching for media items.                                  |
-| 🚧 search_media_classes | ✅ | ❌ | The player provides a list of media classes as filter for searches.             |
+| search_media            | ❌ | ✅ | The player supports searching for media items.                                  |
+| search_media_classes    | ✅ | ❌ | The player provides a list of media classes as filter for searches.             |
+| 🚧 search_media_filters | ✅ | ❌ | The player provides a list of input filters to limit searches.                  |
 
 - R: readable 
   - ✅ Feature has a readable attribute to retrieve the current or available values.
@@ -98,7 +99,7 @@ of the media-player UI on the Remote Two.
   - ✅ Feature has one or multiple commands to trigger an action or set a value. 
   - ❌ No corresponding command(s), only the current value(s) of the feature can be read. 
 
-🚧 Planned features are media searching and playlist handling.
+🚧 Planned features are: playlist handling.
 
 🧑‍💻 Integration driver developers:
 - If certain features or commands are missing for your device, they can be defined with ["simple commands"](#simple-commands).
@@ -112,43 +113,44 @@ of the media-player UI on the Remote Two.
 Entity attributes are enabled by features and hold the current value of a feature or provide available options.
 Multiple features can act on the same attribute.
 
-| Attribute                 | Features                   | Type    | Values                             | Description                                                                              |
-|---------------------------|----------------------------|---------|------------------------------------|------------------------------------------------------------------------------------------|
-| state                     | on_off                     | enum    | [States](#states)                  | State of the media player, influenced by the play and power commands.                    |
-|                           | toggle                     |         |                                    |                                                                                          |
-|                           | play_pause, stop           |         |                                    |                                                                                          |
-| volume                    | volume                     | number  | 0..100                             | Current volume level.                                                                    |
-|                           | volume_up_down             |         |                                    |                                                                                          |
-| muted                     | mute_toggle                | boolean |                                    | Flag if the volume is muted.                                                             |
-|                           | mute, unmute               |         |                                    |                                                                                          |
-| media_duration            | media_duration             | number  |                                    | Media duration in seconds.                                                               |
-| media_position            | media_position             | number  |                                    | Current media position in seconds.                                                       |
-|                           | play_pause, stop           |         |                                    |                                                                                          |
-|                           | fast_forward, rewind, seek |         |                                    |                                                                                          |
-| media_position_updated_at | media_position             | string  | datetime (ISO 8601)                | Optional timestamp when `media_position` was last updated. Requires integration support. |
-| media_id                  | media_type                 | string  |                                    | The content ID of media being played.                                                    |
-| media_type                | media_type                 | string  | [Media type](#media-content-types) | The content type of media being played.                                                  |
-| media_image_url           | media_image_url            | string  |                                    | URL to retrieve the album art or an image representing what's being played.              |
-|                           | play_pause                 |         |                                    |                                                                                          |
-|                           | next, previous             |         |                                    |                                                                                          |
-| media_title               | media_title                | string  |                                    | Currently playing media information.                                                     |
-|                           | play_pause                 |         |                                    |                                                                                          |
-|                           | next, previous             |         |                                    |                                                                                          |
-| media_artist              | media_artist               | string  |                                    | Currently playing media information.                                                     |
-|                           | play_pause                 |         |                                    |                                                                                          |
-|                           | next, previous             |         |                                    |                                                                                          |
-| media_album               | media_album                | string  |                                    | Currently playing media information.                                                     |
-|                           | play_pause                 |         |                                    |                                                                                          |
-|                           | next, previous             |         |                                    |                                                                                          |
-| media_playlist            | play_pause                 | string  |                                    | Title of Playlist currently playing.                                                     |
-|                           | next, previous             |         |                                    |                                                                                          |
-| repeat                    | repeat                     | enum    | `OFF`, `ALL`, `ONE`                | Current repeat mode.                                                                     |
-| shuffle                   | shuffle                    | boolean |                                    | Shuffle mode on or off.                                                                  |
-| source                    | select_source              | string  |                                    | Currently selected media or input source.                                                |
-| source_list               | select_source              | list    | _text items_                       | Available media or input sources.                                                        |
-| sound_mode                | select_sound_mode          | string  |                                    | Currently selected sound mode.                                                           |
-| sound_mode_list           | select_sound_mode          | list    | _text items_                       | Available sound modes.                                                                   |
-| 🚧 search_media_classes   | search_media_classes       | list    | _text items_                       | List of media classes to use as a filter for `search_media`.                             |
+| Attribute                 | Features                   | Type    | Values                             | Description                                                                                    |
+|---------------------------|----------------------------|---------|------------------------------------|------------------------------------------------------------------------------------------------|
+| state                     | on_off                     | enum    | [States](#states)                  | State of the media player, influenced by the play and power commands.                          |
+|                           | toggle                     |         |                                    |                                                                                                |
+|                           | play_pause, stop           |         |                                    |                                                                                                |
+| volume                    | volume                     | number  | 0..100                             | Current volume level.                                                                          |
+|                           | volume_up_down             |         |                                    |                                                                                                |
+| muted                     | mute_toggle                | boolean |                                    | Flag if the volume is muted.                                                                   |
+|                           | mute, unmute               |         |                                    |                                                                                                |
+| media_duration            | media_duration             | number  |                                    | Media duration in seconds.                                                                     |
+| media_position            | media_position             | number  |                                    | Current media position in seconds.                                                             |
+|                           | play_pause, stop           |         |                                    |                                                                                                |
+|                           | fast_forward, rewind, seek |         |                                    |                                                                                                |
+| media_position_updated_at | media_position             | string  | datetime (ISO 8601)                | Optional timestamp when `media_position` was last updated. Requires integration support.       |
+| media_id                  | media_type                 | string  |                                    | The content ID of media being played.                                                          |
+| media_type                | media_type                 | string  | [Media type](#media-content-types) | The content type of media being played.                                                        |
+| media_image_url           | media_image_url            | string  |                                    | URL to retrieve the album art or an image representing what's being played.                    |
+|                           | play_pause                 |         |                                    |                                                                                                |
+|                           | next, previous             |         |                                    |                                                                                                |
+| media_title               | media_title                | string  |                                    | Currently playing media information.                                                           |
+|                           | play_pause                 |         |                                    |                                                                                                |
+|                           | next, previous             |         |                                    |                                                                                                |
+| media_artist              | media_artist               | string  |                                    | Currently playing media information.                                                           |
+|                           | play_pause                 |         |                                    |                                                                                                |
+|                           | next, previous             |         |                                    |                                                                                                |
+| media_album               | media_album                | string  |                                    | Currently playing media information.                                                           |
+|                           | play_pause                 |         |                                    |                                                                                                |
+|                           | next, previous             |         |                                    |                                                                                                |
+| media_playlist            | play_pause                 | string  |                                    | Title of Playlist currently playing.                                                           |
+|                           | next, previous             |         |                                    |                                                                                                |
+| repeat                    | repeat                     | enum    | `OFF`, `ALL`, `ONE`                | Current repeat mode.                                                                           |
+| shuffle                   | shuffle                    | boolean |                                    | Shuffle mode on or off.                                                                        |
+| source                    | select_source              | string  |                                    | Currently selected media or input source.                                                      |
+| source_list               | select_source              | list    | _text items_                       | Available media or input sources.                                                              |
+| sound_mode                | select_sound_mode          | string  |                                    | Currently selected sound mode.                                                                 |
+| sound_mode_list           | select_sound_mode          | list    | _text items_                       | Available sound modes.                                                                         |
+| search_media_classes      | search_media_classes       | list    | [Media Classes](#media-classes)    | List of media classes to use as a filter for `search_media`. Custom classes should be avoided. |
+| 🚧 search_media_filters   | search_media_filters       | list    |                                    |                                                                                                |
 
 ### States
 
@@ -274,7 +276,7 @@ This allows better integration into Remote Two, like default UI mappings and gro
 
 ### Media Browsing
 
-‼️Initial draft, not yet finalized. Will be verified with a reference implementation in the Home Assistant integration.
+‼️Not yet finalized. Currently being verified with a reference implementation in the Home Assistant integration.
 
 Media browsing uses a dedicated command and is not part of the standard media-player entity commands.
 
@@ -487,28 +489,34 @@ and `media_type` values of that item:
 
 ### Media Searching
 
-🚧 Work in progress, not yet finalized.
+‼️Not yet finalized. Currently being verified with a reference implementation in the Home Assistant integration.
 
 Media searching uses a dedicated command and is not part of the standard media-player entity commands.
 
 Note: The filter object is not yet formally defined in the Integration-API. The fields below are examples of possible
 filters and are not required.
 
-| cmd_id       | Parameters           | Description                                                        |
-|--------------|----------------------|--------------------------------------------------------------------|
-| search_media | entity_id            | Search for media items in a media-player entity.                   |
-|              | query                | Free-text search query.                                            |
-|              | media_id             | Optional media content ID to limit the search scope.               |
-|              | media_type           | Optional media content type to limit the search scope.             |
-|              | filter.media_classes | Optional list of media classes to filter the results.              |
-|              | filter.artist        | 🚧 TBD (would likely require a supported-filter feature/attribute) |
-|              | filter.album         | 🚧 TBD  "                                                          |
-|              | paging               | Optional paging object to limit returned items.                    |
+| cmd_id       | Parameters           | Description                                            |
+|--------------|----------------------|--------------------------------------------------------|
+| search_media | entity_id            | Search for media items in a media-player entity.       |
+|              | query                | Free-text search query.                                |
+|              | media_id             | Optional media content ID to limit the search scope.   |
+|              | media_type           | Optional media content type to limit the search scope. |
+|              | filter.media_classes | Optional list of media classes to filter the results.  |
+|              | filter.artist        | 🚧 TBD if a set of well-known filters like `artist`    |
+|              | filter.album         | 🚧     and `album`, or dynamic                         |
+|              | paging               | Optional paging object to limit returned items.        |
 
 The `media_id` and `media_type` parameters behave the same as in `browse_media`: they can be used to restrict the
 search to a specific container or content type, and integrations should propagate and reuse the values consistently.
 Empty strings must be preserved and echoed back as-is. Only omit a field if it was not returned or was explicitly
 `null`.
+
+- The optional `filter.media_classes` filter may only contain media classes that are supported by the integration.
+  - Supported media classes must be specified in the `search_media_classes` attribute by the integration.
+  - Only well-known [Media Classes](#media-classes) should be used without any custom media classes.
+- 🚧 The `filter.artist` and `filter.album` fields are examples of possible future filters and are not yet formally defined.
+- The optional `paging` object can be used to retrieve a specific page of media items and to limit result size.
 
 #### Example
 
@@ -532,9 +540,6 @@ Empty strings must be preserved and echoed back as-is. Only omit a field if it w
   }
 }
 ```
-
-🚧 The `filter.artist` and `filter.album` fields are examples of possible future filters.
-They are **not** required or currently standardized in the Integration-API.
 
 ### Media Playback
 
