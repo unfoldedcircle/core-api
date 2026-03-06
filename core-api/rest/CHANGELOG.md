@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+### Added
+- Media browsing and searching.
+### Fixed
+- Fixed invalid schema references.
+
 ---
 
 ## 0.44.3
