@@ -656,6 +656,8 @@ paths:
       description: |
         Stored runtime credential material for the corresponding integration driver is also removed.
         For `TOKEN` credentials, this includes the mapped credential files.
+
+        ⚠️ The `delete_system` parameter is only intended for testing and development. This can put your system in an unstable state!
       operationId: deleteExternalAccessTokensBySystem
       parameters:
         - $ref: '#/components/parameters/system'
