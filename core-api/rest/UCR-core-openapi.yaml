@@ -2659,7 +2659,7 @@ paths:
       operationId: searchMedia
       parameters:
         - $ref: '#/components/parameters/entity_id'
-        - name: query
+        - name: q
           in: query
           description: The search string.
           required: true
