@@ -30,7 +30,7 @@ tags:
   - name: api-keys
     description: "\U0001F511 API keys for authentication."
   - name: external-token
-    description: "\U0001F48E Credential management for external systems, including generic tokens and OAuth2 credentials."
+    description: "\U0001F48E Access token handling for external systems."
   - name: resources
     description: "\U0001F508 Media files handling, e.g. manage background images, icons or sound effects."
   - name: integrations
@@ -428,116 +428,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Scopes'
-  /auth/callback:
-    get:
-      tags:
-        - external-token
-      summary: "\U0001F9EA Public callback endpoint for OAuth2 authorization responses."
-      description: "OAuth2 authorization callback endpoint for the Authorization Code grant.\n\nThis endpoint is intended to be used as the redirect URI target for external systems that support OAuth2\nauthorization code flow. After the user authorizes the client at the external authorization server, the\nauthorization server redirects the user agent back with either:\n\n- a successful authorization response containing `code` and typically `state`, or\n- an error response containing `error` and optional error details.\n\nA successful callback contains `code`. Error callbacks contain `error` instead and do not include a usable\nauthorization code.\n\nThe callback is processed by the Remote to continue the OAuth2 flow and store the resulting OAuth2 token data for\nthe corresponding external system or integration driver.\n\nClients should not call this endpoint directly except for development or testing of OAuth2 flows.\n\nThe `state` parameter should be treated as an opaque value used for request correlation and CSRF protection.\nIf a `state` value was included in the authorization request, the authorization server must return that exact value\nin the callback response.\n\nThis endpoint implements the authorization response handling defined by OAuth 2.0, RFC 6749:\n- [Section 4.1: Authorization Code Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1)\n- [Section 4.1.2: Authorization Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2)\n- [Section 4.1.2.1: Error Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1)\n- [Section 10.12: Cross-Site Request Forgery](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12)\n\n### \U0001F6A7 Unfolded Circle OAuth redirect service\n\nThe Remote does not have a web browser for the OAuth2 authorization flow, and it is usually not reachable on a\npublic address. To solve this, Unfolded Circle offers a static redirect page on a public address.\n\nIn practice, the authorization server redirects the user agent to the public Unfolded Circle redirect page first.\nThat page then forwards the callback parameters to the target Remote on the local network through the browser\nrunning on the user's device.\n\nThe redirect service is only responsible for browser-side forwarding of the callback. The Remote address is not\nstored server-side by Unfolded Circle; it is only kept in the user's browser.\n"
-      operationId: oauth2Callback
-      parameters:
-        - name: code
-          in: query
-          description: Authorization code returned by the OAuth2 authorization server on successful user authorization.
-          schema:
-            type: string
-        - name: state
-          in: query
-          description: Opaque state value returned by the authorization server. Used for request correlation and CSRF protection.
-          schema:
-            type: string
-        - name: error
-          in: query
-          description: OAuth2 authorization error code returned by the authorization server instead of an authorization code.
-          schema:
-            type: string
-        - name: error_description
-          in: query
-          description: Human-readable error description returned by the authorization server.
-          schema:
-            type: string
-        - name: error_uri
-          in: query
-          description: URI identifying a human-readable web page with additional information about the error.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: HTML response shown in the user's browser after the OAuth2 authorization callback has been processed or forwarded.
-          content:
-            text/html:
-              schema:
-                type: string
-      security: []
   /auth/external:
     get:
       tags:
         - external-token
-      summary: "\U0001F9EA List registered external systems."
-      description: "An external system is a device or service that requires authentication. Integration drivers use external systems to\nauthenticate with services or devices that require either a long-lived token or an OAuth2 authorization code flow.\n\nExternal systems cannot be created manually. They are created automatically when an integration driver requests one of\nthe following driver features:\n\n- `auth.external_tokens`: enables generic token support for a local or custom integration driver.\n  - The provided secret is made available to the integration driver runtime as a credential file. This is typically a\n    long-lived access token.\n  - ⚠️ External integration drivers cannot use this feature.\n- `auth.oauth2.authorization_code`: enables OAuth2 authorization code flow support for an integration driver.\n  - \U0001F6A7 under development\n  - Only one OAuth2 application credential is supported per integration driver (token type `OAUTH2_APP`).\n    For example, a Spotify integration driver requires one OAuth2 application credential.\n  - Multiple OAuth2 token entries can be stored per integration driver (token type `OAUTH2_TOKEN`).\n    For example, multiple Spotify accounts can be linked to the same integration driver.\n\nIf an external system is associated with an integration driver, the returned `intg_driver_id` field contains the\nintegration driver ID.\n\nClients must not infer semantics from the `system` field value. It is an opaque external system identifier and may\nchange in the future.\n\nIf an expected external system identifier is not returned by this operation, requests to\n`/auth/external/{system}` using that identifier will return `404 Not Found`.\nA client should therefore either call this method before creating or updating credentials, or handle `404` responses\naccordingly to inform the user that the integration is not available on the Remote.\n\nThe `type`, `state`, and `intg` query parameters can be used to filter the returned external systems.\n- `type`: only external systems having at least one credential of the specified type are returned. This implies\n  `state=ACTIVE`.\n  - `TOKEN`: generic token, for example a long-lived access token.\n  - `OAUTH2_APP`: OAuth2 application credentials. Requires an associated integration driver and implies `intg=true`.\n  - `OAUTH2_TOKEN`: OAuth2 token data, typically including access token, refresh token, and related metadata.\n- `state`: filters external systems based on whether they currently have stored credentials.\n  - `ALL`: no filtering is performed. This is the default.\n  - `NEW`: only external systems without any stored credentials.\n  - `ACTIVE`: only external systems with at least one stored credential.\n- `intg`: only external systems associated with an integration driver are returned.\n\nThe `token_count` value reflects the applied `type` filter. If no `type` filter is specified, it contains the total\nnumber of stored credentials for the external system.\n\nPlease note that not all filter combinations are currently supported. Common use cases are:\n- Return all external systems: no query parameters, or `state=ALL`\n- Return external systems associated with an integration driver: `intg=true`\n- List external systems associated with an integration driver that do not yet have stored credentials: `intg=true&state=NEW`\n- List all OAuth2 application credentials: `type=OAUTH2_APP`. This implies `intg=true&state=ACTIVE`\n- List all generic tokens: `type=TOKEN`. This implies `state=ACTIVE`\n"
+      summary: "\U0001F9EA Get registered external systems."
+      description: |
+        External systems cannot be created manually. They are automatically being created if a custom integration driver
+        requests to use the "external tokens" feature. This is enabled with the driver feature `auth.external_tokens`.
+
+        ⚠️ External integration drivers cannot use this feature.
+
+        If the expected system name is not returned by this call, all operations on the `/auth/external/{system}` endpoints
+        with that system name will fail.
+        Therefore, it's advisable to either call this method first or react on the 404 error while providing or updating an
+        external system token, to inform the client user, that the integration is not available on the remote.
       operationId: getExternalSystems
-      parameters:
-        - $ref: '#/components/parameters/token_type'
-        - name: state
-          in: query
-          description: Filter external systems by credential state.
-          required: false
-          schema:
-            description: |
-              State of the external system:
-              - `ALL`: all external systems.
-              - `NEW`: external systems that have no stored credentials yet.
-              - `ACTIVE`: external systems that have at least one stored credential.
-            type: string
-            enum:
-              - ALL
-              - NEW
-              - ACTIVE
-        - name: intg
-          in: query
-          description: Only return external systems associated with an integration driver.
-          required: false
-          schema:
-            type: boolean
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ExternalSystemInfos'
-              examples:
-                OAuth2 App Credentials (type=OAUTH2_APP):
-                  value:
-                    - system: uc_spotify_driver
-                      name: Household Account
-                      token_count: 1
-                      token_id: 1234....
-                      intg_driver_id: uc_spotify_driver
-                      intg_name:
-                        en: Spotify
-                      icon: 'uc:music'
-                New External Systems (state=NEW):
-                  value:
-                    - system: test-driver
-                      name: Foobar
-                      token_count: 0
-                    - system: uc_spotify_driver-dev
-                      name: Spotify
-                      token_count: 0
-                External Systems for Integration Drivers with Generic Tokens (type=TOKEN&intg=true):
-                  value:
-                    - system: hass
-                      name: Home Assistant
-                      token_count: 1
-                      intg_driver_id: hass
-                      intg_name:
-                        en: Home Assistant
-                      icon: 'uc:integration'
+                $ref: '#/components/schemas/ExternalSystems'
     delete:
       tags:
         - external-token
-      summary: Remove all external authentication credentials.
+      summary: Remove all external access tokens.
       description: |
         Management operation to delete all external access tokens. Attention: this cannot be reverted!
       operationId: deleteAllExternalAccessTokens
@@ -552,13 +469,48 @@ paths:
     post:
       tags:
         - external-token
-      summary: "\U0001F9EA Create an external authentication credential."
-      description: "This endpoint stores credentials for an external system, for example a generic access token, OAuth2 application\ncredentials, or OAuth2 token data.\n\nIt can be used by a client or integration workflow to provide credentials for the corresponding integration driver\ninstead of requiring the user to enter them manually.\n\nIf a credential with the same `name` already exists for the given system, the server returns `422 Unprocessable Entity`.\nTo replace an existing credential, use `PUT /auth/external/{system}/{tokenId}`.\n\n### Token type `TOKEN`\n\nThis is the default generic token type.\n\nRequired fields are:\n- `token_id`: the primary identifier within the external system. It must be unique within that system and must not end\n  in `-DATA` or `-URL`.\n- `name`: a friendly name to display in a user interface. It must be unique within that system.\n- `token`: the secret credential.\n\nThe `token` format depends on the external system and the integration driver. It can be a UUID, JWT, PEM\ncertificate, or any other representation required for authentication or communication with the external system.\n\n⚠️ `TOKEN` credentials can be used by built-in and custom integration drivers. External integration drivers cannot\naccess the secret token value.\n\n⚠️ The secret token value cannot be retrieved through the API after creation. It is only made available to the\ncorresponding integration driver runtime as a credential file.\n\nTo use generic external tokens, an integration driver must request the `auth.external_tokens` driver feature.\nIf enabled, an external system is created automatically with the `system` identifier matching the `driver_id`.\n\nUse `GET /auth/external` to retrieve the registered external systems.\n\nCredential files are created automatically in the corresponding integration driver runtime for a new `TOKEN` entry:\n- The `UC_TOKENS_HOME` environment variable specifies the directory containing the credential files.\n- The `token_id` value is used as the file name for the secret token.\n  - Example: for `token_id: foobar`, the secret token is available at `${UC_TOKENS_HOME}/foobar`.\n  - The file contains the `token` field value in plain text.\n- Optional files are created for the `url` and `data` fields:\n  - `{token_id}-URL` contains the `url` value. Example: `${UC_TOKENS_HOME}/foobar-URL`\n  - `{token_id}-DATA` contains the `data` value. Example: `${UC_TOKENS_HOME}/foobar-DATA`\n\n### Token type `OAUTH2_APP`\n\nThis token type stores OAuth2 application credentials consisting of the client ID and client secret.\n\nRequired fields are:\n- `name`: a friendly name to display in a user interface. It must be unique within that system.\n  This is typically the linked integration name or another identifier for the target application, for example an\n  account name.\n- `token_id`: OAuth2 client ID\n- `token`: OAuth2 client secret\n\nThe `url` and `data` fields are not used for OAuth2 application credentials.\n\n⚠️ The secret token value cannot be retrieved through the API after creation. It is only made available to the\ncorresponding integration driver runtime through the OAuth2-specific Integration API messages.\n\nTo use OAuth2 application credentials, an integration driver must request the\n`auth.oauth2.authorization_code` driver feature.\nIf enabled, an external system is created automatically with the `system` identifier matching the `driver_id`.\n\n### \U0001F6A7 Token type `OAUTH2_TOKEN`\n\nThis token type stores OAuth2 token data returned by the authorization code flow, typically including an access token,\nrefresh token, and related metadata such as expiration information.\n\n`OAUTH2_TOKEN` entries are normally created automatically after a successful OAuth2 authorization code flow. For\ndevelopment and testing purposes, they can also be created manually.\n\nMultiple `OAUTH2_TOKEN` entries can be stored for the same OAuth2 application. For example, multiple Spotify accounts\ncan be linked to the same integration driver.\n\n\U0001F6A7 For manual creation of `OAUTH2_TOKEN` entries, the request payload format is not yet finalized and should\n   currently be treated as implementation-specific. It will be documented later.\n"
+      summary: "\U0001F9EA Provide an access token of an external system."
+      description: |
+        An access token is usually required to connect to external systems like Home Assistant.
+        This method allows the external system to automatically provide the access token for the corresponding Remote
+        integration instead of forcing the user to type it in. If the token name already exists for the given system,
+        error `422` is returned.
+        Use the PUT method to update an existing token.
+
+        Required fields are:
+        - `token_id`: the main identifier for a given system. It must be unique within that system and may not end in
+          `-DATA` or `-URL`.
+        - `name`: a friendly name to show in a user interface. It must be unique within that system.
+        - `token`: the secret credential.
+
+        The format of the access token depends on the external system and the involved Remote integration.
+        It could be a UUID, a JWT, a PEM certificate or any other representation required for the integration to communicate
+        with the external system.
+
+        ⚠️ External access tokens can be used by the pre-installed integrations and the custom integrations installable by
+        the user. External integrations cannot access the secret token value.
+
+        ⚠️ The secret token value cannot be retrieved anymore with the API and is only available in the corresponding driver
+        runtime as a credential file.
+
+        To use the "external tokens" feature an integration driver has to request the driver feature `auth.external_tokens`.
+        If enabled, an external system is automatically created with the `system` identifier matching the `driver_id`.
+
+        Use the `GET /auth/external` method the retrieve the registered systems.
+
+        Mapped credential files are automatically created in the corresponding integration driver runtime for the new token:
+        - Environment variable `UC_TOKENS_HOME` specifies the directory containing the credential files.
+        - The `token_id` value is used as credential file name for the secret token.
+          - For example: for `token_id: foobar`, the credential file is accessible at the `${UC_TOKENS_HOME}/foobar` path.
+          - The credential file contains the `token` field value in plain text.
+        - Optional files are created for the `url` and `data` fields:
+          - `{token_id}-URL` contains the `url` value. Example: `${UC_TOKENS_HOME}/foobar-URL`
+          - `{token_id}-DATA` contains the `data` value. Example: `${UC_TOKENS_HOME}/foobar-DATA`
       operationId: addExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
       requestBody:
-        description: Credential to store for the external system.
+        description: Access token that needs to be added to the remote.
         content:
           application/json:
             schema:
@@ -566,7 +518,7 @@ paths:
         required: true
       responses:
         '201':
-          description: Credential created successfully. Returns the token identifier.
+          description: Successful operation returning the token identifier in the response.
           content:
             application/json:
               schema:
@@ -584,14 +536,10 @@ paths:
     head:
       tags:
         - external-token
-      summary: "\U0001F9EA Get total number of available credentials for an external system."
-      description: |
-        Returns the total number of stored credentials for the specified external system.
-        Use the optional `type` query parameter to restrict the count to a single credential type.
+      summary: "\U0001F9EA Get total number of available tokens for an external system."
       operationId: getExternalAccessTokenCount
       parameters:
         - $ref: '#/components/parameters/system'
-        - $ref: '#/components/parameters/token_type'
       responses:
         '200':
           description: Successful operation
@@ -609,16 +557,10 @@ paths:
     get:
       tags:
         - external-token
-      summary: "\U0001F9EA List available credentials for an external system."
-      description: |
-        Lists stored credentials for the specified external system.
-
-        Use the optional `type` query parameter to restrict the result to a single credential type.
-        The returned objects contain public metadata only. Secret credential values are never returned by the API.
+      summary: "\U0001F9EA List available tokens for an external system."
       operationId: getExternalAccessTokens
       parameters:
         - $ref: '#/components/parameters/system'
-        - $ref: '#/components/parameters/token_type'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -652,21 +594,12 @@ paths:
     delete:
       tags:
         - external-token
-      summary: Remove all credentials of an external system.
+      summary: Remove all access tokens of an external system.
       description: |
-        Stored runtime credential material for the corresponding integration driver is also removed.
-        For `TOKEN` credentials, this includes the mapped credential files.
-
-        ⚠️ The `delete_system` parameter is only intended for testing and development. This can put your system in an unstable state!
+        All mapped credential files of the corresponding integration driver are also deleted.
       operationId: deleteExternalAccessTokensBySystem
       parameters:
         - $ref: '#/components/parameters/system'
-        - name: delete_system
-          in: query
-          description: Also delete the external system entry after removing all associated credentials.
-          required: false
-          schema:
-            type: boolean
       responses:
         '200':
           description: Successful operation
@@ -680,16 +613,16 @@ paths:
     get:
       tags:
         - external-token
-      summary: "\U0001F9EA Get an external authentication credential."
+      summary: "\U0001F9EA Get external access token."
       description: |
-        Retrieve a stored credential for the specified external system and token identifier.
+        Retrieve an external access token by system and token identifiers.
 
-        ⚠️ Only the public metadata of the credential is returned. The secret credential value cannot be retrieved through
-        the API after creation.
+        ⚠️ Only the public information of the token is returned, the secret token value itself cannot be retrieved anymore
+        with the API.
 
-        For `TOKEN` credentials, the secret value is made available to the corresponding integration driver runtime as a
-        credential file. For OAuth2-related credential types, secret values are made available through the corresponding
-        OAuth2-specific integration mechanisms.
+        The secret token values are automatically mapped to credential files in the corresponding integration driver
+        runtime. The `token_id` value is used as file name for the token, with additional files for the optional `url` and
+        `data` fields.
       operationId: getExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
@@ -712,26 +645,19 @@ paths:
     put:
       tags:
         - external-token
-      summary: "\U0001F9EA Replace an existing credential of an external system."
+      summary: "\U0001F9EA Replace an existing access token of an external system."
       description: |
-        Replace an existing credential identified by the external system identifier and `tokenId`.
+        This methods allows an already provided token of an external system to be updated. The token is identified by
+        the system name and the token identification.
 
-        The request body uses the same schema as credential creation. The path parameter `tokenId` identifies the existing
-        credential to replace.
-
-        For `TOKEN` credentials, updated secret values are also propagated to the corresponding credential files in the
-        integration driver runtime. For OAuth2-related credential types, updated secret values are propagated through the
-        corresponding OAuth2-specific integration mechanisms.
-
-        Notes:
-        - The `token_id` field in the request body is ignored.
-        - If `name` is changed, it needs to be unique within the `system`.
+        The token, url and data values are also updated in the mapped credential files of the corresponding running
+        integration driver.
       operationId: replaceExternalAccessToken
       parameters:
         - $ref: '#/components/parameters/system'
         - $ref: '#/components/parameters/token_id'
       requestBody:
-        description: Credential data used to replace the existing external system credential.
+        description: Access token to update
         content:
           application/json:
             schema:
@@ -751,9 +677,9 @@ paths:
     delete:
       tags:
         - external-token
-      summary: Remove an external authentication credential.
+      summary: Remove an external access token.
       description: |
-        No error is returned if the `tokenId` does not exist. `404` is only returned if the external system is not found.
+        No error is returned if the `tokenId` doesn't exist. `404` is only returned it the `system` is not found.
 
         The mapped credential files of the corresponding integration driver are also deleted.
       operationId: deleteExternalAccessToken
@@ -2733,7 +2659,7 @@ paths:
       operationId: searchMedia
       parameters:
         - $ref: '#/components/parameters/entity_id'
-        - name: query
+        - name: q
           in: query
           description: The search string.
           required: true
@@ -11261,13 +11187,6 @@ components:
       required: false
       schema:
         type: boolean
-    token_type:
-      name: type
-      in: query
-      description: Token type.
-      required: false
-      schema:
-        $ref: '#/components/schemas/ExtTokenType'
   schemas:
     AccessTokenId:
       type: string
@@ -13575,34 +13494,17 @@ components:
         - ir_emitter
         - select
         - voice_assistant
-    ExternalSystemInfos:
+    ExternalSystems:
       type: array
       items:
-        $ref: '#/components/schemas/ExternalSystemInfo'
-    ExternalSystemInfo:
-      description: |
-        Information about an external system.
-        - The `token_id` field is only returned for `token_type: OAUTH2_APP`.
-        - The `intg_driver_id` and `intg_name` fields are only returned if the system is associated with an integration driver.
+        $ref: '#/components/schemas/ExternalSystem'
+    ExternalSystem:
       type: object
       properties:
         system:
           $ref: '#/components/schemas/ExternalSystemId'
         name:
           $ref: '#/components/schemas/ExtSystemName'
-        token_count:
-          description: |
-            Number of tokens associated with this external system.
-            The count reflects the requested token type, or the overall token count if no token type is specified.
-          type: integer
-        token_id:
-          $ref: '#/components/schemas/TokenId'
-        intg_driver_id:
-          $ref: '#/components/schemas/DriverId'
-        intg_name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
       required:
         - system
         - name
@@ -13619,17 +13521,6 @@ components:
       maxLength: 36
       description: |
         Unique token identifier, used for later token management through the external system or management ui.
-    ExtTokenType:
-      description: |
-        Type of the access token:
-        - `TOKEN`: generic token, for example a long-lived access token.
-        - `OAUTH2_APP`: OAuth2 application credentials.
-        - `OAUTH2_TOKEN`: OAuth2 token (access and refresh tokens).
-      type: string
-      enum:
-        - TOKEN
-        - OAUTH2_APP
-        - OAUTH2_TOKEN
     ExtSystemName:
       type: string
       minLength: 1
@@ -13670,8 +13561,6 @@ components:
           $ref: '#/components/schemas/ExternalSystemId'
         token_id:
           $ref: '#/components/schemas/TokenId'
-        token_type:
-          $ref: '#/components/schemas/ExtTokenType'
         name:
           $ref: '#/components/schemas/ExtSystemName'
         description:
@@ -13686,20 +13575,14 @@ components:
       required:
         - system
         - token_id
-        - token_type
         - name
         - creation_date
     ExternalAccessTokenRequest:
       type: object
       description: |
-        - The `token_type` is set to `TOKEN` if not provided.
-        - For `token_type: OAUTH2_APP`, the `token_id` field is required and corresponds to the OAuth client ID.
-        - For `token_type: TOKEN`, the `token_id` is optional and can be provided by the external system.
-          - If omitted, an UUID is generated and returned in the `ExternalAccessToken` response.
-          - The `token_id` may not end in `-DATA` or `-URL`.
+        The token_id can be provided by the external system. If omitted, an UUID is generated and returned in the
+        ExternalAccessToken response. It may not end in `-DATA` or `-URL`.
       properties:
-        token_type:
-          $ref: '#/components/schemas/ExtTokenType'
         token_id:
           $ref: '#/components/schemas/TokenId'
         name:
