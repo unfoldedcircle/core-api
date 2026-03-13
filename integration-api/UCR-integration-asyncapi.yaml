@@ -1543,7 +1543,7 @@ components:
         media:
           type: array
           items:
-            $ref: '#/components/schemas/BrowseMediaItem'
+            $ref: '#/components/schemas/SearchMediaItem'
         pagination:
           $ref: '#/components/schemas/Pagination'
       required:
@@ -2345,11 +2345,20 @@ components:
         - ONE
 
     MediaPlayAction:
+      description: |
+        The media play action is used to specify how the media item should be played.
+
+        Notes:
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show locale aware commands.
+        - Integrations can use their custom values, but they might not be available in the UI.
       type: string
-      enum:
-        - PLAY_NOW
-        - PLAY_NEXT
-        - ADD_TO_QUEUE
+      maxLength: 20
+      anyOf:
+        - enum:
+            - PLAY_NOW
+            - PLAY_NEXT
+            - ADD_TO_QUEUE
+        - { }  # extensible enum: integration can define additional values
       default: PLAY_NOW
 
     BrowseMediaItem:
@@ -2361,6 +2370,10 @@ components:
           maxLength: 255
         title:
           description: Display name.
+          type: string
+          maxLength: 255
+        subtitle:
+          description: Optional subtitle.
           type: string
           maxLength: 255
         artist:
@@ -2392,7 +2405,9 @@ components:
         thumbnail:
           description: |
             URL to download the media artwork, or a base64 encoded PNG or JPG image.
-            Please use a URL whenever possible. Encoded images should be as small as possible.
+            The preferred size is 480x480 pixels.
+            Use the following URI prefix to use a provided icon: `icon://uc:`, for example, `icon://uc:music`.
+            Please avoid using encoded images whenever possible. Payloads should be as small as possible.
           type: string
           maxLength: 32768
         duration:
@@ -2408,6 +2423,16 @@ components:
       required:
         - media_id
         - title
+
+    SearchMediaItem:
+      description: |
+        A media item that was found by a search. Currently identical in shape to `BrowseMediaItem`.
+        Defined as a composition to allow search-specific fields (e.g. relevance score) to be added in the future
+        without a breaking change.
+
+        A search media item may not contain any child `items`.
+      allOf:
+        - $ref: '#/components/schemas/BrowseMediaItem'
 
     remote:
       description: |
