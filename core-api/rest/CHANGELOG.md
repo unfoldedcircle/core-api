@@ -15,6 +15,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.44.4
+### Fixed
+- Creating a UI page returns 201 instead of 200.
+
 ## 0.44.3
 ### Added
 - Activity ready check option.
