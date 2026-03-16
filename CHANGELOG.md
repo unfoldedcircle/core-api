@@ -24,6 +24,7 @@ _Changes in the next release_
 - Dock 3 external port configuration.
 - Voice Assistant support.
 - Select Entity support.
+- Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
 
 ---
 

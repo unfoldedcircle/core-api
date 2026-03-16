@@ -50,7 +50,7 @@ behaviour or automatically add or configure its entities to the users profile.
 ### Develop integration drivers
 
 Since we are providing an API and not an SDK for a specific programming language, one can develop external integrations
-in any language which is capable running a WebSockets server and handling JSON data.
+in any language that is capable of running a WebSockets server and handling JSON data.
 
 The downside of an API is that more low-level coding is required. In our case this involves running a WebSocket server,
 handling the connections from the Remote device, and parsing the JSON payload in the WebSocket text messages.
@@ -61,19 +61,19 @@ how to develop an integration driver for the Remote devices.
 
 #### Examples
 
-- [API models in Rust](https://github.com/unfoldedcircle/api-model-rs)
 - [Node.js API wrapper for the UC Integration-API](https://github.com/unfoldedcircle/integration-node-library)  
   Integrations using the Node.js API wrapper:
+  - [TypeScript integration driver example](https://github.com/unfoldedcircle/integration-ts-example)
   - [Global Caché IR integration](https://github.com/unfoldedcircle/integration-globalcache)
+  - [Philips Hue integration](https://github.com/unfoldedcircle/integration-philipshue)
   - [Roon integration](https://github.com/unfoldedcircle/integration-roon)
 - [Python API wrapper library for the UC Integration-API](https://github.com/unfoldedcircle/integration-python-library)  
   Integrations using the Python API wrapper:
   - [Android TV integration](https://github.com/unfoldedcircle/integration-androidtv)
   - [Apple TV integration](https://github.com/unfoldedcircle/integration-appletv)
   - [Denon AVR integration](https://github.com/unfoldedcircle/integration-denonavr)
-- [Home Assistant integration](https://github.com/unfoldedcircle/integration-home-assistant) written in Rust
-
-We plan to release more examples in the future.
+- [API models in Rust](https://github.com/unfoldedcircle/api-model-rs)
+  - [Home Assistant integration](https://github.com/unfoldedcircle/integration-home-assistant) written in Rust
 
 ## Core APIs
 
