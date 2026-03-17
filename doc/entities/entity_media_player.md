@@ -283,12 +283,13 @@ This allows better integration into Remote Two, like default UI mappings and gro
 Media browsing uses a dedicated command and is not part of the standard media-player entity commands.
 
 
-| cmd_id       | Parameters | Description                                       |
-|:-------------|:-----------|:--------------------------------------------------|
-| browse_media | entity_id  | Browse media from a media-player entity.          |
-|              | media_id   | Optional media content ID to restrict browsing.   |
-|              | media_type | Optional media content type to restrict browsing. |
-|              | paging     | Optional paging object to limit returned items.   |
+| cmd_id       | Parameters | Description                                                      |
+|:-------------|:-----------|:-----------------------------------------------------------------|
+| browse_media | entity_id  | Browse media from a media-player entity.                         |
+|              | media_id   | Optional media content ID to restrict browsing.                  |
+|              | media_type | Optional media content type to restrict browsing.                |
+|              | stable_ids | Optional hint that the client requires stable media identifiers. |
+|              | paging     | Optional paging object to limit returned items.                  |
 
 The `media_id` and `media_type` parameters are optional and can be used to restrict browsing to a specific media item
 or content type. Both fields can be returned in the browse response on the root item and on every child item to describe
@@ -299,6 +300,15 @@ Integrations must ensure that any `media_id` returned by a given entity is stabl
 within that entity. This ensures that it can be reused in subsequent `play_media`, `browse_media` and `search_media`
 calls. Integrations may use either one of the pre-defined semantic content types (see [Media Content Types](#media-content-types))
 or provider-specific URIs for `media_type`, as long as values are stable and reused consistently.
+
+Certain media providers may not support stable identifiers, but the integration might be able to use a workaround
+generating stable identifiers on the client side. The `stable_ids` parameter is a hint that the client really requires
+stable media identifiers in the returned `media_id` and `media_type` fields, because the identifier won't be used right
+now to play a media item but sometime in the future.   
+Roon is such an example, which generates new media keys for every new browse or search request. Use cases like    
+"select an identifier of my favorite playlist, so I can still play it next month" aren't possible with changing
+identifiers. As a workaround, the integration driver can return a path structure (`Library/Playlists/Favorite Songs`)
+or another sort of identifier that can be used to identify or resolve the item in the future.
 
 **Important:** When using `media_id` and `media_type` values in further calls, they must match the values returned in
 the previous `media_browse` response exactly. If an integration returns an empty string (`""`) as value, that exact
@@ -506,16 +516,17 @@ Media searching uses a dedicated command and is not part of the standard media-p
 Note: The filter object is not yet formally defined in the Integration-API. The fields below are examples of possible
 filters and are not required.
 
-| cmd_id       | Parameters           | Description                                            |
-|--------------|----------------------|--------------------------------------------------------|
-| search_media | entity_id            | Search for media items in a media-player entity.       |
-|              | query                | Free-text search query.                                |
-|              | media_id             | Optional media content ID to limit the search scope.   |
-|              | media_type           | Optional media content type to limit the search scope. |
-|              | filter.media_classes | Optional list of media classes to filter the results.  |
-|              | filter.artist        | 🚧 TBD if a set of well-known filters like `artist`    |
-|              | filter.album         | 🚧     and `album`, or dynamic                         |
-|              | paging               | Optional paging object to limit returned items.        |
+| cmd_id       | Parameters           | Description                                                      |
+|--------------|----------------------|------------------------------------------------------------------|
+| search_media | entity_id            | Search for media items in a media-player entity.                 |
+|              | query                | Free-text search query.                                          |
+|              | media_id             | Optional media content ID to limit the search scope.             |
+|              | media_type           | Optional media content type to limit the search scope.           |
+|              | stable_ids           | Optional hint that the client requires stable media identifiers. |
+|              | filter.media_classes | Optional list of media classes to filter the results.            |
+|              | filter.artist        | 🚧 TBD if a set of well-known filters like `artist`              |
+|              | filter.album         | 🚧     and `album`, or dynamic                                   |
+|              | paging               | Optional paging object to limit returned items.                  |
 
 The `media_id` and `media_type` parameters behave the same as in `browse_media`: they can be used to restrict the
 search to a specific container or content type, and integrations should propagate and reuse the values consistently.
@@ -525,6 +536,7 @@ Empty strings must be preserved and echoed back as-is. Only omit a field if it w
 - The optional `filter.media_classes` filter may only contain media classes that are supported by the integration.
   - Supported media classes must be specified in the `search_media_classes` attribute by the integration.
   - Only well-known [Media Classes](#media-classes) should be used without any custom media classes.
+- See [Media Browsing](#media-browsing) for a description of the `stable_ids` parameter.
 - 🚧 The `filter.artist` and `filter.album` fields are examples of possible future filters and are not yet formally defined.
 - The optional `paging` object can be used to retrieve a specific page of media items and to limit result size.
 

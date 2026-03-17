@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.45.0
+  version: 0.45.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -2575,6 +2575,15 @@ paths:
         A `media_id` or `media_type` field may only be omitted from a request if it was not present in the response at all
         or if it was explicitly set to `null` in the browse response.
 
+        The `stable_ids` query parameter is a hint that the client requires stable media identifiers in the returned
+        `media_id` and `media_type` fields. Certain media providers may not support stable identifiers, but the integration
+        might be able to use a workaround generating stable identifiers on the client side.
+
+        Roon is such an example, which generates new media keys for every new browse or search request. Use cases like    
+        "select an identifier of my favorite playlist, so I can still play it next month" aren't possible with changing
+        identifiers. As a workaround, the integration driver returns a path structure (`Library/Playlists/Favorite Songs`)
+        that is resolved when playing an item.
+
         The paging query parameters can be used to retrieve a specific page of media items and to limit result size:
 
         - `limit`: Maximum number of items to return per page. Default is 10.
@@ -2592,6 +2601,7 @@ paths:
         - $ref: '#/components/parameters/entity_id'
         - $ref: '#/components/parameters/media_id'
         - $ref: '#/components/parameters/media_type'
+        - $ref: '#/components/parameters/stable_ids'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -2644,6 +2654,11 @@ paths:
         A `media_id` or `media_type` field may only be omitted from a request if it was not present in the response at all
         or if it was explicitly set to `null` in the search response.
 
+        The `stable_ids` query parameter is a hint that the client requires stable media identifiers in the returned
+        `media_id` and `media_type` fields. Certain media providers may not support stable identifiers, but the integration
+        might be able to use a workaround generating stable identifiers on the client side. See browse endpoint for more
+        information.
+
         The paging query parameters can be used to retrieve a specific page of media items and to limit result size:
 
         - `limit`: Maximum number of items to return per page. Default is 10.
@@ -2688,6 +2703,7 @@ paths:
           schema:
             type: string
             maxLength: 255
+        - $ref: '#/components/parameters/stable_ids'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
       responses:
@@ -2722,49 +2738,6 @@ paths:
           $ref: '#/components/responses/Err408RequestTimeout'
         '409':
           $ref: '#/components/responses/Err409Conflict'
-        '500':
-          $ref: '#/components/responses/Err500InternalServerError'
-        '503':
-          $ref: '#/components/responses/Err503ServiceUnavailable'
-  '/entities/{entityId}/media/queue':
-    get:
-      tags:
-        - entities
-      summary: "\U0001F6A7 Get the current playback queue."
-      description: 'Initial draft, do not use!'
-      operationId: getMediaQueue
-      parameters:
-        - $ref: '#/components/parameters/entity_id'
-        - $ref: '#/components/parameters/page'
-        - $ref: '#/components/parameters/limit'
-      responses:
-        '200':
-          description: Successful operation.
-          headers:
-            Pagination-Count:
-              description: Total number of items.
-              schema:
-                type: integer
-            Pagination-Limit:
-              description: Number of returned items.
-              schema:
-                type: integer
-            Pagination-Page:
-              description: Current page number. 1-based.
-              schema:
-                type: integer
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MediaQueueResponse'
-        '400':
-          $ref: '#/components/responses/Err400BadRequest'
-        '401':
-          $ref: '#/components/responses/Err401Unauthorized'
-        '403':
-          $ref: '#/components/responses/Err403Forbidden'
-        '404':
-          $ref: '#/components/responses/Err404NotFound'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
         '503':
@@ -11182,6 +11155,13 @@ components:
       in: query
       description: |
         true = only consider single-device drivers, false = only multi-device drivers, NONE = all.
+      required: false
+      schema:
+        type: boolean
+    stable_ids:
+      name: stable_ids
+      in: query
+      description: Use stable media identifiers.
       required: false
       schema:
         type: boolean
