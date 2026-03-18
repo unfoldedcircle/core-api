@@ -8,12 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+---
+
+## 0.45.1
 ### Added
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
 ### Fixed
 - Fixed invalid schema references.
-
----
 
 ## 0.44.4
 ### Fixed
