@@ -374,7 +374,7 @@ The `pagination` object in the response should contain:
 - `limit`: The effective page size used for this response.
 - `page`: The 1-based page index used for this response.
 
-Please refer to the [Integration API specification](../../integration-api/UCR-integration-asyncapi.yaml) for the exact
+Please refer to the [Integration API specification]((https://unfoldedcircle.github.io/core-api/integration/) for the exact
 definitions of all data structures.
 
 #### Home Assistant Integration Example with Spotify Media Player
