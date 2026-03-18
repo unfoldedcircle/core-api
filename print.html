@@ -1311,9 +1311,17 @@ requests in <code>msg_data.cmd_id</code>.</p>
 <li><a href="entities/entity_media_player.html#command-name-patterns">Command Name Patterns</a></li>
 </ul>
 </li>
+<li><a href="entities/entity_media_player.html#media-browsing">Media Browsing</a></li>
+<li><a href="entities/entity_media_player.html#media-searching">Media Searching</a></li>
+<li><a href="entities/entity_media_player.html#media-playback">Media Playback</a>
+<ul>
+<li><a href="entities/entity_media_player.html#media-play-action">Media Play Action</a></li>
+</ul>
+</li>
 <li><a href="entities/entity_media_player.html#events">Events</a>
 <ul>
-<li><a href="entities/entity_media_player.html#media-types">Media types</a></li>
+<li><a href="entities/entity_media_player.html#media-content-types">Media Content Types</a></li>
+<li><a href="entities/entity_media_player.html#media-classes">Media Classes</a></li>
 <li><a href="entities/entity_media_player.html#media-images">Media images</a></li>
 </ul>
 </li>
@@ -1341,9 +1349,9 @@ requests in <code>msg_data.cmd_id</code>.</p>
 <!-- TOC -->
 <hr />
 <p>A media player entity controls playback of media on a device. This could be an online music streaming service, a TV,
-a stereo or a video player.</p>
+a stereo, or a video player.</p>
 <h2 id="features-6"><a class="header" href="#features-6">Features</a></h2>
-<p>Media-player features define the capabilities of the controlled device. For example the <code>dpad</code> feature will enable the
+<p>Media-player features define the capabilities of the controlled device. For example, the <code>dpad</code> feature will enable the
 four directional commands and the enter command. Furthermore, certain features control the appearance and functionality
 of the media-player UI on the Remote Two.</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>R</th><th>W</th><th>Description</th></tr></thead><tbody>
@@ -1369,7 +1377,7 @@ of the media-player UI on the Remote Two.</p>
 <tr><td>media_artist</td><td>✅</td><td>❌</td><td>The player announces the media artist.</td></tr>
 <tr><td>media_album</td><td>✅</td><td>❌</td><td>The player announces the media album if music is being played.</td></tr>
 <tr><td>media_image_url</td><td>✅</td><td>❌</td><td>The player provides an image url of the media being played.</td></tr>
-<tr><td>media_type</td><td>✅</td><td>❌</td><td>The player announces the type of media being played.</td></tr>
+<tr><td>media_type</td><td>✅</td><td>❌</td><td>The player announces the content type of media being played.</td></tr>
 <tr><td>dpad</td><td>❌</td><td>✅</td><td>Directional pad navigation, provides up / down / left / right / enter commands.</td></tr>
 <tr><td>numpad</td><td>❌</td><td>✅</td><td>Number pad, provides digit_0, .. , digit_9 commands.</td></tr>
 <tr><td>home</td><td>❌</td><td>✅</td><td>Home navigation support with home &amp; back commands.</td></tr>
@@ -1387,6 +1395,13 @@ of the media-player UI on the Remote Two.</p>
 <tr><td>subtitle</td><td>❌</td><td>✅</td><td>The player supports selecting or switching subtitles.</td></tr>
 <tr><td>record</td><td>❌</td><td>✅</td><td>The player has recording capabilities with record, my_recordings, live commands</td></tr>
 <tr><td>settings</td><td>❌</td><td>✅</td><td>The player supports a settings menu.</td></tr>
+<tr><td>play_media</td><td>❌</td><td>✅</td><td>The player supports playing a specific media item.</td></tr>
+<tr><td>play_media_action</td><td>❌</td><td>✅</td><td>The player supports the play_media action parameter to either play or enqueue.</td></tr>
+<tr><td>clear_playlist</td><td>❌</td><td>✅</td><td>The player allows clearing the active playlist.</td></tr>
+<tr><td>browse_media</td><td>❌</td><td>✅</td><td>The player supports browsing media containers.</td></tr>
+<tr><td>search_media</td><td>❌</td><td>✅</td><td>The player supports searching for media items.</td></tr>
+<tr><td>search_media_classes</td><td>✅</td><td>❌</td><td>The player provides a list of media classes as filter for searches.</td></tr>
+<tr><td>🚧 search_media_filters</td><td>✅</td><td>❌</td><td>The player provides a list of input filters to limit searches.</td></tr>
 </tbody></table>
 </div>
 <ul>
@@ -1403,11 +1418,11 @@ of the media-player UI on the Remote Two.</p>
 </ul>
 </li>
 </ul>
-<p>🚧 Planned features are playlist handling, media browsing and searching.</p>
+<p>🚧 Planned features are: playlist handling.</p>
 <p>🧑‍💻 Integration driver developers:</p>
 <ul>
 <li>If certain features or commands are missing for your device, they can be defined with <a href="entities/entity_media_player.html#simple-commands">"simple commands"</a>.</li>
-<li>If a feature doesn't fully match your device, for example it only has a <code>record</code> function but no <code>my_recordings</code> or
+<li>If a feature doesn't fully match your device, for example, it only has a <code>record</code> function but no <code>my_recordings</code> or
 <code>live</code> functions, then the desired command(s) should also be defined as a <a href="entities/entity_media_player.html#simple-commands">"simple command"</a>.
 <ul>
 <li>For the command name use the corresponding <code>cmd_id</code> in uppercase to keep any command related automations.<br />
@@ -1431,7 +1446,8 @@ Multiple features can act on the same attribute.</p>
 <tr><td></td><td>play_pause, stop</td><td></td><td></td><td></td></tr>
 <tr><td></td><td>fast_forward, rewind, seek</td><td></td><td></td><td></td></tr>
 <tr><td>media_position_updated_at</td><td>media_position</td><td>string</td><td>datetime (ISO 8601)</td><td>Optional timestamp when <code>media_position</code> was last updated. Requires integration support.</td></tr>
-<tr><td>media_type</td><td>media_type</td><td>enum</td><td><em>platform specific</em></td><td>The type of media being played.</td></tr>
+<tr><td>media_id</td><td>media_type</td><td>string</td><td></td><td>The content ID of media being played.</td></tr>
+<tr><td>media_type</td><td>media_type</td><td>string</td><td><a href="entities/entity_media_player.html#media-content-types">Media type</a></td><td>The content type of media being played.</td></tr>
 <tr><td>media_image_url</td><td>media_image_url</td><td>string</td><td></td><td>URL to retrieve the album art or an image representing what's being played.</td></tr>
 <tr><td></td><td>play_pause</td><td></td><td></td><td></td></tr>
 <tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
@@ -1444,12 +1460,17 @@ Multiple features can act on the same attribute.</p>
 <tr><td>media_album</td><td>media_album</td><td>string</td><td></td><td>Currently playing media information.</td></tr>
 <tr><td></td><td>play_pause</td><td></td><td></td><td></td></tr>
 <tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
+<tr><td>media_playlist</td><td>play_pause</td><td>string</td><td></td><td>Title of Playlist currently playing.</td></tr>
+<tr><td></td><td>next, previous</td><td></td><td></td><td></td></tr>
 <tr><td>repeat</td><td>repeat</td><td>enum</td><td><code>OFF</code>, <code>ALL</code>, <code>ONE</code></td><td>Current repeat mode.</td></tr>
 <tr><td>shuffle</td><td>shuffle</td><td>boolean</td><td></td><td>Shuffle mode on or off.</td></tr>
 <tr><td>source</td><td>select_source</td><td>string</td><td></td><td>Currently selected media or input source.</td></tr>
 <tr><td>source_list</td><td>select_source</td><td>list</td><td><em>text items</em></td><td>Available media or input sources.</td></tr>
 <tr><td>sound_mode</td><td>select_sound_mode</td><td>string</td><td></td><td>Currently selected sound mode.</td></tr>
 <tr><td>sound_mode_list</td><td>select_sound_mode</td><td>list</td><td><em>text items</em></td><td>Available sound modes.</td></tr>
+<tr><td>play_media_action</td><td>play_media_action</td><td>list</td><td><a href="entities/entity_media_player.html#media-play-action">Media Play Action</a></td><td>Supported media play actions.</td></tr>
+<tr><td>search_media_classes</td><td>search_media_classes</td><td>list</td><td><a href="entities/entity_media_player.html#media-classes">Media Classes</a></td><td>List of media classes to use as a filter for <code>search_media</code>. Custom classes should be avoided.</td></tr>
+<tr><td>🚧 search_media_filters</td><td>search_media_filters</td><td>list</td><td></td><td></td></tr>
 </tbody></table>
 </div>
 <h3 id="states-6"><a class="header" href="#states-6">States</a></h3>
@@ -1533,12 +1554,14 @@ requests in <code>msg_data.cmd_id</code>.</p>
 <tr><td>audio_track</td><td>-</td><td>Switch or select audio track.</td></tr>
 <tr><td>subtitle</td><td>-</td><td>Switch or select subtitle.</td></tr>
 <tr><td>settings</td><td>-</td><td>Settings menu</td></tr>
-<tr><td>🚧 search</td><td></td><td></td></tr>
+<tr><td>play_media</td><td>media_id, media_type</td><td>Play or enqueue a media item.</td></tr>
+<tr><td></td><td>action</td><td>Optional <code>MediaPlayAction</code> enum if feature <code>play_media_action</code> is supported. Play now, next or enqueue.</td></tr>
+<tr><td>clear_playlist</td><td>-</td><td>Removes all items from the playback queue. Current playback behaviour is integration-dependent (keep playing the current item or clearing everything).</td></tr>
 </tbody></table>
 </div>
 <h3 id="simple-commands"><a class="header" href="#simple-commands">Simple Commands</a></h3>
-<p>Additional commands can be enabled with the <code>simple_commands</code> options. A device exposing a media-player entity can
-support all additional device commands, not covered with the standard features, as so-called "simple commands".
+<p>Additional commands can be enabled with the <code>simple_commands</code> option. A device exposing a media-player entity can
+support all additional device commands, not covered with the standard features, as so-called "simple commands."
 These commands are comparable with the infrared remote-entity commands, where keys trigger an action on the device:</p>
 <ul>
 <li>The command is fully defined by its name and doesn't have any further arguments or related attributes.</li>
@@ -1546,7 +1569,7 @@ These commands are comparable with the infrared remote-entity commands, where ke
 <ul>
 <li>The upper case restriction makes them distinguishable from the pre-defined feature commands.</li>
 <li>Only a subset of the 7-bit ASCII printable characters are allowed: <code>-/_.:+#*°@%()?</code></li>
-<li>Maximum length is 20 characters.</li>
+<li>The maximum length is 20 characters.</li>
 <li>Command name regex: <code>^[A-Z0-9\/_.:+#*°@%()?-]{1,20}$</code></li>
 </ul>
 </li>
@@ -1563,6 +1586,324 @@ This allows better integration into Remote Two, like default UI mappings and gro
 <li><code>DIGIT_</code>: additional input digits besides the pre-defined numpad digits, e.g. <code>DIGIT_10</code>, <code>DIGIT_10+</code></li>
 <li><code>ZONE_</code>: multi-room functions, e.g. <code>ZONE_A</code>, <code>ZONE_MULTIROOM</code></li>
 </ul>
+<h3 id="media-browsing"><a class="header" href="#media-browsing">Media Browsing</a></h3>
+<p>Media browsing uses a dedicated WebSocket message and is not part of the standard media-player entity commands.</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">msg</th><th style="text-align: left">Parameters</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left">browse_media</td><td style="text-align: left">entity_id</td><td style="text-align: left">Browse media from a media-player entity.</td></tr>
+<tr><td style="text-align: left"></td><td style="text-align: left">media_id</td><td style="text-align: left">Optional media content ID to restrict browsing.</td></tr>
+<tr><td style="text-align: left"></td><td style="text-align: left">media_type</td><td style="text-align: left">Optional media content type to restrict browsing.</td></tr>
+<tr><td style="text-align: left"></td><td style="text-align: left">stable_ids</td><td style="text-align: left">Optional hint that the client requires stable media identifiers.</td></tr>
+<tr><td style="text-align: left"></td><td style="text-align: left">paging</td><td style="text-align: left">Optional paging object to limit returned items.</td></tr>
+</tbody></table>
+</div>
+<p>The <code>media_id</code> and <code>media_type</code> parameters are optional and can be used to restrict browsing to a specific media item
+or content type. Both fields can be returned in the browse response on the root item and on every child item to describe
+where the item lives in the provider’s hierarchy and how it can be addressed later. For example, for playback or further
+browsing.</p>
+<p>Integrations must ensure that any <code>media_id</code> returned by a given entity is stable and uniquely identifies the item
+within that entity. This ensures that it can be reused in subsequent <code>play_media</code>, <code>browse_media</code> and <code>search_media</code>
+calls. Integrations may use either one of the pre-defined semantic content types (see <a href="entities/entity_media_player.html#media-content-types">Media Content Types</a>)
+or provider-specific URIs for <code>media_type</code>, as long as values are stable and reused consistently.</p>
+<p>Certain media providers may not support stable identifiers, but the integration might be able to use a workaround
+generating stable identifiers on the client side. The <code>stable_ids</code> parameter is a hint that the client really requires
+stable media identifiers in the returned <code>media_id</code> and <code>media_type</code> fields, because the identifier won't be used right
+now to play a media item but sometime in the future.<br />
+Roon is such an example, which generates new media keys for every new browse or search request. Use cases like<br />
+"select an identifier of my favorite playlist, so I can still play it next month" aren't possible with changing
+identifiers. As a workaround, the integration driver can return a path structure (<code>Library/Playlists/Favorite Songs</code>)
+or another sort of identifier that can be used to identify or resolve the item in the future.</p>
+<p><strong>Important:</strong> When using <code>media_id</code> and <code>media_type</code> values in further calls, they must match the values returned in
+the previous <code>media_browse</code> response exactly. If an integration returns an empty string (<code>""</code>) as value, that exact
+empty string will be sent back on later calls and does not mean "no value."</p>
+<p>A field is only omitted from a request if it was not present in the response at all or if it was explicitly set to
+<code>null</code> in the browse response.</p>
+<p>The optional <code>paging</code> object can be used to retrieve a specific page of media items and to limit result size:</p>
+<ul>
+<li><code>limit</code>: Maximum number of items to return per page. Default is 10.</li>
+<li><code>page</code>: 1-based page index. Default is 1.</li>
+</ul>
+<p>Integrations may return fewer than <code>limit</code> items on the last page; clients must not assume the number of items equals
+<code>limit</code>.</p>
+<h4 id="browse-response"><a class="header" href="#browse-response">Browse Response</a></h4>
+<p>The <code>msg_data</code> object returned by the <code>media_browse</code> command contains the following fields:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Field</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left">media</td><td style="text-align: left">object</td><td style="text-align: left"><code>BrowseMediaItem</code> object.</td></tr>
+<tr><td style="text-align: left">pagination</td><td style="text-align: left">object</td><td style="text-align: left">Optional pagination information for this result page.</td></tr>
+</tbody></table>
+</div>
+<p><code>BrowseMediaItem</code> object:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Field</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left">title</td><td style="text-align: left">string</td><td style="text-align: left">Display title of the current media item/container.</td></tr>
+<tr><td style="text-align: left">subtitle</td><td style="text-align: left">string</td><td style="text-align: left">Optional subtitle of the current media item/container.</td></tr>
+<tr><td style="text-align: left">can_browse</td><td style="text-align: left">boolean</td><td style="text-align: left">Item can be used as a parent/container in a new <code>browse_media</code> call.</td></tr>
+<tr><td style="text-align: left">can_play</td><td style="text-align: left">boolean</td><td style="text-align: left">Item can be used as a target in <code>play_media</code>.</td></tr>
+<tr><td style="text-align: left">can_search</td><td style="text-align: left">boolean</td><td style="text-align: left">Item can be used as scope for a <code>search_media</code> call.</td></tr>
+<tr><td style="text-align: left">media_class</td><td style="text-align: left">string</td><td style="text-align: left">Media class of the current media item.</td></tr>
+<tr><td style="text-align: left">media_type</td><td style="text-align: left">string</td><td style="text-align: left">Provider-specific type or URI of the media item.</td></tr>
+<tr><td style="text-align: left">media_id</td><td style="text-align: left">string</td><td style="text-align: left">Provider-specific identifier of the media item.</td></tr>
+<tr><td style="text-align: left">artist</td><td style="text-align: left">string</td><td style="text-align: left">Optional artist name.</td></tr>
+<tr><td style="text-align: left">album</td><td style="text-align: left">string</td><td style="text-align: left">Optional album name.</td></tr>
+<tr><td style="text-align: left">thumbnail</td><td style="text-align: left">string</td><td style="text-align: left">Optional URL, icon URI or base64 image for artwork.</td></tr>
+<tr><td style="text-align: left">duration</td><td style="text-align: left">number</td><td style="text-align: left">Optional media duration in seconds.</td></tr>
+<tr><td style="text-align: left">items</td><td style="text-align: left">array</td><td style="text-align: left">Optional <code>BrowseMediaItem</code> child items in this container.</td></tr>
+</tbody></table>
+</div>
+<p>The <code>items</code> array is only present if the current item is a container and contains the same <code>BrowseMediaItem</code> objects.
+Child items may not contain further child items (only one level of nesting is supported).</p>
+<ul>
+<li>If a flag is omitted on an item, the default is <code>false</code>.</li>
+<li>Integrations should at least provide <code>can_browse</code> for items that can be used as <code>media_id</code> in follow-up <code>browse_media</code>
+calls.</li>
+<li>For leaf items that can be used with <code>play_media</code>, integrations should set <code>can_play: true</code>.</li>
+<li>Items where all three flags are false should NOT be returned.<br />
+Otherwise, the item will have no associated command in the user interface.</li>
+<li>The <code>media_class</code> and <code>media_type</code> fields use the same semantics and values as documented in the <a href="entities/entity_media_player.html#media-classes">Media Classes</a>
+and <a href="entities/entity_media_player.html#media-content-types">Media Content Types</a> sections.</li>
+<li>The <code>thumbnail</code> field can contain artwork for the current item:
+<ul>
+<li>An icon URI to use a provided icon with the following prefix: <code>icon://uc:</code>, for example, <code>icon://uc:music</code>.</li>
+<li>A URL to download the media artwork.</li>
+<li>A base64 encoded PNG or JPG image.</li>
+<li>The preferred size is 480x480 pixels, either in JPG or PNG format.</li>
+<li>Please avoid using encoded images whenever possible. Payloads should be as small as possible.</li>
+<li>If no thumbnail is provided, a default icon will be used based on <code>media_class</code>.</li>
+</ul>
+</li>
+</ul>
+<p>The <code>pagination</code> object in the response should contain:</p>
+<ul>
+<li><code>count</code>: Total number of items in the container (not just in the current page). If unknown, this field is not returned.</li>
+<li><code>limit</code>: The effective page size used for this response.</li>
+<li><code>page</code>: The 1-based page index used for this response.</li>
+</ul>
+<p>Please refer to the <a href="entities/../../integration-api/UCR-integration-asyncapi.yaml">Integration API specification</a> for the exact
+definitions of all data structures.</p>
+<h4 id="home-assistant-integration-example-with-spotify-media-player"><a class="header" href="#home-assistant-integration-example-with-spotify-media-player">Home Assistant Integration Example with Spotify Media Player</a></h4>
+<p>Example request to browse media at the root level:</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 50,
+  "msg": "browse_media",
+  "msg_data": {
+    "entity_id": "media_player.spotify"
+  }
+}
+</code></pre>
+<p>Example response:</p>
+<pre><code class="language-json">{
+  "kind": "resp",
+  "req_id": 50,
+  "msg": "media_browse",
+  "code": 200,
+  "msg_data": {
+    "media": {
+      "title": "Media Library",
+      "can_browse": true,
+      "media_class": "directory",
+      "media_id": "library",
+      "media_type": "spotify://library",
+      "items": [
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_playlists",
+          "media_type": "spotify://current_user_playlists",
+          "title": "Playlists"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_followed_artists",
+          "media_type": "spotify://current_user_followed_artists",
+          "title": "Artists"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_saved_albums",
+          "media_type": "spotify://current_user_saved_albums",
+          "title": "Albums"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_saved_tracks",
+          "media_type": "spotify://current_user_saved_tracks",
+          "title": "Liked songs"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_saved_shows",
+          "media_type": "spotify://current_user_saved_shows",
+          "title": "Podcasts"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_recently_played",
+          "media_type": "spotify://current_user_recently_played",
+          "title": "Recently played"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_top_artists",
+          "media_type": "spotify://current_user_top_artists",
+          "title": "Top Artists"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "current_user_top_tracks",
+          "media_type": "spotify://current_user_top_tracks",
+          "title": "Top Tracks"
+        },
+        {
+          "can_browse": true,
+          "media_class": "directory",
+          "media_id": "new_releases",
+          "media_type": "spotify://new_releases",
+          "title": "New Releases"
+        }
+      ]
+    },
+    "pagination": {
+      "count": 9,
+      "limit": 9,
+      "page": 1
+    }
+  }
+}
+</code></pre>
+<p>A returned item can be used to continue browsing, if <code>"can_browse": true</code> is set.</p>
+<p>For example, to continue browsing the returned "Playlists" directory, send a new request with the returned <code>media_id</code>
+and <code>media_type</code> values of that item:</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 51,
+  "msg": "browse_media",
+  "msg_data": {
+    "entity_id": "media_player.spotify",
+    "media_id": "current_user_playlists",
+    "media_type": "spotify://current_user_playlists",
+    "paging": {
+      "limit": 10,
+      "page": 1
+    }
+  }
+}
+</code></pre>
+<h3 id="media-searching"><a class="header" href="#media-searching">Media Searching</a></h3>
+<p>🚧 This is a development feature and subject to change. There is no UI support yet.</p>
+<p>Media searching uses a dedicated WebSocket message and is not part of the standard media-player entity commands.</p>
+<p>Note: The filter object is not yet formally defined in the Integration-API. The fields below are examples of possible
+filters and are not required.</p>
+<div class="table-wrapper"><table><thead><tr><th>msg</th><th>Parameters</th><th>Description</th></tr></thead><tbody>
+<tr><td>search_media</td><td>entity_id</td><td>Search for media items in a media-player entity.</td></tr>
+<tr><td></td><td>query</td><td>Free-text search query.</td></tr>
+<tr><td></td><td>media_id</td><td>Optional media content ID to limit the search scope.</td></tr>
+<tr><td></td><td>media_type</td><td>Optional media content type to limit the search scope.</td></tr>
+<tr><td></td><td>stable_ids</td><td>Optional hint that the client requires stable media identifiers.</td></tr>
+<tr><td></td><td>filter.media_classes</td><td>Optional list of media classes to filter the results.</td></tr>
+<tr><td></td><td>filter.artist</td><td>🚧 TBD if a set of well-known filters like <code>artist</code></td></tr>
+<tr><td></td><td>filter.album</td><td>🚧     and <code>album</code>, or dynamic</td></tr>
+<tr><td></td><td>paging</td><td>Optional paging object to limit returned items.</td></tr>
+</tbody></table>
+</div>
+<p>The <code>media_id</code> and <code>media_type</code> parameters behave the same as in <code>browse_media</code>: they can be used to restrict the
+search to a specific container or content type, and integrations should propagate and reuse the values consistently.
+Empty strings must be preserved and echoed back as-is. Only omit a field if it was not returned or was explicitly
+<code>null</code>.</p>
+<ul>
+<li>The optional <code>filter.media_classes</code> filter may only contain media classes that are supported by the integration.
+<ul>
+<li>Supported media classes must be specified in the <code>search_media_classes</code> attribute by the integration.</li>
+<li>Only well-known <a href="entities/entity_media_player.html#media-classes">Media Classes</a> should be used without any custom media classes.</li>
+</ul>
+</li>
+<li>See <a href="entities/entity_media_player.html#media-browsing">Media Browsing</a> for a description of the <code>stable_ids</code> parameter.</li>
+<li>🚧 The <code>filter.artist</code> and <code>filter.album</code> fields are examples of possible future filters and are not yet formally defined.</li>
+<li>The optional <code>paging</code> object can be used to retrieve a specific page of media items and to limit result size.</li>
+</ul>
+<h4 id="search-response"><a class="header" href="#search-response">Search Response</a></h4>
+<p>The <code>msg_data</code> object returned by the <code>media_search</code> command contains the following fields:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Field</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left">media</td><td style="text-align: left">array</td><td style="text-align: left"><code>SearchMediaItem</code> object.</td></tr>
+<tr><td style="text-align: left">pagination</td><td style="text-align: left">object</td><td style="text-align: left">Optional pagination information for this result page.</td></tr>
+</tbody></table>
+</div>
+<p>The <code>SearchMediaItem</code> object is identical to the <code>BrowseMediaItem</code> object, except it does not contain the <code>items</code> field:</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left">Field</th><th style="text-align: left">Type</th><th style="text-align: left">Description</th></tr></thead><tbody>
+<tr><td style="text-align: left">title</td><td style="text-align: left">string</td><td style="text-align: left">Display title of the current media item/container.</td></tr>
+<tr><td style="text-align: left">subtitle</td><td style="text-align: left">string</td><td style="text-align: left">Optional subtitle of the current media item/container.</td></tr>
+<tr><td style="text-align: left">can_browse</td><td style="text-align: left">boolean</td><td style="text-align: left">Item can be used as a parent/container in a new <code>browse_media</code> call.</td></tr>
+<tr><td style="text-align: left">can_play</td><td style="text-align: left">boolean</td><td style="text-align: left">Item can be used as a target in <code>play_media</code>.</td></tr>
+<tr><td style="text-align: left">can_search</td><td style="text-align: left">boolean</td><td style="text-align: left">Item can be used as scope for a <code>search_media</code> call.</td></tr>
+<tr><td style="text-align: left">media_class</td><td style="text-align: left">string</td><td style="text-align: left">Media class of the current media item.</td></tr>
+<tr><td style="text-align: left">media_type</td><td style="text-align: left">string</td><td style="text-align: left">Provider-specific type or URI of the media item.</td></tr>
+<tr><td style="text-align: left">media_id</td><td style="text-align: left">string</td><td style="text-align: left">Provider-specific identifier of the media item.</td></tr>
+<tr><td style="text-align: left">artist</td><td style="text-align: left">string</td><td style="text-align: left">Optional artist name.</td></tr>
+<tr><td style="text-align: left">album</td><td style="text-align: left">string</td><td style="text-align: left">Optional album name.</td></tr>
+<tr><td style="text-align: left">thumbnail</td><td style="text-align: left">string</td><td style="text-align: left">Optional URL, icon URI or base64 image for artwork.</td></tr>
+<tr><td style="text-align: left">duration</td><td style="text-align: left">number</td><td style="text-align: left">Optional media duration in seconds.</td></tr>
+</tbody></table>
+</div>
+<h4 id="example"><a class="header" href="#example">Example</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 124,
+  "msg": "search_media",
+  "msg_data": {
+    "entity_id": "media-1",
+    "query": "live",
+    "filter": {
+      "media_classes": [ "artist", "album"],
+      "artist": "Tricky",
+      "album": "Pieces"
+    },
+    "paging": {
+      "limit": 5,
+      "page": 1
+    }
+  }
+}
+</code></pre>
+<h3 id="media-playback"><a class="header" href="#media-playback">Media Playback</a></h3>
+<p>Starting a media playback is an optional feature and uses a standard <code>entity_command</code> request with the <code>play_media</code>
+command identifier.</p>
+<p>The <code>media_id</code> and <code>media_type</code> parameters must be the exact same values as returned by <code>browse_media</code> or <code>search_media</code>.
+The integration can support other identifiers for directly playing a specific media item  in activity sequences or
+UI commands.</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 125,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "media_player",
+    "entity_id": "media-1",
+    "cmd_id": "play_media",
+    "params": {
+      "media_id": "track-456",
+      "media_type": "track",
+      "action": "PLAY_NOW"
+    }
+  }
+}
+</code></pre>
+<h4 id="media-play-action"><a class="header" href="#media-play-action">Media Play Action</a></h4>
+<p>The <code>play_media_action</code> feature allows integrations to define the behavior of the <code>play_media</code> command in the optional
+<code>action</code> parameter. Supported values are defined in the <code>MediaPlayAction</code> enum in the Integration-API:
+The following actions are pre-defined in the Integration-API and are supported in the UI:</p>
+<ul>
+<li><code>PLAY_NOW</code>: Start playback immediately.</li>
+<li><code>PLAY_NEXT</code>: Add to the queue after the current item.</li>
+<li><code>ADD_TO_QUEUE</code>: Add to the end of the queue.</li>
+</ul>
+<p>The <code>PLAY_NOW</code> action is the default if no action is specified.</p>
+<p>Supported actions must be specified in the <code>play_media_action</code> attribute by the integration.</p>
+<p>Integrations may support additional actions that are not defined in the <code>MediaPlayAction</code> enum, for example, a
+"radio mode." Please note that custom actions might not be exposed in the UI.</p>
 <h3 id="events-6"><a class="header" href="#events-6">Events</a></h3>
 <p>The <code>entity_change</code> event must be emitted by the integration driver if the state or an attribute of the media player
 changes.</p>
@@ -1580,7 +1921,8 @@ changes.</p>
 <tr><td>media_image_url_small</td><td>Current media image url for the small image.</td></tr>
 <tr><td>media_image_url_medium</td><td>Current media image url for the medium size image.</td></tr>
 <tr><td>media_image_url_large</td><td>Current media image url for the large image.</td></tr>
-<tr><td>media_type</td><td>Current media type.</td></tr>
+<tr><td>media_type</td><td>Current media content type.</td></tr>
+<tr><td>search_media_classes</td><td>Available search class filters.</td></tr>
 <tr><td>repeat</td><td>Current repeat mode.</td></tr>
 <tr><td>shuffle</td><td>Current shuffle mode.</td></tr>
 <tr><td>source</td><td>Selected source.</td></tr>
@@ -1592,16 +1934,72 @@ changes.</p>
 <p>At least one attribute must be specified in the <code>entity_change</code> message. If the entity <code>state</code> and another attribute
 changed at the same time, for example if a new track starts playing, they may both be included in the same message.
 It's also valid to always send every attribute.</p>
-<h4 id="media-types"><a class="header" href="#media-types">Media types</a></h4>
-<p>The <code>media_type</code> attribute specifies the media being played:</p>
+<h4 id="media-content-types"><a class="header" href="#media-content-types">Media Content Types</a></h4>
+<p>The media content type is for playback/content semantics.
+It represents the type of the media content to play or that is <strong>currently playing</strong>.</p>
 <ul>
-<li><code>MUSIC</code></li>
-<li><code>RADIO</code></li>
-<li><code>TVSHOW</code></li>
-<li><code>MOVIE</code></li>
-<li><code>VIDEO</code></li>
+<li>Content type of current playing media.</li>
+<li>The play_media command uses <code>media_type</code> to tell the integration what semantic category of content is being requested.</li>
+<li>In media search, the search query includes an optional <code>media_type</code> used to constrain which content type to search in.</li>
 </ul>
-<p>The integration may return other values, but the UI will most likely handle them as an "unknown media".</p>
+<p>The following media content types are pre-defined:</p>
+<ul>
+<li><code>album</code></li>
+<li><code>app</code></li>
+<li><code>apps</code></li>
+<li><code>artist</code></li>
+<li><code>channel</code></li>
+<li><code>channels</code></li>
+<li><code>composer</code></li>
+<li><code>episode</code></li>
+<li><code>game</code></li>
+<li><code>genre</code></li>
+<li><code>image</code></li>
+<li><code>movie</code></li>
+<li><code>music</code></li>
+<li><code>playlist</code></li>
+<li><code>podcast</code></li>
+<li><code>radio</code></li>
+<li><code>season</code></li>
+<li><code>track</code></li>
+<li><code>tv_show</code></li>
+<li><code>url</code></li>
+<li><code>video</code></li>
+</ul>
+<p>The integration may return other values, but the UI will most likely handle them as an "unknown media."</p>
+<h4 id="media-classes"><a class="header" href="#media-classes">Media Classes</a></h4>
+<p>The media class is for browser/structure semantics.
+It represents how a media item should be presented and <strong>organized in the media browser hierarchy</strong>.</p>
+<p>Media classes are used by the frontend and media browser infrastructure to:</p>
+<ul>
+<li>Decide how to render items (folder vs leaf item, icons, metadata fields).</li>
+<li>Decide whether an item is expandable or directly playable.</li>
+<li>Filter results in search or browse operations.</li>
+</ul>
+<p>The following media classes are pre-defined:</p>
+<ul>
+<li><code>album</code></li>
+<li><code>app</code></li>
+<li><code>artist</code></li>
+<li><code>channel</code></li>
+<li><code>composer</code></li>
+<li><code>directory</code></li>
+<li><code>episode</code></li>
+<li><code>game</code></li>
+<li><code>genre</code></li>
+<li><code>image</code></li>
+<li><code>movie</code></li>
+<li><code>music</code></li>
+<li><code>playlist</code></li>
+<li><code>podcast</code></li>
+<li><code>radio</code></li>
+<li><code>season</code></li>
+<li><code>track</code></li>
+<li><code>tv_show</code></li>
+<li><code>url</code></li>
+<li><code>video</code></li>
+</ul>
+<p>The integration may return other values, but the UI will most likely treat them as generic media without custom icons.</p>
 <h4 id="media-images"><a class="header" href="#media-images">Media images</a></h4>
 <ul>
 <li>Supported image formats: jpg and png.</li>
@@ -1610,6 +2008,7 @@ It's also valid to always send every attribute.</p>
 <li>Images will automatically be resized to the required sizes.<br />
 Either from the single image in <code>media_image_url</code> or from the individual sizes.</li>
 <li>Images too large in pixel or file size will be rejected due to resource constraints on the remote.</li>
+<li>Images can be provided as a URL or as base64 encoded data.</li>
 </ul>
 </li>
 <li>Preferred image sizes in pixel:
@@ -1760,10 +2159,7 @@ Either from the single image in <code>media_image_url</code> or from the individ
 <h2 id="open-issues-and-missing-features"><a class="header" href="#open-issues-and-missing-features">Open issues and missing features</a></h2>
 <ul>
 <li>Define album art image limits</li>
-<li>Define media types</li>
 <li>Playlist handling</li>
-<li>Media browsing</li>
-<li>Searching</li>
 </ul>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="remote-entity"><a class="header" href="#remote-entity">Remote Entity</a></h1>
 <p>A remote entity can send commands to a controllable device.</p>
@@ -3652,7 +4048,7 @@ firewalls, VLAN etc.).</p>
 <h3 id="registration-rest-api"><a class="header" href="#registration-rest-api">Registration REST API</a></h3>
 <p>Driver registration is only possible through the Remote core REST API.</p>
 <p>See: <a href="https://github.com/unfoldedcircle/core-api/tree/main/core-api">https://github.com/unfoldedcircle/core-api/tree/main/core-api</a></p>
-<h4 id="example"><a class="header" href="#example">Example</a></h4>
+<h4 id="example-1"><a class="header" href="#example-1">Example</a></h4>
 <p>Register the <a href="https://github.com/unfoldedcircle/integration-node-library/tree/main/examples/simulated-light">simulated-light driver</a>
 using the <a href="https://github.com/unfoldedcircle/core-simulator/tree/main/docker">Core-Simulator Docker setup</a>.
 This also works using the Simulator VM running with bridge networking:</p>
