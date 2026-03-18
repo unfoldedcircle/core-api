@@ -278,12 +278,9 @@ This allows better integration into Remote Two, like default UI mappings and gro
 
 ### Media Browsing
 
-‼️Not yet finalized. Currently being verified with a reference implementation in the Home Assistant integration.
+Media browsing uses a dedicated WebSocket message and is not part of the standard media-player entity commands.
 
-Media browsing uses a dedicated command and is not part of the standard media-player entity commands.
-
-
-| cmd_id       | Parameters | Description                                                      |
+| msg          | Parameters | Description                                                      |
 |:-------------|:-----------|:-----------------------------------------------------------------|
 | browse_media | entity_id  | Browse media from a media-player entity.                         |
 |              | media_id   | Optional media content ID to restrict browsing.                  |
@@ -511,12 +508,12 @@ and `media_type` values of that item:
 
 🚧 This is a development feature and subject to change. There is no UI support yet.
 
-Media searching uses a dedicated command and is not part of the standard media-player entity commands.
+Media searching uses a dedicated WebSocket message and is not part of the standard media-player entity commands.
 
 Note: The filter object is not yet formally defined in the Integration-API. The fields below are examples of possible
 filters and are not required.
 
-| cmd_id       | Parameters           | Description                                                      |
+| msg          | Parameters           | Description                                                      |
 |--------------|----------------------|------------------------------------------------------------------|
 | search_media | entity_id            | Search for media items in a media-player entity.                 |
 |              | query                | Free-text search query.                                          |
