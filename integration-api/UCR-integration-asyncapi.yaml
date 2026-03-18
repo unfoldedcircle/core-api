@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.14.0-beta'
+  version: '0.15.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -123,6 +123,8 @@ channels:
           - $ref: '#/components/messages/unsubscribe_events'
           - $ref: '#/components/messages/get_entity_states'
           - $ref: '#/components/messages/entity_command'
+          - $ref: '#/components/messages/browse_media'
+          - $ref: '#/components/messages/search_media'
           # --- system events
           - $ref: '#/components/messages/enter_standby'
           - $ref: '#/components/messages/exit_standby'
@@ -152,6 +154,8 @@ channels:
           # --- entity handling
           - $ref: '#/components/messages/entity_states'
           - $ref: '#/components/messages/available_entities'
+          - $ref: '#/components/messages/media_browse'
+          - $ref: '#/components/messages/media_search'
           # ------ events
           - $ref: '#/components/messages/entity_change'
           - $ref: '#/components/messages/entity_available'
@@ -802,6 +806,59 @@ components:
       payload:
         $ref: '#/components/schemas/assistantEventMsg'
 
+    browse_media:
+      summary: 👷 Browse media containers of a media_player entity.
+      description: |
+        Retrieves the content of a media container or the root if no `media_id` is specified.
+        Requires the `media_browser` feature on the target `media_player` entity.
+        
+        The `stable_ids` parameter is a hint that the client requires stable media identifiers in the returned
+        `media_id` and `media_type` fields. Certain media providers may not support stable identifiers, but the integration
+        might be able to use a workaround generating stable identifiers on the client side.
+
+        Roon is such an example, which generates new media keys for every new browse or search request. Use cases like    
+        "select an identifier of my favorite playlist, so I can still play it next month" aren't possible with changing
+        identifiers. As a workaround, the integration driver returns a path structure (`Library/Playlists/Favorite Songs`)
+        that is resolved when playing an item.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/browseMediaMsg'
+      x-response:
+        $ref: '#/components/messages/media_browse'
+
+    search_media:
+      summary: 👷 Search media items of a media_player entity.
+      description: |
+        Searches for media items within the active system of the `media_player` entity.
+        Requires the `media_search` feature on the target `media_player` entity.
+        
+        The `stable_ids` parameter is a hint that the client requires stable media identifiers in the returned
+        `media_id` and `media_type` fields. See `browse_media` for more information.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/searchMediaMsg'
+      x-response:
+        $ref: '#/components/messages/media_browse'
+
+    media_browse:
+      summary: 👷 Media browse result.
+      description: |
+        Response message for `browse_media` requests.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/mediaBrowseRespMsg'
+
+    media_search:
+      summary: 👷 Media search result.
+      description: |
+        Response message for `search_media` requests.
+      tags:
+        - name: entity
+      payload:
+        $ref: '#/components/schemas/mediaSearchRespMsg'
 
   # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   schemas:
@@ -1387,6 +1444,129 @@ components:
           required:
             - msg
             - msg_data
+
+    browseMediaMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: browse_media
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  description: The entity id of the media player to browse.
+                  type: string
+                media_id:
+                  description: Optional media content ID to restrict browsing. Integration dependent.
+                  type: string
+                media_type:
+                  description: |
+                    Optional media content type to restrict browsing.
+                    Either a defined MediaContentType value or an integration dependent identifier.
+                  type: string
+                stable_ids:
+                  description: Hint to the integration to return stable media IDs.
+                  type: boolean
+                paging:
+                  $ref: '#/components/schemas/Paging'
+              required:
+                - entity_id
+          required:
+            - msg
+            - msg_data
+
+    searchMediaMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonReq'
+        - properties:
+            msg:
+              type: string
+              const: search_media
+            msg_data:
+              type: object
+              properties:
+                entity_id:
+                  description: The entity id of the media player to search
+                  type: string
+                query:
+                  description: The search string.
+                  type: string
+                media_id:
+                  description: Optional media container to scope the search. Integration dependent.
+                  type: string
+                media_type:
+                  description: |
+                    Optional media content type to restrict browsing.
+                    Either a defined MediaContentType value or an integration dependent identifier.
+                  type: string
+                stable_ids:
+                  description: Hint to the integration to return stable media IDs.
+                  type: boolean
+                filter:
+                  $ref: '#/components/schemas/MediaSearchFilter'
+                paging:
+                  $ref: '#/components/schemas/Paging'
+              required:
+                - entity_id
+                - query
+          required:
+            - msg
+            - msg_data
+
+    mediaBrowseRespMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: media_browse
+            msg_data:
+              $ref: '#/components/schemas/mediaBrowseResponse'
+          required:
+            - msg
+            - msg_data
+
+    mediaSearchRespMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/commonResp'
+        - properties:
+            msg:
+              type: string
+              const: media_search
+            msg_data:
+              $ref: '#/components/schemas/mediaSearchResponse'
+          required:
+            - msg
+            - msg_data
+
+    mediaBrowseResponse:
+      type: object
+      properties:
+        media:
+          $ref: '#/components/schemas/BrowseMediaItem'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+        - pagination
+
+    mediaSearchResponse:
+      type: object
+      properties:
+        media:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchMediaItem'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+      required:
+        - media
+        - pagination
 
     # =========================================================================
     # Event message schemas
@@ -2056,7 +2236,12 @@ components:
                   - subtitle
                   - record
                   - settings
-                  # TODO playlist handling, browsing, searching
+                  - play_media
+                  - play_media_action
+                  - clear_playlist
+                  - browse_media
+                  - search_media
+                  - search_media_classes
             options:
               type: object
               properties:
@@ -2083,6 +2268,189 @@ components:
                   default: 100
                   minimum: 2
                   maximum: 100
+
+    MediaSearchFilter:
+      description: Media search filter
+      type: object
+      properties:
+        media_classes:
+          description: Optional list of media classes to filter the results.
+          type: array
+          items:
+            $ref: '#/components/schemas/MediaClass'
+        artist:
+          description: Optional artist filter.
+          type: string
+        album:
+          description: Optional album filter.
+          type: string
+
+    MediaClass:
+      description: |
+        The media class is for browser/structure semantics.
+        It represents how a media item should be presented and organized in the media browser hierarchy.
+        
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show media type
+          specific information like icons. 
+        - Integrations can use their custom values. Short identifiers like URIs are recommended.
+      type: string
+      maxLength: 255
+      anyOf:
+        - enum:
+            - album
+            - app
+            - artist
+            - channel
+            - composer
+            - directory
+            - episode
+            - game
+            - genre
+            - image
+            - movie
+            - music
+            - playlist
+            - podcast
+            - radio
+            - season
+            - track
+            - tv_show
+            - url
+            - video
+        - { }  # extensible enum: integration can define additional values
+
+    MediaContentType:
+      description: |
+        The media content type is for playback/content semantics.
+        It represents the type of the media content to play or that is currently playing.
+        
+        Notes:
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show media type
+          specific information like icons. 
+        - Integrations can use their custom values. Short identifiers like URIs are recommended.
+      type: string
+      maxLength: 255
+      anyOf:
+        - enum:
+            - album
+            - app
+            - apps
+            - artist
+            - channel
+            - channels
+            - composer
+            - episode
+            - game
+            - genre
+            - image
+            - movie
+            - music
+            - playlist
+            - podcast
+            - radio
+            - season
+            - track
+            - tv_show
+            - url
+            - video
+        - { }  # extensible enum: integration can define additional values
+
+    MediaPlayerRepeatMode:
+      type: string
+      enum:
+        - OFF
+        - ALL
+        - ONE
+
+    MediaPlayAction:
+      description: |
+        The media play action is used to specify how the media item should be played.
+
+        Notes:
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show locale aware commands.
+        - Integrations can use their custom values, but they might not be available in the UI.
+      type: string
+      maxLength: 20
+      anyOf:
+        - enum:
+            - PLAY_NOW
+            - PLAY_NEXT
+            - ADD_TO_QUEUE
+        - { }  # extensible enum: integration can define additional values
+      default: PLAY_NOW
+
+    BrowseMediaItem:
+      type: object
+      properties:
+        media_id:
+          description: Unique identifier of the media item. Integration dependent.
+          type: string
+          maxLength: 255
+        title:
+          description: Display name.
+          type: string
+          maxLength: 255
+        subtitle:
+          description: Optional subtitle.
+          type: string
+          maxLength: 255
+        artist:
+          description: Optional artist name.
+          type: string
+          maxLength: 255
+        album:
+          description: Optional album name.
+          type: string
+          maxLength: 255
+        media_class:
+          $ref: '#/components/schemas/MediaClass'
+        media_type:
+          $ref: '#/components/schemas/MediaContentType'
+        can_browse:
+          description: If `true`, the item can be browsed (is a container) by using `media_id` and `media_type`.
+          type: boolean
+          default: false
+        can_play:
+          description: |
+            If `true`, the item can be played directly using the `play_media` command with `media_id` and `media_type`.
+          type: boolean
+          default: false
+        can_search:
+          description: |
+            If `true`, a search can be performed on the item using `search_media` with `media_id` and `media_type`.
+          type: boolean
+          default: false
+        thumbnail:
+          description: |
+            URL to download the media artwork, or a base64 encoded PNG or JPG image.
+            The preferred size is 480x480 pixels.
+            Use the following URI prefix to use a provided icon: `icon://uc:`, for example, `icon://uc:music`.
+            Please avoid using encoded images whenever possible. Payloads should be as small as possible.
+          type: string
+          maxLength: 32768
+        duration:
+          description: Duration in seconds.
+          type: integer
+        items:
+          description: |
+            Child items if this item is a container. Child items may not contain further child items (only one level
+            of nesting is supported). A new browse request must be sent for deeper levels.
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowseMediaItem'
+      required:
+        - media_id
+        - title
+
+    SearchMediaItem:
+      description: |
+        A media item that was found by a search. Currently identical in shape to `BrowseMediaItem`.
+        Defined as a composition to allow search-specific fields (e.g. relevance score) to be added in the future
+        without a breaking change.
+
+        A search media item may not contain any child `items`.
+      allOf:
+        - $ref: '#/components/schemas/BrowseMediaItem'
 
     remote:
       description: |
@@ -3041,3 +3409,40 @@ components:
       enum:
         - PRONTO
         - HEX
+
+    Paging:
+      description: Paging information for returned items.
+      type: object
+      properties:
+        limit:
+          description: Number of returned items per page.
+          type: integer
+          format: int32
+          default: 10
+          minimum: 1
+        page:
+          description: Current page number. 1-based.
+          type: integer
+          format: int32
+          default: 1
+          minimum: 1
+
+    Pagination:
+      description: Returned pagination information.
+      type: object
+      properties:
+        count:
+          description: Total number of items. If unknown, this field is not returned.
+          type: integer
+          format: int32
+          minimum: 0
+        limit:
+          description: Number of returned items.
+          type: integer
+          format: int32
+          minimum: 0
+        page:
+          description: Current page number. 1-based.
+          type: integer
+          format: int32
+          minimum: 1

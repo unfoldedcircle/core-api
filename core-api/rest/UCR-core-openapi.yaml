@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.44.4
+  version: 0.45.1
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -9,7 +9,7 @@ info:
   license:
     name: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
     url: 'https://creativecommons.org/licenses/by-sa/4.0/'
-  description: "The Unfolded Circle REST Core-API for Remote Two/3 (_UCR REST Core-API_ in short) allows to configure the remote and\nmanage custom resource files. Furthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Unfolded Circle Remote Core-APIs consist of:\n- this REST API\n- the [UCR WebSocket Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/websocket),\n  providing asynchronous events.\n\nThe focus of the Core-APIs is to provide all functionality for the UI application and the web-configurator.  \nThey allow to interact with the Unfolded Circle remote-core service and take full control of its features.\n\nThe Core-APIs may also be used by other external systems and integration drivers, if specific configuration or\ninteraction features are required, which are not present in the [UCR Integration-API](https://github.com/unfoldedcircle/core-api/tree/main/integration-api).\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote-UI.\n- `Bearer Token` for every request.  \n  This is the preferred authentication method for external systems communicating with the UCR REST Core-API.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\n**This API is a preview version and does not yet contain all functionality.**\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
+  description: "The Unfolded Circle REST Core-API for Remote Two/3 (_UCR REST Core-API_ in short) allows to configure the remote and\nmanage custom resource files. Furthermore, API-keys for the WebSocket & REST APIs can be created.\n\n## Overview\n\nThe Unfolded Circle Remote Core-APIs consist of:\n- this REST API\n- the [UCR WebSocket Core-API](https://github.com/unfoldedcircle/core-api/tree/main/core-api/websocket),\n  providing asynchronous events.\n\nThe focus of the Core-APIs is to provide all functionality for the UI application and the web-configurator.  \nThey allow to interact with the Unfolded Circle remote-core service and take full control of its features.\n\nThe Core-APIs may also be used by other external systems and integration drivers, if specific configuration or\ninteraction features are required, which are not present in the [UCR Integration-API](https://github.com/unfoldedcircle/core-api/tree/main/integration-api).\n\n## Authentication\n\nAll API endpoints besides `/api/pub` are secured. Available authentication methods are:\n- `Basic Auth` for every request.  \n  This should only be used for simple testing. At the moment there's only a single user account available for the\n  web-configurator.\n  - User: `web-configurator`\n  - Password: generated pin shown in the remote-UI.\n- `Bearer Token` for every request.  \n  This is the preferred authentication method for external systems communicating with the UCR REST Core-API.\n  - See `/auth/api_keys` endpoints on how to create and manage API keys.\n  - Only the `admin` role is supported at the moment. More roles will be added in the future.\n  - Example for a curl request:  \n    `curl 'http://$IP/api/system' --header 'Authorization: Bearer $API_KEY'`\n- `Cookie` based session login with the `/api/pub/login` endpoint.  \n  This is the preferred method for web frontends like the web-configurator.\n\n## \U0001F6A7 Missing Features\n\nThe following features will be continuously added (in no particular order):\n\n- Upload of custom certificate\n- Static network configuration\n\nPlease check the [core-api GitHub issues](https://github.com/unfoldedcircle/core-api/issues) for the current state. \n\n## API Versioning\n\nThe API is versioned according to [SemVer](https://semver.org/).  \nThe initial public release will be `1.0.0` once it is considered stable enough with some initial integration\nimplementations and developer examples.\n\n**Any major version zero (`0.y.z`) is for initial development and may change at any time!**  \nI.e. backward compatibility for minor releases is not yet established, anything MAY change at any time!\nWe try avoiding it, but it might still happen...\n"
 externalDocs:
   description: Find out more about the Remotes
   url: 'https://www.unfoldedcircle.com/'
@@ -2555,6 +2555,193 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+  '/entities/{entityId}/media/browse':
+    get:
+      tags:
+        - entities
+      summary: "\U0001F50D Browse media containers."
+      description: |
+        This endpoint allows browsing media containers within supported media-player entities.
+
+        The `media_id` and `media_type` parameters are optional and can be used to restrict browsing to a specific media item
+        or content type. Both fields can be returned in the browse response on the root item and on every child item to describe
+        where the item lives in the provider’s hierarchy and how it can be addressed later. For example, for playback or further
+        browsing.
+
+        **Important:** When using `media_id` and `media_type` values in further calls, they must match the values returned in
+        the previous `media_browse` response exactly. If an empty text (`""`) is returned as value, that exact
+        empty text must be sent back on subsequent requests. An empty text does not mean "no value."
+
+        A `media_id` or `media_type` field may only be omitted from a request if it was not present in the response at all
+        or if it was explicitly set to `null` in the browse response.
+
+        The `stable_ids` query parameter is a hint that the client requires stable media identifiers in the returned
+        `media_id` and `media_type` fields. Certain media providers may not support stable identifiers, but the integration
+        might be able to use a workaround generating stable identifiers on the client side.
+
+        Roon is such an example, which generates new media keys for every new browse or search request. Use cases like    
+        "select an identifier of my favorite playlist, so I can still play it next month" aren't possible with changing
+        identifiers. As a workaround, the integration driver returns a path structure (`Library/Playlists/Favorite Songs`)
+        that is resolved when playing an item.
+
+        The paging query parameters can be used to retrieve a specific page of media items and to limit result size:
+
+        - `limit`: Maximum number of items to return per page. Default is 10.
+        - `page`: 1-based page index. Default is 1.
+
+        Common error status codes:
+        - `400 Bad Request`: if the query is invalid, for example if `media_type` is missing for a content specific query.
+        - `404 Not Found`: if the entity does not exist or is not a media-player entity.
+        - `408 Request Timeout`: if the media browse service is not responding.
+        - `409 Conflict`: if the media-player entity does not support media browsing.
+        - `500 Internal Server Error`: if an internal error occurred.
+        - `503 Service Unavailable`: if the media browse service is unavailable or not supported for the given location specified in `media_id` and `media_type`.
+      operationId: browseMedia
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/media_id'
+        - $ref: '#/components/parameters/media_type'
+        - $ref: '#/components/parameters/stable_ids'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaBrowseResponse'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '408':
+          $ref: '#/components/responses/Err408RequestTimeout'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+  '/entities/{entityId}/media/search':
+    get:
+      tags:
+        - entities
+      summary: "\U0001F50D Search for media items."
+      description: |
+        This endpoint allows searching for media within supported media-player entities.
+
+        The `media_id` and `media_type` parameters behave the same as in the browse endpoint: they can be used to restrict the
+        search to a specific container or content type.
+
+        A `media_id` or `media_type` field may only be omitted from a request if it was not present in the response at all
+        or if it was explicitly set to `null` in the search response.
+
+        The `stable_ids` query parameter is a hint that the client requires stable media identifiers in the returned
+        `media_id` and `media_type` fields. Certain media providers may not support stable identifiers, but the integration
+        might be able to use a workaround generating stable identifiers on the client side. See browse endpoint for more
+        information.
+
+        The paging query parameters can be used to retrieve a specific page of media items and to limit result size:
+
+        - `limit`: Maximum number of items to return per page. Default is 10.
+        - `page`: 1-based page index. Default is 1.
+
+        Common error status codes:
+        - `400 Bad Request`: if the query is invalid, for example if `media_type` is missing for a content specific query.
+        - `404 Not Found`: if the entity does not exist or is not a media-player entity.
+        - `408 Request Timeout`: if the media search service is not responding.
+        - `409 Conflict`: if the media-player entity does not support media searching.
+        - `500 Internal Server Error`: if an internal error occurred.
+        - `503 Service Unavailable`: if the media search service is unavailable or not supported for the given location specified in `media_id` and `media_type`.
+      operationId: searchMedia
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - name: q
+          in: query
+          description: The search string.
+          required: true
+          schema:
+            type: string
+            maxLength: 255
+        - $ref: '#/components/parameters/media_id'
+        - $ref: '#/components/parameters/media_type'
+        - name: media_classes
+          in: query
+          description: Optional media classes to filter the results. Separate multiple classes with a comma.
+          required: false
+          schema:
+            type: string
+        - name: artist
+          in: query
+          description: Optional artist filter.
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+        - name: album
+          in: query
+          description: Optional album filter.
+          required: false
+          schema:
+            type: string
+            maxLength: 255
+        - $ref: '#/components/parameters/stable_ids'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+      responses:
+        '200':
+          description: Successful operation.
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaSearchResponse'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '408':
+          $ref: '#/components/responses/Err408RequestTimeout'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   /activities:
     head:
       tags:
@@ -7590,13 +7777,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  has_admin_pin:
-                    description: An administrator pin has been set to use restricted profiles.
-                    type: boolean
-                required:
-                  - has_admin_pin
+                $ref: '#/components/schemas/CfgProfile'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -7614,10 +7795,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                admin_pin:
-                  $ref: '#/components/schemas/AdminPin'
+              $ref: '#/components/schemas/CfgProfileUpdate'
         required: true
       responses:
         '200':
@@ -7625,7 +7803,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1cfg~1profile/get/responses/200/content/application~1json/schema'
+                $ref: '#/components/schemas/CfgProfile'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -9261,9 +9439,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/BackupMetadata/properties/report'
+                $ref: '#/components/schemas/BackupReports'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -9414,7 +9590,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/paths/~1system~1backup~1restore/put/responses/200/content/application~1json/schema'
+                $ref: '#/components/schemas/BackupReports'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -10908,6 +11084,20 @@ components:
       required: false
       schema:
         type: string
+    media_id:
+      name: media_id
+      in: query
+      description: The media ID to browse.
+      required: false
+      schema:
+        type: string
+    media_type:
+      name: media_type
+      in: query
+      description: The media type to browse.
+      required: false
+      schema:
+        type: string
     merge:
       name: merge
       in: query
@@ -10965,6 +11155,13 @@ components:
       in: query
       description: |
         true = only consider single-device drivers, false = only multi-device drivers, NONE = all.
+      required: false
+      schema:
+        type: boolean
+    stable_ids:
+      name: stable_ids
+      in: query
+      description: Use stable media identifiers.
       required: false
       schema:
         type: boolean
@@ -11563,6 +11760,33 @@ components:
       maxLength: 36
       description: |
         Entity identifier used in an integration driver (= available entities).
+    BackupReports:
+      type: array
+      items:
+        type: object
+        properties:
+          item:
+            type: string
+            enum:
+              - db
+              - integration_driver
+              - integration
+              - activity
+              - macro
+              - remote
+              - profile
+              - dock
+              - resource
+          available:
+            type: integer
+            format: int32
+          ok:
+            type: integer
+            format: int32
+        required:
+          - item
+          - available
+          - ok
     BackupSnapshot:
       type: object
       properties:
@@ -11598,30 +11822,7 @@ components:
         version:
           $ref: '#/components/schemas/BackupMetadataVersion'
         report:
-          type: object
-          properties:
-            item:
-              type: string
-              enum:
-                - db
-                - integration_driver
-                - integration
-                - activity
-                - macro
-                - remote
-                - profile
-                - dock
-                - resource
-            available:
-              type: integer
-              format: int32
-            ok:
-              type: integer
-              format: int32
-          required:
-            - item
-            - available
-            - ok
+          $ref: '#/components/schemas/BackupReports/items'
       required:
         - id
         - creation_date
@@ -11723,7 +11924,7 @@ components:
         power_saving:
           $ref: '#/components/schemas/CfgPowerSaving'
         profile:
-          $ref: '#/paths/~1cfg~1profile/get/responses/200/content/application~1json/schema'
+          $ref: '#/components/schemas/CfgProfile'
         software_update:
           $ref: '#/components/schemas/CfgSoftwareUpdate'
         sound:
@@ -12028,6 +12229,19 @@ components:
         - wakeup_sensitivity
         - display_off_sec
         - standby_sec
+    CfgProfile:
+      type: object
+      properties:
+        has_admin_pin:
+          description: An administrator pin has been set to use restricted profiles.
+          type: boolean
+      required:
+        - has_admin_pin
+    CfgProfileUpdate:
+      type: object
+      properties:
+        admin_pin:
+          $ref: '#/components/schemas/AdminPin'
     CfgRemoteDevice:
       type: object
       properties:
@@ -14501,6 +14715,189 @@ components:
                 $ref: '#/components/schemas/EntityId'
             sequence:
               $ref: '#/components/schemas/CommandSequence'
+    MediaBrowseResponse:
+      type: object
+      properties:
+        media:
+          $ref: '#/components/schemas/BrowseMediaItem'
+    MediaSearchResponse:
+      type: array
+      items:
+        $ref: '#/components/schemas/SearchMediaItem'
+    MediaClass:
+      description: |
+        The media class is for browser/structure semantics.
+        It represents how a media item should be presented and organized in the media browser hierarchy.
+
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show media type
+          specific information like icons. 
+        - Integrations can use their custom values. Short identifiers like URIs are recommended.
+      type: string
+      maxLength: 255
+      anyOf:
+        - enum:
+            - album
+            - app
+            - artist
+            - channel
+            - composer
+            - directory
+            - episode
+            - game
+            - genre
+            - image
+            - movie
+            - music
+            - playlist
+            - podcast
+            - radio
+            - season
+            - track
+            - tv_show
+            - url
+            - video
+        - {}
+    MediaContentType:
+      description: |
+        The media content type is for playback/content semantics.
+        It represents the type of the media content to play or that is currently playing.
+
+        Notes:
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show media type
+          specific information like icons. 
+        - Integrations can use their custom values. Short identifiers like URIs are recommended.
+      type: string
+      maxLength: 255
+      anyOf:
+        - enum:
+            - album
+            - app
+            - apps
+            - artist
+            - channel
+            - channels
+            - composer
+            - episode
+            - game
+            - genre
+            - image
+            - movie
+            - music
+            - playlist
+            - podcast
+            - radio
+            - season
+            - track
+            - tv_show
+            - url
+            - video
+        - {}
+    MediaPlayerRepeatMode:
+      type: string
+      enum:
+        - 'OFF'
+        - ALL
+        - ONE
+    MediaPlayAction:
+      description: |
+        The media play action is used to specify how the media item should be played.
+
+        Notes:
+        - Common values are defined as enum variants. Using these values is recommended, so the UI can show locale aware commands.
+        - Integrations can use their custom values, but they might not be available in the UI.
+      type: string
+      maxLength: 20
+      anyOf:
+        - enum:
+            - PLAY_NOW
+            - PLAY_NEXT
+            - ADD_TO_QUEUE
+        - { }  # extensible enum: integration can define additional values
+      default: PLAY_NOW
+    BrowseMediaItem:
+      type: object
+      properties:
+        media_id:
+          description: Unique identifier of the media item. Integration dependent.
+          type: string
+          maxLength: 255
+        title:
+          description: Display name.
+          type: string
+          maxLength: 255
+        subtitle:
+          description: Optional subtitle.
+          type: string
+          maxLength: 255
+        artist:
+          description: Optional artist name.
+          type: string
+          maxLength: 255
+        album:
+          description: Optional album name.
+          type: string
+          maxLength: 255
+        media_class:
+          $ref: '#/components/schemas/MediaClass'
+        media_type:
+          $ref: '#/components/schemas/MediaContentType'
+        can_browse:
+          description: 'If `true`, the item can be browsed (is a container) by using `media_id` and `media_type`.'
+          type: boolean
+          default: false
+        can_play:
+          description: |
+            If `true`, the item can be played directly using the `play_media` command with `media_id` and `media_type`.
+          type: boolean
+          default: false
+        can_search:
+          description: |
+            If `true`, a search can be performed on the item using `search_media` with `media_id` and `media_type`.
+          type: boolean
+          default: false
+        thumbnail:
+          description: |
+            URL to download the media artwork, or a base64 encoded PNG or JPG image.
+            The preferred size is 480x480 pixels.
+            Use the following URI prefix to use a provided icon: `icon://uc:`, for example, `icon://uc:music`.
+            Please use a URL whenever possible. Encoded images should be as small as possible.
+          type: string
+          maxLength: 32768
+        duration:
+          description: Duration in seconds.
+          type: integer
+        items:
+          description: |
+            Child items if this item is a container. Child items may not contain further child items (only one level
+            of nesting is supported). A new browse request must be sent for deeper levels.
+          type: array
+          items:
+            $ref: '#/components/schemas/BrowseMediaItem'
+      required:
+        - media_id
+        - title
+    SearchMediaItem:
+      description: |
+        A media item that was found by a search. Currently identical in shape to `BrowseMediaItem`.
+        Defined as a composition to allow search-specific fields (e.g. relevance score) to be added in the future
+        without a breaking change.
+
+        A search media item may not contain any child `items`.
+      allOf:
+        - $ref: '#/components/schemas/BrowseMediaItem'
+    MediaQueueResponse:
+      description: "\U0001F6A7 initial draft, do not use!"
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/QueueItem'
+        current_index:
+          type: integer
+          description: Absolute index of the currently playing item within the full queue.
+      required:
+        - items
     MeasurementUnit:
       type: string
       enum:
@@ -14686,6 +15083,45 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/Profile'
+    QueueItem:
+      description: "\U0001F6A7 initial draft, do not use!"
+      type: object
+      properties:
+        queue_item_id:
+          type: string
+          description: Unique identifier for the item within this queue instance.
+        media_id:
+          type: string
+          description: Unique identifier for the item (opaque to Core-API).
+        title:
+          type: string
+          description: Display name.
+        media_class:
+          $ref: '#/components/schemas/MediaClass'
+        media_type:
+          $ref: '#/components/schemas/MediaContentType'
+        can_browse:
+          type: boolean
+          description: 'If `true`, the item can be browsed (is a container).'
+        can_play:
+          type: boolean
+          description: 'If `true`, the item can be played directly.'
+        thumbnail:
+          type: string
+          description: 'URL to download the image, or a base64 encoded data.'
+        artist:
+          type: string
+          description: Artist name.
+        album:
+          type: string
+          description: Album name.
+        duration:
+          type: integer
+          description: Duration in seconds.
+      required:
+        - queue_item_id
+        - media_id
+        - title
     Remote:
       description: |
         The remote entity executes a sequence of commands and at the end displays a user interface (similar to remote entity)
@@ -16292,14 +16728,20 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiResponse'
-    Err409Conflict:
-      description: The request conflicts with the current state of the target resource.
+    Err404NotFound:
+      description: The resource does not exist or the URI is invalid.
       content:
         application/json:
           schema:
             $ref: '#/components/schemas/ApiResponse'
-    Err404NotFound:
-      description: The resource does not exist or the URI is invalid.
+    Err408RequestTimeout:
+      description: The request timed out.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiResponse'
+    Err409Conflict:
+      description: The request conflicts with the current state of the target resource.
       content:
         application/json:
           schema:

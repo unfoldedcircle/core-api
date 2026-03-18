@@ -10,6 +10,12 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.45.1
+### Added
+- Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
+### Fixed
+- Fixed invalid schema references.
+
 ## 0.44.4
 ### Fixed
 - Creating a UI page returns 201 instead of 200.
