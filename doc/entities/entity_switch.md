@@ -48,9 +48,9 @@ Optional switch type. This can be used by the UI to represent the entity with a 
 
 ### Options
 
-| Name     | Type    | Default | Description                                                                                                                                              |
-|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| readable | boolean | true    | If set to false the current state of the switch cannot be read. This will make the switch stateless and the UI might ask the user for the current state. |
+| Name     | Type    | Default | Description                                                                                                                                               |
+|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
+| readable | boolean | true    | If set to false, the current state of the switch cannot be read. This will make the switch stateless and the UI might ask the user for the current state. |
 
 ## Integration API
 

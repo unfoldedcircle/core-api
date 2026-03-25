@@ -2,8 +2,8 @@
 
 A button entity can fire an event or start an action which cannot be further controlled once started.
 
-This can be used for "fire and forget" commands, e.g. running a system command, sending an IR code, restart a
-device, reset something etc.
+This can be used for "fire and forget" commands, e.g., running a system command, sending an IR code, restart a
+device, reset something, etc.
 
 A button is stateless. To represent something that can be turned on and off, the [switch](entity_switch.md) entity
 should be used.

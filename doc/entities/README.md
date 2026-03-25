@@ -110,7 +110,7 @@ All entities share the following properties in the `entity` structure:
 | entity_type     | Entity device type name: one of the supported entities.                                                                                                                                       |
 | device_id       | Optional associated device, if the integration driver supports multiple devices.                                                                                                              |
 | features        | Supported features of the entity. See concrete entity definition for available features.                                                                                                      |
-| name            | Human readable name of the entity or device. Default value of the entity name for the entity configuration in the remote. Changeable by the user.                                             |
+| name            | Human-readable name of the entity or device. Default value of the entity name for the entity configuration in the remote. Changeable by the user.                                             |
 | area            | Optional area name, e.g. `Living room`. This information might be used by the UI in the setup process to automatically create profile pages for all areas returned in the available entities. |
 
 ### Features

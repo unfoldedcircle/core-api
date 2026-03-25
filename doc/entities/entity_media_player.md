@@ -11,7 +11,11 @@
   * [Simple Commands](#simple-commands)
     * [Command Name Patterns](#command-name-patterns)
   * [Media Browsing](#media-browsing)
+    * [Browse Response](#browse-response)
+    * [Home Assistant Integration Example](#home-assistant-integration-example-with-spotify-media-player)
   * [Media Searching](#media-searching)
+    * [Search Response](#search-response)
+    * [Example](#example)
   * [Media Playback](#media-playback)
     * [Media Play Action](#media-play-action)
   * [Events](#events)
@@ -174,13 +178,13 @@ See also [common entity states](README.md#states).
 Optional: the media player can be classified what kind of device it represents. This can be used by the UI to represent
 the media player with a different icon, behaviour etc.
 
-| Name          | Description                                           |
-|---------------|-------------------------------------------------------|
-| receiver      | Audio-video receiver.                                 |
-| set_top_box   | Set-top box for multichannel video and media playback |
-| speaker       | Smart speakers or stereo device.                      |
-| streaming_box | Device for media streaming services.                  |
-| tv            | Television device.                                    |
+| Name          | Description                                            |
+|---------------|--------------------------------------------------------|
+| receiver      | Audio-video receiver.                                  |
+| set_top_box   | Set-top box for multichannel video and media playback. |
+| speaker       | Smart speakers or stereo device.                       |
+| streaming_box | Device for media streaming services.                   |
+| tv            | Television device.                                     |
 
 ### Options
 

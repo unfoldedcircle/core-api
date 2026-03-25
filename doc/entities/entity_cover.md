@@ -5,15 +5,15 @@ abilities of the cover and the controllable properties, whereas the _device clas
 
 ## Features
 
-| Name             | R   | W   | Description                                                   |
-|------------------|-----|-----|---------------------------------------------------------------|
-| open             | ✅   | ✅   | The cover can can be opened.                                  |
-| close            | ✅   | ✅   | The cover can can be closed.                                  |
-| stop             | ❌   | ✅   | Opening, closing or setting the position can be stopped.      |
-| position         | ✅   | ✅   | The cover can be moved to a specific position, e.g. 30% open. |
-| 🚧 tilt          | ✅   | ✅   | The cover supports being tilted up and down.                  |
-| 🚧 tilt_stop     | ❌   | ✅   | Tilting the cover can be stopped.                             |
-| 🚧 tilt_position | ✅   | ✅   | The cover can be moved to a specific tilt position.           |
+| Name             | R   | W   | Description                                                    |
+|------------------|-----|-----|----------------------------------------------------------------|
+| open             | ✅   | ✅   | The cover can be opened.                                       |
+| close            | ✅   | ✅   | The cover can be closed.                                       |
+| stop             | ❌   | ✅   | Opening, closing, or setting the position can be stopped.      |
+| position         | ✅   | ✅   | The cover can be moved to a specific position, e.g., 30% open. |
+| 🚧 tilt          | ✅   | ✅   | The cover supports being tilted up and down.                   |
+| 🚧 tilt_stop     | ❌   | ✅   | Tilting the cover can be stopped.                              |
+| 🚧 tilt_position | ✅   | ✅   | The cover can be moved to a specific tilt position.            |
 
 🚧 Planned feature.
 
@@ -49,15 +49,15 @@ See [common entity states](README.md#states).
 
 Optional cover type. This can be used by the UI to represent the cover with a different icon, behaviour etc.
 
-| Name      | Description                                                      |
-|-----------|------------------------------------------------------------------|
-| blind     | Window blinds or shutters which can be opened, closed or tilted. |
-| curtain   | Window curtain or drapes which can be opened or closed.          |
-| garage    | Controllable garage door.                                        |
-| shade     | Sun shades which can be opened to protect an area from the sun.  |
-| 🚧 door   | Controllable door which can be opened and closed.                |
-| 🚧 gate   | Controllable gate which can be opened and closed.                |
-| 🚧 window | A window which can be opened, closed or tilted.                  |
+| Name      | Description                                                       |
+|-----------|-------------------------------------------------------------------|
+| blind     | Window blinds or shutters which can be opened, closed, or tilted. |
+| curtain   | Window curtain or drapes which can be opened or closed.           |
+| garage    | Controllable garage door.                                         |
+| shade     | Sun shades which can be opened to protect an area from the sun.   |
+| 🚧 door   | Controllable door which can be opened and closed.                 |
+| 🚧 gate   | Controllable gate which can be opened and closed.                 |
+| 🚧 window | A window which can be opened, closed, or tilted.                  |
 
 ### Options
 
