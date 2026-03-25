@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.45.2
+### Changed
+- Minimal string length requirements for BrowseMediaItem string fields.
+
 ## 0.45.1
 ### Added
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
