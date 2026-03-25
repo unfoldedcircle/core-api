@@ -429,7 +429,7 @@ driver implementation.</p>
 <tr><td>entity_type</td><td>Entity device type name: one of the supported entities.</td></tr>
 <tr><td>device_id</td><td>Optional associated device, if the integration driver supports multiple devices.</td></tr>
 <tr><td>features</td><td>Supported features of the entity. See concrete entity definition for available features.</td></tr>
-<tr><td>name</td><td>Human readable name of the entity or device. Default value of the entity name for the entity configuration in the remote. Changeable by the user.</td></tr>
+<tr><td>name</td><td>Human-readable name of the entity or device. Default value of the entity name for the entity configuration in the remote. Changeable by the user.</td></tr>
 <tr><td>area</td><td>Optional area name, e.g. <code>Living room</code>. This information might be used by the UI in the setup process to automatically create profile pages for all areas returned in the available entities.</td></tr>
 </tbody></table>
 </div>
@@ -529,8 +529,8 @@ attribute changed at the same time, they may both be included in the same messag
 entity attribute. The remote will filter out non-changed attributes and only update changes in the UI.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="button-entity"><a class="header" href="#button-entity">Button Entity</a></h1>
 <p>A button entity can fire an event or start an action which cannot be further controlled once started.</p>
-<p>This can be used for "fire and forget" commands, e.g. running a system command, sending an IR code, restart a
-device, reset something etc.</p>
+<p>This can be used for "fire and forget" commands, e.g., running a system command, sending an IR code, restart a
+device, reset something, etc.</p>
 <p>A button is stateless. To represent something that can be turned on and off, the <a href="entities/entity_switch.html">switch</a> entity
 should be used.</p>
 <h2 id="features-1"><a class="header" href="#features-1">Features</a></h2>
@@ -609,7 +609,7 @@ their current value.</p>
 </div>
 <h3 id="options-2"><a class="header" href="#options-2">Options</a></h3>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody>
-<tr><td>readable</td><td>boolean</td><td>true</td><td>If set to false the current state of the switch cannot be read. This will make the switch stateless and the UI might ask the user for the current state.</td></tr>
+<tr><td>readable</td><td>boolean</td><td>true</td><td>If set to false, the current state of the switch cannot be read. This will make the switch stateless and the UI might ask the user for the current state.</td></tr>
 </tbody></table>
 </div>
 <h2 id="integration-api-3"><a class="header" href="#integration-api-3">Integration API</a></h2>
@@ -879,10 +879,10 @@ attribute.</p>
 abilities of the cover and the controllable properties, whereas the <em>device class</em> specifies the UI representation.</p>
 <h2 id="features-4"><a class="header" href="#features-4">Features</a></h2>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>R</th><th>W</th><th>Description</th></tr></thead><tbody>
-<tr><td>open</td><td>✅</td><td>✅</td><td>The cover can can be opened.</td></tr>
-<tr><td>close</td><td>✅</td><td>✅</td><td>The cover can can be closed.</td></tr>
-<tr><td>stop</td><td>❌</td><td>✅</td><td>Opening, closing or setting the position can be stopped.</td></tr>
-<tr><td>position</td><td>✅</td><td>✅</td><td>The cover can be moved to a specific position, e.g. 30% open.</td></tr>
+<tr><td>open</td><td>✅</td><td>✅</td><td>The cover can be opened.</td></tr>
+<tr><td>close</td><td>✅</td><td>✅</td><td>The cover can be closed.</td></tr>
+<tr><td>stop</td><td>❌</td><td>✅</td><td>Opening, closing, or setting the position can be stopped.</td></tr>
+<tr><td>position</td><td>✅</td><td>✅</td><td>The cover can be moved to a specific position, e.g., 30% open.</td></tr>
 <tr><td>🚧 tilt</td><td>✅</td><td>✅</td><td>The cover supports being tilted up and down.</td></tr>
 <tr><td>🚧 tilt_stop</td><td>❌</td><td>✅</td><td>Tilting the cover can be stopped.</td></tr>
 <tr><td>🚧 tilt_position</td><td>✅</td><td>✅</td><td>The cover can be moved to a specific tilt position.</td></tr>
@@ -915,13 +915,13 @@ integration driver does not need to support the required tilt commands and event
 <h3 id="device-classes-4"><a class="header" href="#device-classes-4">Device classes</a></h3>
 <p>Optional cover type. This can be used by the UI to represent the cover with a different icon, behaviour etc.</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>
-<tr><td>blind</td><td>Window blinds or shutters which can be opened, closed or tilted.</td></tr>
+<tr><td>blind</td><td>Window blinds or shutters which can be opened, closed, or tilted.</td></tr>
 <tr><td>curtain</td><td>Window curtain or drapes which can be opened or closed.</td></tr>
 <tr><td>garage</td><td>Controllable garage door.</td></tr>
 <tr><td>shade</td><td>Sun shades which can be opened to protect an area from the sun.</td></tr>
 <tr><td>🚧 door</td><td>Controllable door which can be opened and closed.</td></tr>
 <tr><td>🚧 gate</td><td>Controllable gate which can be opened and closed.</td></tr>
-<tr><td>🚧 window</td><td>A window which can be opened, closed or tilted.</td></tr>
+<tr><td>🚧 window</td><td>A window which can be opened, closed, or tilted.</td></tr>
 </tbody></table>
 </div>
 <h3 id="options-4"><a class="header" href="#options-4">Options</a></h3>
@@ -1311,8 +1311,18 @@ requests in <code>msg_data.cmd_id</code>.</p>
 <li><a href="entities/entity_media_player.html#command-name-patterns">Command Name Patterns</a></li>
 </ul>
 </li>
-<li><a href="entities/entity_media_player.html#media-browsing">Media Browsing</a></li>
-<li><a href="entities/entity_media_player.html#media-searching">Media Searching</a></li>
+<li><a href="entities/entity_media_player.html#media-browsing">Media Browsing</a>
+<ul>
+<li><a href="entities/entity_media_player.html#browse-response">Browse Response</a></li>
+<li><a href="entities/entity_media_player.html#home-assistant-integration-example-with-spotify-media-player">Home Assistant Integration Example</a></li>
+</ul>
+</li>
+<li><a href="entities/entity_media_player.html#media-searching">Media Searching</a>
+<ul>
+<li><a href="entities/entity_media_player.html#search-response">Search Response</a></li>
+<li><a href="entities/entity_media_player.html#example">Example</a></li>
+</ul>
+</li>
 <li><a href="entities/entity_media_player.html#media-playback">Media Playback</a>
 <ul>
 <li><a href="entities/entity_media_player.html#media-play-action">Media Play Action</a></li>
@@ -1490,7 +1500,7 @@ Multiple features can act on the same attribute.</p>
 the media player with a different icon, behaviour etc.</p>
 <div class="table-wrapper"><table><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>
 <tr><td>receiver</td><td>Audio-video receiver.</td></tr>
-<tr><td>set_top_box</td><td>Set-top box for multichannel video and media playback</td></tr>
+<tr><td>set_top_box</td><td>Set-top box for multichannel video and media playback.</td></tr>
 <tr><td>speaker</td><td>Smart speakers or stereo device.</td></tr>
 <tr><td>streaming_box</td><td>Device for media streaming services.</td></tr>
 <tr><td>tv</td><td>Television device.</td></tr>
