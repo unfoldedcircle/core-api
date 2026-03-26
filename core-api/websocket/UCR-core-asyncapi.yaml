@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.35.1-beta'
+  version: '0.35.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -11028,24 +11028,30 @@ components:
       type: object
       properties:
         media_id:
-          description: Unique identifier of the media item. Integration dependent.
+          description: |
+            Unique identifier of the media item. Integration dependent.
+            Use an empty value only for special non-playable media items, for example, a root directory in a media library or search result.
           type: string
           maxLength: 255
         title:
           description: Display name.
           type: string
+          minLength: 1
           maxLength: 255
         subtitle:
           description: Optional subtitle.
           type: string
+          minLength: 1
           maxLength: 255
         artist:
           description: Optional artist name.
           type: string
+          minLength: 1
           maxLength: 255
         album:
           description: Optional album name.
           type: string
+          minLength: 1
           maxLength: 255
         media_class:
           $ref: '#/components/schemas/MediaClass'
@@ -11072,6 +11078,7 @@ components:
             Use the following URI prefix to use a provided icon: `icon://uc:`, for example, `icon://uc:music`.
             Please use a URL whenever possible. Encoded images should be as small as possible.
           type: string
+          minLength: 1
           maxLength: 32768
         duration:
           description: Duration in seconds.
