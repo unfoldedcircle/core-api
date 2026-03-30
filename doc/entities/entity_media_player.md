@@ -190,10 +190,23 @@ the media player with a different icon, behaviour etc.
 
 Optional features of the media-player entity.
 
-| Name            | Type   | Values | Default | Description                                                                                                                                                                                                                                                                                                           |
-|-----------------|--------|--------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| simple_commands | array  | string | []      | Additional commands the media-player supports, which are not covered in the feature list. See [simple commands](#simple-commands).<br/>Example: `["EXIT", "THUMBS_UP", "THUMBS_DOWN"]`                                                                                                                                |
-| volume_steps    | number | 2..100 | 100     | Number of available volume steps for the set volume command and UI controls.<br/>Examples: 100 = any value between 0..100, 50 = only odd numbers, 3 = \[33, 67, 100] etc. Value 0 = mute.<br/>Note: if the integration receives an "unexpected" number it is required to round up or down to the next matching value. |
+| Name              | Type      | Values | Default     | Description                                                                                                                                                                                                                                                                                                           |
+|-------------------|-----------|--------|-------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| simple_commands   | array     | string | []          | Additional commands the media-player supports, which are not covered in the feature list. See [simple commands](#simple-commands).<br/>Example: `["EXIT", "THUMBS_UP", "THUMBS_DOWN"]`                                                                                                                                |
+| volume_steps      | number    | 2..100 | 100         | Number of available volume steps for the set volume command and UI controls.<br/>Examples: 100 = any value between 0..100, 50 = only odd numbers, 3 = \[33, 67, 100] etc. Value 0 = mute.<br/>Note: if the integration receives an "unexpected" number it is required to round up or down to the next matching value. |
+| stable_id_support | bit field | 0..15  | 5 (bit 0+2) | Stable media-ID support in the `browse` and `search` commands. Default if missing: `5` (Bit 0 and 2) - `browse` and `search` always return stable IDs.                                                                                                                                                                |
+
+#### stable_id_support
+
+The numeric `stable_id_support` value is a bit field that defines which stable IDs are supported by the integration:
+
+- Bit 0: `browse` always returns stable ids.
+- Bit 1: `browse` supports stable ids with the `stable_ids` parameter.
+- Bit 2: `search` always returns stable ids.
+- Bit 3: `search` returns stable ids with the `stable_ids` parameter.
+
+Using the `stable_ids` parameter for `browse` and `search` might incur a runtime cost and should only be used where
+stable ids are persisted, like in the `play_media` command.
 
 ## Integration API
 
