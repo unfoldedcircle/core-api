@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:core'
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: '0.35.2-beta'
+  version: '0.35.3-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7602,6 +7602,8 @@ components:
           $ref: '#/components/schemas/languageText'
         icon:
           $ref: '#/components/schemas/iconIdentifier'
+        description:
+          $ref: '#/components/schemas/languageText'
         features:
           $ref: '#/components/schemas/entityFeatures'
         options:
