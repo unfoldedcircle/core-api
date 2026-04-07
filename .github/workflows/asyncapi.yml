@@ -28,7 +28,7 @@ jobs:
       contents: write  # To push a branch
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Validate websocket-api
         uses: WaleedAshraf/asyncapi-github-action@v0.0.10

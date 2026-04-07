@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: write  # To push a branch
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Install mdbook
@@ -40,7 +40,7 @@ jobs:
 
       - name: Cache cargo install
         id: cache-cargo-install
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/.cargo/bin
