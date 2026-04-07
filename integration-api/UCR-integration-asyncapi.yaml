@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.15.2-beta'
+  version: '0.15.3-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2268,7 +2268,17 @@ components:
                   default: 100
                   minimum: 2
                   maximum: 100
-
+                stable_id_support:
+                  description: |
+                    Bit-field indicating if the `browse` and `search` commands support stable media IDs:
+                    
+                    - Bit 0: `browse` always returns stable ids.
+                    - Bit 1: `browse` supports stable ids with the `stable_ids` parameter.
+                    - Bit 2: `search` always returns stable ids.
+                    - Bit 3: `search` returns stable ids with the `stable_ids` parameter.
+                  type: integer
+                  minimum: 0
+                  default: 5
     MediaSearchFilter:
       description: Media search filter
       type: object
