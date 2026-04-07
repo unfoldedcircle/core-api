@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.15.3-beta'
+  version: '0.15.4-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1924,6 +1924,8 @@ components:
           $ref: '#/components/schemas/languageText'
         icon:
           $ref: '#/components/schemas/iconIdentifier'
+        description:
+          $ref: '#/components/schemas/languageText'
         area:
           description: |
             Optional area if supported by the integration, e.g. `Living room`. This information might be used by the UI

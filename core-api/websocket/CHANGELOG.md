@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.35.3-beta
+### Added
+- Add an optional description field in available_entity.
+
 ## 0.35.2-beta
 ### Changed
 - Minimal string length requirements for BrowseMediaItem string fields.
