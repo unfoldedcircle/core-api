@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.45.3
+### Added
+- Add an optional description field to AvailableEntity.
+
 ## 0.45.2
 ### Changed
 - Minimal string length requirements for BrowseMediaItem string fields.

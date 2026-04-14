@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: Remote Two/3 REST Core-API
-  version: 0.45.2
+  version: 0.45.3
   contact:
     name: API Support
     url: 'https://github.com/unfoldedcircle/core-api/issues'
@@ -11734,6 +11734,8 @@ components:
           $ref: '#/components/schemas/LanguageText'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
         features:
           description: |
             Supported features of the entity. See entity documentation for available features.
