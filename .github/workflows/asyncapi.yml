@@ -72,6 +72,7 @@ jobs:
           ag ./dock-api/UCD2-asyncapi.yaml @asyncapi/html-template -o ./static/api/dock --force-write
 
       - name: Deploy core API GH page
+        if: github.ref == 'refs/heads/main' || contains(github.ref, 'tags/v')
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
@@ -79,6 +80,7 @@ jobs:
           target-folder: ./ws
 
       - name: Deploy integration API GH page
+        if: github.ref == 'refs/heads/main' || contains(github.ref, 'tags/v')
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
@@ -86,6 +88,7 @@ jobs:
           target-folder: ./integration
 
       - name: Deploy dock API GH page
+        if: github.ref == 'refs/heads/main' || contains(github.ref, 'tags/v')
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
