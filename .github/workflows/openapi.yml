@@ -23,11 +23,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
-      - name: Validate
-        uses: mbowman100/swagger-validator-action@master
-        with:
-          files: |
-            ./core-api/rest/UCR-core-openapi.yaml
+      - name: Validate with redocli CLI
+        run: |
+          docker pull redocly/cli
+          docker run --rm -v $PWD/core-api/rest:/spec -e REDOCLY_TELEMETRY=false redocly/cli lint UCR-core-openapi.yaml
 
   publish:
     name: Publish GitHub pages

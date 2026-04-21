@@ -8,6 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+### Fixed
+- Schema validation errors found with the new redocly-cli linter.
+
+### Changed
+- Migrate OAS specification from 3.0.3 to 3.1.1.
+
 ---
 
 ## 0.45.3

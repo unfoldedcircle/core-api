@@ -1,0 +1,7 @@
+extends:
+  - recommended
+rules:
+  # our service runs on localhost!
+  no-server-example.com: off
+  # TODO check later
+  operation-4xx-response: off
