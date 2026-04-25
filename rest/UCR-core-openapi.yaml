@@ -2,7 +2,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.45.3
+  version: 0.45.4
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2776,7 +2776,7 @@ paths:
               $ref: '#/components/schemas/EntityUpdateRequest'
         required: true
       responses:
-        '201':
+        '200':
           description: Successful operation returning the configured entity in the response.
           content:
             application/json:
@@ -3503,7 +3503,7 @@ paths:
   /activities/{entityId}/buttons/{buttonId}/{buttonPress}:
     get:
       tags:
-        - remotes
+        - activities
       summary: Get a button press mapping.
       operationId: getActivityButtonPressMapping
       parameters:
@@ -3531,7 +3531,7 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
     delete:
       tags:
-        - remotes
+        - activities
       summary: Remove a button press mapping.
       operationId: deleteActivityButtonPressMapping
       parameters:
@@ -3725,7 +3725,7 @@ paths:
     get:
       tags:
         - activities
-      summary: Get the user interface page definition of a remote-entity.
+      summary: Get the user interface page definition of an activity-entity.
       operationId: getActivityUiPage
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -3881,7 +3881,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Activity'
+                $ref: '#/components/schemas/ActivityGroup'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -4058,7 +4058,7 @@ paths:
         integration driver.
 
         To create a new macro at least a name must be provided. The `icon`, `description` and `options.entity_ids`
-        are optional and can be set later with the `PUT` update operation.
+        are optional and can be set later with the `PATCH` update operation.
 
         When setting a text in a multilingual field, like name or description, the default `en` identifier should always be
         included.
@@ -4066,7 +4066,7 @@ paths:
         The new macro can be cloned from another macro-entity identifier in `clone_from`. All applicable configuration will
         be copied, except a new macro name must be specified. The `icon` and `description` fields can still be specified and
         will override the copied data. The `options.entity_ids` is not allowed when cloning data, additional entities
-        can be added later with the `PUT` update operation.
+        can be added later with the `PATCH` update operation.
 
         The `entity_ids` may be omitted when creating a new macro and specified later when updating the macro.
       operationId: createMacro
@@ -5341,7 +5341,7 @@ paths:
         with `/remotes/{entityId}`.
 
         Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
-      operationId: getInfraredEntities
+      operationId: getRemotes
       parameters:
         - name: kind
           in: query
@@ -9591,7 +9591,7 @@ paths:
         Once a port has been reconfigured, the WebSocket event `dock_port_mode` is sent in the `docks` channel.
 
         Response codes:
-        - `201`: port configuration has been accepted. Depending on the mode, this operation might take a few seconds.
+        - `200`: port configuration has been accepted. Depending on the mode, this operation might take a few seconds.
         - `400`: bad request, for example an unsupported or unknown mode.
         - `404`: either the dock identifier or port number is not valid.
         - `503`: dock connection is not available, configuration cannot be changed at the moment.
@@ -9607,7 +9607,7 @@ paths:
               $ref: '#/components/schemas/ExternalPortConfigurationRequest'
         required: true
       responses:
-        '201':
+        '200':
           description: Successful operation returning the configured port in the response.
           content:
             application/json:
@@ -11059,7 +11059,7 @@ paths:
       operationId: stopWifiScan
       responses:
         '200':
-          description: Dock discovery status
+          description: WiFi scan status
           content:
             application/json:
               schema:
@@ -13665,7 +13665,7 @@ components:
         - ERROR
     ActivityGroupOverview:
       description: |
-        Minimal activity group object intended for an overview page, which is returned when retrieving all activities.
+        Minimal activity group object intended for an overview page, which is returned when retrieving all activity groups.
       type: object
       properties:
         group_id:
@@ -14407,7 +14407,7 @@ components:
                   properties:
                     dev_profile_id:
                       description: BT device profile identifier
-                      type: boolean
+                      type: string
                     peripherals:
                       $ref: '#/components/schemas/BtDevicePeripherals'
                     profile:
