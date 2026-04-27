@@ -16746,7 +16746,7 @@ components:
       type: object
       properties:
         id:
-          description: Unique identifier, automatically crated if not specified.
+          description: Unique identifier, automatically created if not specified.
           type: string
           minLength: 1
           maxLength: 64
