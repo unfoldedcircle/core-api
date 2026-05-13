@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-2f057a50.js";
+            window.path_to_searchindex_js = "../searchindex-c81ebc12.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-a810bdbd.js"></script>
@@ -174,7 +174,7 @@
 
                 <div id="mdbook-content" class="content">
                     <main>
-                        <h1 id="driver-installation-on-the-remote"><a class="header" href="#driver-installation-on-the-remote">Driver installation on the Remote</a></h1>
+                        <h1 id="custom-driver-installation-on-the-remote"><a class="header" href="#custom-driver-installation-on-the-remote">Custom driver installation on the Remote</a></h1>
 <p>Starting with firmware v1.9.0, custom installation drivers can be installed on the Remote.</p>
 <p>‼️ Custom integration drivers is a developer preview and not all features are implemented yet. See <a href="#missing-features">missing features</a>.</p>
 <h2 id="installation-archive-format"><a class="header" href="#installation-archive-format">Installation archive format</a></h2>
@@ -274,7 +274,7 @@ this prefix might get removed during a future firmware update.</li>
 <h3 id="driver-icon"><a class="header" href="#driver-icon">Driver icon</a></h3>
 <p>A driver icon can either use a predefined icon or a custom icon. Predefined icons are prefixed with <code>uc:</code>, followed by
 the icon identifier in lowercase.</p>
-<p>A custom driver icon can be installed automatically as custom icon resource.</p>
+<p>A custom driver icon can be installed automatically as a custom icon resource.</p>
 <ol>
 <li>In <code>driver.json</code> set the icon field to <code>custom:$ICON_FILENAME</code></li>
 <li>Include <code>$ICON_FILENAME</code> in the root of the archive.</li>
@@ -284,8 +284,13 @@ the icon identifier in lowercase.</p>
   "icon": "custom:foobar.png"
 }
 </code></pre>
-<p>The icon file called <code>foobar.png</code> must be added to the root of the archive.
-Icons must be of size 90x90 pixels and either in PNG or JPG format. Maximum size is 32 KB.</p>
+<p>The icon file called <code>foobar.png</code> must be added to the root of the archive.</p>
+<p>Icon requirements and restrictions:</p>
+<ul>
+<li>Size must be 90x90 pixels.</li>
+<li>Supported image formats: PNG and JPG.</li>
+<li>Maximum size: 16 KB.</li>
+</ul>
 <h3 id="installation-archive-example"><a class="header" href="#installation-archive-example">Installation archive example</a></h3>
 <p>Example of a Node.js based integration driver archive (contents of bin/node_modules are not shown for a clearer overview):</p>
 <pre><code>.
@@ -321,7 +326,7 @@ missing.
 <h2 id="restrictions"><a class="header" href="#restrictions">Restrictions</a></h2>
 <ul>
 <li>Maximum 10 custom integrations can be installed.</li>
-<li>Only Node.js is supported besides a statically linked binary. Other runtimes are not supported at the moment.
+<li>Only Node.js is supported beside a statically linked binary. Other runtimes are not supported at the moment.
 <ul>
 <li>Python integrations must pack the Python runtime into the archive.</li>
 </ul>
@@ -330,19 +335,13 @@ missing.
 <li>No symlinks are allowed. They are automatically removed during the installation.</li>
 <li>Executable files are only allowed in the <code>./bin</code> directory.
 <ul>
-<li>No other tools are provided in the runtime environment. E.g. there is no shell available and no other tools
+<li>No other tools are provided in the runtime environment. E.g., there is no shell available and no other tools
 like <code>cp</code> or <code>mv</code>.</li>
 </ul>
 </li>
 </ul>
 <h3 id="missing-features"><a class="header" href="#missing-features">Missing features</a></h3>
 <ul>
-<li><input disabled="" type="checkbox"> Resource restrictions for integration drivers: limit maximum amount of memory and CPU usage.</li>
-<li><input disabled="" type="checkbox"> Update an installed integrations.
-<ul>
-<li>Workaround: remove and re-install.</li>
-</ul>
-</li>
 <li><input disabled="" type="checkbox"> Resource usage: provide memory and CPU usage per integration.
 <ul>
 <li>Only the overall resource usage can be monitored with <code>GET /api/pub/status</code>.</li>
@@ -360,7 +359,7 @@ like <code>cp</code> or <code>mv</code>.</li>
 </li>
 <li>The working directory is set to the binary directory.</li>
 <li>The binary directory is read-only.</li>
-<li>Node.js version: v20.16 (firmware release 1.9.3 and newer).
+<li>Node.js version: v22.22 (firmware release 2.9.2 and newer, v22.13 in firmware 2.8.2, v20.16 in firmware 1.9.3).
 <ul>
 <li>There are no pre-installed node modules.</li>
 <li>An integration driver must include all required modules in the installation archive, including <code>uc-integration-api</code> (if used).</li>
@@ -394,11 +393,13 @@ like <code>cp</code> or <code>mv</code>.</li>
 </ul>
 </li>
 </ul>
-<p>⚠️ CPU and memory restrictions are not yet in place but will be enforced in a future firmware update!</p>
+<h4 id="resource-restrictions"><a class="header" href="#resource-restrictions">Resource restrictions</a></h4>
+<p>A single custom integration should not use more than 100 MB of memory and conserve CPU usage.</p>
 <ul>
-<li>A single integration driver should not use more than 100 MB of memory.</li>
+<li>All custom integrations (max 10) share a common memory pool of 1 GB and are limited to 200% CPU usage (2 cores).</li>
+<li>If the memory pool is exceeded, custom integrations will be terminated. Integrations using the most memory will be terminated first.</li>
+<li>A single custom integration will be throttled if it uses more than 250 MB and terminated if it uses more than 350 MB.</li>
 </ul>
-<p><em>TODO more details about sandbox environment</em></p>
 <h4 id="network"><a class="header" href="#network">Network</a></h4>
 <p>The integration runs on the same network environment as the Remote. There is no network bridge or firewall.</p>
 <ul>
@@ -414,21 +415,35 @@ a native binary for the Remote.</p>
 <li>The driver must be compiled as a static binary for libc.</li>
 <li>Most dynamic libraries in the cross-compile sysroot are NOT available in the custom integration runtime environment!</li>
 </ul>
-<h2 id="install-driver"><a class="header" href="#install-driver">Install driver</a></h2>
+<h2 id="driver-installation"><a class="header" href="#driver-installation">Driver installation</a></h2>
+<p>The easiest way to manage custom integration drivers is to use the web-configurator.</p>
+<h3 id="upload-a-new-driver"><a class="header" href="#upload-a-new-driver">Upload a new driver</a></h3>
+<p>In the web-configurator open the integration view and chose <em>Add new, Install custom</em>.</p>
+<h4 id="rest-api"><a class="header" href="#rest-api">REST API</a></h4>
 <pre><code class="language-shell">curl --location 'http://$IP/api/intg/install' \
 --user 'web-configurator:$PIN' \
 --form 'file=@"custom-intg.tar.gz"'
 </code></pre>
 <p>See <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a> for more details.</p>
-<h2 id="delete-driver"><a class="header" href="#delete-driver">Delete driver</a></h2>
+<h3 id="update-driver"><a class="header" href="#update-driver">Update driver</a></h3>
+<p>ℹ️ The driver update feature requires firmware release v2.9.3 or newer.</p>
+<p>In the web-configurator open the integration view and chose <em>Add new, Install custom</em> and check the
+<code>Update existing driver</code> option.</p>
+<h4 id="rest-api-1"><a class="header" href="#rest-api-1">REST API</a></h4>
+<pre><code class="language-shell">curl --location 'http://$IP/api/intg/install?update=true' \
+--user 'web-configurator:$PIN' \
+--form 'file=@"custom-intg.tar.gz"'
+</code></pre>
+<h3 id="delete-driver"><a class="header" href="#delete-driver">Delete driver</a></h3>
+<p>The integration instance and driver can be deleted in the web-configurator within the main integration view.
+If there’s an active instance of the custom integration driver, the instance needs to be deleted first, then the driver.</p>
+<h4 id="rest-api-2"><a class="header" href="#rest-api-2">REST API</a></h4>
 <p>To delete a custom integration, use the regular endpoints to delete an integration instance and driver.
 These are the same endpoints as for an external network integration driver:</p>
 <ul>
 <li>Delete integration instance <code>DELETE /api/intg/instances/:intgId</code>.</li>
 <li>Delete driver and installation files: <code>DELETE /api/intg/drivers/:driverId</code>.</li>
 </ul>
-<p>See <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a> for more details.</p>
-<p>The instance and driver can also be deleted in the web-configurator.</p>
 <h2 id="log-access"><a class="header" href="#log-access">Log access</a></h2>
 <p>Output to stdout and stderr are automatically stored with a timestamp and accessible as the other system logs:</p>
 <ul>
@@ -438,7 +453,7 @@ These are the same endpoints as for an external network integration driver:</p>
 <p>See <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core API</a> for more details.</p>
 <p>Log files can also be downloaded in the web-configurator: <em>Settings, Development: Logs</em></p>
 <h3 id="web-app-log-viewer"><a class="header" href="#web-app-log-viewer">Web-app log viewer</a></h3>
-<p>⚠️ Available from firmware release v2.1.0</p>
+<p>ℹ️️ Available from firmware release v2.1.0</p>
 <p>The <a href="https://logdy.dev/">Logdy</a> web application is installed on the device to monitor integration driver log events in
 near real time.</p>
 <ul>
@@ -493,12 +508,21 @@ server for the integration-API).</li>
 <li>Only use <code>/tmp</code> for small, temporary files since it is a RAM file system.</li>
 </ul>
 <h2 id="example-integrations"><a class="header" href="#example-integrations">Example integrations</a></h2>
-<p>The following Python based integration drivers create a custom integration installation archive during build with a
-GitHub action:</p>
+<p>The following integration drivers create a custom integration installation archive during build with a GitHub action:</p>
+<ul>
+<li>Node.js based:
+<ul>
+<li><a href="https://github.com/unfoldedcircle/integration-philipshue">Philips Hue</a></li>
+<li><a href="https://github.com/unfoldedcircle/integration-roon">Roon</a></li>
+</ul>
+</li>
+<li>Python based:
 <ul>
 <li><a href="https://github.com/unfoldedcircle/integration-androidtv">Android TV</a></li>
 <li><a href="https://github.com/unfoldedcircle/integration-appletv">Apple TV</a></li>
 <li><a href="https://github.com/unfoldedcircle/integration-denonavr">Denon AVR</a></li>
+</ul>
+</li>
 </ul>
 
                     </main>
