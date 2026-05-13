@@ -2,7 +2,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.45.4
+  version: 0.46.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1649,12 +1649,20 @@ paths:
             - `STATE_DIRECTORY`: data directory.
           - The returned path may not be stored, it may change with future software updates.
 
+        Existing custom integrations can be updated by setting the `update` query parameter to `true`.
+        - A custom integration must be installed having the same `driver_id`, otherwise error `404` is returned.
+        - Existing configuration files are not replaced.
+          - It is recommended to not include dynamic configuration files in the archive. The integration should create them
+            at runtime and automatically migrate them if required.
+        - All binary and data files are overwritten.
+
         To delete a custom integration, use the regular endpoints to delete an integration instance and driver:
         - Delete integration `DELETE /api/intg/instances/:intgId`.
         - Delete driver and installation files: `DELETE /api/intg/drivers/:driverId`.
 
         Error response codes:
         - `400`: invalid archive, missing data in archive or included metadata cannot be read.
+        - `404`: custom integration not found for updating, there's no installed custom integration with the same `driver_id`. 
         - `409`: custom integration is not compatible with the current firmware or the maximum amount of custom integration
                  installations has been reached.
         - `413`: archive is too large.
@@ -1663,6 +1671,13 @@ paths:
                  installation and the device needs to be restarted.
         - `507`: insufficient storage to upload and process installation archive.
       operationId: installCustomIntegration
+      parameters:
+        - name: update
+          in: query
+          description: Update an existing custom integration.
+          required: false
+          schema:
+            type: boolean
       requestBody:
         content:
           multipart/form-data:
@@ -1686,6 +1701,8 @@ paths:
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
           $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
         '409':
           $ref: '#/components/responses/Err409Conflict'
         '413':
