@@ -1,4 +1,4 @@
-# Driver installation on the Remote
+# Custom driver installation on the Remote
 
 Starting with firmware v1.9.0, custom installation drivers can be installed on the Remote.
 
@@ -92,7 +92,7 @@ It is a reduced version of the `IntegrationDriver` object, without driver connec
 A driver icon can either use a predefined icon or a custom icon. Predefined icons are prefixed with `uc:`, followed by
 the icon identifier in lowercase.
 
-A custom driver icon can be installed automatically as custom icon resource.
+A custom driver icon can be installed automatically as a custom icon resource.
 
 1. In `driver.json` set the icon field to `custom:$ICON_FILENAME`
 2. Include `$ICON_FILENAME` in the root of the archive.
@@ -105,7 +105,11 @@ Example `driver.json` (other fields omitted for simplicity):
 ```
 
 The icon file called `foobar.png` must be added to the root of the archive.
-Icons must be of size 90x90 pixels and either in PNG or JPG format. Maximum size is 32 KB.
+
+Icon requirements and restrictions:
+- Size must be 90x90 pixels.
+- Supported image formats: PNG and JPG.
+- Maximum size: 16 KB.
 
 ### Installation archive example
 
@@ -140,19 +144,16 @@ Example of a Node.js based integration driver archive (contents of bin/node_modu
 ## Restrictions
 
 - Maximum 10 custom integrations can be installed.
-- Only Node.js is supported besides a statically linked binary. Other runtimes are not supported at the moment.
+- Only Node.js is supported beside a statically linked binary. Other runtimes are not supported at the moment.
   - Python integrations must pack the Python runtime into the archive.
 - The integration driver runs in a sandbox. Access to devices and the filesystem is restricted.
 - No symlinks are allowed. They are automatically removed during the installation.
 - Executable files are only allowed in the `./bin` directory.
-  - No other tools are provided in the runtime environment. E.g. there is no shell available and no other tools
+  - No other tools are provided in the runtime environment. E.g., there is no shell available and no other tools
     like `cp` or `mv`.
 
 ### Missing features
 
-- [ ] Resource restrictions for integration drivers: limit maximum amount of memory and CPU usage.
-- [ ] Update an installed integrations.
-  - Workaround: remove and re-install.
 - [ ] Resource usage: provide memory and CPU usage per integration.
   - Only the overall resource usage can be monitored with `GET /api/pub/status`.
 
@@ -165,7 +166,7 @@ The driver runs in a sandbox with limited access to the host system.
   - `UC_INTEGRATION_HTTP_PORT`: port number.
 - The working directory is set to the binary directory.
 - The binary directory is read-only.
-- Node.js version: v20.16 (firmware release 1.9.3 and newer).
+- Node.js version: v22.22 (firmware release 2.9.2 and newer, v22.13 in firmware 2.8.2, v20.16 in firmware 1.9.3).
   - There are no pre-installed node modules.
   - An integration driver must include all required modules in the installation archive, including `uc-integration-api` (if used). 
 - File access with relative paths between `bin`, `config`, and `data` is not possible.
@@ -181,10 +182,13 @@ The driver runs in a sandbox with limited access to the host system.
   - The user and group IDs may change between driver restarts.
   - Write access to the `$UC_CONFIG_HOME`, `$UC_DATA_HOME` and `/tmp` directories is ensured.
 
-⚠️ CPU and memory restrictions are not yet in place but will be enforced in a future firmware update!
-- A single integration driver should not use more than 100 MB of memory.
+#### Resource restrictions
 
-_TODO more details about sandbox environment_
+A single custom integration should not use more than 100 MB of memory and conserve CPU usage.
+
+- All custom integrations (max 10) share a common memory pool of 1 GB and are limited to 200% CPU usage (2 cores).
+- If the memory pool is exceeded, custom integrations will be terminated. Integrations using the most memory will be terminated first.
+- A single custom integration will be throttled if it uses more than 250 MB and terminated if it uses more than 350 MB.
 
 #### Network
 
@@ -205,7 +209,15 @@ a native binary for the Remote.
 - The driver must be compiled as a static binary for libc.
 - Most dynamic libraries in the cross-compile sysroot are NOT available in the custom integration runtime environment!
 
-## Install driver
+## Driver installation
+
+The easiest way to manage custom integration drivers is to use the web-configurator. 
+
+### Upload a new driver
+
+In the web-configurator open the integration view and chose _Add new, Install custom_.
+
+#### REST API
 
 ```shell
 curl --location 'http://$IP/api/intg/install' \
@@ -215,17 +227,33 @@ curl --location 'http://$IP/api/intg/install' \
 
 See [REST Core API](https://unfoldedcircle.github.io/core-api/rest/) for more details.
 
-## Delete driver
+### Update driver
+
+ℹ️ The driver update feature requires firmware release v2.9.3 or newer.
+
+In the web-configurator open the integration view and chose _Add new, Install custom_ and check the
+`Update existing driver` option.
+
+#### REST API
+
+```shell
+curl --location 'http://$IP/api/intg/install?update=true' \
+--user 'web-configurator:$PIN' \
+--form 'file=@"custom-intg.tar.gz"'
+```
+
+### Delete driver
+
+The integration instance and driver can be deleted in the web-configurator within the main integration view.
+If there's an active instance of the custom integration driver, the instance needs to be deleted first, then the driver.
+
+#### REST API
 
 To delete a custom integration, use the regular endpoints to delete an integration instance and driver. 
 These are the same endpoints as for an external network integration driver:
 
 - Delete integration instance `DELETE /api/intg/instances/:intgId`.
 - Delete driver and installation files: `DELETE /api/intg/drivers/:driverId`.
-
-See [REST Core API](https://unfoldedcircle.github.io/core-api/rest/) for more details.
-
-The instance and driver can also be deleted in the web-configurator.
 
 ## Log access
 
@@ -240,7 +268,7 @@ Log files can also be downloaded in the web-configurator: _Settings, Development
 
 ### Web-app log viewer
 
-⚠️ Available from firmware release v2.1.0
+ℹ️️ Available from firmware release v2.1.0
 
 The [Logdy](https://logdy.dev/) web application is installed on the device to monitor integration driver log events in
 near real time. 
@@ -292,10 +320,13 @@ curl --request PUT 'http://$IP/api/system/logs/web' \
 
 ## Example integrations
 
-The following Python based integration drivers create a custom integration installation archive during build with a
-GitHub action:
+The following integration drivers create a custom integration installation archive during build with a GitHub action:
 
-- [Android TV](https://github.com/unfoldedcircle/integration-androidtv)
-- [Apple TV](https://github.com/unfoldedcircle/integration-appletv)
-- [Denon AVR](https://github.com/unfoldedcircle/integration-denonavr)
+- Node.js based:
+  - [Philips Hue](https://github.com/unfoldedcircle/integration-philipshue)
+  - [Roon](https://github.com/unfoldedcircle/integration-roon)
+- Python based:
+  - [Android TV](https://github.com/unfoldedcircle/integration-androidtv)
+  - [Apple TV](https://github.com/unfoldedcircle/integration-appletv)
+  - [Denon AVR](https://github.com/unfoldedcircle/integration-denonavr)
 
