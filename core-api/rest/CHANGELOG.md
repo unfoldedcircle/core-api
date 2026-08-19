@@ -16,6 +16,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.46.1
+### Added
+- Add `change_dock_token` to `DockUpdateRequest`.
+
 ## 0.46.0
 - Update option when installing a custom integration.
 

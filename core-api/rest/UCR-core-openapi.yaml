@@ -2,7 +2,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.46.0
+  version: 0.46.1
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -9061,9 +9061,10 @@ paths:
       description: |
         Update one or more dock fields.
 
-        - If the dock is in an `active` connection state, then the `name`, `token` and `wifi` values are persisted in the
-          dock if provided in the request. The request fails with `503` service unavailable if the configuration can't be
-          set in the docking station.
+        - If the dock is in an `active` connection state, then the `name` and `wifi` values are persisted in the
+          dock if provided in the request. The `token` is also persisted if `change_dock_token` is not explicitly set to
+          `false`.
+          The request fails with `503` service unavailable if the configuration can't be set in the docking station.
         - An empty `custom_ws_url` value will remove the custom URL.
         - If the dock is not active, the values are only stored in the remote. A changed `token` will be used for the next
           connection attempt.
@@ -16286,6 +16287,16 @@ components:
           type: string
           maxLength: 40
           description: Access token to connect to the dock.
+        change_dock_token:
+          type: boolean
+          default: true
+          description: |
+            Change access token in the dock or only in the remote.
+
+            - If set to true, the token is also changed in the Dock.  
+              This requires an active Dock connection, otherwise error 503 is returned.
+            - If set to false, the token is only changed in the Remote.  
+              The new token is used in the next connection attempt.
         active:
           type: boolean
           description: Auto connect to dock when network is available.
