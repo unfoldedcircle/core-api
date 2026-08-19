@@ -1,8 +1,12 @@
+# =============================================================================
+# GENERATED FILE — DO NOT EDIT.
+# Bundled from common schemas used in WS and REST APIs.
+# =============================================================================
 openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.46.1
+  version: 0.48.2
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1308,6 +1312,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -1983,6 +1990,9 @@ paths:
         - $ref: '#/components/parameters/has_instances'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -2301,6 +2311,9 @@ paths:
         - $ref: '#/components/parameters/enabled'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -2681,6 +2694,9 @@ paths:
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -3119,6 +3135,9 @@ paths:
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation
@@ -4039,6 +4058,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/query'
       responses:
         '200':
@@ -5326,6 +5348,8 @@ paths:
         and paging parameters.
 
         Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
+
+        The optional `q` text search filters the counted remotes, see the `GET` operation.
       operationId: getRemoteCount
       parameters:
         - name: kind
@@ -5334,6 +5358,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/RemoteKind'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
@@ -5358,6 +5383,10 @@ paths:
         with `/remotes/{entityId}`.
 
         Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
+
+        The optional `q` text search searches case-insensitive in the remote name, entity identifier and integration
+        name. All language variants of the name are searched. It is combined with the `kind` filter and applied before
+        paging, i.e. the `Pagination-Count` header contains the number of matching remotes.
       operationId: getRemotes
       parameters:
         - name: kind
@@ -5366,8 +5395,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/RemoteKind'
+        - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation
@@ -8401,6 +8434,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       operationId: getVoiceAssistants
       responses:
         '200':
@@ -8449,6 +8485,8 @@ paths:
         - $ref: '#/components/parameters/active'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
       responses:
         '200':
           description: Successful operation
@@ -10740,6 +10778,7 @@ paths:
       tags:
         - system
       summary: Remove all standby inhibitors.
+      description: Removes all inhibitors created through the API. Internal inhibitors (ids prefixed with `uc:`) are not affected.
       operationId: deleteAllStandbyInhibitors
       responses:
         '200':
@@ -10788,7 +10827,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AmbientLight'
+                $ref: '#/components/schemas/AmbientLightResponse'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -11117,10 +11156,18 @@ paths:
       summary: Create a new Wifi network configuration.
       operationId: addWifiNetwork
       description: |
-        Add a new network configuration for the given SSID.  
+        Add a new network configuration for the given SSID.
         For an open network without password the `password` field must be omitted (do not send an empty password value).
 
-        ⚠️ Only WPA-PSK (pre shared keys) and open networks are supported!
+        The optional `security` field selects the security type (open, WPA/WPA2-PSK, WPA3-SAE, WPA2/WPA3 transition mode).
+        If omitted, a password creates the strongest profile the device's WiFi hardware supports: WPA2/WPA3 transition
+        mode on hardware with WPA3 support (connects to WPA2-only, transition and WPA3-only networks), WPA/WPA2-PSK
+        otherwise. Clients therefore do not need to determine the network's security type.
+        `WPA3_SAE` requires WPA3 support of the device's WiFi hardware, otherwise the request is rejected.
+
+        Set `hidden` to connect to a hidden network (non-broadcasting SSID).
+
+        ⚠️ WPA3-Enterprise, WPA-EAP and WEP networks are not supported!
       requestBody:
         content:
           application/json:
@@ -11361,6 +11408,55 @@ components:
       required: true
       schema:
         type: string
+    sort:
+      name: sort
+      in: query
+      description: |
+        Field to order the collection by:
+        - `name`: friendly name, case-insensitive. Localized names are resolved with the `lang`
+          parameter, defaulting to the configured system locale.
+        - `created`: record creation order. `sort=created&order=asc` returns the ordering used before
+          sorting was introduced (insertion order).
+
+        If omitted, items are sorted by friendly name.
+      required: false
+      schema:
+        type: string
+        enum:
+          - name
+          - created
+        default: name
+    order:
+      name: order
+      in: query
+      description: Sort direction. If omitted, ascending order is used.
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+    lang:
+      name: lang
+      in: query
+      description: |
+        Language used for friendly-name sorting, as a culture code: two-letter ISO 639-1 language
+        code with an optional ISO 3166 country code, e.g. `en`, `de`, `de_CH`.
+
+        The sort key of each item is resolved with the following fallback chain: exact culture code,
+        base language, first country variant of the base language, `en`, first `en` country variant,
+        the item's first language entry. If omitted, the configured system locale is used.
+
+        Sort keys are compared with the Unicode Collation Algorithm using the language-independent
+        root ordering: letters with diacritics sort at the position of their base letter (`Ärger`
+        between `Apfel` and `Berta`), and case and accent differences only break ties between
+        otherwise equal names.
+      required: false
+      schema:
+        type: string
+        pattern: ^[a-z]{2}(_[A-Z]{2})?$
+        example: de_CH
     driver_id:
       name: driverId
       in: path
@@ -12377,7 +12473,7 @@ components:
         id:
           description: Unique identifier of the setting to be returned with the entered value.
           type: string
-          maximum: 50
+          maxLength: 50
         label:
           $ref: '#/components/schemas/LanguageText'
         field:
@@ -12905,6 +13001,28 @@ components:
           type: array
           items:
             type: string
+    SequenceErrorPolicy:
+      description: |
+        How entity command failures are handled while an activity or macro sequence runs.
+
+        The policy applies per step class. *Transition steps* are the power-off commands of the activity an activity
+        group is switching away from: they are prepended to the incoming activity's sequence and therefore run under
+        the incoming activity's command, even though they belong to the outgoing one.
+
+        - `abort`: any failing command aborts the sequence, transition steps included.
+        - `continue_transition` (**default**): a failing transition step is continued past, so an unreachable device of
+          the activity being switched away from does not prevent the new activity from starting. The failure is still
+          reported: the outgoing activity ends in state `ERROR`, not `OFF`, because its devices may still be on. A
+          failing step of the activity's own sequence aborts it, as without a group switch.
+        - `ignore_all`: no failing command aborts the sequence and none is reported — the run reaches its normal final
+          state and the outgoing activity of a group switch is reported `OFF` even if its power-off failed. Use this to
+          force a start past known-unreachable devices. A missing entity is skipped as well.
+      type: string
+      default: continue_transition
+      enum:
+        - abort
+        - continue_transition
+        - ignore_all
     EntityCommand:
       description: |
         Entity command object. The `entity_id` only has to be specified if it's not already included as a parameter in the URL.
@@ -12922,7 +13040,14 @@ components:
         params:
           description: |
             Optional command parameters as key / value pairs. See entity documentation for available parameters.
+
+            The parameters listed below are only interpreted by the activity and macro sequence commands
+            (`activity.on`, `activity.off`, `activity.start`, `macro.run`) and are ignored by every other entity.
           type: object
+          properties:
+            error_policy:
+              $ref: '#/components/schemas/SequenceErrorPolicy'
+          additionalProperties: true
       required:
         - cmd_id
       examples:
@@ -13674,7 +13799,15 @@ components:
         - `OFF`: No included activity is running.
         - `ACTIVE`: An included activity is running.
         - `RUNNING`: An included activity is currently running, e.g. either switching activities, or turning off.
-        - `ERROR`: An included activity is in an error state.
+        - `ERROR`: An included activity is in an error state, **and** no included activity is on or running.
+
+        The group state answers whether something is happening in the group, so `RUNNING` and `ACTIVE` take
+        precedence over `ERROR`. An activity state is not persisted and is only reset when that activity runs
+        again, so an error would otherwise mark the group as faulty indefinitely — including while another
+        activity in the group runs normally.
+
+        The precise fault signal is the `state` of the individual activity, which is unchanged and returned in
+        the same response.
       type: string
       enum:
         - 'OFF'
@@ -15602,6 +15735,31 @@ components:
             - max
       required:
         - grid
+    EntityCmdParamCommon:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        param:
+          description: Parameter name.
+          type: string
+        type:
+          description: Parameter type.
+          type: string
+          enum:
+            - number
+            - bool
+            - regex
+            - enum
+            - selection
+        optional:
+          description: Parameter is optional.
+          type: boolean
+          default: false
+      required:
+        - name
+        - param
+        - type
     EntityCmdParamNumber:
       type: object
       description: |
@@ -15718,31 +15876,6 @@ components:
           items:
             source: attributes
             field: source_list
-    EntityCmdParamCommon:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        param:
-          description: Parameter name.
-          type: string
-        type:
-          description: Parameter type.
-          type: string
-          enum:
-            - number
-            - bool
-            - regex
-            - enum
-            - selection
-        optional:
-          description: Parameter is optional.
-          type: boolean
-          default: false
-      required:
-        - name
-        - param
-        - type
     EntityCommandMetadata:
       type: object
       properties:
@@ -16774,7 +16907,7 @@ components:
       type: object
       properties:
         id:
-          description: Unique identifier, automatically created if not specified.
+          description: Unique identifier, automatically created if not specified. The prefix `uc:` is reserved for internal inhibitors and rejected.
           type: string
           minLength: 1
           maxLength: 64
@@ -16803,6 +16936,9 @@ components:
           maximum: 65535
       required:
         - intensity
+    AmbientLightResponse:
+      type: object
+      $ref: '#/components/schemas/AmbientLight'
     AvailableSystemUpdate:
       type: object
       properties:
@@ -17004,6 +17140,28 @@ components:
         - REASSOCIATE
         - ENABLE_ALL_NETWORKS
         - DISABLE_ALL_NETWORKS
+    WifiSecurity:
+      description: |
+        WiFi network security type:
+        - `OPEN`: open network without authentication
+        - `WPA_PSK`: WPA / WPA2 Personal with a pre-shared key
+        - `WPA3_SAE`: WPA3 Personal (SAE) only. Requires WPA3 support of the device's WiFi hardware,
+          otherwise the request is rejected.
+        - `WPA2_WPA3`: WPA2 / WPA3 transition mode. Falls back to WPA2-PSK on devices without
+          WPA3 hardware support.
+
+        When omitted in a create-network request, a password creates the strongest profile the
+        device's WiFi hardware supports (`WPA2_WPA3` with WPA3 support, `WPA_PSK` otherwise);
+        without a password an open network is created.
+
+        In scan results the field is omitted if the network security could not be classified
+        (e.g. WEP or EAP-only networks).
+      type: string
+      enum:
+        - OPEN
+        - WPA_PSK
+        - WPA3_SAE
+        - WPA2_WPA3
     AccessPointScan:
       type: object
       properties:
@@ -17019,6 +17177,8 @@ components:
         auth:
           description: Authentication method
           type: string
+        security:
+          $ref: '#/components/schemas/WifiSecurity'
         ssid:
           description: |
             SSID network name as friendly UTF-8 representation. Use this name to present the network to users, but not for
@@ -17069,6 +17229,8 @@ components:
         secured:
           description: Secured or unsecured network
           type: boolean
+        security:
+          $ref: '#/components/schemas/WifiSecurity'
         state:
           $ref: '#/components/schemas/NetworkState'
       required:
@@ -17100,8 +17262,14 @@ components:
           maxLength: 64
         password:
           type: string
-          minLength: 1
+          minLength: 8
           maxLength: 63
+        security:
+          $ref: '#/components/schemas/WifiSecurity'
+        hidden:
+          description: |
+            Hidden network: actively probe for the SSID to connect to a non-broadcasting access point.
+          type: boolean
     WifiNetworkCmd:
       type: string
       enum:
@@ -17234,8 +17402,6 @@ components:
         - id
     ActivityRequest:
       $ref: '#/components/schemas/ActivityCreate'
-    AmbientLightResponse:
-      $ref: '#/components/schemas/AmbientLight'
   responses:
     Err500InternalServerError:
       description: The server has encountered a situation it does not know how to handle. Retrying the same request will most likely result in the same error.
