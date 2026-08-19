@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.36.0-beta
+  version: 0.37.0-beta
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -70,6 +70,31 @@ info:
     We try avoiding it, but it might still happen...
 
     ## WebSocket Connection
+
+    ### Connection limit
+
+    The number of concurrent Core-API WebSocket sessions is capped. Beyond the limit the server refuses the
+    connection upgrade with HTTP status `503 Service Unavailable` and a `Retry-After` header, before any WebSocket
+    session is established.
+
+    - A client receiving `503` should wait for the indicated period and retry, rather than reconnecting immediately.
+
+    ### Keep-alive
+
+    The server sends a WebSocket `ping` frame to an otherwise silent client every 10 seconds, and closes a session
+    from which it has received nothing for 30 seconds.
+
+    - Any frame from the client counts, including a protocol `pong` and the application level `ping` message.
+    - A client that only listens for events does not have to send anything: answering the server's `ping` frames
+      keeps the session open, which WebSocket libraries normally do automatically.
+
+    Browser clients need no special handling. The JavaScript `WebSocket` API intentionally exposes no ping/pong —
+    a web app cannot *send* a ping, which is what the application level `ping` message below is for — but the
+    browser answers the server's ping frames itself, below the JavaScript layer, as required by RFC 6455. This
+    keeps working while the tab is in the background.
+
+    A client implementing the protocol by hand must answer `ping` frames with a `pong`, or send the application
+    level `ping` message more often than every 30 seconds.
 
     ### Authentication
 
@@ -979,6 +1004,7 @@ components:
                 message: Invalid argument. Foo must be a positive number.
     del_all_standby_inhibitors:
       summary: 🧪 Remove all standby inhibitors.
+      description: Removes all inhibitors created through the API. Internal inhibitors (ids prefixed with `uc:`) are not affected.
       payload:
         $ref: '#/components/schemas/DelAllStandbyInhibitorsMsg'
       x-response:
@@ -5527,7 +5553,15 @@ components:
                 params:
                   description: |
                     Optional key/value command parameters if required. See entity documentation for more information.
+
+                    The parameters listed below are only interpreted by the activity and macro sequence commands
+                    (`activity.on`, `activity.off`, `activity.start`, `macro.run`) and are ignored by every other
+                    entity.
                   type: object
+                  properties:
+                    error_policy:
+                      $ref: '#/components/schemas/SequenceErrorPolicy'
+                  additionalProperties: true
               required:
                 - entity_id
                 - cmd_id
@@ -8490,6 +8524,28 @@ components:
         - STOPPED
         - TIMEOUT
         - ERROR
+    SequenceErrorPolicy:
+      description: |
+        How entity command failures are handled while an activity or macro sequence runs.
+
+        The policy applies per step class. *Transition steps* are the power-off commands of the activity an activity
+        group is switching away from: they are prepended to the incoming activity's sequence and therefore run under
+        the incoming activity's command, even though they belong to the outgoing one.
+
+        - `abort`: any failing command aborts the sequence, transition steps included.
+        - `continue_transition` (**default**): a failing transition step is continued past, so an unreachable device of
+          the activity being switched away from does not prevent the new activity from starting. The failure is still
+          reported: the outgoing activity ends in state `ERROR`, not `OFF`, because its devices may still be on. A
+          failing step of the activity's own sequence aborts it, as without a group switch.
+        - `ignore_all`: no failing command aborts the sequence and none is reported — the run reaches its normal final
+          state and the outgoing activity of a group switch is reported `OFF` even if its power-off failed. Use this to
+          force a start past known-unreachable devices. A missing entity is skipped as well.
+      type: string
+      default: continue_transition
+      enum:
+        - abort
+        - continue_transition
+        - ignore_all
     ActivityGroupOptions:
       description: |
         👷Not yet finalized!
@@ -11310,7 +11366,7 @@ components:
       type: object
       properties:
         id:
-          description: Unique identifier, automatically created if not specified.
+          description: Unique identifier, automatically created if not specified. The prefix `uc:` is reserved for internal inhibitors and rejected.
           type: string
           minLength: 1
           maxLength: 64
