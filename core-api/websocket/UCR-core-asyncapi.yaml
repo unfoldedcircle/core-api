@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.37.0-beta
+  version: 0.37.2-beta
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2573,8 +2573,14 @@ components:
         - `ENABLE`: Enable a network. If no network is connected, it will be tried to connect to this network.
         - `DISABLE`: Disable a network. If the network is currently connected it will be disconnected.
         - `SELECT`: Select the given network and disable all others.
+        - `JOIN`: Connect to the given network and keep every other saved network enabled as fallback.
 
-        ⚠️ Attention: all network changes (enabled or disabled) are persisted!
+        All commands return as soon as the request is accepted; the outcome arrives as a
+        `wifi_change` event.
+
+        `ENABLE` and `DISABLE` are persisted immediately. `SELECT` and `JOIN` are persisted
+        only once the connection to the network is confirmed: on failure or timeout the
+        previous enabled/disabled configuration is restored and nothing is persisted.
       tags:
         - name: wifi
       payload:
@@ -5504,7 +5510,7 @@ components:
                 commands:
                   type: array
                   items:
-                    $ref: '#/components/schemas/EntityCommand'
+                    $ref: '#/components/schemas/cmd_id'
               required:
                 - commands
           required:
@@ -5549,19 +5555,9 @@ components:
                 entity_id:
                   $ref: '#/components/schemas/EntityId'
                 cmd_id:
-                  $ref: '#/components/schemas/EntityCommand'
+                  $ref: '#/components/schemas/cmd_id'
                 params:
-                  description: |
-                    Optional key/value command parameters if required. See entity documentation for more information.
-
-                    The parameters listed below are only interpreted by the activity and macro sequence commands
-                    (`activity.on`, `activity.off`, `activity.start`, `macro.run`) and are ignored by every other
-                    entity.
-                  type: object
-                  properties:
-                    error_policy:
-                      $ref: '#/components/schemas/SequenceErrorPolicy'
-                  additionalProperties: true
+                  $ref: '#/components/schemas/params'
               required:
                 - entity_id
                 - cmd_id
@@ -8440,12 +8436,7 @@ components:
     EntityFeature:
       type: string
     EntityCommand:
-      description: |
-        Entity command identifier, as returned in the entity command metadata.
-
-        This identifier may change at any time and may not be used for logic decisions in a client!
-        If entity specific information is required, the entity object must be loaded from the `entity_id`.
-      type: string
+      $ref: '#/components/schemas/cmd_id'
     EntityType:
       type: string
       description: Entity type
@@ -8524,28 +8515,6 @@ components:
         - STOPPED
         - TIMEOUT
         - ERROR
-    SequenceErrorPolicy:
-      description: |
-        How entity command failures are handled while an activity or macro sequence runs.
-
-        The policy applies per step class. *Transition steps* are the power-off commands of the activity an activity
-        group is switching away from: they are prepended to the incoming activity's sequence and therefore run under
-        the incoming activity's command, even though they belong to the outgoing one.
-
-        - `abort`: any failing command aborts the sequence, transition steps included.
-        - `continue_transition` (**default**): a failing transition step is continued past, so an unreachable device of
-          the activity being switched away from does not prevent the new activity from starting. The failure is still
-          reported: the outgoing activity ends in state `ERROR`, not `OFF`, because its devices may still be on. A
-          failing step of the activity's own sequence aborts it, as without a group switch.
-        - `ignore_all`: no failing command aborts the sequence and none is reported — the run reaches its normal final
-          state and the outgoing activity of a group switch is reported `OFF` even if its power-off failed. Use this to
-          force a start past known-unreachable devices. A missing entity is skipped as well.
-      type: string
-      default: continue_transition
-      enum:
-        - abort
-        - continue_transition
-        - ignore_all
     ActivityGroupOptions:
       description: |
         👷Not yet finalized!
@@ -11013,6 +10982,7 @@ components:
         - ENABLE
         - DISABLE
         - SELECT
+        - JOIN
     NetworkState:
       type: string
       enum:
@@ -11025,6 +10995,12 @@ components:
       properties:
         event:
           $ref: '#/components/schemas/WifiEvent'
+        id:
+          type: integer
+          description: Saved network the event refers to. Only present when the event concerns a specific network.
+        ssid_hex:
+          type: string
+          description: Hexstring of the network's native SSID, where known.
     WifiEvent:
       description: |
         WiFi event:
@@ -11685,6 +11661,64 @@ components:
         auto_brightness:
           description: When enabled, button backlight will automatically turn on in a dark room.
           type: boolean
+    cmd_id:
+      description: |
+        Entity command identifier, as returned in the entity command metadata.
+
+        This identifier may change at any time and may not be used for logic decisions in a client!
+        If entity specific information is required, the entity object must be loaded from the `entity_id`.
+
+        ### Stopping an activity or macro sequence
+
+        `activity.stop` and `macro.stop` abort a sequence that is still running, whether it is an
+        on-sequence, an off-sequence or a macro. The remaining steps are not executed and are not
+        resumed later; commands already sent to a device are **not** reversed. Once the sequence
+        has been aborted, the entity reports the `STOPPED` state.
+
+        Stopping is idempotent: if no sequence is running for the entity, the request still
+        succeeds and nothing is reported. This keeps a stop that races the natural end of a
+        sequence from failing.
+
+        The request is answered once the stopped sequence has fully wound down, so that a
+        follow-up command cannot overlap with it at a shared device. Aborting a step that is
+        already in flight can therefore delay the response by a few seconds.
+      type: string
+    SequenceErrorPolicy:
+      description: |
+        How entity command failures are handled while an activity or macro sequence runs.
+
+        The policy applies per step class. *Transition steps* are the power-off commands of the activity an activity
+        group is switching away from: they are prepended to the incoming activity's sequence and therefore run under
+        the incoming activity's command, even though they belong to the outgoing one.
+
+        - `abort`: any failing command aborts the sequence, transition steps included.
+        - `continue_transition` (**default**): a failing transition step is continued past, so an unreachable device of
+          the activity being switched away from does not prevent the new activity from starting. The failure is still
+          reported: the outgoing activity ends in state `ERROR`, not `OFF`, because its devices may still be on. A
+          failing step of the activity's own sequence aborts it, as without a group switch.
+        - `ignore_all`: no failing command aborts the sequence and none is reported — the run reaches its normal final
+          state and the outgoing activity of a group switch is reported `OFF` even if its power-off failed. Use this to
+          force a start past known-unreachable devices. A missing entity is skipped as well.
+      type: string
+      default: continue_transition
+      enum:
+        - abort
+        - continue_transition
+        - ignore_all
+    params:
+      description: |
+        Optional command parameters as key / value pairs. See entity documentation for available parameters.
+
+        The parameters listed below are only interpreted by the activity and macro sequence commands
+        (`activity.on`, `activity.off`, `activity.start`, `macro.run`) and are ignored by every other entity.
+
+        They do **not** apply to `activity.stop` and `macro.stop`: those abort a running sequence
+        instead of executing one, and take no parameters.
+      type: object
+      properties:
+        error_policy:
+          $ref: '#/components/schemas/SequenceErrorPolicy'
+      additionalProperties: true
     RemoveTurnOnDelays:
       description: |
         - `previous_cmd_skipped`: Only remove delay steps if the previous step is skipped, because the entity is in a
