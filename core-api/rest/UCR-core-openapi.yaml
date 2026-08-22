@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.48.2
+  version: 0.48.3
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -11275,8 +11275,14 @@ paths:
         - `ENABLE`: Enable a network. If no network is connected, it will be tried to connect to this network.
         - `DISABLE`: Disable a network. If the network is currently connected it will be disconnected.
         - `SELECT`: Select the given network and disable all others.
+        - `JOIN`: Connect to the given network and keep every other saved network enabled as fallback.
 
-        ⚠️ Attention: all network changes (enabled or disabled) are persisted!
+        All commands return as soon as the request is accepted; the outcome arrives as a WiFi
+        event (`wifi_change`).
+
+        `ENABLE` and `DISABLE` are persisted immediately. `SELECT` and `JOIN` are persisted only
+        once the connection to the network is confirmed: on failure or timeout the previous
+        enabled/disabled configuration is restored and nothing is persisted.
       operationId: wifiNetworkCommand
       parameters:
         - $ref: '#/components/parameters/wifi_id'
@@ -13036,6 +13042,21 @@ components:
 
             This identifier may change at any time and may not be used for logic decisions in a client!
             If entity specific information is required, the entity object must be loaded from the `entity_id`.
+
+            ### Stopping an activity or macro sequence
+
+            `activity.stop` and `macro.stop` abort a sequence that is still running, whether it is an
+            on-sequence, an off-sequence or a macro. The remaining steps are not executed and are not
+            resumed later; commands already sent to a device are **not** reversed. Once the sequence
+            has been aborted, the entity reports the `STOPPED` state.
+
+            Stopping is idempotent: if no sequence is running for the entity, the request still
+            succeeds and nothing is reported. This keeps a stop that races the natural end of a
+            sequence from failing.
+
+            The request is answered once the stopped sequence has fully wound down, so that a
+            follow-up command cannot overlap with it at a shared device. Aborting a step that is
+            already in flight can therefore delay the response by a few seconds.
           type: string
         params:
           description: |
@@ -13043,6 +13064,9 @@ components:
 
             The parameters listed below are only interpreted by the activity and macro sequence commands
             (`activity.on`, `activity.off`, `activity.start`, `macro.run`) and are ignored by every other entity.
+
+            They do **not** apply to `activity.stop` and `macro.stop`: those abort a running sequence
+            instead of executing one, and take no parameters.
           type: object
           properties:
             error_policy:
@@ -17276,6 +17300,7 @@ components:
         - ENABLE
         - DISABLE
         - SELECT
+        - JOIN
     ModifyWifiNetwork:
       type: object
       properties:
