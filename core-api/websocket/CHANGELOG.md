@@ -10,6 +10,21 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.37.2-beta
+### Added
+- `get_network_state` for getting the current IP connectivity state.
+- `set_entity_state` for setting the power state of an entity. This requires the `admin` or `remote-ui` scope.
+- New event: `network_change`.
+- WiFi `JOIN` option in `wifi_network_command`: Connect to the given network and keep every other saved network enabled as fallback.
+
+### Breaking Changes
+- Schema names are now using UpperCamelCase naming, some messages and objects are defined slightly different due to using a shared object schema for the REST and WebSocket APIs and a new AsyncAPI bundler.
+  This might affect code generation clients. The wire format remains the same.
+
+### Changed
+- The number of WebSocket connections is limited. A client receiving `503` should wait for the indicated period and retry, rather than reconnecting immediately.
+- The server sends a WebSocket `ping` frame to an otherwise silent client every 10 seconds, and closes a session from which it has received nothing for 30 seconds.
+
 ## 0.35.4-beta
 ### Added
 - Add `change_dock_token` to `dockUpdateRequest`.

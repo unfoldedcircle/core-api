@@ -2882,6 +2882,58 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+  /entities/{entityId}/state:
+    put:
+      tags:
+        - entities
+      summary: Set the power state of an entity.
+      description: |
+        Corrects the runtime power state of an entity ("fix entity state"): sets the `state` attribute to `ON` or `OFF`
+        **without sending any command to the device**. Use it when the recorded state drifted from reality, e.g. an
+        IR-controlled device that was switched with its original remote.
+
+        - The correction is runtime-only: it is not persisted, it is lost on restart, and a later state report from the
+          integration driver replaces it.
+        - An `entity_change` event with the full entity in `new_state` is emitted if the state actually changed.
+        - Supported entity types: `switch`, `light`, `climate`, `media_player`, `remote`, `activity`. Any other entity
+          type is refused with `422`.
+        - `activity`: the state is set without running the on- or off-sequence. Progress attributes from an earlier run
+          are removed. The prevent-sleep standby inhibitor is added (`ON`, if the activity has `prevent_sleep` set) or
+          removed (`OFF`). The request is refused with `409` while a sequence of that activity is still running — stop it
+          first with `activity.stop`. Afterwards the activity behaves as if its sequence had ended in the given state,
+          e.g. an `activity.off` command runs the off-sequence.
+        - `409` is also returned if the entity currently reports `UNAVAILABLE` (integration not connected).
+        - Access: requires the `admin` or `remote-ui` scope; other API keys are refused with `403`.
+        - An invalid value is refused with `400`, an unknown entity with `404`.
+      operationId: setEntityState
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: New power state
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityStateUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation returning the entity with the corrected state in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
   /entities/{entityId}/media/browse:
     get:
       tags:
@@ -13080,6 +13132,25 @@ components:
           params:
             hue: 180
             saturation: 90
+    EntityPowerState:
+      type: string
+      description: Power state of an entity.
+      enum:
+        - 'ON'
+        - 'OFF'
+      examples:
+        - 'ON'
+    EntityStateUpdate:
+      type: object
+      description: |
+        Runtime power state correction of an entity. See "Set the power state of an entity" operation.
+      properties:
+        state:
+          $ref: '#/components/schemas/EntityPowerState'
+      required:
+        - state
+      examples:
+        - state: 'OFF'
     MediaClass:
       description: |
         The media class is for browser/structure semantics.
