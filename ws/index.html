@@ -933,12 +933,12 @@ Device features:
   <span class="hljs-attr">"id"</span>: <span class="hljs-number">0</span>,
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"set_button_cfg"</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
     <span class="hljs-attr">"static_color"</span>: {
       <span class="hljs-attr">"rgb"</span>: [
-        <span class="hljs-number">255</span>,
-        <span class="hljs-number">255</span>,
-        <span class="hljs-number">255</span>
+        <span class="hljs-number">0</span>,
+        <span class="hljs-number">0</span>,
+        <span class="hljs-number">0</span>
       ],
       <span class="hljs-attr">"zones"</span>: [
         <span class="hljs-string">"string"</span>
@@ -1033,7 +1033,7 @@ Device features:
   <span class="hljs-attr">"id"</span>: <span class="hljs-number">0</span>,
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"set_display_cfg"</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
     <span class="hljs-attr">"auto_brightness"</span>: <span class="hljs-literal">true</span>
   }
 }
@@ -1721,9 +1721,9 @@ a closed user group.</p>
   <span class="hljs-attr">"id"</span>: <span class="hljs-number">0</span>,
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"set_power_saving_cfg"</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">3</span>,
-    <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">60</span>,
-    <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">10800</span>
+    <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">0</span>
   }
 }
 </code></pre>
@@ -1808,7 +1808,7 @@ a closed user group.</p>
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"set_sound_cfg"</span>,
   <span class="hljs-attr">"msg_data"</span>: {
     <span class="hljs-attr">"enabled"</span>: <span class="hljs-literal">true</span>,
-    <span class="hljs-attr">"volume"</span>: <span class="hljs-number">100</span>
+    <span class="hljs-attr">"volume"</span>: <span class="hljs-number">0</span>
   }
 }
 </code></pre>
@@ -3868,7 +3868,7 @@ This is the max value of the regular standby and the longest active standby inhi
   <span class="hljs-attr">"msg_data"</span>: {
     <span class="hljs-attr">"mode"</span>: <span class="hljs-string">"NORMAL"</span>,
     <span class="hljs-attr">"battery"</span>: {
-      <span class="hljs-attr">"capacity"</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">"capacity"</span>: <span class="hljs-number">0</span>,
       <span class="hljs-attr">"status"</span>: <span class="hljs-string">"CHARGING"</span>,
       <span class="hljs-attr">"power_supply"</span>: <span class="hljs-literal">true</span>
     },
@@ -3914,7 +3914,7 @@ This is the max value of the regular standby and the longest active standby inhi
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"ambient_light"</span>,
   <span class="hljs-attr">"code"</span>: <span class="hljs-number">200</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"intensity"</span>: <span class="hljs-number">65535</span>
+    <span class="hljs-attr">"intensity"</span>: <span class="hljs-number">0</span>
   }
 }
 </code></pre>
@@ -4065,12 +4065,12 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
   <span class="hljs-attr">"code"</span>: <span class="hljs-number">200</span>,
   <span class="hljs-attr">"msg_data"</span>: {
     <span class="hljs-attr">"button"</span>: {
-      <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
       <span class="hljs-attr">"static_color"</span>: {
         <span class="hljs-attr">"rgb"</span>: [
-          <span class="hljs-number">255</span>,
-          <span class="hljs-number">255</span>,
-          <span class="hljs-number">255</span>
+          <span class="hljs-number">0</span>,
+          <span class="hljs-number">0</span>,
+          <span class="hljs-number">0</span>
         ],
         <span class="hljs-attr">"zones"</span>: [
           <span class="hljs-string">"string"</span>
@@ -4085,7 +4085,7 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
       <span class="hljs-attr">"name"</span>: <span class="hljs-string">"string"</span>
     },
     <span class="hljs-attr">"display"</span>: {
-      <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
       <span class="hljs-attr">"auto_brightness"</span>: <span class="hljs-literal">true</span>
     },
     <span class="hljs-attr">"features"</span>: [
@@ -4134,9 +4134,9 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
       }
     },
     <span class="hljs-attr">"power_saving"</span>: {
-      <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">3</span>,
-      <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">60</span>,
-      <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">10800</span>
+      <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">0</span>
     },
     <span class="hljs-attr">"profile"</span>: {
       <span class="hljs-attr">"has_admin_pin"</span>: <span class="hljs-literal">true</span>
@@ -4152,7 +4152,7 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
     },
     <span class="hljs-attr">"sound"</span>: {
       <span class="hljs-attr">"enabled"</span>: <span class="hljs-literal">true</span>,
-      <span class="hljs-attr">"volume"</span>: <span class="hljs-number">100</span>
+      <span class="hljs-attr">"volume"</span>: <span class="hljs-number">0</span>
     },
     <span class="hljs-attr">"voice"</span>: {
       <span class="hljs-attr">"microphone"</span>: <span class="hljs-literal">true</span>,
@@ -4211,12 +4211,12 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"button_cfg"</span>,
   <span class="hljs-attr">"code"</span>: <span class="hljs-number">200</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
     <span class="hljs-attr">"static_color"</span>: {
       <span class="hljs-attr">"rgb"</span>: [
-        <span class="hljs-number">255</span>,
-        <span class="hljs-number">255</span>,
-        <span class="hljs-number">255</span>
+        <span class="hljs-number">0</span>,
+        <span class="hljs-number">0</span>,
+        <span class="hljs-number">0</span>
       ],
       <span class="hljs-attr">"zones"</span>: [
         <span class="hljs-string">"string"</span>
@@ -4260,7 +4260,7 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"display_cfg"</span>,
   <span class="hljs-attr">"code"</span>: <span class="hljs-number">200</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
     <span class="hljs-attr">"auto_brightness"</span>: <span class="hljs-literal">true</span>
   }
 }
@@ -4528,9 +4528,9 @@ a closed user group.</p>
   <span class="hljs-attr">"msg"</span>: <span class="hljs-string">"power_saving_cfg"</span>,
   <span class="hljs-attr">"code"</span>: <span class="hljs-number">200</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">3</span>,
-    <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">60</span>,
-    <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">10800</span>
+    <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">0</span>,
+    <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">0</span>
   }
 }
 </code></pre>
@@ -4566,7 +4566,7 @@ a closed user group.</p>
   <span class="hljs-attr">"code"</span>: <span class="hljs-number">200</span>,
   <span class="hljs-attr">"msg_data"</span>: {
     <span class="hljs-attr">"enabled"</span>: <span class="hljs-literal">true</span>,
-    <span class="hljs-attr">"volume"</span>: <span class="hljs-number">100</span>
+    <span class="hljs-attr">"volume"</span>: <span class="hljs-number">0</span>
   }
 }
 </code></pre>
@@ -5219,8 +5219,8 @@ of nesting is supported). A new browse request must be sent for deeper levels.</
         <span class="hljs-attr">"model"</span>: <span class="hljs-string">"string"</span>,
         <span class="hljs-attr">"revision"</span>: <span class="hljs-string">"string"</span>,
         <span class="hljs-attr">"serial"</span>: <span class="hljs-string">"string"</span>,
-        <span class="hljs-attr">"led_brightness"</span>: <span class="hljs-number">100</span>,
-        <span class="hljs-attr">"eth_led_brightness"</span>: <span class="hljs-number">100</span>,
+        <span class="hljs-attr">"led_brightness"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"eth_led_brightness"</span>: <span class="hljs-number">0</span>,
         <span class="hljs-attr">"connection_type"</span>: <span class="hljs-string">"string"</span>,
         <span class="hljs-attr">"version"</span>: <span class="hljs-string">"string"</span>,
         <span class="hljs-attr">"state"</span>: <span class="hljs-string">"IDLE"</span>,
@@ -5242,7 +5242,7 @@ of nesting is supported). A new browse request must be sent for deeper levels.</
             }
           }
         ],
-        <span class="hljs-attr">"volume"</span>: <span class="hljs-number">100</span>,
+        <span class="hljs-attr">"volume"</span>: <span class="hljs-number">0</span>,
         <span class="hljs-attr">"description"</span>: <span class="hljs-string">"string"</span>
       }
     ]
@@ -9507,12 +9507,12 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
   <span class="hljs-attr">"msg_data"</span>: {
     <span class="hljs-attr">"new_state"</span>: {
       <span class="hljs-attr">"button"</span>: {
-        <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+        <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
         <span class="hljs-attr">"static_color"</span>: {
           <span class="hljs-attr">"rgb"</span>: [
-            <span class="hljs-number">255</span>,
-            <span class="hljs-number">255</span>,
-            <span class="hljs-number">255</span>
+            <span class="hljs-number">0</span>,
+            <span class="hljs-number">0</span>,
+            <span class="hljs-number">0</span>
           ],
           <span class="hljs-attr">"zones"</span>: [
             <span class="hljs-string">"string"</span>
@@ -9527,7 +9527,7 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
         <span class="hljs-attr">"name"</span>: <span class="hljs-string">"string"</span>
       },
       <span class="hljs-attr">"display"</span>: {
-        <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">100</span>,
+        <span class="hljs-attr">"brightness"</span>: <span class="hljs-number">0</span>,
         <span class="hljs-attr">"auto_brightness"</span>: <span class="hljs-literal">true</span>
       },
       <span class="hljs-attr">"features"</span>: [
@@ -9576,9 +9576,9 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
         }
       },
       <span class="hljs-attr">"power_saving"</span>: {
-        <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">3</span>,
-        <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">60</span>,
-        <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">10800</span>
+        <span class="hljs-attr">"wakeup_sensitivity"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"display_off_sec"</span>: <span class="hljs-number">0</span>,
+        <span class="hljs-attr">"standby_sec"</span>: <span class="hljs-number">0</span>
       },
       <span class="hljs-attr">"profile"</span>: {
         <span class="hljs-attr">"has_admin_pin"</span>: <span class="hljs-literal">true</span>
@@ -9594,7 +9594,7 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
       },
       <span class="hljs-attr">"sound"</span>: {
         <span class="hljs-attr">"enabled"</span>: <span class="hljs-literal">true</span>,
-        <span class="hljs-attr">"volume"</span>: <span class="hljs-number">100</span>
+        <span class="hljs-attr">"volume"</span>: <span class="hljs-number">0</span>
       },
       <span class="hljs-attr">"voice"</span>: {
         <span class="hljs-attr">"microphone"</span>: <span class="hljs-literal">true</span>,
@@ -9694,8 +9694,8 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
       <span class="hljs-attr">"model"</span>: <span class="hljs-string">"string"</span>,
       <span class="hljs-attr">"revision"</span>: <span class="hljs-string">"string"</span>,
       <span class="hljs-attr">"serial"</span>: <span class="hljs-string">"string"</span>,
-      <span class="hljs-attr">"led_brightness"</span>: <span class="hljs-number">100</span>,
-      <span class="hljs-attr">"eth_led_brightness"</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">"led_brightness"</span>: <span class="hljs-number">0</span>,
+      <span class="hljs-attr">"eth_led_brightness"</span>: <span class="hljs-number">0</span>,
       <span class="hljs-attr">"connection_type"</span>: <span class="hljs-string">"string"</span>,
       <span class="hljs-attr">"version"</span>: <span class="hljs-string">"string"</span>,
       <span class="hljs-attr">"state"</span>: <span class="hljs-string">"IDLE"</span>,
@@ -9717,7 +9717,7 @@ Examples: <code>en</code>, <code>en_UK</code>, <code>en_US</code>, <code>de</cod
           }
         }
       ],
-      <span class="hljs-attr">"volume"</span>: <span class="hljs-number">100</span>,
+      <span class="hljs-attr">"volume"</span>: <span class="hljs-number">0</span>,
       <span class="hljs-attr">"description"</span>: <span class="hljs-string">"string"</span>
     }
   }
@@ -9818,7 +9818,7 @@ reachable.</p>
       <span class="hljs-attr">"discovery_type"</span>: <span class="hljs-string">"BT"</span>,
       <span class="hljs-attr">"timestamp"</span>: <span class="hljs-string">"2019-08-24T14:15:22Z"</span>,
       <span class="hljs-attr">"bt"</span>: {
-        <span class="hljs-attr">"signal"</span>: <span class="hljs-number">5</span>,
+        <span class="hljs-attr">"signal"</span>: <span class="hljs-number">0</span>,
         <span class="hljs-attr">"last_seen_sec"</span>: <span class="hljs-number">0</span>
       }
     }
@@ -9865,7 +9865,7 @@ reachable.</p>
     <span class="hljs-attr">"dock_id"</span>: <span class="hljs-string">"string"</span>,
     <span class="hljs-attr">"update_id"</span>: <span class="hljs-string">"string"</span>,
     <span class="hljs-attr">"version"</span>: <span class="hljs-string">"string"</span>,
-    <span class="hljs-attr">"progress"</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">"progress"</span>: <span class="hljs-number">0</span>,
     <span class="hljs-attr">"state"</span>: <span class="hljs-string">"NEW"</span>,
     <span class="hljs-attr">"error"</span>: <span class="hljs-string">"NONE"</span>
   }
@@ -10091,7 +10091,7 @@ support the various Swiss German dialects!</p>
   <span class="hljs-attr">"cat"</span>: <span class="hljs-string">"REMOTE"</span>,
   <span class="hljs-attr">"ts"</span>: <span class="hljs-string">"2019-08-24T14:15:22Z"</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"capacity"</span>: <span class="hljs-number">100</span>,
+    <span class="hljs-attr">"capacity"</span>: <span class="hljs-number">0</span>,
     <span class="hljs-attr">"status"</span>: <span class="hljs-string">"CHARGING"</span>,
     <span class="hljs-attr">"power_supply"</span>: <span class="hljs-literal">true</span>
   }
@@ -10110,7 +10110,7 @@ support the various Swiss German dialects!</p>
   <span class="hljs-attr">"cat"</span>: <span class="hljs-string">"REMOTE"</span>,
   <span class="hljs-attr">"ts"</span>: <span class="hljs-string">"2019-08-24T14:15:22Z"</span>,
   <span class="hljs-attr">"msg_data"</span>: {
-    <span class="hljs-attr">"intensity"</span>: <span class="hljs-number">65535</span>
+    <span class="hljs-attr">"intensity"</span>: <span class="hljs-number">0</span>
   }
 }
 </code></pre>
