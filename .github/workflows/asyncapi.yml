@@ -28,20 +28,22 @@ jobs:
       contents: write  # To push a branch
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+        with:
+          persist-credentials: false
 
       - name: Validate websocket-api
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.10
+        uses: WaleedAshraf/asyncapi-github-action@d31f1627ac7c24132e7c4e4b89948d43b619685a # v0.0.10
         with:
           filepath: './core-api/websocket/UCR-core-asyncapi.yaml'
 
       - name: Validate integration-api
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.10
+        uses: WaleedAshraf/asyncapi-github-action@d31f1627ac7c24132e7c4e4b89948d43b619685a # v0.0.10
         with:
           filepath: './integration-api/UCR-integration-asyncapi.yaml'
 
       - name: Validate dock-api
-        uses: WaleedAshraf/asyncapi-github-action@v0.0.10
+        uses: WaleedAshraf/asyncapi-github-action@d31f1627ac7c24132e7c4e4b89948d43b619685a # v0.0.10
         with:
           filepath: './dock-api/UCD2-asyncapi.yaml'
 
@@ -73,7 +75,7 @@ jobs:
 
       - name: Deploy core API GH page
         if: github.ref == 'refs/heads/main' || contains(github.ref, 'tags/v')
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           branch: gh-pages
           folder: ./static/api/ws
@@ -81,7 +83,7 @@ jobs:
 
       - name: Deploy integration API GH page
         if: github.ref == 'refs/heads/main' || contains(github.ref, 'tags/v')
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           branch: gh-pages
           folder: ./static/api/integration
@@ -89,7 +91,7 @@ jobs:
 
       - name: Deploy dock API GH page
         if: github.ref == 'refs/heads/main' || contains(github.ref, 'tags/v')
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@d92aa235d04922e8f08b40ce78cc5442fcfbfa2f # v4.8.0
         with:
           branch: gh-pages
           folder: ./static/api/dock
