@@ -5,6 +5,7 @@
 # Developer Guide
 
 - [Remote Two user interface](remote-ui.md)
+- [User interface widgets](ui-widgets.md)
 - [Remote Two DNS-SD lookup](discovery.md)
 
 # Entity Documentation
@@ -20,6 +21,7 @@
   - [Sensor](entities/entity_sensor.md)
   - [IR-Emitter](entities/entity_ir_emitter.md)
   - [Select](entities/entity_select.md)
+  - [Number](entities/entity_number.md)
   - [Voice Assistant](entities/entity_voice_assistant.md)
 
 # Integration Drivers

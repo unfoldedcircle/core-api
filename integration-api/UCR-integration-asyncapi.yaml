@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.16.0-beta'
+  version: '0.17.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -790,6 +790,16 @@ components:
               cmd_id: select_option
               params:
                 option: "Option 1"
+        - payload:
+            kind: req
+            id: 129
+            msg: entity_command
+            msg_data:
+              entity_type: number
+              entity_id: number-1
+              cmd_id: set_value
+              params:
+                value: 42
 
     # --- events
     entity_change:
@@ -1927,7 +1937,7 @@ components:
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `button`, `switch`, `light`, `cover`, `media_player`,
-        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `voice_assistant`. 
+        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `number`, `voice_assistant`. 
 
         See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
         for more information.
@@ -2630,6 +2640,59 @@ components:
               description: The select entity has no options.
               type: object
 
+    number:
+      description: |
+        The number entity holds a single numeric value which can be read and set. It is the writable counterpart of the
+        `sensor` entity and is rendered as a slider or a value field with increment / decrement buttons.
+
+        The value range is defined by the integration driver in the entity options.
+
+        See [number entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_number.md)
+        for more information.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              description: |
+                The number entity has a single `value` feature which is always present, even if not specified.
+              type: array
+              items:
+                type: string
+                enum:
+                  - value
+            options:
+              type: object
+              properties:
+                min:
+                  description: Minimum value (inclusive).
+                  type: number
+                  default: 0
+                max:
+                  description: Maximum value (inclusive).
+                  type: number
+                  default: 100
+                step:
+                  description: |
+                    Step size between values. Smallest step size: 0.01.
+                    Also used as default step for the `increment` and `decrement` commands.
+                  type: number
+                  default: 1
+                decimals:
+                  description: Number of decimal places to show in the UI. 0 = integer value.
+                  type: integer
+                  minimum: 0
+                  default: 0
+                unit:
+                  description: Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.
+                  $ref: '#/components/schemas/languageText'
+                readable:
+                  description: |
+                    If set to false, the current value cannot be read from the device and the driver will not send
+                    `value` attribute updates. The remote keeps the last value sent to the driver.
+                  type: boolean
+                  default: true
+
     voice_assistant:
       description: |
         A voice assistant entity can be used to receive a microphone input stream suitable to send voice commands
@@ -2886,6 +2949,7 @@ components:
             - remote
             - ir_emitter
             - select
+            - number
             - voice_assistant
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
 
