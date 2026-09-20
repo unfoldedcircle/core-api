@@ -1,8 +1,12 @@
+# =============================================================================
+# GENERATED FILE — DO NOT EDIT.
+# Bundled from common schemas used in WS and REST APIs.
+# =============================================================================
 openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.46.0
+  version: 0.49.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1308,6 +1312,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -1983,6 +1990,9 @@ paths:
         - $ref: '#/components/parameters/has_instances'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -2301,6 +2311,9 @@ paths:
         - $ref: '#/components/parameters/enabled'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -2681,6 +2694,9 @@ paths:
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation.
@@ -2864,6 +2880,58 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+  /entities/{entityId}/state:
+    put:
+      tags:
+        - entities
+      summary: Set the power state of an entity.
+      description: |
+        Corrects the runtime power state of an entity ("fix entity state"): sets the `state` attribute to `ON` or `OFF`
+        **without sending any command to the device**. Use it when the recorded state drifted from reality, e.g. an
+        IR-controlled device that was switched with its original remote.
+
+        - The correction is runtime-only: it is not persisted, it is lost on restart, and a later state report from the
+          integration driver replaces it.
+        - An `entity_change` event with the full entity in `new_state` is emitted if the state actually changed.
+        - Supported entity types: `switch`, `light`, `climate`, `media_player`, `remote`, `activity`. Any other entity
+          type is refused with `422`.
+        - `activity`: the state is set without running the on- or off-sequence. Progress attributes from an earlier run
+          are removed. The prevent-sleep standby inhibitor is added (`ON`, if the activity has `prevent_sleep` set) or
+          removed (`OFF`). The request is refused with `409` while a sequence of that activity is still running — stop it
+          first with `activity.stop`. Afterwards the activity behaves as if its sequence had ended in the given state,
+          e.g. an `activity.off` command runs the off-sequence.
+        - `409` is also returned if the entity currently reports `UNAVAILABLE` (integration not connected).
+        - Access: requires the `admin` or `remote-ui` scope; other API keys are refused with `403`.
+        - An invalid value is refused with `400`, an unknown entity with `404`.
+      operationId: setEntityState
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: New power state
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntityStateUpdate'
+        required: true
+      responses:
+        '200':
+          description: Successful operation returning the entity with the corrected state in the response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
   /entities/{entityId}/media/browse:
@@ -3119,6 +3187,9 @@ paths:
         - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation
@@ -3310,6 +3381,82 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /activities/{entityId}/readiness:
+    get:
+      tags:
+        - activities
+      summary: Check whether an activity command can run right now.
+      description: |
+        Pre-flight check of an activity's `on` / `start` or `off` command: predicts the steps the run would execute
+        **right now** and checks for every command step whether its target can receive the command — entity present,
+        integration enabled and connected, IR emitter available, Bluetooth stack connected.
+
+        - The prediction is what the engine would execute, including the power-off steps an activity-group switch
+          prepends for the activity switched away from (`part: transition`, `switch_from`) and without the power-on steps
+          of devices already on. Nested activities and macros are expanded to their commands (`parents`).
+        - `ready` is the single verdict: `true` if the run would start and reach its final state, i.e. no blocked step
+          would abort it under `error_policy` (`aborting_steps` is `0`). Blocked steps the policy continues past do
+          not make it `false`; `blocked_steps` and the per-step `reason` show which devices would not be reached. A
+          step whose entity no longer exists is reported as `skipped` and never blocks, because the run skips it.
+        - Read-only: nothing is executed, stopped or changed. The check may be called while a sequence is running.
+        - It does **not** gate starting the activity: `activity.on` runs exactly as before, whatever the report says.
+        - Step indices use the same frame as the `step.index` of the sequence progress events.
+        - The report is a snapshot: re-check after an `integration_state`, `dock_state` or `ir_emitter_state` event.
+          The response is not cacheable.
+        - A not-ready report is a `200`. An unknown activity is `404`; a macro identifier, an unsupported `command` or a
+          malformed `lang` is `400`.
+      operationId: getActivityReadiness
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - name: command
+          in: query
+          description: The activity command to check. `start` is an alias of `on`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - 'on'
+              - start
+              - 'off'
+            default: 'on'
+        - $ref: '#/components/parameters/readiness_lang'
+        - name: error_policy
+          in: query
+          description: |
+            The error policy the start would run with — the same values and default as the `error_policy` parameter of
+            the `activity.on` / `activity.off` / `macro.run` command. It does not change which steps are checked; it
+            decides, per step class, whether a blocked step would abort the run (`aborts_run`, `aborting_steps`) and
+            with it the `ready` verdict: `continue_transition` continues past a blocked transition step, `abort` aborts
+            on any, `ignore_all` on none.
+            An unknown value is refused with `400`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - abort
+              - continue_transition
+              - ignore_all
+            default: continue_transition
+      responses:
+        '200':
+          description: Readiness report. Check `ready` for the verdict.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequenceReadiness'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -4039,6 +4186,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
         - $ref: '#/components/parameters/query'
       responses:
         '200':
@@ -4210,6 +4360,67 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /macros/{entityId}/readiness:
+    get:
+      tags:
+        - macros
+      summary: Check whether a macro can run right now.
+      description: |
+        Pre-flight check of a macro run: predicts the steps the run would execute **right now** and checks for every
+        command step whether its target can receive the command — entity present, integration enabled and connected,
+        IR emitter available, Bluetooth stack connected. Nested activities and macros are expanded to their commands
+        (`parents`).
+
+        - `ready` is the single verdict: `true` if the run would start and reach its final state, i.e. no blocked step
+          would abort it under `error_policy` (`aborting_steps` is `0`). Blocked steps the policy continues past do
+          not make it `false`; `blocked_steps` and the per-step `reason` show which devices would not be reached. A
+          step whose entity no longer exists is reported as `skipped` and never blocks, because the run skips it.
+        - Read-only: nothing is executed, stopped or changed. It does **not** gate `macro.run`.
+        - The report is a snapshot: re-check after an `integration_state`, `dock_state` or `ir_emitter_state` event.
+          The response is not cacheable.
+        - A not-ready report is a `200`. An unknown macro is `404`; an activity identifier or a malformed `lang` is
+          `400`.
+      operationId: getMacroReadiness
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/readiness_lang'
+        - name: error_policy
+          in: query
+          description: |
+            The error policy the start would run with — the same values and default as the `error_policy` parameter of
+            the `activity.on` / `activity.off` / `macro.run` command. It does not change which steps are checked; it
+            decides, per step class, whether a blocked step would abort the run (`aborts_run`, `aborting_steps`) and
+            with it the `ready` verdict: `continue_transition` continues past a blocked transition step, `abort` aborts
+            on any, `ignore_all` on none.
+            An unknown value is refused with `400`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - abort
+              - continue_transition
+              - ignore_all
+            default: continue_transition
+      responses:
+        '200':
+          description: Readiness report. Check `ready` for the verdict.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequenceReadiness'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -5326,6 +5537,8 @@ paths:
         and paging parameters.
 
         Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
+
+        The optional `q` text search filters the counted remotes, see the `GET` operation.
       operationId: getRemoteCount
       parameters:
         - name: kind
@@ -5334,6 +5547,7 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/RemoteKind'
+        - $ref: '#/components/parameters/query'
       responses:
         '200':
           description: Successful operation
@@ -5358,6 +5572,10 @@ paths:
         with `/remotes/{entityId}`.
 
         Only the IR-entity count is returned if no remote-`kind` query parameter is specified.
+
+        The optional `q` text search searches case-insensitive in the remote name, entity identifier and integration
+        name. All language variants of the name are searched. It is combined with the `kind` filter and applied before
+        paging, i.e. the `Pagination-Count` header contains the number of matching remotes.
       operationId: getRemotes
       parameters:
         - name: kind
@@ -5366,8 +5584,12 @@ paths:
           required: false
           schema:
             $ref: '#/components/schemas/RemoteKind'
+        - $ref: '#/components/parameters/query'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       responses:
         '200':
           description: Successful operation
@@ -8401,6 +8623,9 @@ paths:
       parameters:
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
       operationId: getVoiceAssistants
       responses:
         '200':
@@ -8449,6 +8674,8 @@ paths:
         - $ref: '#/components/parameters/active'
         - $ref: '#/components/parameters/page'
         - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
       responses:
         '200':
           description: Successful operation
@@ -9061,9 +9288,10 @@ paths:
       description: |
         Update one or more dock fields.
 
-        - If the dock is in an `active` connection state, then the `name`, `token` and `wifi` values are persisted in the
-          dock if provided in the request. The request fails with `503` service unavailable if the configuration can't be
-          set in the docking station.
+        - If the dock is in an `active` connection state, then the `name` and `wifi` values are persisted in the
+          dock if provided in the request. The `token` is also persisted if `change_dock_token` is not explicitly set to
+          `false`.
+          The request fails with `503` service unavailable if the configuration can't be set in the docking station.
         - An empty `custom_ws_url` value will remove the custom URL.
         - If the dock is not active, the values are only stored in the remote. A changed `token` will be used for the next
           connection attempt.
@@ -10739,6 +10967,7 @@ paths:
       tags:
         - system
       summary: Remove all standby inhibitors.
+      description: Removes all inhibitors created through the API. Internal inhibitors (ids prefixed with `uc:`) are not affected.
       operationId: deleteAllStandbyInhibitors
       responses:
         '200':
@@ -10787,7 +11016,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AmbientLight'
+                $ref: '#/components/schemas/AmbientLightResponse'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -11116,10 +11345,18 @@ paths:
       summary: Create a new Wifi network configuration.
       operationId: addWifiNetwork
       description: |
-        Add a new network configuration for the given SSID.  
+        Add a new network configuration for the given SSID.
         For an open network without password the `password` field must be omitted (do not send an empty password value).
 
-        ⚠️ Only WPA-PSK (pre shared keys) and open networks are supported!
+        The optional `security` field selects the security type (open, WPA/WPA2-PSK, WPA3-SAE, WPA2/WPA3 transition mode).
+        If omitted, a password creates the strongest profile the device's WiFi hardware supports: WPA2/WPA3 transition
+        mode on hardware with WPA3 support (connects to WPA2-only, transition and WPA3-only networks), WPA/WPA2-PSK
+        otherwise. Clients therefore do not need to determine the network's security type.
+        `WPA3_SAE` requires WPA3 support of the device's WiFi hardware, otherwise the request is rejected.
+
+        Set `hidden` to connect to a hidden network (non-broadcasting SSID).
+
+        ⚠️ WPA3-Enterprise, WPA-EAP and WEP networks are not supported!
       requestBody:
         content:
           application/json:
@@ -11227,8 +11464,14 @@ paths:
         - `ENABLE`: Enable a network. If no network is connected, it will be tried to connect to this network.
         - `DISABLE`: Disable a network. If the network is currently connected it will be disconnected.
         - `SELECT`: Select the given network and disable all others.
+        - `JOIN`: Connect to the given network and keep every other saved network enabled as fallback.
 
-        ⚠️ Attention: all network changes (enabled or disabled) are persisted!
+        All commands return as soon as the request is accepted; the outcome arrives as a WiFi
+        event (`wifi_change`).
+
+        `ENABLE` and `DISABLE` are persisted immediately. `SELECT` and `JOIN` are persisted only
+        once the connection to the network is confirmed: on failure or timeout the previous
+        enabled/disabled configuration is restored and nothing is persisted.
       operationId: wifiNetworkCommand
       parameters:
         - $ref: '#/components/parameters/wifi_id'
@@ -11360,6 +11603,55 @@ components:
       required: true
       schema:
         type: string
+    sort:
+      name: sort
+      in: query
+      description: |
+        Field to order the collection by:
+        - `name`: friendly name, case-insensitive. Localized names are resolved with the `lang`
+          parameter, defaulting to the configured system locale.
+        - `created`: record creation order. `sort=created&order=asc` returns the ordering used before
+          sorting was introduced (insertion order).
+
+        If omitted, items are sorted by friendly name.
+      required: false
+      schema:
+        type: string
+        enum:
+          - name
+          - created
+        default: name
+    order:
+      name: order
+      in: query
+      description: Sort direction. If omitted, ascending order is used.
+      required: false
+      schema:
+        type: string
+        enum:
+          - asc
+          - desc
+        default: asc
+    lang:
+      name: lang
+      in: query
+      description: |
+        Language used for friendly-name sorting, as a culture code: two-letter ISO 639-1 language
+        code with an optional ISO 3166 country code, e.g. `en`, `de`, `de_CH`.
+
+        The sort key of each item is resolved with the following fallback chain: exact culture code,
+        base language, first country variant of the base language, `en`, first `en` country variant,
+        the item's first language entry. If omitted, the configured system locale is used.
+
+        Sort keys are compared with the Unicode Collation Algorithm using the language-independent
+        root ordering: letters with diacritics sort at the position of their base letter (`Ärger`
+        between `Apfel` and `Berta`), and case and accent differences only break ties between
+        otherwise equal names.
+      required: false
+      schema:
+        type: string
+        pattern: ^[a-z]{2}(_[A-Z]{2})?$
+        example: de_CH
     driver_id:
       name: driverId
       in: path
@@ -11461,6 +11753,20 @@ components:
       required: false
       schema:
         type: boolean
+    readiness_lang:
+      name: lang
+      in: query
+      description: |
+        Language of the friendly names in the report, as a culture code: two-letter ISO 639-1 language
+        code with an optional ISO 3166 country code, e.g. `en`, `de`, `de_CH`. Same format and fallback
+        chain as the `lang` parameter of the collection endpoints: exact culture code, base language,
+        first country variant of the base language, `en`, first `en` country variant, the item's first
+        language entry. If omitted, the configured system locale is used.
+      required: false
+      schema:
+        type: string
+        pattern: ^[a-z]{2}(_[A-Z]{2})?$
+        example: de_CH
     button_id:
       name: buttonId
       in: path
@@ -12376,7 +12682,7 @@ components:
         id:
           description: Unique identifier of the setting to be returned with the entered value.
           type: string
-          maximum: 50
+          maxLength: 50
         label:
           $ref: '#/components/schemas/LanguageText'
         field:
@@ -12904,6 +13210,28 @@ components:
           type: array
           items:
             type: string
+    SequenceErrorPolicy:
+      description: |
+        How entity command failures are handled while an activity or macro sequence runs.
+
+        The policy applies per step class. *Transition steps* are the power-off commands of the activity an activity
+        group is switching away from: they are prepended to the incoming activity's sequence and therefore run under
+        the incoming activity's command, even though they belong to the outgoing one.
+
+        - `abort`: any failing command aborts the sequence, transition steps included.
+        - `continue_transition` (**default**): a failing transition step is continued past, so an unreachable device of
+          the activity being switched away from does not prevent the new activity from starting. The failure is still
+          reported: the outgoing activity ends in state `ERROR`, not `OFF`, because its devices may still be on. A
+          failing step of the activity's own sequence aborts it, as without a group switch.
+        - `ignore_all`: no failing command aborts the sequence and none is reported — the run reaches its normal final
+          state and the outgoing activity of a group switch is reported `OFF` even if its power-off failed. Use this to
+          force a start past known-unreachable devices. A missing entity is skipped as well.
+      type: string
+      default: continue_transition
+      enum:
+        - abort
+        - continue_transition
+        - ignore_all
     EntityCommand:
       description: |
         Entity command object. The `entity_id` only has to be specified if it's not already included as a parameter in the URL.
@@ -12917,11 +13245,36 @@ components:
 
             This identifier may change at any time and may not be used for logic decisions in a client!
             If entity specific information is required, the entity object must be loaded from the `entity_id`.
+
+            ### Stopping an activity or macro sequence
+
+            `activity.stop` and `macro.stop` abort a sequence that is still running, whether it is an
+            on-sequence, an off-sequence or a macro. The remaining steps are not executed and are not
+            resumed later; commands already sent to a device are **not** reversed. Once the sequence
+            has been aborted, the entity reports the `STOPPED` state.
+
+            Stopping is idempotent: if no sequence is running for the entity, the request still
+            succeeds and nothing is reported. This keeps a stop that races the natural end of a
+            sequence from failing.
+
+            The request is answered once the stopped sequence has fully wound down, so that a
+            follow-up command cannot overlap with it at a shared device. Aborting a step that is
+            already in flight can therefore delay the response by a few seconds.
           type: string
         params:
           description: |
             Optional command parameters as key / value pairs. See entity documentation for available parameters.
+
+            The parameters listed below are only interpreted by the activity and macro sequence commands
+            (`activity.on`, `activity.off`, `activity.start`, `macro.run`) and are ignored by every other entity.
+
+            They do **not** apply to `activity.stop` and `macro.stop`: those abort a running sequence
+            instead of executing one, and take no parameters.
           type: object
+          properties:
+            error_policy:
+              $ref: '#/components/schemas/SequenceErrorPolicy'
+          additionalProperties: true
       required:
         - cmd_id
       examples:
@@ -12930,6 +13283,25 @@ components:
           params:
             hue: 180
             saturation: 90
+    EntityPowerState:
+      type: string
+      description: Power state of an entity.
+      enum:
+        - 'ON'
+        - 'OFF'
+      examples:
+        - 'ON'
+    EntityStateUpdate:
+      type: object
+      description: |
+        Runtime power state correction of an entity. See "Set the power state of an entity" operation.
+      properties:
+        state:
+          $ref: '#/components/schemas/EntityPowerState'
+      required:
+        - state
+      examples:
+        - state: 'OFF'
     MediaClass:
       description: |
         The media class is for browser/structure semantics.
@@ -13653,6 +14025,290 @@ components:
                 $ref: '#/components/schemas/EntityId'
             sequences:
               $ref: '#/components/schemas/ActivitySequences'
+    ReadinessEntityRef:
+      type: object
+      description: Entity identifier with its friendly name in the report's language.
+      properties:
+        entity_id:
+          type: string
+        name:
+          type: string
+      required:
+        - entity_id
+        - name
+    ReadinessStepPart:
+      type: string
+      description: |
+        Which part of the run a step belongs to:
+        - `transition`: power-off step of the activity switched away from, prepended by the activity-group switch.
+        - `sequence`: step of the checked activity's or macro's own sequence.
+      enum:
+        - transition
+        - sequence
+    ReadinessReasonCode:
+      type: string
+      description: |
+        Why a step is blocked or skipped:
+        - `ENTITY_NOT_FOUND`: the entity no longer exists; the run skips the step (`skipped: true`, never blocking).
+        - `INTEGRATION_NOT_FOUND`: the entity's integration instance is not configured.
+        - `INTEGRATION_DISABLED`: the integration instance is disabled.
+        - `INTEGRATION_NOT_CONNECTED`: the integration driver is not connected; `state` carries the device state.
+        - `IR_EMITTER_NOT_AVAILABLE`: the IR emitter the command is sent through is not available (dock disconnected,
+          integration disconnected, emitter not registered); `emitter_id`, `device_type` and, for a dock, `dock_id`.
+        - `REMOTE_IR_OUTPUT_MISSING`: an internal IR remote-entity has no IR output configured.
+        - `BT_NOT_CONNECTED`: the Bluetooth stack is not connected (internal BT remote-entity).
+        - `NESTING_LIMIT`: a nested activity or macro is not expanded because it is nested too deeply or starts itself
+          again.
+        - `INVALID_COMMAND`: the step's command cannot be run by its entity as a sequence step, e.g. `activity.stop`.
+      enum:
+        - ENTITY_NOT_FOUND
+        - INTEGRATION_NOT_FOUND
+        - INTEGRATION_DISABLED
+        - INTEGRATION_NOT_CONNECTED
+        - IR_EMITTER_NOT_AVAILABLE
+        - REMOTE_IR_OUTPUT_MISSING
+        - BT_NOT_CONNECTED
+        - NESTING_LIMIT
+        - INVALID_COMMAND
+    ReadinessReason:
+      type: object
+      description: Why a step is blocked or skipped, with the details a client needs to explain it.
+      properties:
+        code:
+          $ref: '#/components/schemas/ReadinessReasonCode'
+        message:
+          type: string
+          description: |
+            English diagnostic containing the friendly names in the report's language. Clients localize the sentence
+            from `code` and the detail fields.
+        integration_id:
+          type: string
+        integration_name:
+          type: string
+          description: Friendly name of the integration in the report's language.
+        state:
+          type: string
+          description: Integration device state, e.g. `DISCONNECTED`.
+        emitter_id:
+          type: string
+        device_type:
+          type: string
+          description: IR emitter type, e.g. `DOCK`, `EXTERNAL`, `INTERNAL`.
+        dock_id:
+          type: string
+      required:
+        - code
+        - message
+    ReadinessStep:
+      type: object
+      description: One step of the predicted run.
+      properties:
+        index:
+          type: integer
+          description: |
+            1-based position in the top-level run — the same frame as `step.index` of the sequence progress events, so a
+            report can be correlated with a later run. A step of a nested sequence carries the index of the parent step
+            that starts it.
+        nested_index:
+          type: integer
+          description: 1-based position inside the nested sequence, for steps reached through `parents`.
+        part:
+          $ref: '#/components/schemas/ReadinessStepPart'
+        type:
+          type: string
+          enum:
+            - command
+            - delay
+        entity_id:
+          type: string
+          description: Target entity of a command step.
+        entity_type:
+          type: string
+          description: Entity type of the target, see the entity documentation.
+        name:
+          type: string
+          description: Friendly name of the target entity in the report's language.
+        cmd_id:
+          type: string
+          description: |
+            The command as the run dispatches it. A simple command of a remote-entity is reported as `remote.send`
+            (internal IR remote) or `remote.send_cmd` (integration remote) with the simple command in `params.command`.
+        params:
+          type: object
+          description: Command parameters as authored.
+          additionalProperties: true
+        delay:
+          type: integer
+          description: Delay in milliseconds of a delay step.
+        parents:
+          type: array
+          description: The activities and macros this step was reached through, outermost first.
+          items:
+            $ref: '#/components/schemas/ReadinessEntityRef'
+        ready:
+          type: boolean
+          description: The target can receive the command, or the run skips this step.
+        skipped:
+          type: boolean
+          description: |
+            The run skips this step because its entity no longer exists. Informational — a skipped step never blocks.
+            Only present when `true`.
+        aborts_run:
+          type: boolean
+          description: |
+            For a blocked step: whether the run would abort here under the checked `error_policy`. `false` when the
+            policy continues past it — a transition step under `continue_transition`, or any step under `ignore_all`.
+            Absent for ready and skipped steps.
+        reason:
+          $ref: '#/components/schemas/ReadinessReason'
+          description: Why the step is blocked or skipped. Absent for a ready step.
+      required:
+        - index
+        - part
+        - type
+        - ready
+    SequenceReadiness:
+      type: object
+      description: |
+        Readiness report of an activity command or macro run: the steps the run would execute right now and whether
+        every target can receive its command. `ready` is the single verdict a client needs — `true` if the run would
+        start and reach its final state, i.e. no blocked step would abort it under `error_policy` (`aborting_steps` is
+        `0`). Blocked steps the policy continues past — a transition step under `continue_transition`, any step under
+        `ignore_all` — do not make it `false`; `blocked_steps` and the per-step `ready` / `reason` still show which
+        devices would not be reached. A step whose entity no longer exists is *skipped* (as the run skips it) and never
+        blocks.
+
+        The report is a snapshot of the current device, integration, dock and Bluetooth state. Re-check after an
+        `integration_state`, `dock_state` or `ir_emitter_state` event.
+      properties:
+        entity_id:
+          type: string
+          description: Activity or macro entity identifier.
+        entity_type:
+          type: string
+          enum:
+            - activity
+            - macro
+        cmd_id:
+          type: string
+          description: The checked command.
+          examples:
+            - activity.on
+            - activity.off
+            - macro.run
+        lang:
+          type: string
+          description: Language every friendly name in this report was resolved for.
+          examples:
+            - de
+        error_policy:
+          type: string
+          description: The error policy the run was checked against, the same option the start command takes.
+          enum:
+            - abort
+            - continue_transition
+            - ignore_all
+        ready:
+          type: boolean
+          description: '`true` if no blocked step would abort the run under `error_policy`, i.e. `aborting_steps` is `0`.'
+        total_steps:
+          type: integer
+          description: Number of top-level steps, nested sequences counted as one step each.
+        transition_steps:
+          type: integer
+          description: |
+            Number of leading power-off steps prepended by an activity-group switch. Only set for an activity `on` /
+            `start` command while another activity of the same group is on.
+        blocked_steps:
+          type: integer
+          description: 'Number of steps with `ready: false`, nested steps included.'
+        skipped_steps:
+          type: integer
+          description: Number of skipped steps, nested steps included.
+        aborting_steps:
+          type: integer
+          description: Number of blocked steps at which the run would abort under `error_policy`.
+        switch_from:
+          $ref: '#/components/schemas/ReadinessEntityRef'
+          description: The activity an activity-group switch would switch away from. Absent if none.
+        steps:
+          type: array
+          description: Every step of the predicted run, in execution order, nested sequences expanded in place.
+          items:
+            $ref: '#/components/schemas/ReadinessStep'
+      required:
+        - entity_id
+        - entity_type
+        - cmd_id
+        - lang
+        - error_policy
+        - ready
+        - total_steps
+        - transition_steps
+        - blocked_steps
+        - skipped_steps
+        - aborting_steps
+        - steps
+      examples:
+        - entity_id: uc.main.watch_tv
+          entity_type: activity
+          cmd_id: activity.on
+          lang: de
+          error_policy: continue_transition
+          ready: true
+          total_steps: 4
+          transition_steps: 1
+          blocked_steps: 1
+          skipped_steps: 1
+          aborting_steps: 0
+          switch_from:
+            entity_id: uc.main.listen_music
+            name: Musik hören
+          steps:
+            - index: 1
+              part: transition
+              type: command
+              entity_id: denon.media_player.avr
+              entity_type: media_player
+              name: Denon AVR
+              cmd_id: media_player.off
+              ready: false
+              aborts_run: false
+              reason:
+                code: INTEGRATION_NOT_CONNECTED
+                message: integration 'Denon AVR' (denon) is DISCONNECTED
+                integration_id: denon
+                integration_name: Denon AVR
+                state: DISCONNECTED
+            - index: 2
+              part: sequence
+              type: command
+              entity_id: uc.main.remote.tv
+              entity_type: remote
+              name: Fernseher
+              cmd_id: remote.send
+              params:
+                command: POWER_ON
+              ready: true
+            - index: 3
+              part: sequence
+              type: delay
+              delay: 2000
+              ready: true
+            - index: 4
+              nested_index: 1
+              part: sequence
+              type: command
+              entity_id: uc.main.switch.old_lamp
+              cmd_id: switch.on
+              parents:
+                - entity_id: uc.main.macro.lights
+                  name: Licht
+              ready: true
+              skipped: true
+              reason:
+                code: ENTITY_NOT_FOUND
+                message: 'entity uc.main.switch.old_lamp no longer exists: the step is skipped'
     ActivityUserInterfacePageUpdate:
       type: object
       properties:
@@ -13673,7 +14329,15 @@ components:
         - `OFF`: No included activity is running.
         - `ACTIVE`: An included activity is running.
         - `RUNNING`: An included activity is currently running, e.g. either switching activities, or turning off.
-        - `ERROR`: An included activity is in an error state.
+        - `ERROR`: An included activity is in an error state, **and** no included activity is on or running.
+
+        The group state answers whether something is happening in the group, so `RUNNING` and `ACTIVE` take
+        precedence over `ERROR`. An activity state is not persisted and is only reset when that activity runs
+        again, so an error would otherwise mark the group as faulty indefinitely — including while another
+        activity in the group runs normally.
+
+        The precise fault signal is the `state` of the individual activity, which is unchanged and returned in
+        the same response.
       type: string
       enum:
         - 'OFF'
@@ -14215,7 +14879,10 @@ components:
           description: Friendly name of the IR emitter device.
           type: string
         active:
-          description: Emitter device is active or currently not available.
+          description: |
+            Emitter device is available: it is enabled and its transport is connected
+            (`DOCK`: the dock session is `ACTIVE`, `EXTERNAL`: the integration is `CONNECTED`).
+            Availability changes are announced with the `ir_emitter_state` WebSocket event.
           type: boolean
         capabilities:
           description: Optional capabilities of the emitter.
@@ -15601,6 +16268,31 @@ components:
             - max
       required:
         - grid
+    EntityCmdParamCommon:
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        param:
+          description: Parameter name.
+          type: string
+        type:
+          description: Parameter type.
+          type: string
+          enum:
+            - number
+            - bool
+            - regex
+            - enum
+            - selection
+        optional:
+          description: Parameter is optional.
+          type: boolean
+          default: false
+      required:
+        - name
+        - param
+        - type
     EntityCmdParamNumber:
       type: object
       description: |
@@ -15717,31 +16409,6 @@ components:
           items:
             source: attributes
             field: source_list
-    EntityCmdParamCommon:
-      type: object
-      properties:
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        param:
-          description: Parameter name.
-          type: string
-        type:
-          description: Parameter type.
-          type: string
-          enum:
-            - number
-            - bool
-            - regex
-            - enum
-            - selection
-        optional:
-          description: Parameter is optional.
-          type: boolean
-          default: false
-      required:
-        - name
-        - param
-        - type
     EntityCommandMetadata:
       type: object
       properties:
@@ -16286,6 +16953,16 @@ components:
           type: string
           maxLength: 40
           description: Access token to connect to the dock.
+        change_dock_token:
+          type: boolean
+          default: true
+          description: |
+            Change access token in the dock or only in the remote.
+
+            - If set to true, the token is also changed in the Dock.  
+              This requires an active Dock connection, otherwise error 503 is returned.
+            - If set to false, the token is only changed in the Remote.  
+              The new token is used in the next connection attempt.
         active:
           type: boolean
           description: Auto connect to dock when network is available.
@@ -16763,7 +17440,7 @@ components:
       type: object
       properties:
         id:
-          description: Unique identifier, automatically created if not specified.
+          description: Unique identifier, automatically created if not specified. The prefix `uc:` is reserved for internal inhibitors and rejected.
           type: string
           minLength: 1
           maxLength: 64
@@ -16792,6 +17469,9 @@ components:
           maximum: 65535
       required:
         - intensity
+    AmbientLightResponse:
+      type: object
+      $ref: '#/components/schemas/AmbientLight'
     AvailableSystemUpdate:
       type: object
       properties:
@@ -16993,6 +17673,28 @@ components:
         - REASSOCIATE
         - ENABLE_ALL_NETWORKS
         - DISABLE_ALL_NETWORKS
+    WifiSecurity:
+      description: |
+        WiFi network security type:
+        - `OPEN`: open network without authentication
+        - `WPA_PSK`: WPA / WPA2 Personal with a pre-shared key
+        - `WPA3_SAE`: WPA3 Personal (SAE) only. Requires WPA3 support of the device's WiFi hardware,
+          otherwise the request is rejected.
+        - `WPA2_WPA3`: WPA2 / WPA3 transition mode. Falls back to WPA2-PSK on devices without
+          WPA3 hardware support.
+
+        When omitted in a create-network request, a password creates the strongest profile the
+        device's WiFi hardware supports (`WPA2_WPA3` with WPA3 support, `WPA_PSK` otherwise);
+        without a password an open network is created.
+
+        In scan results the field is omitted if the network security could not be classified
+        (e.g. WEP or EAP-only networks).
+      type: string
+      enum:
+        - OPEN
+        - WPA_PSK
+        - WPA3_SAE
+        - WPA2_WPA3
     AccessPointScan:
       type: object
       properties:
@@ -17008,6 +17710,8 @@ components:
         auth:
           description: Authentication method
           type: string
+        security:
+          $ref: '#/components/schemas/WifiSecurity'
         ssid:
           description: |
             SSID network name as friendly UTF-8 representation. Use this name to present the network to users, but not for
@@ -17058,6 +17762,8 @@ components:
         secured:
           description: Secured or unsecured network
           type: boolean
+        security:
+          $ref: '#/components/schemas/WifiSecurity'
         state:
           $ref: '#/components/schemas/NetworkState'
       required:
@@ -17089,14 +17795,21 @@ components:
           maxLength: 64
         password:
           type: string
-          minLength: 1
+          minLength: 8
           maxLength: 63
+        security:
+          $ref: '#/components/schemas/WifiSecurity'
+        hidden:
+          description: |
+            Hidden network: actively probe for the SSID to connect to a non-broadcasting access point.
+          type: boolean
     WifiNetworkCmd:
       type: string
       enum:
         - ENABLE
         - DISABLE
         - SELECT
+        - JOIN
     ModifyWifiNetwork:
       type: object
       properties:
@@ -17223,8 +17936,6 @@ components:
         - id
     ActivityRequest:
       $ref: '#/components/schemas/ActivityCreate'
-    AmbientLightResponse:
-      $ref: '#/components/schemas/AmbientLight'
   responses:
     Err500InternalServerError:
       description: The server has encountered a situation it does not know how to handle. Retrying the same request will most likely result in the same error.
