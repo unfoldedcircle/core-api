@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.49.0
+### Added
+- Activity and Macro readiness checks.
+
 ## 0.48.3
 ### Fixed
 - Schema validation errors found with the new redocly-cli linter.

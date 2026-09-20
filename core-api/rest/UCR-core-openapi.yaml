@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.48.3
+  version: 0.49.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -3387,6 +3387,82 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+  /activities/{entityId}/readiness:
+    get:
+      tags:
+        - activities
+      summary: Check whether an activity command can run right now.
+      description: |
+        Pre-flight check of an activity's `on` / `start` or `off` command: predicts the steps the run would execute
+        **right now** and checks for every command step whether its target can receive the command — entity present,
+        integration enabled and connected, IR emitter available, Bluetooth stack connected.
+
+        - The prediction is what the engine would execute, including the power-off steps an activity-group switch
+          prepends for the activity switched away from (`part: transition`, `switch_from`) and without the power-on steps
+          of devices already on. Nested activities and macros are expanded to their commands (`parents`).
+        - `ready` is the single verdict: `true` if the run would start and reach its final state, i.e. no blocked step
+          would abort it under `error_policy` (`aborting_steps` is `0`). Blocked steps the policy continues past do
+          not make it `false`; `blocked_steps` and the per-step `reason` show which devices would not be reached. A
+          step whose entity no longer exists is reported as `skipped` and never blocks, because the run skips it.
+        - Read-only: nothing is executed, stopped or changed. The check may be called while a sequence is running.
+        - It does **not** gate starting the activity: `activity.on` runs exactly as before, whatever the report says.
+        - Step indices use the same frame as the `step.index` of the sequence progress events.
+        - The report is a snapshot: re-check after an `integration_state`, `dock_state` or `ir_emitter_state` event.
+          The response is not cacheable.
+        - A not-ready report is a `200`. An unknown activity is `404`; a macro identifier, an unsupported `command` or a
+          malformed `lang` is `400`.
+      operationId: getActivityReadiness
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - name: command
+          in: query
+          description: The activity command to check. `start` is an alias of `on`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - 'on'
+              - start
+              - 'off'
+            default: 'on'
+        - $ref: '#/components/parameters/readiness_lang'
+        - name: error_policy
+          in: query
+          description: |
+            The error policy the start would run with — the same values and default as the `error_policy` parameter of
+            the `activity.on` / `activity.off` / `macro.run` command. It does not change which steps are checked; it
+            decides, per step class, whether a blocked step would abort the run (`aborts_run`, `aborting_steps`) and
+            with it the `ready` verdict: `continue_transition` continues past a blocked transition step, `abort` aborts
+            on any, `ignore_all` on none.
+            An unknown value is refused with `400`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - abort
+              - continue_transition
+              - ignore_all
+            default: continue_transition
+      responses:
+        '200':
+          description: Readiness report. Check `ready` for the verdict.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequenceReadiness'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /activities/{entityId}/buttons:
     get:
       tags:
@@ -4284,6 +4360,67 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /macros/{entityId}/readiness:
+    get:
+      tags:
+        - macros
+      summary: Check whether a macro can run right now.
+      description: |
+        Pre-flight check of a macro run: predicts the steps the run would execute **right now** and checks for every
+        command step whether its target can receive the command — entity present, integration enabled and connected,
+        IR emitter available, Bluetooth stack connected. Nested activities and macros are expanded to their commands
+        (`parents`).
+
+        - `ready` is the single verdict: `true` if the run would start and reach its final state, i.e. no blocked step
+          would abort it under `error_policy` (`aborting_steps` is `0`). Blocked steps the policy continues past do
+          not make it `false`; `blocked_steps` and the per-step `reason` show which devices would not be reached. A
+          step whose entity no longer exists is reported as `skipped` and never blocks, because the run skips it.
+        - Read-only: nothing is executed, stopped or changed. It does **not** gate `macro.run`.
+        - The report is a snapshot: re-check after an `integration_state`, `dock_state` or `ir_emitter_state` event.
+          The response is not cacheable.
+        - A not-ready report is a `200`. An unknown macro is `404`; an activity identifier or a malformed `lang` is
+          `400`.
+      operationId: getMacroReadiness
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+        - $ref: '#/components/parameters/readiness_lang'
+        - name: error_policy
+          in: query
+          description: |
+            The error policy the start would run with — the same values and default as the `error_policy` parameter of
+            the `activity.on` / `activity.off` / `macro.run` command. It does not change which steps are checked; it
+            decides, per step class, whether a blocked step would abort the run (`aborts_run`, `aborting_steps`) and
+            with it the `ready` verdict: `continue_transition` continues past a blocked transition step, `abort` aborts
+            on any, `ignore_all` on none.
+            An unknown value is refused with `400`.
+          required: false
+          schema:
+            type: string
+            enum:
+              - abort
+              - continue_transition
+              - ignore_all
+            default: continue_transition
+      responses:
+        '200':
+          description: Readiness report. Check `ready` for the verdict.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SequenceReadiness'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -11616,6 +11753,20 @@ components:
       required: false
       schema:
         type: boolean
+    readiness_lang:
+      name: lang
+      in: query
+      description: |
+        Language of the friendly names in the report, as a culture code: two-letter ISO 639-1 language
+        code with an optional ISO 3166 country code, e.g. `en`, `de`, `de_CH`. Same format and fallback
+        chain as the `lang` parameter of the collection endpoints: exact culture code, base language,
+        first country variant of the base language, `en`, first `en` country variant, the item's first
+        language entry. If omitted, the configured system locale is used.
+      required: false
+      schema:
+        type: string
+        pattern: ^[a-z]{2}(_[A-Z]{2})?$
+        example: de_CH
     button_id:
       name: buttonId
       in: path
@@ -13874,6 +14025,290 @@ components:
                 $ref: '#/components/schemas/EntityId'
             sequences:
               $ref: '#/components/schemas/ActivitySequences'
+    ReadinessEntityRef:
+      type: object
+      description: Entity identifier with its friendly name in the report's language.
+      properties:
+        entity_id:
+          type: string
+        name:
+          type: string
+      required:
+        - entity_id
+        - name
+    ReadinessStepPart:
+      type: string
+      description: |
+        Which part of the run a step belongs to:
+        - `transition`: power-off step of the activity switched away from, prepended by the activity-group switch.
+        - `sequence`: step of the checked activity's or macro's own sequence.
+      enum:
+        - transition
+        - sequence
+    ReadinessReasonCode:
+      type: string
+      description: |
+        Why a step is blocked or skipped:
+        - `ENTITY_NOT_FOUND`: the entity no longer exists; the run skips the step (`skipped: true`, never blocking).
+        - `INTEGRATION_NOT_FOUND`: the entity's integration instance is not configured.
+        - `INTEGRATION_DISABLED`: the integration instance is disabled.
+        - `INTEGRATION_NOT_CONNECTED`: the integration driver is not connected; `state` carries the device state.
+        - `IR_EMITTER_NOT_AVAILABLE`: the IR emitter the command is sent through is not available (dock disconnected,
+          integration disconnected, emitter not registered); `emitter_id`, `device_type` and, for a dock, `dock_id`.
+        - `REMOTE_IR_OUTPUT_MISSING`: an internal IR remote-entity has no IR output configured.
+        - `BT_NOT_CONNECTED`: the Bluetooth stack is not connected (internal BT remote-entity).
+        - `NESTING_LIMIT`: a nested activity or macro is not expanded because it is nested too deeply or starts itself
+          again.
+        - `INVALID_COMMAND`: the step's command cannot be run by its entity as a sequence step, e.g. `activity.stop`.
+      enum:
+        - ENTITY_NOT_FOUND
+        - INTEGRATION_NOT_FOUND
+        - INTEGRATION_DISABLED
+        - INTEGRATION_NOT_CONNECTED
+        - IR_EMITTER_NOT_AVAILABLE
+        - REMOTE_IR_OUTPUT_MISSING
+        - BT_NOT_CONNECTED
+        - NESTING_LIMIT
+        - INVALID_COMMAND
+    ReadinessReason:
+      type: object
+      description: Why a step is blocked or skipped, with the details a client needs to explain it.
+      properties:
+        code:
+          $ref: '#/components/schemas/ReadinessReasonCode'
+        message:
+          type: string
+          description: |
+            English diagnostic containing the friendly names in the report's language. Clients localize the sentence
+            from `code` and the detail fields.
+        integration_id:
+          type: string
+        integration_name:
+          type: string
+          description: Friendly name of the integration in the report's language.
+        state:
+          type: string
+          description: Integration device state, e.g. `DISCONNECTED`.
+        emitter_id:
+          type: string
+        device_type:
+          type: string
+          description: IR emitter type, e.g. `DOCK`, `EXTERNAL`, `INTERNAL`.
+        dock_id:
+          type: string
+      required:
+        - code
+        - message
+    ReadinessStep:
+      type: object
+      description: One step of the predicted run.
+      properties:
+        index:
+          type: integer
+          description: |
+            1-based position in the top-level run — the same frame as `step.index` of the sequence progress events, so a
+            report can be correlated with a later run. A step of a nested sequence carries the index of the parent step
+            that starts it.
+        nested_index:
+          type: integer
+          description: 1-based position inside the nested sequence, for steps reached through `parents`.
+        part:
+          $ref: '#/components/schemas/ReadinessStepPart'
+        type:
+          type: string
+          enum:
+            - command
+            - delay
+        entity_id:
+          type: string
+          description: Target entity of a command step.
+        entity_type:
+          type: string
+          description: Entity type of the target, see the entity documentation.
+        name:
+          type: string
+          description: Friendly name of the target entity in the report's language.
+        cmd_id:
+          type: string
+          description: |
+            The command as the run dispatches it. A simple command of a remote-entity is reported as `remote.send`
+            (internal IR remote) or `remote.send_cmd` (integration remote) with the simple command in `params.command`.
+        params:
+          type: object
+          description: Command parameters as authored.
+          additionalProperties: true
+        delay:
+          type: integer
+          description: Delay in milliseconds of a delay step.
+        parents:
+          type: array
+          description: The activities and macros this step was reached through, outermost first.
+          items:
+            $ref: '#/components/schemas/ReadinessEntityRef'
+        ready:
+          type: boolean
+          description: The target can receive the command, or the run skips this step.
+        skipped:
+          type: boolean
+          description: |
+            The run skips this step because its entity no longer exists. Informational — a skipped step never blocks.
+            Only present when `true`.
+        aborts_run:
+          type: boolean
+          description: |
+            For a blocked step: whether the run would abort here under the checked `error_policy`. `false` when the
+            policy continues past it — a transition step under `continue_transition`, or any step under `ignore_all`.
+            Absent for ready and skipped steps.
+        reason:
+          $ref: '#/components/schemas/ReadinessReason'
+          description: Why the step is blocked or skipped. Absent for a ready step.
+      required:
+        - index
+        - part
+        - type
+        - ready
+    SequenceReadiness:
+      type: object
+      description: |
+        Readiness report of an activity command or macro run: the steps the run would execute right now and whether
+        every target can receive its command. `ready` is the single verdict a client needs — `true` if the run would
+        start and reach its final state, i.e. no blocked step would abort it under `error_policy` (`aborting_steps` is
+        `0`). Blocked steps the policy continues past — a transition step under `continue_transition`, any step under
+        `ignore_all` — do not make it `false`; `blocked_steps` and the per-step `ready` / `reason` still show which
+        devices would not be reached. A step whose entity no longer exists is *skipped* (as the run skips it) and never
+        blocks.
+
+        The report is a snapshot of the current device, integration, dock and Bluetooth state. Re-check after an
+        `integration_state`, `dock_state` or `ir_emitter_state` event.
+      properties:
+        entity_id:
+          type: string
+          description: Activity or macro entity identifier.
+        entity_type:
+          type: string
+          enum:
+            - activity
+            - macro
+        cmd_id:
+          type: string
+          description: The checked command.
+          examples:
+            - activity.on
+            - activity.off
+            - macro.run
+        lang:
+          type: string
+          description: Language every friendly name in this report was resolved for.
+          examples:
+            - de
+        error_policy:
+          type: string
+          description: The error policy the run was checked against, the same option the start command takes.
+          enum:
+            - abort
+            - continue_transition
+            - ignore_all
+        ready:
+          type: boolean
+          description: '`true` if no blocked step would abort the run under `error_policy`, i.e. `aborting_steps` is `0`.'
+        total_steps:
+          type: integer
+          description: Number of top-level steps, nested sequences counted as one step each.
+        transition_steps:
+          type: integer
+          description: |
+            Number of leading power-off steps prepended by an activity-group switch. Only set for an activity `on` /
+            `start` command while another activity of the same group is on.
+        blocked_steps:
+          type: integer
+          description: 'Number of steps with `ready: false`, nested steps included.'
+        skipped_steps:
+          type: integer
+          description: Number of skipped steps, nested steps included.
+        aborting_steps:
+          type: integer
+          description: Number of blocked steps at which the run would abort under `error_policy`.
+        switch_from:
+          $ref: '#/components/schemas/ReadinessEntityRef'
+          description: The activity an activity-group switch would switch away from. Absent if none.
+        steps:
+          type: array
+          description: Every step of the predicted run, in execution order, nested sequences expanded in place.
+          items:
+            $ref: '#/components/schemas/ReadinessStep'
+      required:
+        - entity_id
+        - entity_type
+        - cmd_id
+        - lang
+        - error_policy
+        - ready
+        - total_steps
+        - transition_steps
+        - blocked_steps
+        - skipped_steps
+        - aborting_steps
+        - steps
+      examples:
+        - entity_id: uc.main.watch_tv
+          entity_type: activity
+          cmd_id: activity.on
+          lang: de
+          error_policy: continue_transition
+          ready: true
+          total_steps: 4
+          transition_steps: 1
+          blocked_steps: 1
+          skipped_steps: 1
+          aborting_steps: 0
+          switch_from:
+            entity_id: uc.main.listen_music
+            name: Musik hören
+          steps:
+            - index: 1
+              part: transition
+              type: command
+              entity_id: denon.media_player.avr
+              entity_type: media_player
+              name: Denon AVR
+              cmd_id: media_player.off
+              ready: false
+              aborts_run: false
+              reason:
+                code: INTEGRATION_NOT_CONNECTED
+                message: integration 'Denon AVR' (denon) is DISCONNECTED
+                integration_id: denon
+                integration_name: Denon AVR
+                state: DISCONNECTED
+            - index: 2
+              part: sequence
+              type: command
+              entity_id: uc.main.remote.tv
+              entity_type: remote
+              name: Fernseher
+              cmd_id: remote.send
+              params:
+                command: POWER_ON
+              ready: true
+            - index: 3
+              part: sequence
+              type: delay
+              delay: 2000
+              ready: true
+            - index: 4
+              nested_index: 1
+              part: sequence
+              type: command
+              entity_id: uc.main.switch.old_lamp
+              cmd_id: switch.on
+              parents:
+                - entity_id: uc.main.macro.lights
+                  name: Licht
+              ready: true
+              skipped: true
+              reason:
+                code: ENTITY_NOT_FOUND
+                message: 'entity uc.main.switch.old_lamp no longer exists: the step is skipped'
     ActivityUserInterfacePageUpdate:
       type: object
       properties:
@@ -14444,7 +14879,10 @@ components:
           description: Friendly name of the IR emitter device.
           type: string
         active:
-          description: Emitter device is active or currently not available.
+          description: |
+            Emitter device is available: it is enabled and its transport is connected
+            (`DOCK`: the dock session is `ACTIVE`, `EXTERNAL`: the integration is `CONNECTED`).
+            Availability changes are announced with the `ir_emitter_state` WebSocket event.
           type: boolean
         capabilities:
           description: Optional capabilities of the emitter.

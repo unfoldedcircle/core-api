@@ -10,6 +10,11 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.38.0-beta
+### Added
+- `get_sequence_readiness` for checking whether an activity command or a macro can run right now.
+- Infrared-related messages for REST Core-API feature parity.
+
 ## 0.37.2-beta
 ### Added
 - `get_network_state` for getting the current IP connectivity state.
