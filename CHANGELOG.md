@@ -9,6 +9,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 _Changes in the next release_
 
 ### Added
+- Integration-API driver setup flow:
+  - The setup process is no longer bounded by fixed timeouts. The Remote keeps a session alive while a client renews
+    it and, while running on battery, caps it with a budget derived from the battery charge level.
+  - New `integrationSetupError` values: `DRIVER_UNAVAILABLE`, `INVALID_INPUT`, `ABORTED`, `ALREADY_CONFIGURED` and
+    `NOT_SUPPORTED`.
+  - New optional `error_message` in the `driver_setup_change` event, to show a driver-provided reason to the user.
+  - Rejected user input can be corrected in place (`state: WAIT_USER_ACTION` with `error: INVALID_INPUT`) instead of
+    failing the whole setup.
+  - New optional `language` in `setup_driver`, so a driver can answer in the user interface language only.
+  - Requires a Remote reporting API version `0.19.0` or newer; drivers using the new values declare `min_core_api`.
+- Readiness check for activity and macro sequences.
 - Bluetooth HID peripheral support.
 - Custom integration installation. 
 - Integration-API: add `get_runtime_info` request message to retrieve driver runtime information from the Remote.
