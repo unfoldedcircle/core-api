@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.49.0
+  version: 0.52.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -279,6 +279,85 @@ paths:
                   - id=; HttpOnly; Path=/; Max-Age=0; Expires=Sat, 26 Jun 2021 12:05:09 GMT
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
+  /pub/auth/callback:
+    get:
+      tags:
+        - external-token
+      summary: 🧪 Public callback endpoint for OAuth2 authorization responses.
+      description: |
+        OAuth2 authorization callback endpoint for the Authorization Code grant.
+
+        This endpoint is intended to be used as the redirect URI target for external systems that support OAuth2
+        authorization code flow. After the user authorizes the client at the external authorization server, the
+        authorization server redirects the user agent back with either:
+
+        - a successful authorization response containing `code` and typically `state`, or
+        - an error response containing `error` and optional error details.
+
+        A successful callback contains `code`. Error callbacks contain `error` instead and do not include a usable
+        authorization code.
+
+        The callback is processed by the Remote to continue the OAuth2 flow and store the resulting OAuth2 token data for
+        the corresponding external system or integration driver.
+
+        Clients should not call this endpoint directly except for development or testing of OAuth2 flows.
+
+        The `state` parameter should be treated as an opaque value used for request correlation and CSRF protection.
+        If a `state` value was included in the authorization request, the authorization server must return that exact value
+        in the callback response.
+
+        This endpoint implements the authorization response handling defined by OAuth 2.0, RFC 6749:
+        - [Section 4.1: Authorization Code Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1)
+        - [Section 4.1.2: Authorization Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2)
+        - [Section 4.1.2.1: Error Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1)
+        - [Section 10.12: Cross-Site Request Forgery](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12)
+
+        ### 🚧 Unfolded Circle OAuth redirect service
+
+        The Remote does not have a web browser for the OAuth2 authorization flow, and it is usually not reachable on a
+        public address. To solve this, Unfolded Circle offers a static redirect page on a public address.
+
+        In practice, the authorization server redirects the user agent to the public Unfolded Circle redirect page first.
+        That page then forwards the callback parameters to the target Remote on the local network through the browser
+        running on the user's device.
+
+        The redirect service is only responsible for browser-side forwarding of the callback. The Remote address is not
+        stored server-side by Unfolded Circle; it is only kept in the user's browser.
+      operationId: oauth2Callback
+      parameters:
+        - name: code
+          in: query
+          description: Authorization code returned by the OAuth2 authorization server on successful user authorization.
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: Opaque state value returned by the authorization server. Used for request correlation and CSRF protection.
+          schema:
+            type: string
+        - name: error
+          in: query
+          description: OAuth2 authorization error code returned by the authorization server instead of an authorization code.
+          schema:
+            type: string
+        - name: error_description
+          in: query
+          description: Human-readable error description returned by the authorization server.
+          schema:
+            type: string
+        - name: error_uri
+          in: query
+          description: URI identifying a human-readable web page with additional information about the error.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: HTML response shown in the user's browser after the OAuth2 authorization callback has been processed or forwarded.
+          content:
+            text/html:
+              schema:
+                type: string
+      security: []
   /auth/api_keys:
     head:
       tags:
@@ -497,85 +576,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Scopes'
-  /auth/callback:
-    get:
-      tags:
-        - external-token
-      summary: 🧪 Public callback endpoint for OAuth2 authorization responses.
-      description: |
-        OAuth2 authorization callback endpoint for the Authorization Code grant.
-
-        This endpoint is intended to be used as the redirect URI target for external systems that support OAuth2
-        authorization code flow. After the user authorizes the client at the external authorization server, the
-        authorization server redirects the user agent back with either:
-
-        - a successful authorization response containing `code` and typically `state`, or
-        - an error response containing `error` and optional error details.
-
-        A successful callback contains `code`. Error callbacks contain `error` instead and do not include a usable
-        authorization code.
-
-        The callback is processed by the Remote to continue the OAuth2 flow and store the resulting OAuth2 token data for
-        the corresponding external system or integration driver.
-
-        Clients should not call this endpoint directly except for development or testing of OAuth2 flows.
-
-        The `state` parameter should be treated as an opaque value used for request correlation and CSRF protection.
-        If a `state` value was included in the authorization request, the authorization server must return that exact value
-        in the callback response.
-
-        This endpoint implements the authorization response handling defined by OAuth 2.0, RFC 6749:
-        - [Section 4.1: Authorization Code Grant](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1)
-        - [Section 4.1.2: Authorization Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2)
-        - [Section 4.1.2.1: Error Response](https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.2.1)
-        - [Section 10.12: Cross-Site Request Forgery](https://datatracker.ietf.org/doc/html/rfc6749#section-10.12)
-
-        ### 🚧 Unfolded Circle OAuth redirect service
-
-        The Remote does not have a web browser for the OAuth2 authorization flow, and it is usually not reachable on a
-        public address. To solve this, Unfolded Circle offers a static redirect page on a public address.
-
-        In practice, the authorization server redirects the user agent to the public Unfolded Circle redirect page first.
-        That page then forwards the callback parameters to the target Remote on the local network through the browser
-        running on the user's device.
-
-        The redirect service is only responsible for browser-side forwarding of the callback. The Remote address is not
-        stored server-side by Unfolded Circle; it is only kept in the user's browser.
-      operationId: oauth2Callback
-      parameters:
-        - name: code
-          in: query
-          description: Authorization code returned by the OAuth2 authorization server on successful user authorization.
-          schema:
-            type: string
-        - name: state
-          in: query
-          description: Opaque state value returned by the authorization server. Used for request correlation and CSRF protection.
-          schema:
-            type: string
-        - name: error
-          in: query
-          description: OAuth2 authorization error code returned by the authorization server instead of an authorization code.
-          schema:
-            type: string
-        - name: error_description
-          in: query
-          description: Human-readable error description returned by the authorization server.
-          schema:
-            type: string
-        - name: error_uri
-          in: query
-          description: URI identifying a human-readable web page with additional information about the error.
-          schema:
-            type: string
-      responses:
-        '200':
-          description: HTML response shown in the user's browser after the OAuth2 authorization callback has been processed or forwarded.
-          content:
-            text/html:
-              schema:
-                type: string
-      security: []
   /auth/external:
     get:
       tags:
@@ -1760,6 +1760,24 @@ paths:
 
         Emits the WebSocket event `integration_setup_change` with `event_type: START`.
 
+        Session lifetime:
+        - While the device is charging a setup session has no maximum duration. It lives while a client keeps it
+          alive with the `PUT /intg/setup/:driver_id/keepalive` operation (see `keepalive_timeout_sec` in the
+          response) and ends on completion, on abort (`DELETE`), when the keep-alive lease expires (`STOP` event
+          with `state: ERROR`, `error: TIMEOUT`), or when the integration driver becomes unavailable
+          (`error: DRIVER_UNAVAILABLE`).
+        - While the device runs on battery the session is additionally bounded by a budget: 5 minutes below 10 %
+          battery, 10 minutes below 20 %, 20 minutes below 30 %, otherwise 30 minutes. The budget starts when the
+          device went on battery — the start of the session, or the moment the charger was removed — and it is
+          removed again as soon as the device charges. A falling battery level can shorten it, but never to less
+          than a minute from the present. When it expires the session ends like a keep-alive lease expiry, with
+          `state: ERROR` and `error: TIMEOUT`; `setup_limit_reason` tells the two apart. The budget is reported by
+          `setup_limit_active`, `setup_expires_in_sec` and `setup_limit_reason` in every setup response and every
+          `integration_setup_change` event. What a setup started now would get is reported before it starts, as
+          `operation_budget_sec` / `operation_budget_reason` in `GET /system/power`.
+        - `language`: optional user interface language passed to the driver, so it can return page texts and error
+          messages in one language. Defaults to the configured device language.
+
         Request body:
         - `name`: optional integration name. If not specified the name of the integration driver is used.
         - `setup_data`: optional driver setting values corresponding to the driver's `setup_data_schema` object.
@@ -1792,6 +1810,8 @@ paths:
                   value:
                     id: sim-test
                     state: SETUP
+                    language: en
+                    keepalive_timeout_sec: 300
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -1833,12 +1853,10 @@ paths:
         response message. There are also WebSocket `integration_setup_change` event messages for state changes to avoid
         polling.
 
-        Defined setup states:
-        - `SETUP`: setup is running and configuring the integration. 
-        - `WAIT_USER_ACTION`: user input is required to continue the setup process. See `require_user_action` in response
-           for the required user input. Provide the requested data with the `PUT` operation.
-        - `OK`: setup process has been completed successfully, the integration driver can now be used.
-        - `ERROR`: the setup process failed. Check the `error` field for more information.
+        See `IntegrationSetupState` for the defined setup states and `IntegrationSetupError` for the error codes.
+
+        Reading the status does not renew the keep-alive lease of the session, use
+        `PUT /intg/setup/:driver_id/keepalive` for that.
       operationId: getIntegrationSetupStatus
       parameters:
         - $ref: '#/components/parameters/driver_id'
@@ -1860,18 +1878,28 @@ paths:
         - integrations
       summary: Provide requested integration setup data.
       description: |
-        Set required data to configure the integration driver or continue the setup process.
-
-        Defined user actions to set in the request body `action` field:
-        - `input_values`: if the user was requested to enter settings, e.g. connection or credential parameters to a device
-          or service.
-        - `confirm`: response to the user action `confirmation`. Set to `true` if the user had to perform an action like
-          pressing a button on a device and then confirms the action with continuing the setup process.  
+        Set required data to configure the integration driver or continue the setup process. The session must be in
+        state `WAIT_USER_ACTION` and the request body must match the requested `require_user_action`:
+        - `input_values`: if the user was requested to enter settings (`require_user_action.input`), e.g. connection
+          or credential parameters to a device or service.
+        - `confirm`: response to the user action `require_user_action.confirmation`. Set to `true` if the user had to
+          perform an action like pressing a button on a device and then confirms the action with continuing the setup
+          process.  
           The `false` value is prepared for yes / no choices.
 
-        The `state` field in the response message indicate the current state of the setup process. Use the `GET` operation
-        to poll for state updates or listen to the corresponding WebSocket `integration_setup_change` event messages with
-        `event_type: SETUP`.
+        Providing user data renews the keep-alive lease of the session.
+
+        The `state` field in the response message indicates the current state of the setup process. Use the `GET`
+        operation to poll for state updates or listen to the corresponding WebSocket `integration_setup_change` event
+        messages with `event_type: SETUP`. If the driver rejects the input, the next change carries
+        `state: WAIT_USER_ACTION`, `error: INVALID_INPUT`, an optional `error_message` and the input page again: the
+        setup continues and the user can correct the input.
+
+        Response status codes:
+        - `400`: the session is not waiting for user input, or the request body does not match the requested user
+          action, or the driver rejected the input values.
+        - `404`: no setup session exists for the given `driver_id`.
+        - `503`: the integration driver is not connected.
       operationId: setIntegrationUserData
       parameters:
         - $ref: '#/components/parameters/driver_id'
@@ -1920,13 +1948,49 @@ paths:
 
         Depending on the integration driver, a started setup process cannot be aborted.
 
-        Emits the WebSocket event `integration_setup_change` with `event_type: STOP`.
+        Emits the WebSocket event `integration_setup_change` with `event_type: STOP` and, for a session that was still
+        running, `state: ERROR` and `error: ABORTED`.
       operationId: stopIntegrationSetup
       parameters:
         - $ref: '#/components/parameters/driver_id'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+  /intg/setup/{driverId}/keepalive:
+    put:
+      tags:
+        - integrations
+      summary: Keep the integration setup session alive.
+      description: |
+        Renew the keep-alive lease of a running setup session.
+
+        A setup session has no maximum duration, but it ends with `state: ERROR` and `error: TIMEOUT` if no client
+        renews it within `keepalive_timeout_sec` (reported in every `IntegrationSetupInfo`). Call this operation
+        periodically while the setup dialog is open — at most every `keepalive_timeout_sec / 3` — and immediately when
+        the client application returns to the foreground, since browsers throttle timers of hidden pages.
+
+        Providing user data with `PUT /intg/setup/:driver_id` also renews the lease; reading the status with `GET` does
+        not. The lease can be renewed in any non-final state.
+
+        Response status codes:
+        - `404`: no setup session exists for the given `driver_id`, e.g. because the lease already expired. Start a new
+          setup process.
+      operationId: keepIntegrationSetupAlive
+      parameters:
+        - $ref: '#/components/parameters/driver_id'
+      responses:
+        '200':
+          description: Lease renewed, current setup state.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrationSetupInfo'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -3399,16 +3463,33 @@ paths:
 
         - The prediction is what the engine would execute, including the power-off steps an activity-group switch
           prepends for the activity switched away from (`part: transition`, `switch_from`) and without the power-on steps
-          of devices already on. Nested activities and macros are expanded to their commands (`parents`).
+          of devices already on — those are reported in `omitted` instead, so the plan can be reconciled with the
+          sequence as authored. Nested activities and macros are expanded to their commands (`parents`).
         - `ready` is the single verdict: `true` if the run would start and reach its final state, i.e. no blocked step
           would abort it under `error_policy` (`aborting_steps` is `0`). Blocked steps the policy continues past do
           not make it `false`; `blocked_steps` and the per-step `reason` show which devices would not be reached. A
           step whose entity no longer exists is reported as `skipped` and never blocks, because the run skips it.
         - Read-only: nothing is executed, stopped or changed. The check may be called while a sequence is running.
         - It does **not** gate starting the activity: `activity.on` runs exactly as before, whatever the report says.
-        - Step indices use the same frame as the `step.index` of the sequence progress events.
-        - The report is a snapshot: re-check after an `integration_state`, `dock_state` or `ir_emitter_state` event.
-          The response is not cacheable.
+        - Step indices use the same frame as the `step.index` of the sequence progress events. Every step also carries
+          `authored_index`, its position in the sequence as stored, so a reported problem can be pointed at the row that
+          causes it — discard the report rather than re-use its positions once the sequence is edited.
+        - `reason.group_id` identifies the cause: it is equal for exactly those steps blocked by the same thing, so n
+          blocked steps collapse to k problems without the client guessing the rule. Treat it as opaque.
+        - Every friendly name in the report is resolved for `lang`, the checked activity's own `name` included.
+        - A step that starts a nested activity or macro which is already running is reported blocked, and that target's
+          own steps are not listed — the run would be refused there rather than execute them.
+        - A step is checked against its target entity's own availability as well as its integration's: an entity the
+          system has lost is reported `ENTITY_UNAVAILABLE` even while its driver is connected.
+        - An internal IR remote-entity's step is checked against its configured IR output as a whole: the emitter must
+          be available **and** the configured port must exist on it now (`REMOTE_IR_OUTPUT_INVALID`, with the port in
+          `reason.port_id`). The port is validated when the remote is saved, but an emitter's port set can change
+          under a stored port.
+        - The report is a snapshot taken at `timestamp`. The response is not cacheable.
+        - `depends_on` names the resources the verdict rests on — the integrations, IR emitters and docks the check
+          consulted, and whether it consulted the Bluetooth stack. Re-check a report when a `dock_state`,
+          `integration_state` or `ir_emitter_state` event names one of them, and leave every other report alone. It
+          covers availability only; which devices are already on also shapes the run.
         - A not-ready report is a `200`. An unknown activity is `404`; a macro identifier, an unsupported `command` or a
           malformed `lang` is `400`.
       operationId: getActivityReadiness
@@ -3429,8 +3510,10 @@ paths:
         - name: error_policy
           in: query
           description: |
-            The error policy the start would run with — the same values and default as the `error_policy` parameter of
-            the `activity.on` / `activity.off` / `macro.run` command. It does not change which steps are checked; it
+            The error policy the start would run with — the same values as the `error_policy` parameter of the
+            `activity.on` / `activity.off` / `macro.run` command, resolved the same way: if omitted, the activity's
+            stored `error_policy` option applies, then `continue_transition` (a macro has no stored option). It does
+            not change which steps are checked; it
             decides, per step class, whether a blocked step would abort the run (`aborts_run`, `aborting_steps`) and
             with it the `ready` verdict: `continue_transition` continues past a blocked transition step, `abort` aborts
             on any, `ignore_all` on none.
@@ -3442,7 +3525,6 @@ paths:
               - abort
               - continue_transition
               - ignore_all
-            default: continue_transition
       responses:
         '200':
           description: Readiness report. Check `ready` for the verdict.
@@ -4382,8 +4464,25 @@ paths:
           not make it `false`; `blocked_steps` and the per-step `reason` show which devices would not be reached. A
           step whose entity no longer exists is reported as `skipped` and never blocks, because the run skips it.
         - Read-only: nothing is executed, stopped or changed. It does **not** gate `macro.run`.
-        - The report is a snapshot: re-check after an `integration_state`, `dock_state` or `ir_emitter_state` event.
-          The response is not cacheable.
+        - Step indices use the same frame as the `step.index` of the sequence progress events. Every step also carries
+          `authored_index`, its position in the sequence as stored, so a reported problem can be pointed at the row that
+          causes it. A macro run rewrites nothing, so `omitted` is always empty here.
+        - `reason.group_id` identifies the cause: it is equal for exactly those steps blocked by the same thing, so n
+          blocked steps collapse to k problems without the client guessing the rule. Treat it as opaque.
+        - Every friendly name in the report is resolved for `lang`, the checked macro's own `name` included.
+        - A step that starts a nested activity or macro which is already running is reported blocked, and that target's
+          own steps are not listed — the run would be refused there rather than execute them.
+        - A step is checked against its target entity's own availability as well as its integration's: an entity the
+          system has lost is reported `ENTITY_UNAVAILABLE` even while its driver is connected.
+        - An internal IR remote-entity's step is checked against its configured IR output as a whole: the emitter must
+          be available **and** the configured port must exist on it now (`REMOTE_IR_OUTPUT_INVALID`, with the port in
+          `reason.port_id`). The port is validated when the remote is saved, but an emitter's port set can change
+          under a stored port.
+        - The report is a snapshot taken at `timestamp`. The response is not cacheable.
+        - `depends_on` names the resources the verdict rests on — the integrations, IR emitters and docks the check
+          consulted, and whether it consulted the Bluetooth stack. Re-check a report when a `dock_state`,
+          `integration_state` or `ir_emitter_state` event names one of them, and leave every other report alone. It
+          covers availability only; which devices are already on also shapes the run.
         - A not-ready report is a `200`. An unknown macro is `404`; an activity identifier or a malformed `lang` is
           `400`.
       operationId: getMacroReadiness
@@ -4393,20 +4492,18 @@ paths:
         - name: error_policy
           in: query
           description: |
-            The error policy the start would run with — the same values and default as the `error_policy` parameter of
-            the `activity.on` / `activity.off` / `macro.run` command. It does not change which steps are checked; it
-            decides, per step class, whether a blocked step would abort the run (`aborts_run`, `aborting_steps`) and
-            with it the `ready` verdict: `continue_transition` continues past a blocked transition step, `abort` aborts
-            on any, `ignore_all` on none.
+            The error policy the run would execute under — `abort` (default) or `ignore_all`, as for the `macro.run`
+            command's `error_policy` parameter. A macro run has no transition steps, so `continue_transition` is
+            accepted for compatibility but equals `abort`, and the report names `abort`. The policy does not change
+            which steps are checked; it decides whether a blocked step would abort the run (`aborts_run`,
+            `aborting_steps`) and with it the `ready` verdict: `abort` aborts on any blocked step, `ignore_all` on none.
             An unknown value is refused with `400`.
           required: false
           schema:
             type: string
             enum:
               - abort
-              - continue_transition
               - ignore_all
-            default: continue_transition
       responses:
         '200':
           description: Readiness report. Check `ready` for the verdict.
@@ -4452,38 +4549,12 @@ paths:
       responses:
         '200':
           description: Successful operation
-          headers:
-            Pagination-Count:
-              description: Total number of items.
-              schema:
-                type: integer
-            Pagination-Limit:
-              description: Number of returned items.
-              schema:
-                type: integer
-            Pagination-Page:
-              description: Current page number. 1-based.
-              schema:
-                type: integer
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      description: Manufacturer identification
-                      type: string
-                    name:
-                      description: Manufacturer name
-                      type: string
-                    custom:
-                      description: Flag indicating if this manufacturer was created by the user
-                      type: boolean
-                  required:
-                    - id
-                    - name
+                  $ref: '#/components/schemas/Manufacturer'
               examples:
                 default:
                   value:
@@ -4520,38 +4591,12 @@ paths:
       responses:
         '200':
           description: Successful operation
-          headers:
-            Pagination-Count:
-              description: Total number of items.
-              schema:
-                type: integer
-            Pagination-Limit:
-              description: Number of returned items.
-              schema:
-                type: integer
-            Pagination-Page:
-              description: Current page number. 1-based.
-              schema:
-                type: integer
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  type: object
-                  properties:
-                    id:
-                      description: Code set identifier
-                      type: string
-                    name:
-                      description: Device name
-                      type: string
-                    custom:
-                      description: Flag indicating if this manufacturer was created by the user
-                      type: boolean
-                  required:
-                    - id
-                    - name
+                  $ref: '#/components/schemas/ManufacturerCodeSet'
               examples:
                 default:
                   value:
@@ -6138,6 +6183,35 @@ paths:
                   id: 12
                   confirm: true
         required: true
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    delete:
+      tags:
+        - remotes
+      summary: Forget a paired Bluetooth remote.
+      description: |
+        Clear the Bluetooth bond of a BT-remote entity. The entity itself is kept: only the
+        pairing information is removed, so the remote has to be paired again before it can be
+        used.
+
+        Response codes:
+        - `400 Bad Request`: if the entity is not a BT-remote entity.
+        - `404 Not Found`: if the entity does not exist.
+        - `503 Service Unavailable`: BT is switched off, or the service is not responding.
+      operationId: forgetBtRemote
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
       responses:
         '200':
           $ref: '#/components/responses/SuccessMessage'
@@ -8126,6 +8200,11 @@ paths:
       description: |
         Change one or multiple network settings.
 
+        A `wifi.band` the device cannot use (`a` on a device whose `bands` list does not contain it)
+        is rejected with `400`. A band change takes effect after the next restart: the running
+        WiFi connection is not touched and the configuration reports `restart_required` until
+        the device restarts.
+
         ⚠️ The `wake_on_wlan` field is deprecated, please use `wifi.wake_on_wlan` instead.
         - If `wake_on_wlan` is specified, it will also be stored in `wifi.wake_on_wlan`! 
 
@@ -8240,6 +8319,11 @@ paths:
       summary: Modify advanced wifi network settings.
       description: |
         Change one or multiple advanced wifi network settings.
+
+        A `band` the device cannot use (`a` on a device whose `bands` list does not contain it)
+        is rejected with `400`. A band change takes effect after the next restart: the running
+        WiFi connection is not touched and the configuration reports `restart_required` until
+        the device restarts.
       operationId: updateWifiNetworkSettings
       requestBody:
         content:
@@ -9534,10 +9618,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  id:
-                    type: string
+                $ref: '#/components/schemas/DockUpdateProgress'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -9902,6 +9983,77 @@ paths:
           $ref: '#/components/responses/Err404NotFound'
         '503':
           $ref: '#/components/responses/Err503ServiceUnavailable'
+  /docks/devices/{dockId}/ir/learn:
+    get:
+      tags:
+        - dock
+      summary: Get IR learning status and results.
+      description: |
+        The current status and if the dock is in IR learning mode, any learned codes will be returned.
+      operationId: irLearningStatus
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: IR learning status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IrStatus'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    post:
+      tags:
+        - dock
+      summary: Start IR learning.
+      description: |
+        Puts the dock into IR learning mode. Use the GET status request to check on learned codes or DELETE to stop learning.
+      operationId: startIrLearning
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+        - name: timeout
+          in: query
+          description: 'Timeout in seconds to switch off learning mode. Default: 30'
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 255
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - dock
+      summary: Stop IR learning and clear results.
+      description: |
+        The current status and any learned codes will be returned. After this call any learned codes are no longer accessible
+        through the GET status call.
+      operationId: stopIrLearning
+      parameters:
+        - $ref: '#/components/parameters/dock_id'
+      responses:
+        '200':
+          description: IR learning status
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IrStatus'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /system:
     get:
       tags:
@@ -12839,8 +12991,21 @@ components:
       type: object
       additionalProperties:
         type: string
+    LanguageCode:
+      description: |
+        Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
+        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
+        separated by an underscore.
+        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
+      type: string
+      pattern: ^[a-z]{2}(_\w+)?$
     CreateIntegrationSetup:
       type: object
+      description: |
+        Start an integration driver setup session.
+
+        A session has no maximum duration: it lives while the client keeps it alive, see the `keepalive`
+        operation and `keepalive_timeout_sec` in `IntegrationSetupInfo`.
       properties:
         driver_id:
           $ref: '#/components/schemas/DriverId'
@@ -12851,16 +13016,53 @@ components:
         reconfigure:
           description: Reconfigure an already configured integration.
           type: boolean
+        language:
+          description: |
+            Language of the user interface driving the setup. Passed to the integration driver with the setup start,
+            so the driver can return page texts and error messages in this language only, instead of all languages
+            it supports. Defaults to the configured language of the device.
+          $ref: '#/components/schemas/LanguageCode'
       required:
         - driver_id
     IntegrationSetupState:
+      description: |
+        State of a setup session:
+        - `NEW`: the session is being prepared: the driver is started and connected if required. Only observable
+          through a status read, and only briefly.
+        - `SETUP`: setup is running and configuring the integration.
+        - `WAIT_USER_ACTION`: user input is required to continue the setup process. See `require_user_action` for the
+          required user input. Provide the requested data with the user data operation.
+        - `OK`: setup process has been completed successfully, the integration driver can now be used.
+        - `ERROR`: the setup process failed. Check the `error` and `error_message` fields for more information.
       type: string
       enum:
+        - NEW
         - SETUP
         - WAIT_USER_ACTION
         - OK
         - ERROR
     IntegrationSetupError:
+      description: |
+        Why a setup ended in `state: ERROR`, or — for `INVALID_INPUT` — why the same input page is shown again.
+        The code is the machine-readable classifier; a driver may add a human-readable, language-specific
+        `error_message`.
+
+        - `NONE`: no error information available.
+        - `NOT_FOUND`: the driver could not find the device or service to set up.
+        - `CONNECTION_REFUSED`: the driver could not connect to the device or service.
+        - `AUTHORIZATION_ERROR`: the device or service rejected the credentials or the pairing.
+        - `TIMEOUT`: the keep-alive lease of the session expired without a renewal (see `keepalive_timeout_sec`),
+          or the driver timed out while communicating with the device or service.
+        - `DRIVER_UNAVAILABLE`: the integration driver is not running, not connected, or its connection could not be
+          re-established. Check the integration driver service and start the setup again.
+        - `INVALID_INPUT`: the provided user data was rejected. When reported together with
+          `state: WAIT_USER_ACTION` and a `require_user_action` page, the setup continues and the user can correct
+          the input.
+        - `ABORTED`: the setup was stopped by a client.
+        - `ALREADY_CONFIGURED`: the driver refused the setup because an integration instance already exists and no
+          reconfiguration was requested.
+        - `NOT_SUPPORTED`: the driver does not support the requested operation, e.g. reconfiguration.
+        - `OTHER`: any other error, see `error_message` if provided.
       type: string
       enum:
         - NONE
@@ -12868,6 +13070,11 @@ components:
         - CONNECTION_REFUSED
         - AUTHORIZATION_ERROR
         - TIMEOUT
+        - DRIVER_UNAVAILABLE
+        - INVALID_INPUT
+        - ABORTED
+        - ALREADY_CONFIGURED
+        - NOT_SUPPORTED
         - OTHER
     ConfirmationPage:
       description: |
@@ -12895,14 +13102,21 @@ components:
         - title
     IntegrationSetupInfo:
       type: object
-      description: Integration setup state
+      description: Integration setup session state.
       properties:
         id:
+          description: Setup session identifier, equals the `driver_id`.
           type: string
         state:
           $ref: '#/components/schemas/IntegrationSetupState'
         error:
           $ref: '#/components/schemas/IntegrationSetupError'
+        error_message:
+          description: |
+            Optional human-readable description of the error, provided by the integration driver. Language-specific
+            plain text (no Markdown): pick the user interface language, fall back to `en`, then to any entry, then to
+            a text for the `error` code. Reported until the next state change.
+          $ref: '#/components/schemas/LanguageText'
         require_user_action:
           description: If set, the setup process waits for the specified user action.
           oneOf:
@@ -12918,9 +13132,56 @@ components:
                   $ref: '#/components/schemas/ConfirmationPage'
               required:
                 - confirmation
+        reconfigure:
+          description: The session reconfigures an already configured integration.
+          type: boolean
+        language:
+          description: Language the driver was asked to use for page texts and messages.
+          $ref: '#/components/schemas/LanguageCode'
+        keepalive_timeout_sec:
+          description: |
+            Keep-alive lease of the session in seconds. The session ends with `state: ERROR`, `error: TIMEOUT` if it
+            is not renewed within this time. Renew it with the `keepalive` operation at most every third of this
+            value, and immediately after the client application returns to the foreground. Providing user data also
+            renews the lease; reading the status does not.
+          type: integer
+          minimum: 1
+        setup_limit_active:
+          description: |
+            A maximum duration is in force for this session because the device runs on battery. While the device is
+            charging there is no limit and this is `false`.
+          type: boolean
+        setup_expires_in_sec:
+          description: |
+            Seconds left of the battery budget. Only set while `setup_limit_active` is `true`. The value can grow
+            (the charger was removed again, which restarts the budget) or shrink (the battery level crossed a
+            threshold), but a shrink never moves it to less than 60 seconds from the present.
+          type: integer
+          minimum: 0
+        setup_limit_total_sec:
+          description: |
+            The full battery budget the remaining time is measured against, e.g. `1800`. Only set while
+            `setup_limit_active` is `true`, and it follows the battery level: crossing a threshold replaces it with
+            the shorter budget of the new level. Use it as the denominator of a countdown, with
+            `setup_expires_in_sec` as the numerator. It is not an elapsed-time reference: when a shortened budget
+            was clamped to the minimum remaining time, `setup_limit_total_sec - setup_expires_in_sec` is less than
+            the time the setup has actually been running on battery.
+          type: integer
+          minimum: 0
+        setup_limit_reason:
+          description: |
+            Why a limit is in force. Only set while `setup_limit_active` is `true`.
+            - `BATTERY`: the device runs on battery and the session gets the full budget.
+            - `LOW_BATTERY`: the battery level shortened the budget.
+          type: string
+          enum:
+            - BATTERY
+            - LOW_BATTERY
       required:
         - id
         - state
+        - keepalive_timeout_sec
+        - setup_limit_active
     IntegrationDrivers:
       type: array
       items:
@@ -13150,66 +13411,6 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         description:
           $ref: '#/components/schemas/LanguageText'
-    Entity:
-      description: |
-        Configured entity in the remote to be used in one or more user profiles.
-
-        See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
-        for more information.
-      type: object
-      properties:
-        entity_id:
-          $ref: '#/components/schemas/EntityId'
-        entity_type:
-          $ref: '#/components/schemas/EntityType'
-        integration_id:
-          $ref: '#/components/schemas/IntegrationId'
-        device_class:
-          description: |
-            Optional device type. This can be used by the UI to represent the entity with a different
-            icon, behaviour etc. See entity documentation for available device classes.
-          type: string
-        name:
-          $ref: '#/components/schemas/LanguageText'
-        icon:
-          $ref: '#/components/schemas/IconIdentifier'
-        features:
-          description: |
-            Supported features of the entity. See entity documentation for available features.
-          type: array
-          items:
-            type: string
-        options:
-          description: |
-            Feature options. See entity documentation for available options.
-          type: object
-        description:
-          $ref: '#/components/schemas/LanguageText'
-        attributes:
-          description: |
-            Dynamic entity attributes set by the integration driver. These are key/value pairs, see [integration entity
-            documentation](https://github.com/unfoldedcircle/core-api/tree/main/doc/entities) for detailed information.
-          type: object
-      required:
-        - entity_id
-        - entity_type
-        - integration_id
-        - name
-    Entities:
-      type: array
-      items:
-        $ref: '#/components/schemas/Entity'
-    EntityDeleteRequest:
-      type: object
-      description: |
-        Delete request model for multiple entities. Either specify `integration_id` or `entity_ids`.
-      properties:
-        integration_id:
-          type: string
-        entity_ids:
-          type: array
-          items:
-            type: string
     SequenceErrorPolicy:
       description: |
         How entity command failures are handled while an activity or macro sequence runs.
@@ -13226,6 +13427,10 @@ components:
         - `ignore_all`: no failing command aborts the sequence and none is reported — the run reaches its normal final
           state and the outgoing activity of a group switch is reported `OFF` even if its power-off failed. Use this to
           force a start past known-unreachable devices. A missing entity is skipped as well.
+
+        A macro run has no transition steps: for `macro.run` and the macro readiness check, `continue_transition` is
+        accepted but equals `abort`, and the run is reported under `abort`. A macro embedded in the power-off an
+        activity group switch prepends runs under the activity's policy instead.
       type: string
       default: continue_transition
       enum:
@@ -13270,6 +13475,10 @@ components:
 
             They do **not** apply to `activity.stop` and `macro.stop`: those abort a running sequence
             instead of executing one, and take no parameters.
+
+            If `error_policy` is omitted, an activity runs under the `error_policy` stored in its options, or under
+            `continue_transition` when none is stored. A macro has no stored option and runs under `abort`;
+            `continue_transition` is accepted for a macro but equals `abort`, since a macro run has no transition steps.
           type: object
           properties:
             error_policy:
@@ -13283,6 +13492,229 @@ components:
           params:
             hue: 180
             saturation: 90
+    SequenceProgressStep:
+      type: object
+      description: |
+        The step an activity or macro sequence is executing, published in the `step` attribute of the entity's
+        `entity_change` event and readable in the entity's `attributes` for as long as the run lasts.
+
+        One event is emitted per executed step, in order and never coalesced, plus a final event carrying the run's
+        state. A terminal `ERROR` event replays the step the run failed at, so a client that missed the progress
+        events still learns where it stopped; a successful final event (`ON`, `OFF`, `COMPLETED`) carries no `step`
+        at all.
+
+        **Two frames.** `index` counts the run the engine actually executes; `authored_index` is the position of the
+        same step in the sequence as stored. They differ whenever an activity-group switch prepends the power-off
+        steps of the activity being switched away from, or omits the power-on steps of devices already on. Use
+        `index` to correlate with a readiness report's `steps`, and `authored_index` to point at a row of the
+        sequence being edited.
+
+        ⚠️ These attributes exist only while a run is in progress and are **never persisted**: they are dropped from
+        the entity when the run reaches its final state, and are gone after a restart.
+      properties:
+        index:
+          type: integer
+          description: |
+            1-based position in the run the engine executes — the same frame as the `index` of a
+            `SequenceReadiness` step, so a report can be correlated with the run that follows it.
+        authored_index:
+          type: integer
+          description: |
+            1-based position of this step in the sequence as stored. Absent for a power-off step an activity-group
+            switch prepended: that step belongs to the activity named by `transition_from` and has no position in
+            the sequence being run.
+
+            It indexes the sequence **as stored when the run started**; a client that edits the sequence meanwhile
+            must stop using the positions of an in-flight run.
+        type:
+          type: string
+          enum:
+            - command
+            - delay
+        transition_from:
+          type: string
+          description: |
+            Entity identifier of the activity being switched away from, set only on a power-off step an
+            activity-group switch prepended, so a failure can be attributed to the activity being left rather than
+            to the one being started.
+
+            Its **presence is the step's class**: a step that carries it was prepended by an activity-group switch,
+            one that does not belongs to the sequence being run. There is no separate class field and none is
+            needed — a nested run never performs group logic, so no nested step is ever a prepended one. It
+            corresponds to `part` of a `SequenceReadiness` step.
+        switch_from_index:
+          type: integer
+          description: |
+            1-based position of this step in the **off-sequence of the activity named by `transition_from`** — a
+            different sequence from the one `authored_index` indexes, which is why it is its own field. Set only on
+            a prepended power-off step, and only where the switch took that step from a stored off-sequence:
+            under the default group strategy the power-off steps are synthesized from the outgoing activity's
+            included entities and there is no row to point at.
+
+            Same field and meaning as a `SequenceReadiness` step's `switch_from_index`.
+        command:
+          $ref: '#/components/schemas/EntityCommand'
+          description: The command of a `command` step, as authored.
+        entity:
+          type: object
+          description: Target entity of a `command` step. Only present once the entity has been resolved.
+          properties:
+            type:
+              $ref: '#/components/schemas/EntityType'
+            integration_id:
+              type: string
+            name:
+              $ref: '#/components/schemas/LanguageText'
+        delay:
+          type: integer
+          description: Delay in milliseconds of a `delay` step.
+        state:
+          type: string
+          description: '`ERROR` when the step failed. Absent while the step is running or when it succeeded.'
+          enum:
+            - ERROR
+        error_code:
+          type: integer
+          description: HTTP-equivalent status code of the failure.
+          examples:
+            - 404
+        error:
+          type: string
+          description: Reason phrase of `error_code`.
+          examples:
+            - Not Found
+        error_message:
+          type: string
+          description: English diagnostic of the failure.
+        skipped:
+          type: boolean
+          description: |
+            Present and `true` only on a step the run **walked past** because its target entity no longer exists.
+            The step keeps its error detail, so a client learns which device was left out, but the run did not fail
+            here and never stops here — an activity with a dangling entity starts by requirement.
+
+            Read it, with `aborts_run`, before presenting a step as a failure. A skipped step is never the step a
+            run failed at: a terminal `ERROR` event replays the step that actually stopped the run, never one that
+            was skipped. Same field and meaning as a `SequenceReadiness` step's `skipped`.
+        aborts_run:
+          type: boolean
+          description: |
+            Whether the run stops at this step. Present only on a failed step, and carries the same meaning as the
+            `aborts_run` of a `SequenceReadiness` step: `false` means the sequence's error policy lets the run
+            continue past this failure, so the run still reaches its normal final state and this step is the only
+            place the failure is reported.
+
+            A failed step is not by itself a failed run — read this field before presenting one as fatal. The
+            policy decides per step class: `abort` stops at any failure, `continue_transition` (the default)
+            continues past a failed power-off step an activity-group switch prepended but stops at a failure of the
+            sequence's own steps, and `ignore_all` continues past every failure.
+      required:
+        - index
+        - type
+      examples:
+        - index: 2
+          authored_index: 3
+          type: command
+          command:
+            entity_id: uc.main.switch.floor_lamp
+            cmd_id: switch.on
+          entity:
+            type: switch
+            integration_id: uc.main
+            name:
+              en: Floor lamp
+              de: Stehlampe
+        - index: 2
+          authored_index: 2
+          type: command
+          command:
+            entity_id: uc.main.switch.gone
+            cmd_id: switch.on
+          state: ERROR
+          skipped: true
+          aborts_run: false
+          error_code: 404
+          error: Not Found
+          error_message: entity not found
+        - index: 1
+          type: command
+          transition_from: uc.main.listen_music
+          switch_from_index: 1
+          command:
+            entity_id: denon.media_player.avr
+            cmd_id: media_player.off
+          state: ERROR
+          error_code: 503
+          error: Service Unavailable
+          error_message: integration 'Denon AVR' (denon) is DISCONNECTED
+          aborts_run: false
+    Entity:
+      description: |
+        Configured entity in the remote to be used in one or more user profiles.
+
+        See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
+        for more information.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+        integration_id:
+          $ref: '#/components/schemas/IntegrationId'
+        device_class:
+          description: |
+            Optional device type. This can be used by the UI to represent the entity with a different
+            icon, behaviour etc. See entity documentation for available device classes.
+          type: string
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        features:
+          description: |
+            Supported features of the entity. See entity documentation for available features.
+          type: array
+          items:
+            type: string
+        options:
+          description: |
+            Feature options. See entity documentation for available options.
+          type: object
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        attributes:
+          description: |
+            Dynamic entity attributes set by the integration driver. These are key/value pairs, see [integration entity
+            documentation](https://github.com/unfoldedcircle/core-api/tree/main/doc/entities) for detailed information.
+
+            While an activity or macro sequence is running, its entity additionally carries the progress attributes
+            `step` (a `SequenceProgressStep`), `total_steps`, `timeout`, `skip_missing_entities`, `error_policy` and,
+            for a nested run, `parent`. They exist only for the duration of the run and are never persisted.
+          type: object
+          properties:
+            step:
+              $ref: '#/components/schemas/SequenceProgressStep'
+      required:
+        - entity_id
+        - entity_type
+        - integration_id
+        - name
+    Entities:
+      type: array
+      items:
+        $ref: '#/components/schemas/Entity'
+    EntityDeleteRequest:
+      type: object
+      description: |
+        Delete request model for multiple entities. Either specify `integration_id` or `entity_ids`.
+      properties:
+        integration_id:
+          type: string
+        entity_ids:
+          type: array
+          items:
+            type: string
     EntityPowerState:
       type: string
       description: Power state of an entity.
@@ -13712,17 +14144,14 @@ components:
         - type: delay
           delay: 100
     CommandSequence:
-      description: Sequence of commands to execute.
+      description: |
+        Sequence of commands to execute. Each step is tagged by its `type` constant (`command` or
+        `delay`), which selects the step schema.
       type: array
       items:
         oneOf:
           - $ref: '#/components/schemas/CommandSequenceEntity'
           - $ref: '#/components/schemas/CommandSequenceDelay'
-        discriminator:
-          propertyName: type
-          mapping:
-            command: '#/components/schemas/CommandSequenceEntity'
-            delay: '#/components/schemas/CommandSequenceDelay'
     ActivitySequences:
       type: object
       properties:
@@ -13960,6 +14389,13 @@ components:
                     Checks if entities in the on- or off-sequence are available before running the sequence.
                   type: boolean
                   default: true
+                error_policy:
+                  description: |
+                    How entity command failures are handled when a sequence of this activity runs. Applies when the
+                    `activity.on` / `activity.off` / `activity.start` command carries no `error_policy` parameter; the
+                    command parameter overrides it. Reported as `continue_transition` when nothing is stored.
+                  allOf:
+                    - $ref: '#/components/schemas/SequenceErrorPolicy'
                 touch_slider:
                   $ref: '#/components/schemas/TouchSliderUiCfg'
                 voice_assistant:
@@ -14015,6 +14451,12 @@ components:
                 Readiness check when turning the activity on or off.
                 Checks if entities in the on- or off-sequence are available before running the sequence.
               type: boolean
+            error_policy:
+              description: |
+                How entity command failures are handled when a sequence of this activity runs and the command carries no
+                `error_policy` parameter. Same values as the command parameter; an unknown value is refused with `400`.
+              allOf:
+                - $ref: '#/components/schemas/SequenceErrorPolicy'
             touch_slider:
               $ref: '#/components/schemas/TouchSliderUiCfg'
             voice_assistant:
@@ -14025,6 +14467,152 @@ components:
                 $ref: '#/components/schemas/EntityId'
             sequences:
               $ref: '#/components/schemas/ActivitySequences'
+    ReadinessDependencies:
+      type: object
+      description: |
+        The availability resources the check consulted, whether or not each was available — the set the verdict
+        rests on. An `integration_state`, `dock_state` or `ir_emitter_state` event naming none of these cannot
+        change the report's verdict, so a client can re-check the reports that name the changed resource and leave
+        every other one alone. A resource listed here was consulted even where every step using it was ready: a
+        ready step carries no `reason` and therefore names no resource, which is why this set cannot be derived
+        from `steps`.
+
+        ⚠️ **Availability only, and only at the integration/emitter level.** An entity's own state is not listed
+        here and can change the verdict on its own: an unreachable device blocks its step
+        (`ENTITY_UNAVAILABLE`), and which devices are already in their target state decides which power-on steps an
+        activity-group switch omits. Both arrive on `entity_change`, not on the three device events. A client that
+        must react to them re-checks on the `entity_change` events of the entities named in `steps` and `omitted`.
+      properties:
+        integration_ids:
+          type: array
+          description: |
+            Integration instances whose state was consulted. Entities of the internal integration need no
+            integration and contribute nothing.
+          items:
+            type: string
+        emitter_ids:
+          type: array
+          description: IR emitters whose availability was consulted.
+          items:
+            type: string
+        dock_ids:
+          type: array
+          description: |
+            The docks among `emitter_ids`. Best effort: an emitter the check could not resolve is listed as an
+            emitter only, because nothing identifies it as a dock.
+          items:
+            type: string
+        bt:
+          type: boolean
+          description: |
+            The Bluetooth stack was consulted, i.e. a step sends through it. There is no Bluetooth state event yet,
+            so a client re-checks such a report on its own schedule.
+      required:
+        - integration_ids
+        - emitter_ids
+        - dock_ids
+        - bt
+    ReadinessGroupMember:
+      type: object
+      description: One other member of the checked activity's group.
+      properties:
+        entity_id:
+          type: string
+        name:
+          type: string
+          description: Friendly name in the report's language.
+        state:
+          type: string
+          description: |
+            State as the engine holds it. Not reduced to a flag: `OFF` and `STOPPED` differ in whether the member
+            may have left devices on, which is what decides whether the next start switches away from it.
+          enum:
+            - 'ON'
+            - 'OFF'
+            - RUNNING
+            - ERROR
+            - TIMEOUT
+            - STOPPED
+      required:
+        - entity_id
+        - name
+        - state
+    ReadinessActivityGroup:
+      type: object
+      description: |
+        The activity group the checked activity belongs to, and what its other members are doing.
+
+        Present only where the group shapes the plan — an activity `on` / `start` — so its absence there means the
+        activity is in no group rather than that nothing happened. A member's state decides both whether a switch
+        happens and which member it switches away from, so a report that named neither could not explain its own
+        plan: a sibling that is `OFF` produces no switch, one left in `STOPPED` or `ERROR` produces one.
+
+        ⚠️ The members' states are a snapshot at `timestamp` and change on `entity_change`, **not** on the events
+        `depends_on` covers — that set is scoped to availability resources.
+      properties:
+        group_id:
+          type: string
+        name:
+          type: string
+          description: Friendly name of the group in the report's language.
+        turn_off_unused_entities:
+          type: string
+          description: |
+            The group's strategy for powering off the outgoing activity's unused devices, which decides whether a
+            switch prepends any step at all.
+          enum:
+            - always
+            - in_off_sequence
+            - run_off_sequence
+            - never
+        members:
+          type: array
+          description: |
+            The group's **other** members. The checked activity is this report's `entity_id` and is not repeated
+            here. A member's state does not by itself say it will be switched away from — only `switch_from` names
+            that one.
+          items:
+            $ref: '#/components/schemas/ReadinessGroupMember'
+      required:
+        - group_id
+        - name
+        - turn_off_unused_entities
+        - members
+    ReadinessSwitchFrom:
+      type: object
+      description: |
+        The activity an activity-group switch would switch away from, and the state that selected it — whether it is
+        running, or was left behind by a run that did not finish normally.
+
+        Its own type rather than a `ReadinessEntityRef` with an optional state: that schema is also every nested
+        step's `parents` chain, where a state means nothing.
+      properties:
+        entity_id:
+          type: string
+        name:
+          type: string
+          description: Friendly name in the report's language.
+        state:
+          type: string
+          enum:
+            - 'ON'
+            - RUNNING
+            - ERROR
+            - TIMEOUT
+            - STOPPED
+      required:
+        - entity_id
+        - name
+        - state
+    ReadinessStepPart:
+      type: string
+      description: |
+        Which part of the run a step belongs to:
+        - `transition`: power-off step of the activity switched away from, prepended by the activity-group switch.
+        - `sequence`: step of the checked activity's or macro's own sequence.
+      enum:
+        - transition
+        - sequence
     ReadinessEntityRef:
       type: object
       description: Entity identifier with its friendly name in the report's language.
@@ -14036,15 +14624,6 @@ components:
       required:
         - entity_id
         - name
-    ReadinessStepPart:
-      type: string
-      description: |
-        Which part of the run a step belongs to:
-        - `transition`: power-off step of the activity switched away from, prepended by the activity-group switch.
-        - `sequence`: step of the checked activity's or macro's own sequence.
-      enum:
-        - transition
-        - sequence
     ReadinessReasonCode:
       type: string
       description: |
@@ -14056,10 +14635,31 @@ components:
         - `IR_EMITTER_NOT_AVAILABLE`: the IR emitter the command is sent through is not available (dock disconnected,
           integration disconnected, emitter not registered); `emitter_id`, `device_type` and, for a dock, `dock_id`.
         - `REMOTE_IR_OUTPUT_MISSING`: an internal IR remote-entity has no IR output configured.
+        - `REMOTE_IR_OUTPUT_INVALID`: an internal IR remote-entity's configured IR output names a port the emitter
+          does not have — `port_id` carries it. Distinct from `REMOTE_IR_OUTPUT_MISSING`: an output *is* configured,
+          and the fix is a different port on the same device rather than a different device. The stored port is
+          validated when the remote is saved, but an emitter's port set can change afterwards (a dock's model or
+          port mask, a dock replaced under the same id, a restore from a backup taken against another dock), and a
+          send then fails on it.
         - `BT_NOT_CONNECTED`: the Bluetooth stack is not connected (internal BT remote-entity).
+        - `ENTITY_UNAVAILABLE`: the target entity itself is unavailable — the system has lost the device even though
+          its integration is enabled and connected, e.g. an IP device that is powered off. `state` carries the
+          entity's state, and `integration_id` the integration to investigate at, where it is one a user can
+          configure. Only `UNAVAILABLE` blocks: `UNKNOWN` is what every device reads after a restart, since
+          entity attributes are never persisted, and `ERROR` on an activity describes a run that already failed and
+          does not stop a new one. Reported only when the step is not already blocked for its integration, its
+          emitter or Bluetooth, so losing one driver stays one cause rather than one per device.
         - `NESTING_LIMIT`: a nested activity or macro is not expanded because it is nested too deeply or starts itself
           again.
-        - `INVALID_COMMAND`: the step's command cannot be run by its entity as a sequence step, e.g. `activity.stop`.
+        - `INVALID_COMMAND`: the step's command cannot be run by its entity — `activity.stop` as a sequence step, or a
+          `remote.*` command an integration's remote-entity does not accept. Reported only where the run would refuse
+          the command itself; internal remote-entities are not validated, by the engine or by the check.
+        - `SEQUENCE_ALREADY_RUNNING`: the nested activity or macro this step would start is already running, so the
+          start would be refused. Its sequence is **not** expanded — the run fails at this step rather than executing
+          those steps, so they are not listed. Nothing is misconfigured: the target is busy. A step that *stops* a
+          target running a different command is not reported this way, because the engine preempts it instead.
+        - `ALREADY_IN_STATE`: the step is left out of the run because its target is already in the state it would bring
+          it to. Only used in `omitted`, never for a step of the predicted run.
       enum:
         - ENTITY_NOT_FOUND
         - INTEGRATION_NOT_FOUND
@@ -14067,9 +14667,13 @@ components:
         - INTEGRATION_NOT_CONNECTED
         - IR_EMITTER_NOT_AVAILABLE
         - REMOTE_IR_OUTPUT_MISSING
+        - REMOTE_IR_OUTPUT_INVALID
         - BT_NOT_CONNECTED
+        - ENTITY_UNAVAILABLE
         - NESTING_LIMIT
         - INVALID_COMMAND
+        - SEQUENCE_ALREADY_RUNNING
+        - ALREADY_IN_STATE
     ReadinessReason:
       type: object
       description: Why a step is blocked or skipped, with the details a client needs to explain it.
@@ -14081,24 +14685,59 @@ components:
           description: |
             English diagnostic containing the friendly names in the report's language. Clients localize the sentence
             from `code` and the detail fields.
+        group_id:
+          type: string
+          description: |
+            Identifier of the underlying cause: equal for exactly those steps blocked or skipped by the same thing —
+            one unavailable integration, one unavailable IR emitter, one disconnected Bluetooth stack, one missing
+            entity — so every client groups a report into the same set of problems. **Opaque**: compare it for
+            equality, never parse it. Its format is not part of the contract and may change.
+          examples:
+            - IR_EMITTER_NOT_AVAILABLE:uc.dock.living_room
         integration_id:
           type: string
+          description: |
+            The integration this reason is about: the one that is not configured, disabled or disconnected for an
+            `INTEGRATION_*` code, and — for `ENTITY_UNAVAILABLE` — the integration behind the unreachable entity, so
+            a client can offer it as the place to investigate.
+
+            Absent for an entity of an internal integration (an internal infrared or Bluetooth remote, an activity,
+            a macro): there is no integration a user can open, and a link to one would resolve to nothing.
         integration_name:
           type: string
           description: Friendly name of the integration in the report's language.
         state:
           type: string
-          description: Integration device state, e.g. `DISCONNECTED`.
+          description: |
+            The state that made the step not ready: the integration's device state for an integration reason (e.g.
+            `DISCONNECTED`), the entity's own state for `ENTITY_UNAVAILABLE`. The `code` says which.
         emitter_id:
           type: string
+        port_id:
+          type: string
+          description: |
+            The configured IR output port that does not exist on the emitter. Only set for
+            `REMOTE_IR_OUTPUT_INVALID`.
+        emitter_name:
+          type: string
+          description: |
+            Friendly name of the IR emitter. Absent when the emitter is no longer registered. Resolved for the report's
+            language only for an emitter provided by an integration, which is an entity: a dock's name and the name of
+            the remote's built-in emitter have no language variants and are returned as stored.
         device_type:
           type: string
           description: IR emitter type, e.g. `DOCK`, `EXTERNAL`, `INTERNAL`.
         dock_id:
           type: string
+        dock_name:
+          type: string
+          description: |
+            Friendly name of the dock, set for a `DOCK` emitter whose dock is known. The same value as `emitter_name`:
+            a dock emitter is named after its dock.
       required:
         - code
         - message
+        - group_id
     ReadinessStep:
       type: object
       description: One step of the predicted run.
@@ -14109,6 +14748,31 @@ components:
             1-based position in the top-level run — the same frame as `step.index` of the sequence progress events, so a
             report can be correlated with a later run. A step of a nested sequence carries the index of the parent step
             that starts it.
+
+            ⚠️ Not the same frame as `total_steps`, which counts the entries of `steps`: nested steps share their
+            parent's `index`, so "step {index} of {total_steps}" is never a valid sentence.
+        authored_index:
+          type: integer
+          description: |
+            1-based position of the same top-level step in the **stored** sequence — the counterpart of `index` in the
+            sequence as authored, so a reported problem can be pointed at the row that causes it. Differs from `index`
+            whenever an activity-group switch prepended transition steps or omitted power-on steps of devices already
+            on. A step of a nested sequence carries the position of the parent step that starts it, exactly as `index`
+            does; a transition step has no position in the checked sequence and carries none.
+
+            It indexes the sequence **as stored when the check ran**: a client that edits the sequence afterwards must
+            discard the report rather than re-use its positions.
+        switch_from_index:
+          type: integer
+          description: |
+            For a `transition` step: its 1-based position in the off-sequence of the activity named by
+            `switch_from` — a different sequence from the one `authored_index` indexes, which is why it is its own
+            field and why a transition step never carries `authored_index`.
+
+            Only set where the activity-group switch took the step from that stored sequence, i.e. for the
+            `in_off_sequence` and `run_off_sequence` strategies. Under `always` — **the default** — the power-off
+            steps are synthesized from the outgoing activity's included entities and there is no row to point at,
+            so the field is absent and a client can only link the activity itself.
         nested_index:
           type: integer
           description: 1-based position inside the nested sequence, for steps reached through `parents`.
@@ -14127,7 +14791,10 @@ components:
           description: Entity type of the target, see the entity documentation.
         name:
           type: string
-          description: Friendly name of the target entity in the report's language.
+          description: |
+            Friendly name of the target entity in the report's language. For an entity that no longer exists, its last
+            known name as the checked activity or macro retained it, falling back to the entity identifier when none
+            was retained.
         cmd_id:
           type: string
           description: |
@@ -14167,6 +14834,49 @@ components:
         - part
         - type
         - ready
+    ReadinessOmittedStep:
+      type: object
+      description: |
+        One step of the stored sequence the run leaves out because its target is already in the state it would bring it
+        to. Deliberately not a `ReadinessStep`: it has no position in the predicted run, so it carries no `index`,
+        `part`, `ready`, `skipped` or `aborts_run` — every entry of `steps` is a step the run executes.
+      properties:
+        authored_index:
+          type: integer
+          description: 1-based position in the stored sequence, the same frame as `ReadinessStep.authored_index`.
+        type:
+          type: string
+          enum:
+            - command
+            - delay
+        entity_id:
+          type: string
+          description: Target entity of an omitted command step.
+        entity_type:
+          type: string
+          description: Entity type of the target, see the entity documentation.
+        name:
+          type: string
+          description: Friendly name of the target entity in the report's language.
+        cmd_id:
+          type: string
+          description: The command as authored.
+        params:
+          type: object
+          description: Command parameters as authored.
+          additionalProperties: true
+        delay:
+          type: integer
+          description: Delay in milliseconds of an omitted delay step.
+        reason:
+          $ref: '#/components/schemas/ReadinessReason'
+          description: |
+            Always `ALREADY_IN_STATE`. A turn-on delay dropped together with the power-on step before it carries that
+            step's `group_id`, so both belong to one cause.
+      required:
+        - authored_index
+        - type
+        - reason
     SequenceReadiness:
       type: object
       description: |
@@ -14178,8 +14888,15 @@ components:
         devices would not be reached. A step whose entity no longer exists is *skipped* (as the run skips it) and never
         blocks.
 
-        The report is a snapshot of the current device, integration, dock and Bluetooth state. Re-check after an
-        `integration_state`, `dock_state` or `ir_emitter_state` event.
+        `steps` is the predicted run and nothing else. A step of the stored sequence the run leaves out because its
+        target is already in the state it would bring it to — an activity-group switch drops the power-on steps of
+        devices already on, and the turn-on delays behind them — is reported in `omitted` instead, so the report can
+        be reconciled with the sequence as authored. Every step, executed or omitted, carries the position it has in
+        that stored sequence (`authored_index`).
+
+        The report is a snapshot of the current device, integration, dock and Bluetooth state taken at `timestamp`.
+        `depends_on` names the resources that snapshot rests on, so an `integration_state`, `dock_state` or
+        `ir_emitter_state` event naming none of them cannot change this report's verdict and need not invalidate it.
       properties:
         entity_id:
           type: string
@@ -14189,6 +14906,13 @@ components:
           enum:
             - activity
             - macro
+        name:
+          type: string
+          description: |
+            Friendly name of the checked activity or macro in the report's language, so a client can title the report
+            without a second lookup. Falls back to `entity_id` when the entity has no name at all.
+          examples:
+            - Fernsehen
         cmd_id:
           type: string
           description: The checked command.
@@ -14203,22 +14927,39 @@ components:
             - de
         error_policy:
           type: string
-          description: The error policy the run was checked against, the same option the start command takes.
+          description: |
+            The error policy the run was checked against, resolved as the start command resolves it: the request's
+            `error_policy`, else the activity's stored `error_policy` option, else `continue_transition`. For a macro
+            this is `abort` or `ignore_all`: a macro run has no transition steps, so `continue_transition` collapses
+            to `abort`.
           enum:
             - abort
             - continue_transition
             - ignore_all
+        timestamp:
+          type: string
+          format: date-time
+          description: |
+            When the check was performed, in the same clock and format the WebSocket event stream stamps its events
+            with (`ts`), so a stored report can be compared against a later `integration_state`, `dock_state` or
+            `ir_emitter_state` event.
+          examples:
+            - '2026-08-31T09:14:22.481Z'
         ready:
           type: boolean
           description: '`true` if no blocked step would abort the run under `error_policy`, i.e. `aborting_steps` is `0`.'
         total_steps:
           type: integer
-          description: Number of top-level steps, nested sequences counted as one step each.
+          description: |
+            Number of entries in `steps`, i.e. every step the run would execute with nested sequences expanded. Every
+            step count except `omitted_steps` is in this same frame, so they can be compared and subtracted without
+            converting between frames.
         transition_steps:
           type: integer
           description: |
-            Number of leading power-off steps prepended by an activity-group switch. Only set for an activity `on` /
-            `start` command while another activity of the same group is on.
+            Number of leading `steps` entries with `part: transition` — the power-off steps prepended by an
+            activity-group switch, nested sequences expanded. Only set for an activity `on` / `start` command while
+            another activity of the same group is on.
         blocked_steps:
           type: integer
           description: 'Number of steps with `ready: false`, nested steps included.'
@@ -14228,44 +14969,92 @@ components:
         aborting_steps:
           type: integer
           description: Number of blocked steps at which the run would abort under `error_policy`.
+        omitted_steps:
+          type: integer
+          description: |
+            Number of entries in `omitted`. Not part of the frame above: an omitted step is not executed and is
+            therefore neither a blocked nor a skipped step.
+        depends_on:
+          $ref: '#/components/schemas/ReadinessDependencies'
+        activity_group:
+          $ref: '#/components/schemas/ReadinessActivityGroup'
         switch_from:
-          $ref: '#/components/schemas/ReadinessEntityRef'
-          description: The activity an activity-group switch would switch away from. Absent if none.
+          $ref: '#/components/schemas/ReadinessSwitchFrom'
+          description: |
+            The activity an activity-group switch would switch away from, with the state that selected it. Present
+            **only** when a switch is planned: it is what `part: transition` steps and `switch_from_index` refer to.
+            Absent means no member qualified — `activity_group.members` then says why.
         steps:
           type: array
           description: Every step of the predicted run, in execution order, nested sequences expanded in place.
           items:
             $ref: '#/components/schemas/ReadinessStep'
+        omitted:
+          type: array
+          description: |
+            Steps of the stored sequence the run leaves out because their target is already in the state they would
+            bring it to. Empty unless an activity-group switch drops power-on steps of devices already reported on.
+          items:
+            $ref: '#/components/schemas/ReadinessOmittedStep'
       required:
         - entity_id
         - entity_type
+        - name
         - cmd_id
         - lang
         - error_policy
+        - timestamp
         - ready
         - total_steps
         - transition_steps
         - blocked_steps
         - skipped_steps
         - aborting_steps
+        - omitted_steps
+        - depends_on
         - steps
+        - omitted
       examples:
         - entity_id: uc.main.watch_tv
           entity_type: activity
+          name: Fernsehen
           cmd_id: activity.on
           lang: de
           error_policy: continue_transition
+          timestamp: '2026-08-31T09:14:22.481Z'
           ready: true
           total_steps: 4
           transition_steps: 1
           blocked_steps: 1
           skipped_steps: 1
           aborting_steps: 0
+          omitted_steps: 1
+          activity_group:
+            group_id: 1ef02dc9-9054-45f8-a0ea-ae519cc88f0f
+            name: Wohnzimmer
+            turn_off_unused_entities: always
+            members:
+              - entity_id: uc.main.listen_music
+                name: Musik hören
+                state: 'ON'
+              - entity_id: uc.main.watch_apple_tv
+                name: Apple TV schauen
+                state: STOPPED
+          depends_on:
+            integration_ids:
+              - denon
+            emitter_ids:
+              - uc.dock.living_room
+            dock_ids:
+              - uc.dock.living_room
+            bt: false
           switch_from:
             entity_id: uc.main.listen_music
             name: Musik hören
+            state: 'ON'
           steps:
             - index: 1
+              switch_from_index: 2
               part: transition
               type: command
               entity_id: denon.media_player.avr
@@ -14277,10 +15066,12 @@ components:
               reason:
                 code: INTEGRATION_NOT_CONNECTED
                 message: integration 'Denon AVR' (denon) is DISCONNECTED
+                group_id: INTEGRATION_NOT_CONNECTED:denon
                 integration_id: denon
                 integration_name: Denon AVR
                 state: DISCONNECTED
             - index: 2
+              authored_index: 2
               part: sequence
               type: command
               entity_id: uc.main.remote.tv
@@ -14291,15 +15082,18 @@ components:
                 command: POWER_ON
               ready: true
             - index: 3
+              authored_index: 3
               part: sequence
               type: delay
               delay: 2000
               ready: true
             - index: 4
+              authored_index: 4
               nested_index: 1
               part: sequence
               type: command
               entity_id: uc.main.switch.old_lamp
+              name: Alte Lampe
               cmd_id: switch.on
               parents:
                 - entity_id: uc.main.macro.lights
@@ -14308,7 +15102,19 @@ components:
               skipped: true
               reason:
                 code: ENTITY_NOT_FOUND
-                message: 'entity uc.main.switch.old_lamp no longer exists: the step is skipped'
+                message: 'entity ''Alte Lampe'' (uc.main.switch.old_lamp) no longer exists: the step is skipped'
+                group_id: ENTITY_NOT_FOUND:uc.main.switch.old_lamp
+          omitted:
+            - authored_index: 1
+              type: command
+              entity_id: uc.main.switch.floor_lamp
+              entity_type: switch
+              name: Stehlampe
+              cmd_id: switch.on
+              reason:
+                code: ALREADY_IN_STATE
+                message: '''Stehlampe'' (uc.main.switch.floor_lamp) is already on: the step is not run'
+                group_id: ALREADY_IN_STATE:uc.main.switch.floor_lamp
     ActivityUserInterfacePageUpdate:
       type: object
       properties:
@@ -14599,6 +15405,38 @@ components:
                 $ref: '#/components/schemas/EntityId'
             sequence:
               $ref: '#/components/schemas/CommandSequence'
+    Manufacturer:
+      type: object
+      description: IR device manufacturer from the manufacturer search.
+      properties:
+        id:
+          description: Manufacturer identification
+          type: string
+        name:
+          description: Manufacturer name
+          type: string
+        custom:
+          description: Flag indicating if this manufacturer was created by the user
+          type: boolean
+      required:
+        - id
+        - name
+    ManufacturerCodeSet:
+      type: object
+      description: IR device code set of a manufacturer from the code set search.
+      properties:
+        id:
+          description: Code set identifier
+          type: string
+        name:
+          description: Device name
+          type: string
+        custom:
+          description: Flag indicating if this code set was created by the user
+          type: boolean
+      required:
+        - id
+        - name
     CodeSetInfo:
       type: object
       properties:
@@ -15719,14 +16557,6 @@ components:
           type: boolean
       required:
         - enabled
-    LanguageCode:
-      description: |
-        Language culture code: starting with the two-letter [ISO-639-1](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
-        code, followed by an optional [ISO-3166 country code](https://en.wikipedia.org/wiki/List_of_ISO_3166_country_codes),
-        separated by an underscore.
-        Examples: `en`, `en_UK`, `en_US`, `de`, `de_DE`, `de_CH` etc.
-      type: string
-      pattern: ^[a-z]{2}(_\w+)?$
     CountryCode:
       description: Two letter country code according to [ISO-3166-1-alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2).
       type: string
@@ -15772,6 +16602,12 @@ components:
         - `auto`: auto-configuration
         - `a`: 5 GHz
         - `b`: 2.4 GHz
+
+        `a` is only accepted on devices whose `bands` list contains it. A device without a
+        5 GHz radio (Remote Two) treats `auto` and `b` alike.
+
+        A band change takes effect after the next restart: the running WiFi connection is not
+        touched and the configuration reports `restart_required` until the device restarts.
       type: string
       enum:
         - auto
@@ -17092,6 +17928,20 @@ components:
           $ref: '#/components/schemas/UartConfiguration'
       required:
         - mode
+    IrStatus:
+      type: object
+      properties:
+        dock_id:
+          $ref: '#/components/schemas/DockId'
+        learning_active:
+          description: Dock is in IR learning mode
+          type: boolean
+        state:
+          $ref: '#/components/schemas/DockState'
+        codes:
+          type: array
+          items:
+            $ref: '#/components/schemas/LearnedIrCode'
     SystemInfo:
       type: object
       properties:
@@ -17349,6 +18199,23 @@ components:
             There are active standby inhibitors preventing system standby.
             - A blocking inhibitor will return a constant `standby_timeout_sec` value of `86400` (1 day).
           type: boolean
+        operation_budget_sec:
+          description: |
+            How long an operation that must hold the device awake — an integration setup, for example — may run if
+            it started now. Only set while the device runs on battery: while charging no limit applies and the
+            field is absent. A running operation reports its own remaining time; this value is what a new one would
+            get.
+          type: integer
+          minimum: 0
+        operation_budget_reason:
+          description: |
+            Why `operation_budget_sec` applies. Absent while charging.
+            - `BATTERY`: the device runs on battery and an operation gets the full budget.
+            - `LOW_BATTERY`: the battery level shortened the budget.
+          type: string
+          enum:
+            - BATTERY
+            - LOW_BATTERY
       required:
         - mode
         - power_supply
@@ -17828,20 +18695,6 @@ components:
     FriendlyName:
       type: string
       maxLength: 64
-    IrStatus:
-      type: object
-      properties:
-        dock_id:
-          $ref: '#/components/schemas/DockId'
-        learning_active:
-          description: Dock is in IR learning mode
-          type: boolean
-        state:
-          $ref: '#/components/schemas/DockState'
-        codes:
-          type: array
-          items:
-            $ref: '#/components/schemas/LearnedIrCode'
     MediaPlayerRepeatMode:
       type: string
       enum:

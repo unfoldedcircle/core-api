@@ -10,6 +10,23 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.52.0
+### Fixed
+- OAuth2 authorization callback endpoint.
+
+### Added
+- Integration setup keep-alive handling with battery-aware setup limits.
+- Bluetooth remote pairing reset.
+- WiFi security selection, WPA3 support and hidden network configuration.
+- More detailed activity / macro readiness and sequence progress reporting.
+
+### Changed
+- Extended integration setup status with localized errors, setup limits and language handling.
+- Clarified activity / macro sequence error handling and stop behavior.
+- Improved WiFi network connection behavior and persistence rules.
+- Expanded system update download / progress handling.
+- Clarified media browse / search, IR repeat and dock configuration behavior.
+
 ## 0.49.0
 ### Added
 - Activity and Macro readiness checks.
