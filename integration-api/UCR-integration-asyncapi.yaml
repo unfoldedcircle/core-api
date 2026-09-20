@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.15.4-beta'
+  version: '0.16.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -401,14 +401,32 @@ components:
         - `event_type: STOP` with `event: OK` finishes the setup process and the UC Remote creates an integration instance.
         - `event_type: STOP` with `event: ERROR` aborts the setup process.
 
-        ⚠️ If the setup process takes more than a few seconds, the integration should send `driver_setup_change` events
-        with `state: SETUP` to the UC Remote to show a setup progress to the user and prevent an inactivity timeout.  
-        Default setup timeouts:
-        - Setup progress (watchdog): 60 seconds. If no setup message is received within that time, the setup process
-          is aborted.
-        - User action timeout: 3 minutes. If there's no user response within that time, the setup process is aborted.
-        - Overall setup timeout: 5 minutes. The setup process is automatically aborted if it is still running after
-          that time.
+        The setup process is **not** bounded by fixed timeouts. The UC Remote keeps a setup session alive for as
+        long as a client (the web-configurator, for example) keeps renewing it, so a user may take as long as they
+        need on a settings or confirmation page, and a driver may take as long as it needs between messages.
+        Progress events are therefore a user-interface courtesy, not a keep-alive: send `event_type: SETUP` with
+        `state: SETUP` to show the user that something is happening, not to hold the session open.
+
+        A setup session ends when:
+        - the driver finishes it — `event_type: STOP` with `state: OK` or `state: ERROR`;
+        - a client aborts it;
+        - no client renews it any more (5 minutes by default);
+        - the driver's connection is lost for good, or the driver is deleted;
+        - or, while the Remote runs **on battery**, its battery budget expires: 5 minutes below 10 % charge,
+          10 minutes below 20 %, 20 minutes below 30 %, otherwise 30 minutes. The budget starts when the setup
+          session began running on battery — when the setup was started, if the Remote was already off the
+          charger, or the moment the charger was removed during the setup. How long the Remote had been off the
+          charger before the setup started does not shorten it. Putting it back in the charger removes the limit
+          entirely; taking it off again starts a fresh budget.
+
+        In every one of those cases the driver receives an `abort_driver_setup` event and must release whatever the
+        setup was holding — a pairing window on the device, an open session, a discovery listener. The `error` field
+        of that event is only ever `TIMEOUT`, `NONE` or `OTHER`: the Remote never sends the codes added later towards
+        a driver, so a strict parser keeps working.
+
+        ⚠️ A Remote reporting an API version below `0.19.0` still applies the previous fixed timeouts: a 60-second
+        progress watchdog, a 3-minute user action timeout and a 5-minute overall timeout. A driver that has to work
+        with both keeps sending progress events every few seconds.
 
         If no setup is needed, but the integration driver requires to show additional information to the user before
         the integration is setup (e.g. terms & conditions, further help information or web links, etc.), it can define
@@ -459,6 +477,17 @@ components:
           ⚠️ The `false` value is not yet used but might be used in the future for yes / no choices.
 
         The `state` field in the response message indicate the current state of the setup process.
+
+        If the provided data is not acceptable, the driver has two options:
+        - fail the setup: `driver_setup_change` with `event_type: STOP` and `state: ERROR`, optionally with an
+          `error` code and an `error_message`;
+        - or ask the user to correct it: `driver_setup_change` with `event_type: SETUP`, `state: WAIT_USER_ACTION`,
+          `error: INVALID_INPUT`, an optional `error_message` and the `require_user_action` page again — usually the
+          same page. The Remote keeps the session waiting for user input, shows the message with the page, and the
+          user can submit again. This is the friendlier option for a wrong PIN or an unreachable address.
+
+        ⚠️ The second option requires a Remote reporting API version `0.19.0` or newer. An older Remote turns any
+        `error` into a terminal `ERROR` and ends the setup.
       tags:
         - name: setup
       payload:
@@ -1115,6 +1144,17 @@ components:
                   type: boolean
                 setup_data:
                   $ref: '#/components/schemas/SettingsValues'
+                language:
+                  description: |
+                    Language of the user interface driving the setup, set by the Remote from the
+                    client's request or from the configured device language.
+
+                    A driver SHOULD return the texts of its settings and confirmation pages and its
+                    `error_message` in this language, and MAY add `en` as a fallback — instead of
+                    every language it supports. A driver that ignores the field keeps working.
+
+                    ⚠️ Only sent by a Remote reporting API version `0.19.0` or newer.
+                  $ref: '#/components/schemas/languageCode'
               required:
                 - setup_data
           required:
@@ -2876,6 +2916,23 @@ components:
           $ref: '#/components/schemas/integrationSetupState'
         error:
           $ref: '#/components/schemas/integrationSetupError'
+        error_message:
+          description: |
+            Optional human-readable description of the error, shown to the user next to — or instead
+            of — the text the Remote has for the `error` code. Use it whenever the driver knows more
+            than the code can carry: "PIN rejected by the Apple TV", "bridge button was not pressed
+            within 30 s", "host 10.0.0.5 unreachable on port 8443".
+
+            Plain text, no Markdown. The Remote picks the entry for the user interface language,
+            falls back to `en`, then to any entry, and finally to its own text for the code. Send
+            only the language requested in `setup_driver`, plus `en` as a fallback if available.
+
+            The Remote caps what it stores: at most 20 languages, at most 500 characters each;
+            longer entries are truncated.
+
+            ⚠️ Requires a Remote reporting API version `0.19.0` or newer; an older Remote ignores
+            the field.
+          $ref: '#/components/schemas/languageText'
         require_user_action:
           description: If set, the setup process waits for the specified user action.
           type: object
@@ -2915,7 +2972,30 @@ components:
     # shared with Core-API
     integrationSetupError:
       description: |
-        More detailed error reason for `state: ERROR` condition.
+        More detailed error reason for a `state: ERROR` condition, and for the non-terminal
+        `INVALID_INPUT` described in `set_driver_user_data`.
+
+        - `NONE`: no further error information available.
+        - `NOT_FOUND`: the device or service to set up could not be found.
+        - `CONNECTION_REFUSED`: the device or service could not be reached.
+        - `AUTHORIZATION_ERROR`: the device or service rejected the credentials or the pairing.
+        - `TIMEOUT`: an operation against the device or service timed out. The Remote also uses this
+          code in `abort_driver_setup` when it ends a setup itself.
+        - `DRIVER_UNAVAILABLE`: the integration driver is not running, not connected, or its
+          connection could not be re-established. Set by the Remote; a driver has no reason to send it.
+        - `INVALID_INPUT`: the data provided by the user was rejected. Sent together with
+          `state: WAIT_USER_ACTION` and a `require_user_action` page, the setup continues instead of
+          failing — see `set_driver_user_data`.
+        - `ABORTED`: the setup was stopped by a client. Set by the Remote.
+        - `ALREADY_CONFIGURED`: an integration instance already exists and no reconfiguration was
+          requested.
+        - `NOT_SUPPORTED`: the driver does not support the requested operation, e.g. reconfiguration.
+        - `OTHER`: any other error. Use `error_message` to say what happened.
+
+        ⚠️ `DRIVER_UNAVAILABLE`, `INVALID_INPUT`, `ABORTED`, `ALREADY_CONFIGURED` and
+        `NOT_SUPPORTED` require a Remote reporting API version `0.19.0` or newer. An older Remote
+        cannot deserialize them and drops the whole message. A driver that sends one of them must
+        declare `min_core_api: "0.19.0"` in its driver metadata.
       type: string
       enum:
         - NONE
@@ -2923,6 +3003,11 @@ components:
         - CONNECTION_REFUSED
         - AUTHORIZATION_ERROR
         - TIMEOUT
+        - DRIVER_UNAVAILABLE
+        - INVALID_INPUT
+        - ABORTED
+        - ALREADY_CONFIGURED
+        - NOT_SUPPORTED
         - OTHER
 
     # shared with Core-API

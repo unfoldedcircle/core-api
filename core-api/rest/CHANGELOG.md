@@ -8,13 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This section contains unreleased changes which will be part of an upcoming release.
 
+---
+
+## 0.49.0
+### Added
+- Activity and Macro readiness checks.
+
+## 0.48.3
 ### Fixed
 - Schema validation errors found with the new redocly-cli linter.
 
+### Added
+- Sorting and order parameters for fetching integrations, docks, entities, activities, macros, remotes, voice assistants.
+- Setting the power state of an entity with `PUT /entities/{entityId}/state`.
+- Full-text search options for fetching remotes with `GET /remotes`.
+- WiFi `JOIN` option: Connect to the given network and keep every other saved network enabled as fallback.
+- Activity sequence start error policy.
+- Stopping an activity or macro sequence.
+
 ### Changed
 - Migrate OAS specification from 3.0.3 to 3.1.1.
+- Changed Wifi password requirement to have at least 8 characters.
 
----
+## 0.46.1
+### Added
+- Add `change_dock_token` to `DockUpdateRequest`.
 
 ## 0.46.0
 - Update option when installing a custom integration.
