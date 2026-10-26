@@ -46,29 +46,58 @@ The number entity only supports the `ON` state and the [common entity states](RE
 
 ### Device Classes
 
-None. Device classes for default icons and value formatting might be added in the future, e.g. `percentage`, `volume`,
-`brightness`, `temperature`, `duration`.
+The optional device class specifies the type of the value. It is used by the UI to show a matching default icon, a
+default unit and to format the value. If not specified, the number entity is a generic number, and the `unit` option
+defines the unit label.
+
+| Name           | Default unit | Description                                                                                                                                     |
+|----------------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| battery        | %            | Battery charge level, e.g. the minimum state of charge of a home battery.                                                                       |
+| current        | A            | Electrical current in ampere, e.g. the charging current limit of a wallbox.                                                                     |
+| duration       | s            | Time span, e.g. the run time of a timer. Supported units: `ms`, `s`, `min`, `h`, `d`. The UI may show the value as a time span, e.g. `1:30:00`. |
+| energy         | kWh          | Energy in kilowatt-hour.                                                                                                                        |
+| humidity       | %            | Relative humidity, e.g. the target humidity of a dehumidifier.                                                                                  |
+| illuminance    | lx           | Illuminance in lux, e.g. the brightness threshold of a motion sensor.                                                                           |
+| power          | W            | Power in watt or kilowatt, e.g. a power limit.                                                                                                  |
+| sound_pressure | dB           | Sound level in decibel.                                                                                                                         |
+| temperature    | °C           | Temperature, e.g. a temperature threshold or setpoint.                                                                                          |
+| voltage        | V            | Voltage in volt.                                                                                                                                |
+
+- The `unit` option overrides the default unit of the device class.
+- There is no automatic unit conversion: `value`, `min`, `max` and `step` are always in the unit of the entity. Unlike
+  the [sensor entity](entity_sensor.md), a `temperature` number entity is not converted between °C and °F.
 
 ### Options
 
-| Name     | Type    | Default | Description                                                                                                                                                     |
-|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| min      | number  | 0       | Minimum value (inclusive).                                                                                                                                      |
-| max      | number  | 100     | Maximum value (inclusive).                                                                                                                                      |
-| step     | number  | 1       | Step size between values. Smallest step size: 0.01. Also used as default step for the `increment` and `decrement` commands.                                     |
-| decimals | integer | 0       | Number of decimal places to show in the UI. 0 = integer value.                                                                                                  |
-| unit     | text    |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.                                                                      |
-| readable | boolean | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value. |
+| Name     | Type           | Default | Description                                                                                                                                                     |
+|----------|----------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| min      | number \| null | 0       | Minimum value (inclusive). `null`: no lower limit.                                                                                                              |
+| max      | number \| null | 100     | Maximum value (inclusive). `null`: no upper limit.                                                                                                              |
+| step     | number         | 1       | Step size between values, must be greater than 0. Smallest step size: 0.000001. Also used as default step for the `increment` and `decrement` commands.         |
+| decimals | integer        | 0       | Number of decimal places to show in the UI: 0..6. 0 = integer value.                                                                                            |
+| unit     | text           |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`. Default: unit of the [device class](#device-classes).                |
+| readable | boolean        | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value. |
 
-The option vocabulary is the same as for the `number` field in the [driver setup settings](../integration-driver/driver-setup.md).
+The option vocabulary is similar to the `number` field in the [driver setup settings](../integration-driver/driver-setup.md),
+with the following differences:
+
+- The step size option is called `step` instead of `steps`.
+- `unit` is a plain text instead of a language text.
+- `min` and `max` have a default value. An unbounded range must be set explicitly with `null`.
 
 Notes:
 
 - The options are static and are read when the entity is configured in the Remote. If the value range of a device
   changes, the integration driver has to send an updated entity definition with the `entity_available` event. Dynamic
   ranges in the entity attributes are not supported.
+  - 🚧 The `entity_available` event is not yet supported by the Remote. Until then, an updated entity definition is
+    only applied when the Remote retrieves the available entities with the `get_available_entities` request.
 - The Remote UI uses `(max - min) / step` to determine the number of positions. A very large number of positions might
   be rendered as a value field instead of a slider.
+- An unbounded number entity, with `min` or `max` set to `null`, is rendered as a value field with increment and
+  decrement buttons by default.
+- The `step` size should be compatible with `decimals`. A step size of 0.5 requires at least 1 decimal place to show
+  every possible value.
 - With `readable: false` the Remote does not expect an `entity_change` event after a command and shows the last value
   sent to the driver. This should be avoided whenever possible.
 
@@ -83,8 +112,8 @@ requests in `msg_data.cmd_id`.
 |-----------|------------|---------------------------------------------------------------------------------------------------------------------------------|
 | set_value | value      | Set the value. The `value` parameter is within the `min` and `max` option range. The driver may round the value to `step`.       |
 |           | duration   | Optional: transition time in milliseconds to reach the new value, if supported by the device. Drivers may ignore this parameter. |
-| increment | step       | Increase the value by `step`. If not specified, the `step` option is used. The value is clamped at `max`.                        |
-| decrement | step       | Decrease the value by `step`. If not specified, the `step` option is used. The value is clamped at `min`.                        |
+| increment | step       | Increase the value by `step`. If not specified, the `step` option is used. The value is clamped at `max`, if specified.          |
+| decrement | step       | Decrease the value by `step`. If not specified, the `step` option is used. The value is clamped at `min`, if specified.          |
 
 The `increment` and `decrement` commands are used for physical button mappings, e.g. `VOLUME_UP` and `VOLUME_DOWN`, and
 for D-pad navigation when a slider widget has the focus. The Remote does not calculate the new value itself, since the
@@ -111,7 +140,9 @@ The Remote shows the value set by the user immediately and then follows the `val
 event. If the driver doesn't confirm the new value within a few seconds, the UI falls back to the last known value.
 Drivers should therefore send the `entity_change` event as soon as the device has applied the new value.
 
-### Entity definition example
+### Entity definition examples
+
+Generic number entity with a custom unit:
 
 ```json
 {
@@ -127,6 +158,41 @@ Drivers should therefore send the `entity_change` event as soon as the device ha
     "step": 0.5,
     "decimals": 1,
     "unit": "dB"
+  }
+}
+```
+
+Number entity with a device class and its default unit `A`:
+
+```json
+{
+  "entity_id": "wallbox-1_charging_current",
+  "entity_type": "number",
+  "device_class": "current",
+  "name": {
+    "en": "Charging current"
+  },
+  "options": {
+    "min": 6,
+    "max": 32,
+    "step": 1
+  }
+}
+```
+
+Unbounded counter without an upper limit:
+
+```json
+{
+  "entity_id": "coffee_counter",
+  "entity_type": "number",
+  "name": {
+    "en": "Coffee cups"
+  },
+  "options": {
+    "min": 0,
+    "max": null,
+    "step": 1
   }
 }
 ```
