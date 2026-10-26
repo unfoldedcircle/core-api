@@ -2602,11 +2602,12 @@ components:
                 custom_unit:
                   description: |
                     Unit label for a custom sensor if `device_class` is not specified or to override a default unit.
-                  $ref: '#/components/schemas/languageText'
+                  type: string
                 native_unit:
                   description: |
                     The sensor's native unit of measurement to perform automatic conversion. Applicable to device
                     classes: `temperature`
+                  type: string
                 decimals:
                   description: |
                     Number of decimal places to show in the UI if the sensor provides the measurement as a number.
@@ -2686,7 +2687,7 @@ components:
                   default: 0
                 unit:
                   description: Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.
-                  $ref: '#/components/schemas/languageText'
+                  type: string
                 readable:
                   description: |
                     If set to false, the current value cannot be read from the device and the driver will not send

@@ -3,22 +3,22 @@
 The number entity holds a single numeric value which can be read and set. It is the writable counterpart of the
 [sensor entity](entity_sensor.md) and the numeric counterpart of the [select entity](entity_select.md).
 
-The value range, step size and unit are defined by the integration driver in the entity options. The Remote renders a
+The value range, step size, and unit are defined by the integration driver in the entity options. The Remote renders a
 number entity as a slider or as a value field with increment and decrement buttons, depending on where it is used:
 
 - On a profile page the entity is shown with its default representation.
-- In an activity or remote-entity user interface, the [slider widget](../ui-widgets.md#slider) can be bound to the
-  `value` feature and positioned freely in the page grid.
-- The Remote 3 touch slider can be assigned to the `value` feature.
+- In an activity user interface, the [slider widget](../ui-widgets.md#slider) can be bound to the `value` feature and
+  positioned freely in the page grid.
+- The Remote 3 touch-slider can be assigned to the `value` feature.
 
 Typical use cases are device settings which don't fit any other entity, for example an amplifier's bass level, the zoom
-of a camera, a projector's lens shift, the speed of a fan or a custom "scene intensity" value.
+of a camera, a projector's lens shift, the speed of a fan, or a custom "scene intensity" value.
 
 ## Features
 
-| Name  | R   | W   | Description                                                             |
-|-------|-----|-----|-------------------------------------------------------------------------|
-| value | ✅   | ✅   | Default feature of a number entity. Always present, even if not specified. |
+| Name  | R  | W  | Description                                                                |
+|-------|----|----|----------------------------------------------------------------------------|
+| value | ✅ | ✅ | Default feature of a number entity. Always present, even if not specified. |
 
 - R: readable
     - ✅ Feature has a readable attribute to retrieve the current value.
@@ -51,13 +51,13 @@ None. Device classes for default icons and value formatting might be added in th
 
 ### Options
 
-| Name     | Type    | Default | Description                                                                                                                                                    |
-|----------|---------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| min      | number  | 0       | Minimum value (inclusive).                                                                                                                                     |
-| max      | number  | 100     | Maximum value (inclusive).                                                                                                                                     |
-| step     | number  | 1       | Step size between values. Smallest step size: 0.01. Also used as default step for the `increment` and `decrement` commands.                                    |
-| decimals | integer | 0       | Number of decimal places to show in the UI. 0 = integer value.                                                                                                 |
-| unit     | text    |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.                                                                     |
+| Name     | Type    | Default | Description                                                                                                                                                     |
+|----------|---------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| min      | number  | 0       | Minimum value (inclusive).                                                                                                                                      |
+| max      | number  | 100     | Maximum value (inclusive).                                                                                                                                      |
+| step     | number  | 1       | Step size between values. Smallest step size: 0.01. Also used as default step for the `increment` and `decrement` commands.                                     |
+| decimals | integer | 0       | Number of decimal places to show in the UI. 0 = integer value.                                                                                                  |
+| unit     | text    |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.                                                                      |
 | readable | boolean | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value. |
 
 The option vocabulary is the same as for the `number` field in the [driver setup settings](../integration-driver/driver-setup.md).
@@ -126,9 +126,7 @@ Drivers should therefore send the `entity_change` event as soon as the device ha
     "max": 10,
     "step": 0.5,
     "decimals": 1,
-    "unit": {
-      "en": "dB"
-    }
+    "unit": "dB"
   }
 }
 ```
