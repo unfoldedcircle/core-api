@@ -2579,13 +2579,14 @@ components:
               type: string
               enum:
                 - custom
-                - temperature
+                - battery
+                - current
+                - energy
                 - humidity
                 - power
-                - energy
+                - temperature
                 - voltage
-                - current
-                - battery
+                - binary
 #                - air_quality_index
 #                - carbon_dioxide
 #                - carbon_monoxide
