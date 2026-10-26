@@ -6,7 +6,8 @@ The number entity holds a single numeric value which can be read and set. It is 
 The value range, step size, and unit are defined by the integration driver in the entity options. The Remote renders a
 number entity as a slider or as a value field with increment and decrement buttons, depending on where it is used:
 
-- On a profile page the entity is shown with its default representation.
+- On a profile page the entity is shown with its default representation. The `display_mode` option is a hint for the
+  preferred representation, see [Display Mode](#display-mode).
 - In an activity user interface, the [slider widget](../ui-widgets.md#slider) can be bound to the `value` feature and
   positioned freely in the page grid.
 - The Remote 3 touch-slider can be assigned to the `value` feature.
@@ -52,6 +53,7 @@ defines the unit label.
 
 | Name           | Default unit | Description                                                                                                                                     |
 |----------------|--------------|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| audio_level    | dB           | Audio level in decibel, e.g. the volume, bass or treble of an AV receiver. Not intended for measured sound pressure levels.                      |
 | battery        | %            | Battery charge level, e.g. the minimum state of charge of a home battery.                                                                       |
 | current        | A            | Electrical current in ampere, e.g. the charging current limit of a wallbox.                                                                     |
 | duration       | s            | Time span, e.g. the run time of a timer. Supported units: `ms`, `s`, `min`, `h`, `d`. The UI may show the value as a time span, e.g. `1:30:00`. |
@@ -59,9 +61,12 @@ defines the unit label.
 | humidity       | %            | Relative humidity, e.g. the target humidity of a dehumidifier.                                                                                  |
 | illuminance    | lx           | Illuminance in lux, e.g. the brightness threshold of a motion sensor.                                                                           |
 | power          | W            | Power in watt or kilowatt, e.g. a power limit.                                                                                                  |
-| sound_pressure | dB           | Sound level in decibel.                                                                                                                         |
 | temperature    | °C           | Temperature, e.g. a temperature threshold or setpoint.                                                                                          |
 | voltage        | V            | Voltage in volt.                                                                                                                                |
+
+The device classes are kept in sync with the [sensor entity](entity_sensor.md#device-classes): a device class has the
+same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
+makes sense for one of them, like the `binary` sensor device class.
 
 - The `unit` option overrides the default unit of the device class.
 - There is no automatic unit conversion: `value`, `min`, `max` and `step` are always in the unit of the entity. Unlike
@@ -69,14 +74,15 @@ defines the unit label.
 
 ### Options
 
-| Name     | Type           | Default | Description                                                                                                                                                     |
-|----------|----------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| min      | number \| null | 0       | Minimum value (inclusive). `null`: no lower limit.                                                                                                              |
-| max      | number \| null | 100     | Maximum value (inclusive). `null`: no upper limit.                                                                                                              |
-| step     | number         | 1       | Step size between values, must be greater than 0. Smallest step size: 0.000001. Also used as default step for the `increment` and `decrement` commands.         |
-| decimals | integer        | 0       | Number of decimal places to show in the UI: 0..6. 0 = integer value.                                                                                            |
-| unit     | text           |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`. Default: unit of the [device class](#device-classes).                |
-| readable | boolean        | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value. |
+| Name         | Type           | Default | Description                                                                                                                                                     |
+|--------------|----------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| min          | number \| null | 0       | Minimum value (inclusive). `null`: no lower limit.                                                                                                              |
+| max          | number \| null | 100     | Maximum value (inclusive). `null`: no upper limit.                                                                                                              |
+| step         | number         | 1       | Step size between values, must be greater than 0. Smallest step size: 0.000001. Also used as default step for the `increment` and `decrement` commands.         |
+| decimals     | integer        | 0       | Number of decimal places to show in the UI: 0..6. 0 = integer value.                                                                                            |
+| unit         | text           |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`. Default: unit of the [device class](#device-classes).                |
+| display_mode | enum           | auto    | Hint for the preferred default representation in the UI: `auto`, `slider`, `stepper`. See [Display Mode](#display-mode).                                        |
+| readable     | boolean        | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value. |
 
 The option vocabulary is similar to the `number` field in the [driver setup settings](../integration-driver/driver-setup.md),
 with the following differences:
@@ -92,14 +98,28 @@ Notes:
   ranges in the entity attributes are not supported.
   - 🚧 The `entity_available` event is not yet supported by the Remote. Until then, an updated entity definition is
     only applied when the Remote retrieves the available entities with the `get_available_entities` request.
-- The Remote UI uses `(max - min) / step` to determine the number of positions. A very large number of positions might
-  be rendered as a value field instead of a slider.
-- An unbounded number entity, with `min` or `max` set to `null`, is rendered as a value field with increment and
-  decrement buttons by default.
 - The `step` size should be compatible with `decimals`. A step size of 0.5 requires at least 1 decimal place to show
   every possible value.
 - With `readable: false` the Remote does not expect an `entity_change` event after a command and shows the last value
   sent to the driver. This should be avoided whenever possible.
+
+### Display Mode
+
+The `display_mode` option is a hint for the default representation of the number entity, e.g. on a profile page or in
+the entity control screen. It is comparable to the `mode` attribute of a Home Assistant number entity.
+
+| Value   | Description                                                                                                                 |
+|---------|-----------------------------------------------------------------------------------------------------------------------------|
+| auto    | Default. The UI chooses the representation based on the value range.                                                        |
+| slider  | Prefer a slider. Only applicable to a bounded number entity: if `min` or `max` is `null`, the entity is shown as a stepper. |
+| stepper | Prefer a value field with increment and decrement buttons, e.g. for precise settings or a large value range.                |
+
+- With `auto`, the Remote UI uses `(max - min) / step` to determine the number of positions. A very large number of
+  positions is rendered as a stepper instead of a slider.
+- An unbounded number entity, with `min` or `max` set to `null`, is always rendered as a stepper.
+- The display mode doesn't apply to a [slider widget](../ui-widgets.md#slider) in an activity user interface, or to the
+  Remote 3 touch-slider. These are explicitly chosen by the user.
+- The UI may ignore the hint, e.g. if there isn't enough space for a slider.
 
 ## Integration API
 
@@ -162,7 +182,7 @@ Generic number entity with a custom unit:
 }
 ```
 
-Number entity with a device class and its default unit `A`:
+Number entity with a device class and its default unit `A`, preferably shown as a stepper:
 
 ```json
 {
@@ -175,7 +195,8 @@ Number entity with a device class and its default unit `A`:
   "options": {
     "min": 6,
     "max": 32,
-    "step": 1
+    "step": 1,
+    "display_mode": "stepper"
   }
 }
 ```

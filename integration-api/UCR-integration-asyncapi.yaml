@@ -2582,6 +2582,10 @@ components:
               description: |
                 Sensor type. This is used by the UI to represent the sensor with a matching icon, default unit etc.  
                 To use a custom unit
+
+                The device classes are kept in sync with the `number` entity.
+
+                🚧 Planned device classes: `audio_level`, `duration`, `illuminance`.
               type: string
               enum:
                 - custom
@@ -2593,10 +2597,12 @@ components:
                 - temperature
                 - voltage
                 - binary
+#                - audio_level
+#                - duration
+#                - illuminance
 #                - air_quality_index
 #                - carbon_dioxide
 #                - carbon_monoxide
-#                - illuminance
 #                - pressure
             options:
               type: object
@@ -2675,10 +2681,13 @@ components:
                 Optional type of the value. This is used by the UI to show a matching default icon, a default unit and
                 to format the value. If not specified, the number entity is a generic number.
 
+                The device classes are kept in sync with the `sensor` entity.
+
                 There is no automatic unit conversion: `value`, `min`, `max` and `step` are always in the unit of the
                 entity.
               type: string
               enum:
+                - audio_level
                 - battery
                 - current
                 - duration
@@ -2686,7 +2695,6 @@ components:
                 - humidity
                 - illuminance
                 - power
-                - sound_pressure
                 - temperature
                 - voltage
             options:
@@ -2724,6 +2732,22 @@ components:
                     Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.
                     Default: unit of the device class.
                   type: string
+                display_mode:
+                  description: |
+                    Hint for the preferred default representation in the UI.
+
+                    - `auto`: the UI chooses the representation based on the value range.
+                    - `slider`: prefer a slider. Only applicable if `min` and `max` are set.
+                    - `stepper`: prefer a value field with increment and decrement buttons.
+
+                    An unbounded number entity is always shown as a stepper. The hint doesn't apply to a slider widget
+                    in an activity user interface, or to the touch-slider.
+                  type: string
+                  enum:
+                    - auto
+                    - slider
+                    - stepper
+                  default: auto
                 readable:
                   description: |
                     If set to false, the current value cannot be read from the device and the driver will not send

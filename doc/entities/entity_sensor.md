@@ -41,17 +41,24 @@ The sensor entity only supports the `ON` state and the [common entity states](RE
 
 The device class specifies the type of sensor. Default if not specified: `custom`.
 
-| Name        | Default unit | Description                                                                                                                                |
-|-------------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| custom      |              | Generic sensor with custom unit                                                                                                            |
-| battery     | %            | Battery charge in %                                                                                                                        |
-| current     | A            | Electrical current in ampere                                                                                                               |
-| energy      | kWh          | Energy in kilowatt-hour                                                                                                                    |
-| humidity    | %            | Humidity in %                                                                                                                              |
-| power       | W            | Power in watt or kilowatt                                                                                                                  |
-| temperature | °C           | Temperature with automatic °C, °F conversion, depending on remote settings. Use `native_unit` option if the temperature is measured in °F. |
-| voltage     | V            | Voltage in volt                                                                                                                            |
-| binary      |              | Binary sensor. The binary specific device class is stored in the `unit` attribute.                                                         |
+| Name          | Default unit | Description                                                                                                                                                |
+|---------------|--------------|------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| custom        |              | Generic sensor with custom unit                                                                                                                            |
+| 🚧 audio_level | dB           | Audio level in decibel, e.g. the current volume of an AV receiver. Not intended for measured sound pressure levels.                                        |
+| battery       | %            | Battery charge in %                                                                                                                                        |
+| current       | A            | Electrical current in ampere                                                                                                                               |
+| 🚧 duration    | s            | Time span, e.g. the remaining run time of a device. Supported units: `ms`, `s`, `min`, `h`, `d`. The UI may show the value as a time span, e.g. `1:30:00`. |
+| energy        | kWh          | Energy in kilowatt-hour                                                                                                                                    |
+| humidity      | %            | Humidity in %                                                                                                                                              |
+| 🚧 illuminance | lx           | Illuminance in lux.                                                                                                                                        |
+| power         | W            | Power in watt or kilowatt                                                                                                                                  |
+| temperature   | °C           | Temperature with automatic °C, °F conversion, depending on remote settings. Use `native_unit` option if the temperature is measured in °F.                 |
+| voltage       | V            | Voltage in volt                                                                                                                                            |
+| binary        |              | Binary sensor. The binary specific device class is stored in the `unit` attribute.                                                                         |
+
+The device classes are kept in sync with the [number entity](entity_number.md#device-classes): a device class has the
+same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
+makes sense for one of them, like the `custom` and `binary` sensor device classes.
 
 #### Binary Device Class
 
