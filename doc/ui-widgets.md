@@ -60,6 +60,9 @@ the value range, step and formatting of each feature. The following features can
 - Default: the feature used if the `feature` property of the entity feature target is not specified.
 - The feature must be included in the `features` list of the entity, except for the `number.value` feature which is
   always present.
+- The feature must have a bounded value range. A number entity with option `min` or `max` set to `null` is unbounded
+  and cannot be used as an entity feature target, neither for a slider widget nor for the Remote 3 touch slider. The
+  `min` and `max` properties of a slider widget only limit the range of a feature and cannot replace a missing limit.
 - 🚧 Planned feature.
 
 ## Slider

@@ -116,7 +116,8 @@ the entity control screen. It is comparable to the `mode` attribute of a Home As
 
 - With `auto`, the Remote UI uses `(max - min) / step` to determine the number of positions. A very large number of
   positions is rendered as a stepper instead of a slider.
-- An unbounded number entity, with `min` or `max` set to `null`, is always rendered as a stepper.
+- An unbounded number entity, with `min` or `max` set to `null`, is always rendered as a stepper. It cannot be used as a
+  target for the [slider widget](../ui-widgets.md#slider-capable-features) or the Remote 3 touch-slider.
 - The display mode doesn't apply to a [slider widget](../ui-widgets.md#slider) in an activity user interface, or to the
   Remote 3 touch-slider. These are explicitly chosen by the user.
 - The UI may ignore the hint, e.g. if there isn't enough space for a slider.
