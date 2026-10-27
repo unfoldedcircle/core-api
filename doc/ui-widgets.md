@@ -107,17 +107,17 @@ The slider configuration is set in the `slider` property of the user interface i
 }
 ```
 
-| Property    | Type    | Default    | Description                                                                                                                               |
-|-------------|---------|------------|-------------------------------------------------------------------------------------------------------------------------------------------|
-| entity_id   | string  | required   | Entity to control. See [entity feature target](#entity-feature-target).                                                                   |
-| feature     | string  | type default | Slider-capable feature of the entity. See [entity feature target](#entity-feature-target).                                              |
-| show_name   | boolean | false      | Show the entity name as widget label instead of the item's `text` field.                                                                  |
-| show_value  | boolean | true       | Show the current value and unit. See [value formatting](#value-formatting).                                                               |
-| icon_min    | string  |            | Optional icon identifier shown at the minimum end of the slider.                                                                          |
-| icon_max    | string  |            | Optional icon identifier shown at the maximum end of the slider.                                                                          |
-| min         | number  | feature min | Optional lower limit of the slider. Clamped to the value range of the feature.                                                            |
-| max         | number  | feature max | Optional upper limit of the slider. Clamped to the value range of the feature.                                                            |
-| update_mode | enum    | on_release | `on_release`: the value is sent once when the slider is released. `live`: values are sent while moving the slider, at most every 200 ms, and the final value on release. |
+| Property    | Type    | Default      | Description                                                                                                                                                              |
+|-------------|---------|--------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| entity_id   | string  | required     | Entity to control. See [entity feature target](#entity-feature-target).                                                                                                  |
+| feature     | string  | type default | Slider-capable feature of the entity. See [entity feature target](#entity-feature-target).                                                                               |
+| show_name   | boolean | false        | Show the entity name as widget label instead of the item's `text` field.                                                                                                 |
+| show_value  | boolean | true         | Show the current value and unit. See [value formatting](#value-formatting).                                                                                              |
+| icon_min    | string  |              | Optional icon identifier shown at the minimum end of the slider.                                                                                                         |
+| icon_max    | string  |              | Optional icon identifier shown at the maximum end of the slider.                                                                                                         |
+| min         | number  | feature min  | Optional lower limit of the slider. Clamped to the value range of the feature.                                                                                           |
+| max         | number  | feature max  | Optional upper limit of the slider. Clamped to the value range of the feature.                                                                                           |
+| update_mode | enum    | on_release   | `on_release`: the value is sent once when the slider is released. `live`: values are sent while moving the slider, at most every 200 ms, and the final value on release. |
 
 Label rules are the same as for the sensor and select widgets: if the item's `text` field is set, it is used as widget
 label, except if `show_name` is `true`. If no label should be shown, omit `text` and leave `show_name` at `false`.

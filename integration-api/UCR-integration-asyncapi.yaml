@@ -2729,7 +2729,8 @@ components:
                 decimals:
                   description: |
                     Number of decimal places to show in the UI. 0 = integer value.
-                    If not set, the decimal places are derived from `step` and `min`. Can be overridden by the user.
+                    If not set, the decimal places are derived from `step`, `min` and `max`. Can be overridden by the
+                    user.
                   type: integer
                   minimum: 0
                   maximum: 6

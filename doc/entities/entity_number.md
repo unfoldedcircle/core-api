@@ -75,15 +75,15 @@ makes sense for one of them, like the `binary` sensor device class.
 
 ### Options
 
-| Name         | Type           | Default | Description                                                                                                                                                               |
-|--------------|----------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| min          | number \| null | 0       | Minimum value (inclusive). `null`: no lower limit.                                                                                                                        |
-| max          | number \| null | 100     | Maximum value (inclusive). `null`: no upper limit.                                                                                                                        |
-| step         | number         | 1       | Step size between values, must be greater than 0. Smallest step size: 0.000001. Also used as default step for the `increment` and `decrement` commands.                   |
-| decimals     | integer        |         | Number of decimal places to show in the UI: 0..6. 0 = integer value. If not set, the decimal places are derived from `step` and `min`. See [value format](#value-format). |
-| unit         | text           |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`. Default: unit of the [device class](#device-classes).                          |
-| display_mode | enum           | auto    | Hint for the preferred default representation in the UI: `auto`, `slider`, `stepper`. See [Display Mode](#display-mode).                                                  |
-| readable     | boolean        | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value.           |
+| Name         | Type           | Default | Description                                                                                                                                                                      |
+|--------------|----------------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| min          | number \| null | 0       | Minimum value (inclusive). `null`: no lower limit.                                                                                                                               |
+| max          | number \| null | 100     | Maximum value (inclusive). `null`: no upper limit.                                                                                                                               |
+| step         | number         | 1       | Step size between values, must be greater than 0. Smallest step size: 0.000001. Also used as default step for the `increment` and `decrement` commands.                          |
+| decimals     | integer        |         | Number of decimal places to show in the UI: 0..6. 0 = integer value. If not set, the decimal places are derived from `step`, `min` and `max`. See [value format](#value-format). |
+| unit         | text           |         | Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`. Default: unit of the [device class](#device-classes).                                 |
+| display_mode | enum           | auto    | Hint for the preferred default representation in the UI: `auto`, `slider`, `stepper`. See [Display Mode](#display-mode).                                                         |
+| readable     | boolean        | true    | If set to false, the current value cannot be read from the device and the driver will not send `value` attribute updates. The Remote keeps the last sent value.                  |
 
 The option vocabulary is similar to the `number` field in the [driver setup settings](../integration-driver/driver-setup.md),
 with the following differences:
@@ -110,8 +110,8 @@ The UI rounds the value for display only and always shows it with the same numbe
 
 - With the `decimals` option, the value is shown with exactly this number of decimal places. E.g. `21` with
   `decimals: 1` is shown as `21.0`.
-- Without the `decimals` option, the number of decimal places of `step` and `min` is used. E.g. a step size of 0.5
-  shows 1 decimal place, a step size of 1 with `min: 0.5` as well.
+- Without the `decimals` option, the number of decimal places of `step`, `min` and `max` is used. E.g. a step size
+  of 0.5 shows 1 decimal place, a step size of 1 with `min: 0.5` or `max: 2.5` as well.
 
 Calculated values should be rounded to the step size, or at least to 15 significant digits, to remove floating point
 artifacts like `1.499999999999997`.
@@ -186,6 +186,7 @@ the last value.
 
 The Remote shows the value set by the user immediately and then follows the `value` attribute in the `entity_change`
 event. If the driver doesn't confirm the new value within a few seconds, the UI falls back to the last known value.
+Exception: with option `readable: false` the UI keeps the value sent to the driver.
 Drivers should therefore send the `entity_change` event as soon as the device has applied the new value.
 
 ### Entity definition examples

@@ -40,8 +40,13 @@ _Changes in the next release_
 - User overrides of entity options in `options.user`: `decimals` of the sensor entity, `decimals` and `display_mode` of
   the number entity.
 - Sensor and number entity: value format rules, `null` value while unavailable. Without the `decimals` option, a sensor
-  value is shown with at most 2 decimal places, and a number value with the decimal places of `step` and `min`.
+  value is shown with at most 2 decimal places, and a number value with the decimal places of `step`, `min` and
+  `max`.
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
+
+### Fixed
+- Integration-API: the sensor entity option `custom_unit` is a plain text, as in the sensor entity documentation and
+  the Remote implementation. The AsyncAPI definition wrongly referenced a language text.
 
 ---
 
