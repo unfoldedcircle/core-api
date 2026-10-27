@@ -13,11 +13,11 @@ The sensor entity has no features.
 
 ### Attributes
 
-| Attribute | Type            | Values            | Description                                             |
-|-----------|-----------------|-------------------|---------------------------------------------------------|
-| state     | enum            | [States](#states) | Optional state of the sensor.                           |
-| value     | number / string |                   | The native measurement value of the sensor.             |
-| unit      | string          |                   | Optional unit of the `value` if no default unit is set. |
+| Attribute | Type                   | Values            | Description                                                                          |
+|-----------|------------------------|-------------------|--------------------------------------------------------------------------------------|
+| state     | enum                   | [States](#states) | Optional state of the sensor.                                                        |
+| value     | number / string / null |                   | The native measurement value of the sensor. `null`: no value, e.g. while unavailable. |
+| unit      | string                 |                   | Optional unit of the `value` if no default unit is set.                              |
 
 The `unit` attribute can be specified in the `entity_change` event and takes precedence over the associated default unit
 in the `device_class` or the specified `custom_unit` in the options.
@@ -26,6 +26,18 @@ If an integration driver gets the current unit from an external system together 
 to pass it on.  
 If the integration driver is in control of the unit, and it can't change at runtime, the unit can be specified in the
 available entity definition as `options.custom_unit` and then omitted in `entity_change` events.
+
+#### Value format
+
+- A numeric measurement must be sent as a JSON number, not as a text value. Text values are shown as they are, without
+  any formatting.
+- Calculated values should be rounded to the resolution of the sensor, or at least to 15 significant digits, to remove
+  floating point artifacts like `1.499999999999997`.
+- The UI rounds a numeric value for display only:
+  - With the `decimals` option, the value is shown with exactly this number of decimal places. E.g. `21` with
+    `decimals: 1` is shown as `21.0`.
+  - Without the `decimals` option, floating point artifacts are removed and the value is shown with at most 2 decimal
+    places, without trailing zeros. E.g. `21.40` is shown as `21.4`, `1.499999999999997` as `1.5`.
 
 ### States
 
@@ -74,13 +86,21 @@ If the `unit` attribute is not specified, the binary sensor is a generic on/off 
 
 ### Options
 
-| Name         | Type   | Default | Description                                                                                                                     |
-|--------------|--------|---------|---------------------------------------------------------------------------------------------------------------------------------|
-| custom_unit  | text   |         | Unit label for a custom sensor if `device_class` is not specified or to override a default unit.                                |
-| native_unit  | text   |         | The sensor's native unit of measurement to perform automatic conversion. Applicable to device classes: `temperature`.           |
-| decimals     | number | 0       | Number of decimal places to show in the UI if the sensor provides the measurement as a number. Not applicable to string values. |
-| 🚧 min_value | number |         | Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.                                   |
-| 🚧 max_value | number |         | Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.                                   |
+| Name        | Type    | Default | Description                                                                                                                                                                                                            |
+|-------------|---------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| custom_unit | text    |         | Unit label for a custom sensor if `device_class` is not specified or to override a default unit.                                                                                                                       |
+| native_unit | text    |         | The sensor's native unit of measurement to perform automatic conversion. Applicable to device classes: `temperature`.                                                                                                  |
+| decimals    | integer |         | Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values. If not set, at most 2 decimal places are shown. See [value format](#value-format). |
+| 🚧 min_value | number  |         | Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.                                                                                                                          |
+| 🚧 max_value | number  |         | Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.                                                                                                                          |
+
+### User overrides
+
+The following options can be overridden by the user in the Remote. See [user overrides](README.md#user-overrides).
+
+| Name     | Description                                 |
+|----------|---------------------------------------------|
+| decimals | Number of decimal places to show in the UI. |
 
 ## Integration API
 
@@ -97,7 +117,7 @@ The following attributes are supported:
 | Attribute | Description                                                                                              |
 |-----------|----------------------------------------------------------------------------------------------------------|
 | state     | Optional entity [state](#states).                                                                        |
-| value     | The current sensor value.                                                                                |
+| value     | The current sensor value. `null` if there's no value, e.g. while the sensor is unavailable.              |
 | unit      | Optional: the unit of measurement for the given `value`. If omitted, the configured entity unit is used. |
 
 - At least one attribute must be specified in the `entity_change` message.
@@ -105,6 +125,8 @@ The following attributes are supported:
   - It's also valid to always send every attribute.
 - Only sending the `unit` attribute is not valid.
 - If the state is never sent, the sensor is considered available (`ON`).
+- If the sensor becomes unavailable or the value is unknown, `value` should be set to `null`. Otherwise the Remote keeps
+  the last value.
 
 ### Event Examples
 
@@ -128,7 +150,7 @@ Sensor with a number value:
 }
 ```
 
-Sensor with a string value:
+Sensor with a text value:
 
 ```json
 {
@@ -139,8 +161,25 @@ Sensor with a string value:
     "entity_type": "sensor",
     "entity_id": "sensor-2",
     "attributes": {
-      "value": "231",
-      "unit": "V"
+      "value": "Charging"
+    }
+  }
+}
+```
+
+Sensor becoming unavailable:
+
+```json
+{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-1",
+    "attributes": {
+      "state": "UNAVAILABLE",
+      "value": null
     }
   }
 }

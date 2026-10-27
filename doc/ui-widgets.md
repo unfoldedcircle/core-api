@@ -12,15 +12,29 @@ web-configurator, or provided as default user interface by a [remote entity](ent
 
 ## Item types
 
-| Type         | Bound to                                      | Description                                                                          |
-|--------------|-----------------------------------------------|--------------------------------------------------------------------------------------|
-| icon         | optional entity command                       | Icon button, either a UC icon or a custom icon.                                      |
-| text         | optional entity command                       | Text button.                                                                         |
-| numpad       | -                                             | Number pad for digit commands.                                                       |
-| media_player | media-player entity                           | Media information and controls of a media-player entity.                             |
-| sensor       | sensor entity                                 | Value and unit of a [sensor entity](entities/entity_sensor.md).                      |
-| select       | select entity                                 | Option selection of a [select entity](entities/entity_select.md).                    |
-| slider       | [entity feature](#entity-feature-target)      | Slider to read and set a numeric entity feature. See [slider widget](#slider).       |
+| Type         | Bound to                                 | Description                                                                                               |
+|--------------|------------------------------------------|-----------------------------------------------------------------------------------------------------------|
+| icon         | optional entity command                  | Icon button, either a UC icon or a custom icon.                                                           |
+| text         | optional entity command                  | Text button.                                                                                              |
+| numpad       | -                                        | Number pad for digit commands.                                                                            |
+| media_player | media-player entity                      | Media information and controls of a media-player entity.                                                  |
+| sensor       | sensor entity                            | Value and unit of a [sensor entity](entities/entity_sensor.md).                                           |
+| select       | select entity                            | Option selection of a [select entity](entities/entity_select.md).                                         |
+| slider       | [entity feature](#entity-feature-target) | Slider to read and set a numeric entity feature. See [slider widget](#slider).                            |
+| number       | number entity                            | Value of a [number entity](entities/entity_number.md) as slider or stepper. See [number widget](#number). |
+
+## Value formatting
+
+Widgets showing a numeric value, like the sensor, slider and number widgets, format the value with the effective number
+of decimal places:
+
+1. The user override in the entity's `options.user.decimals`, see [user overrides](entities/README.md#user-overrides).
+2. The `decimals` option of the entity.
+3. The automatic format of the entity type, see the value format of the [sensor](entities/entity_sensor.md#value-format)
+   and [number](entities/entity_number.md#value-format) entity.
+
+Text values of a sensor entity are shown as they are. The values of the other slider-capable features are shown as
+defined in the [slider-capable features](#slider-capable-features).
 
 ## Entity feature target
 
@@ -98,7 +112,7 @@ The slider configuration is set in the `slider` property of the user interface i
 | entity_id   | string  | required   | Entity to control. See [entity feature target](#entity-feature-target).                                                                   |
 | feature     | string  | type default | Slider-capable feature of the entity. See [entity feature target](#entity-feature-target).                                              |
 | show_name   | boolean | false      | Show the entity name as widget label instead of the item's `text` field.                                                                  |
-| show_value  | boolean | true       | Show the current value and unit.                                                                                                          |
+| show_value  | boolean | true       | Show the current value and unit. See [value formatting](#value-formatting).                                                               |
 | icon_min    | string  |            | Optional icon identifier shown at the minimum end of the slider.                                                                          |
 | icon_max    | string  |            | Optional icon identifier shown at the maximum end of the slider.                                                                          |
 | min         | number  | feature min | Optional lower limit of the slider. Clamped to the value range of the feature.                                                            |
@@ -144,6 +158,58 @@ slider) decrease and increase the value by one step:
 
 - `number` entity: `decrement` / `increment` commands.
 - Other entity types: the feature command with the current value plus or minus the step size.
+
+## Number
+
+The number widget shows a [number entity](entities/entity_number.md) with its default representation: either as a
+slider, or as a value field with decrement and increment buttons (stepper).
+
+### Configuration
+
+The number widget configuration is set in the `number` property of the user interface item:
+
+```json
+{
+  "type": "number",
+  "text": "Bass",
+  "number": {
+    "number_id": "amp-1_bass"
+  },
+  "location": { "x": 0, "y": 4 },
+  "size": { "width": 4, "height": 1 }
+}
+```
+
+| Property  | Type    | Default  | Description                                                              |
+|-----------|---------|----------|--------------------------------------------------------------------------|
+| number_id | string  | required | Number entity to show.                                                   |
+| show_name | boolean | false    | Show the entity name as widget label instead of the item's `text` field. |
+
+Label rules are the same as for the sensor, select and slider widgets.
+
+### Representation
+
+- The effective [display mode](entities/entity_number.md#display-mode) of the entity defines the representation: the
+  user override, otherwise the `display_mode` option of the entity, otherwise `auto`.
+- An unbounded number entity, with `min` or `max` set to `null`, is always shown as a stepper.
+- The value is shown with the unit and the effective number of decimal places. See
+  [value formatting](#value-formatting).
+- The widget has no representation setting of its own. For a slider with additional settings, like limits, icons or
+  live updates, use the [slider widget](#slider).
+- The orientation and the minimum size of the slider representation are the same as for the
+  [slider widget](#orientation-and-size).
+
+### Commands
+
+- Stepper: the decrement and increment buttons send the `decrement` and `increment` commands without a `step`
+  parameter. The integration driver uses the `step` option of the entity.
+- Slider: the `set_value` command is sent when the slider is released.
+- The UI may allow entering a value directly, e.g. by tapping the value. The value is sent with the `set_value`
+  command.
+- When the widget has the focus during D-pad navigation, the left and right buttons (up and down for a vertical slider)
+  send the `decrement` and `increment` commands.
+
+The value updates and feedback are the same as for the [slider widget](#value-updates-and-feedback).
 
 ## Remote 3 touch slider
 

@@ -1956,6 +1956,9 @@ components:
         for more information.
         
         If no icon identifier is specified, the default icon for the entity type is used.
+
+        The `options.user` object is reserved for user overrides of entity options in the Remote. It must not be sent
+        by an integration driver and is ignored by the Remote.
       discriminator: entity_type
       type: object
       properties:
@@ -2623,9 +2626,11 @@ components:
                 decimals:
                   description: |
                     Number of decimal places to show in the UI if the sensor provides the measurement as a number.
-                    Not applicable to string values.
+                    Not applicable to text values. If not set, at most 2 decimal places are shown.
+                    Can be overridden by the user.
                   type: integer
-                  default: 0
+                  minimum: 0
+                  maximum: 6
                 min_value:
                   description: |
                     🚧 Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.
@@ -2722,11 +2727,12 @@ components:
                   minimum: 0.000001
                   default: 1
                 decimals:
-                  description: Number of decimal places to show in the UI. 0 = integer value.
+                  description: |
+                    Number of decimal places to show in the UI. 0 = integer value.
+                    If not set, the decimal places are derived from `step` and `min`. Can be overridden by the user.
                   type: integer
                   minimum: 0
                   maximum: 6
-                  default: 0
                 unit:
                   description: |
                     Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.
@@ -2741,7 +2747,7 @@ components:
                     - `stepper`: prefer a value field with increment and decrement buttons.
 
                     An unbounded number entity is always shown as a stepper. The hint doesn't apply to a slider widget
-                    in an activity user interface, or to the touch-slider.
+                    in an activity user interface, or to the touch-slider. Can be overridden by the user.
                   type: string
                   enum:
                     - auto
