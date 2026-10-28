@@ -25,6 +25,7 @@ Supported entities:
 - [Sensor](entity_sensor.md)
 - [IR-Emitter](entity_ir_emitter.md)
 - [Select](entity_select.md)
+- [Number](entity_number.md)
 - [Voice Assistant](entity_voice_assistant.md)
 
 The 🚧 icon within the entity descriptions indicates a planned feature.
@@ -150,6 +151,35 @@ representation how an entity is presented to a user. E.g. a `cover` entity has m
 Options are feature modifiers to customize certain behaviour, e.g. the default `on_off` feature for a switch expects the
 current state to be retrievable. If a switch can't provide its current state, it becomes a toggle switch with setting
 the `readable` option to `false`. 
+
+#### User overrides
+
+Some options can be overridden by the user in the Remote, e.g. the number of decimal places of a sensor value. The user
+values are stored in the `options.user` object of the configured entity, using the same option names. They take
+precedence over the options of the integration driver.
+
+- The `user` option is reserved for the Remote. An integration driver must not send it, the Remote ignores it in the
+  entity definition of a driver.
+- The user values are kept if the integration driver provides an updated entity definition.
+- The entity documentation lists the options which can be overridden by the user.
+
+Example of a number entity with a user override of the `decimals` and `display_mode` options:
+
+```json
+{
+  "options": {
+    "min": 0,
+    "max": 100,
+    "step": 0.5,
+    "decimals": 1,
+    "display_mode": "auto",
+    "user": {
+      "decimals": 0,
+      "display_mode": "stepper"
+    }
+  }
+}
+```
 
 ### Commands
 

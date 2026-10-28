@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.16.0-beta'
+  version: '0.17.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -790,6 +790,16 @@ components:
               cmd_id: select_option
               params:
                 option: "Option 1"
+        - payload:
+            kind: req
+            id: 129
+            msg: entity_command
+            msg_data:
+              entity_type: number
+              entity_id: number-1
+              cmd_id: set_value
+              params:
+                value: 42
 
     # --- events
     entity_change:
@@ -808,7 +818,11 @@ components:
     entity_available:
       summary: 🔍 New entity available event.
       description: |
-        Optional event to notify the UC Remote that new entities are available.
+        Optional event to notify the UC Remote that new entities are available, or that the definition of an available
+        entity has changed. For example, the value range of a number entity.
+
+        🚧 Not yet supported by the Remote. Until then, entity definitions are only updated when the Remote retrieves
+        the available entities with the `get_available_entities` request.
       tags:
         - name: entity
         - name: event
@@ -819,6 +833,8 @@ components:
       summary: 🔍 Entity removed event.
       description: |
         Optional event to notify the UC Remote that entities were removed and no longer available.
+
+        🚧 Not yet supported by the Remote.
       tags:
         - name: entity
         - name: event
@@ -1927,7 +1943,7 @@ components:
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `button`, `switch`, `light`, `cover`, `media_player`,
-        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `voice_assistant`. 
+        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `number`, `voice_assistant`. 
 
         See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
         for more information.
@@ -1940,6 +1956,9 @@ components:
         for more information.
         
         If no icon identifier is specified, the default icon for the entity type is used.
+
+        The `options.user` object is reserved for user overrides of entity options in the Remote. It must not be sent
+        by an integration driver and is ignored by the Remote.
       discriminator: entity_type
       type: object
       properties:
@@ -2566,20 +2585,27 @@ components:
               description: |
                 Sensor type. This is used by the UI to represent the sensor with a matching icon, default unit etc.  
                 To use a custom unit
+
+                The device classes are kept in sync with the `number` entity.
+
+                🚧 Planned device classes: `audio_level`, `duration`, `illuminance`.
               type: string
               enum:
                 - custom
-                - temperature
+                - battery
+                - current
+                - energy
                 - humidity
                 - power
-                - energy
+                - temperature
                 - voltage
-                - current
-                - battery
+                - binary
+#                - audio_level
+#                - duration
+#                - illuminance
 #                - air_quality_index
 #                - carbon_dioxide
 #                - carbon_monoxide
-#                - illuminance
 #                - pressure
             options:
               type: object
@@ -2591,17 +2617,20 @@ components:
                 custom_unit:
                   description: |
                     Unit label for a custom sensor if `device_class` is not specified or to override a default unit.
-                  $ref: '#/components/schemas/languageText'
+                  type: string
                 native_unit:
                   description: |
                     The sensor's native unit of measurement to perform automatic conversion. Applicable to device
                     classes: `temperature`
+                  type: string
                 decimals:
                   description: |
                     Number of decimal places to show in the UI if the sensor provides the measurement as a number.
-                    Not applicable to string values.
+                    Not applicable to text values. If not set, at most 2 decimal places are shown.
+                    Can be overridden by the user.
                   type: integer
-                  default: 0
+                  minimum: 0
+                  maximum: 6
                 min_value:
                   description: |
                     🚧 Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.
@@ -2629,6 +2658,109 @@ components:
             options:
               description: The select entity has no options.
               type: object
+
+    number:
+      description: |
+        The number entity holds a single numeric value which can be read and set. It is the writable counterpart of the
+        `sensor` entity and is rendered as a slider or a value field with increment / decrement buttons.
+
+        The value range is defined by the integration driver in the entity options. The optional device class is used
+        for a matching default icon, unit and value formatting.
+
+        See [number entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_number.md)
+        for more information.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              description: |
+                The number entity has a single `value` feature which is always present, even if not specified.
+              type: array
+              items:
+                type: string
+                enum:
+                  - value
+            device_class:
+              description: |
+                Optional type of the value. This is used by the UI to show a matching default icon, a default unit and
+                to format the value. If not specified, the number entity is a generic number.
+
+                The device classes are kept in sync with the `sensor` entity.
+
+                There is no automatic unit conversion: `value`, `min`, `max` and `step` are always in the unit of the
+                entity.
+              type: string
+              enum:
+                - audio_level
+                - battery
+                - current
+                - duration
+                - energy
+                - humidity
+                - illuminance
+                - power
+                - temperature
+                - voltage
+            options:
+              type: object
+              properties:
+                min:
+                  description: |
+                    Minimum value (inclusive). `null`: no lower limit.
+                  type:
+                    - number
+                    - 'null'
+                  default: 0
+                max:
+                  description: |
+                    Maximum value (inclusive). `null`: no upper limit.
+                  type:
+                    - number
+                    - 'null'
+                  default: 100
+                step:
+                  description: |
+                    Step size between values, must be greater than 0. Smallest step size: 0.000001.
+                    Also used as default step for the `increment` and `decrement` commands.
+                  type: number
+                  minimum: 0.000001
+                  default: 1
+                decimals:
+                  description: |
+                    Number of decimal places to show in the UI. 0 = integer value.
+                    If not set, the decimal places are derived from `step`, `min` and `max`. Can be overridden by the
+                    user.
+                  type: integer
+                  minimum: 0
+                  maximum: 6
+                unit:
+                  description: |
+                    Optional unit label of the value, shown next to the value in the UI. E.g. `%`, `dB`, `°C`.
+                    Default: unit of the device class.
+                  type: string
+                display_mode:
+                  description: |
+                    Hint for the preferred default representation in the UI.
+
+                    - `auto`: the UI chooses the representation based on the value range.
+                    - `slider`: prefer a slider. Only applicable if `min` and `max` are set.
+                    - `stepper`: prefer a value field with increment and decrement buttons.
+
+                    An unbounded number entity is always shown as a stepper. The hint doesn't apply to a slider widget
+                    in an activity user interface, or to the touch-slider. Can be overridden by the user.
+                  type: string
+                  enum:
+                    - auto
+                    - slider
+                    - stepper
+                  default: auto
+                readable:
+                  description: |
+                    If set to false, the current value cannot be read from the device and the driver will not send
+                    `value` attribute updates. The remote keeps the last value sent to the driver.
+                  type: boolean
+                  default: true
 
     voice_assistant:
       description: |
@@ -2886,6 +3018,7 @@ components:
             - remote
             - ir_emitter
             - select
+            - number
             - voice_assistant
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
 
