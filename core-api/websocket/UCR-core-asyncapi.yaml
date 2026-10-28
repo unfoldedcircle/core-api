@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.45.0-beta
+  version: 0.47.0-beta
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -4731,9 +4731,11 @@ components:
         For an open network without password the `password` field must be omitted (do not send an empty password value).
 
         The optional `security` field selects the security type (open, WPA/WPA2-PSK, WPA3-SAE, WPA2/WPA3 transition mode).
-        If omitted, a password creates the strongest profile the device's WiFi hardware supports: WPA2/WPA3 transition
-        mode on hardware with WPA3 support (connects to WPA2-only, transition and WPA3-only networks), WPA/WPA2-PSK
-        otherwise. Clients therefore do not need to determine the network's security type.
+        If omitted, a password creates the profile the scanned access points of the network call for: WPA/WPA2-PSK
+        without protected management frames (PMF) when no access point requires PMF, otherwise a protected profile with
+        the strongest key management the device's WiFi hardware supports. Clients therefore do not need to determine
+        the network's security type. The optional `pmf` field (`AUTO`, `REQUIRED`, `NONE`) overrides the automatic
+        PMF decision; `REQUIRED` and `NONE` profiles are never changed automatically.
         `WPA3_SAE` requires WPA3 support of the device's WiFi hardware, otherwise the request is rejected.
 
         Set `hidden` to connect to a hidden network (non-broadcasting SSID).
@@ -4800,7 +4802,9 @@ components:
     update_wifi_network:
       summary: 🧪 Change WiFi network configuration.
       description: |
-        Set a new WiFi network password.
+        Set a new WiFi network password and/or the protected management frames mode (`pmf`).
+        At least one of the two must be provided. A `pmf` change is applied and saved immediately;
+        a password change is verified by a connection attempt first.
       tags:
         - name: wifi
       payload:
@@ -10433,6 +10437,7 @@ components:
             - entity_macro
             - entity_remote
             - entity_select
+            - entity_number
             - activity_groups
             - integrations
             - profiles
@@ -13641,6 +13646,10 @@ components:
         options:
           description: |
             Feature options. See entity documentation for available options.
+
+            The `user` object holds the user overrides of options, with the same option names. An override takes precedence
+            over the option of the integration driver. It is kept if the driver provides an updated entity definition.
+            See [user overrides](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/README.md#user-overrides).
           type: object
         description:
           $ref: '#/components/schemas/LanguageText'
@@ -13682,6 +13691,27 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         description:
           $ref: '#/components/schemas/LanguageText'
+        options:
+          type: object
+          description: |
+            Entity option changes. Only the user overrides in `user` can be changed, the options of the integration
+            driver can't be changed. Any other property is rejected.
+          additionalProperties: false
+          properties:
+            user:
+              description: |
+                User overrides of entity options, merged key by key with the existing overrides:
+                - A value sets the override, `null` removes it.
+                - `null` instead of an object removes all overrides.
+
+                Options which can be overridden:
+                - `sensor` entity: `decimals` (integer 0..6).
+                - `number` entity: `decimals` (integer 0..6), `display_mode` (`auto`, `slider`, `stepper`).
+
+                Other options or entity types are rejected with a validation error naming `options.user.<option>`.
+              type:
+                - object
+                - 'null'
         attributes:
           type: object
           description: |
@@ -13759,6 +13789,7 @@ components:
         - remote
         - ir_emitter
         - select
+        - number
         - voice_assistant
     EntityPowerState:
       type: string
@@ -16927,7 +16958,12 @@ components:
           description: |
             Hidden network: actively probe for the SSID to connect to a non-broadcasting access point.
           type: boolean
+        pmf:
+          $ref: '#/components/schemas/WifiPmf'
     ModifyWifiNetwork:
+      description: |
+        Update of a saved network: the password and/or the protected management frames mode.
+        At least one of `password` and `pmf` is required.
       type: object
       properties:
         id:
@@ -16935,11 +16971,12 @@ components:
           minimum: 0
         password:
           type: string
-          minLength: 1
+          minLength: 8
           maxLength: 63
+        pmf:
+          $ref: '#/components/schemas/WifiPmf'
       required:
         - id
-        - password
     SavedNetworks:
       type: array
       items:
@@ -16962,6 +16999,8 @@ components:
           type: boolean
         security:
           $ref: '#/components/schemas/WifiSecurity'
+        pmf:
+          $ref: '#/components/schemas/WifiPmf'
         signal_level:
           type: integer
         state:
@@ -16979,7 +17018,7 @@ components:
         - `INTERFACE_DISABLED`: This state is entered if the network interface is disabled. The driver refuses any new operations that would use the radio until the interface has been enabled.
         - `INACTIVE`: This state is entered if there are no enabled networks in the configuration. The driver is not trying to associate with a new network and external interaction (e.g. add or enable a network) is needed to start association.
         - `SCANNING`: Scanning for a network.
-        - `AUTHENTICATED`: Trying to authenticate with a BSS/SSID.
+        - `AUTHENTICATING`: Trying to authenticate with a BSS/SSID.
         - `ASSOCIATING`: Trying to associate with a BSS/SSID.
         - `ASSOCIATED`: Association completed.
         - `FOUR_WAY_HANDSHAKE`: WPA 4-Way Key Handshake in progress.
@@ -16993,7 +17032,7 @@ components:
         - INTERFACE_DISABLED
         - INACTIVE
         - SCANNING
-        - AUTHENTICATED
+        - AUTHENTICATING
         - ASSOCIATING
         - ASSOCIATED
         - FOUR_WAY_HANDSHAKE
@@ -18345,7 +18384,9 @@ components:
         voice:
           $ref: '#/components/schemas/CfgVoiceControl'
         restart_required:
-          description: A configuration change requires a restart.
+          description: |
+            A configuration change requires a restart to take effect. Set after a change of the BT
+            peripheral connections, the WiFi band, or a configuration reset. Cleared by a restart.
           type: boolean
     CfgButtonsUpdate:
       description: Button configuration model to update settings. Missing properties are not changed.
@@ -19230,6 +19271,8 @@ components:
           The specified entity_id must be part of the included entities in the activity and of type media-player.
         - `select`: show a select box with the specified options from the select entity's `options` attribute.
         - `sensor`: show sensor value from the specified sensor entity specified in the `sensor` configuration object.
+        - `slider`: show a slider bound to a numeric entity feature specified in the `slider` configuration object.
+        - `number`: show a number entity as slider or stepper, specified in the `number` configuration object.
       type: string
       enum:
         - icon
@@ -19238,6 +19281,8 @@ components:
         - media_player
         - select
         - sensor
+        - slider
+        - number
     UserInterfaceItemSelect:
       description: |
         Select item configuration.
@@ -19275,6 +19320,106 @@ components:
           default: true
       required:
         - sensor_id
+    EntityFeatureTarget:
+      description: |
+        Reference to a numeric entity feature which can be read and set, for example `light.dim` or
+        `media_player.volume`. Used by the Remote 3 touch slider and the slider user interface widget.
+
+        See [user interface widgets](https://github.com/unfoldedcircle/core-api/blob/main/doc/ui-widgets.md) for the
+        supported features and the default feature of each entity type.
+
+        The feature must have a bounded value range: a number entity with option `min` or `max` set to `null` is rejected
+        with a validation error.
+      type: object
+      properties:
+        entity_id:
+          $ref: '#/components/schemas/EntityId'
+        feature:
+          description: |
+            The feature to control. One of the slider-capable features of the entity.
+            The default slider feature of the entity type is controlled if not specified.
+          type: string
+      required:
+        - entity_id
+    SliderUpdateMode:
+      description: |
+        When the slider value is sent to the entity:
+        - `on_release`: the value is sent once when the slider is released.
+        - `live`: values are sent while moving the slider, throttled by the remote, and the final value on release.
+      type: string
+      enum:
+        - on_release
+        - live
+      default: on_release
+    UserInterfaceItemSlider:
+      description: |
+        Slider item configuration.
+        The slider reads the current value from the entity attribute of the referenced feature and sends the
+        corresponding entity command when the value is changed by the user.
+        The orientation is derived from the item size: vertical if `size.height` > `size.width`, otherwise horizontal.
+        If the user interface `text` field is set, it is used as a widget label, except if `show_name` is set to true.
+        If no widget label should be shown, omit the item's `text` field and set `show_name` to false.
+
+        See [user interface widgets](https://github.com/unfoldedcircle/core-api/blob/main/doc/ui-widgets.md#slider) for
+        the supported entity features.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/EntityFeatureTarget'
+        - type: object
+          properties:
+            show_name:
+              description: Show the entity name as widget label instead of the user interface item's `text` field.
+              type: boolean
+              default: false
+            show_value:
+              description: Show the current value and unit.
+              type: boolean
+              default: true
+            icon_min:
+              description: Optional icon shown at the minimum end of the slider.
+              $ref: '#/components/schemas/IconIdentifier'
+            icon_max:
+              description: Optional icon shown at the maximum end of the slider.
+              $ref: '#/components/schemas/IconIdentifier'
+            min:
+              description: Optional lower limit of the slider. Clamped to the value range of the feature.
+              type: number
+            max:
+              description: Optional upper limit of the slider. Clamped to the value range of the feature.
+              type: number
+            update_mode:
+              $ref: '#/components/schemas/SliderUpdateMode'
+      examples:
+        - entity_id: denon.avr.zone_2
+          feature: volume
+          icon_min: uc:volume-low
+          icon_max: uc:volume-high
+          max: 60
+          update_mode: live
+    UserInterfaceItemNumber:
+      description: |
+        Number item configuration.
+        Shows a number entity with its default representation: a slider, or a value field with decrement and increment
+        buttons (stepper). The representation follows the effective `display_mode` of the entity: the user override in
+        `options.user`, otherwise the `display_mode` option of the entity. An unbounded number entity is always shown as a
+        stepper.
+        If the user interface `text` field is set, it is used as a widget label, except if `show_name` is set to true.
+        If no widget label should be shown, omit the item's `text` field and set `show_name` to false.
+
+        See [user interface widgets](https://github.com/unfoldedcircle/core-api/blob/main/doc/ui-widgets.md#number) for
+        more information.
+      type: object
+      properties:
+        number_id:
+          $ref: '#/components/schemas/EntityId'
+        show_name:
+          description: Show the number-entity name as widget label instead of the user interface item's `text` field.
+          type: boolean
+          default: false
+      required:
+        - number_id
+      examples:
+        - number_id: denon.avr.bass
     GridLocation:
       description: Button placement in the grid with 0-based coordinates.
       type: object
@@ -19302,7 +19447,8 @@ components:
           default: 1
     UserInterfaceItem:
       description: |
-        A user interface item is either an icon, text, sensor value or media information from a media-player entity.
+        A user interface item is either an icon, text, sensor value, select box, slider, number entity or media information
+        from a media-player entity.
         - Icon and text items can be static or linked to a command specified in the `command` field.
         - The command object can only be used for `icon` and `text` items.
         - Default size is 1x1 if not specified.
@@ -19322,6 +19468,10 @@ components:
           $ref: '#/components/schemas/UserInterfaceItemSelect'
         sensor:
           $ref: '#/components/schemas/UserInterfaceItemSensor'
+        slider:
+          $ref: '#/components/schemas/UserInterfaceItemSlider'
+        number:
+          $ref: '#/components/schemas/UserInterfaceItemNumber'
         command:
           $ref: '#/components/schemas/EntityCommand-2'
         location:
@@ -19421,19 +19571,6 @@ components:
       required:
         - group_id
         - name
-    TouchSliderTarget:
-      description: The target entity feature to control.
-      type: object
-      properties:
-        entity_id:
-          $ref: '#/components/schemas/EntityId'
-        feature:
-          description: |
-            The feature to control. One of the listed entity features.
-            The default slider feature is controlled if not specified.
-          type: string
-      required:
-        - entity_id
     TouchSliderUiCfg:
       description: |
         Remote 3 touch slider configuration. Assign the touch slider to a specific entity feature on a UI screen.
@@ -19452,7 +19589,7 @@ components:
           type: boolean
           default: true
         target:
-          $ref: '#/components/schemas/TouchSliderTarget'
+          $ref: '#/components/schemas/EntityFeatureTarget'
       required:
         - enabled
     VoiceAssistantTarget:
@@ -19670,15 +19807,19 @@ components:
       description: |
         WiFi network security type:
         - `OPEN`: open network without authentication
-        - `WPA_PSK`: WPA / WPA2 Personal with a pre-shared key
-        - `WPA3_SAE`: WPA3 Personal (SAE) only. Requires WPA3 support of the device's WiFi hardware,
-          otherwise the request is rejected.
-        - `WPA2_WPA3`: WPA2 / WPA3 transition mode. Falls back to WPA2-PSK on devices without
-          WPA3 hardware support.
+        - `WPA_PSK`: WPA / WPA2 Personal with a pre-shared key. Pinned: the profile never lists SAE.
+        - `WPA3_SAE`: WPA3 Personal (SAE) only, with protected management frames required. Requires
+          WPA3 support of the device's WiFi hardware, otherwise the request is rejected.
+        - `WPA2_WPA3`: WPA2 / WPA3 transition mode. Same as omitting the field: the profile follows the
+          access points, see below.
 
-        When omitted in a create-network request, a password creates the strongest profile the
-        device's WiFi hardware supports (`WPA2_WPA3` with WPA3 support, `WPA_PSK` otherwise);
-        without a password an open network is created.
+        When omitted in a create-network request, a password creates the profile that the scanned
+        access points of the network call for: WPA/WPA2-PSK without protected management frames
+        (PMF) when no access point of the network requires PMF and PSK is offered, otherwise a
+        protected profile with the strongest key management the device's WiFi hardware supports
+        (SAE where offered). A network not in the current scan (hidden, out of range) starts with
+        the protected profile and is re-evaluated once connected. The `pmf` field overrides the
+        automatic decision. Without a password an open network is created.
 
         In scan results the field is omitted if the network security could not be classified
         (e.g. WEP or EAP-only networks).
@@ -19688,6 +19829,26 @@ components:
         - WPA_PSK
         - WPA3_SAE
         - WPA2_WPA3
+    WifiPmf:
+      description: |
+        Protected management frames (PMF, IEEE 802.11w) mode of a password-protected network:
+        - `AUTO` (default when omitted): decided per access point. PMF is enabled only when an access
+          point of the network requires it (or offers only WPA3-SAE); otherwise the profile uses
+          WPA/WPA2-PSK without PMF, which gives the fastest reconnect after standby. The device keeps
+          the profile in sync with the network: it enables PMF when the network starts requiring it
+          and disables it again once connected to a network that does not.
+        - `REQUIRED`: PMF always enabled (optional on the air, so unprotected access points of the same
+          network stay reachable), SAE kept where the hardware supports it. Never changed automatically.
+        - `NONE`: PMF never enabled, WPA/WPA2-PSK only. Never changed automatically. Access points that
+          require PMF and WPA3-only networks are unreachable with this setting.
+
+        `WPA3_SAE` networks are always reported as `REQUIRED`; `NONE` is rejected for them.
+        Omitted in saved-network listings for open or unclassifiable networks.
+      type: string
+      enum:
+        - AUTO
+        - REQUIRED
+        - NONE
     IntegrationDiscovery:
       type: object
       properties:
