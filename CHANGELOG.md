@@ -45,6 +45,9 @@ _Changes in the next release_
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
 
 ### Fixed
+- Core APIs: document how the `limits` of a number parameter and the `items` of a selection parameter in the entity
+  command metadata reference the entity the command is configured for.
+- Light entity: the `brightness` parameter of the `on` command is 0..255, not a percentage value.
 - Integration-API: the sensor entity option `custom_unit` is a plain text, as in the sensor entity documentation and
   the Remote implementation. The AsyncAPI definition wrongly referenced a language text.
 

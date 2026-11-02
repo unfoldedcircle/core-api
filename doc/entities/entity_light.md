@@ -54,14 +54,14 @@ None.
 The integration driver has to implement a handler for the `entity_command` message to process the following command
 requests in `msg_data.cmd_id`.
 
-| cmd_id | Parameters        | Description                                                    |
-|--------|-------------------|----------------------------------------------------------------|
-| on     | -                 | Turn the light on. Optionally set brightness and color values: |
-|        | brightness        | - dim the light to the given percentage value.                 |
-|        | hue, saturation   | - adjust the color of the light.                               |
-|        | color_temperature | - adjust the color temperature.                                |
-| off    | -                 | Turn the light off.                                            |
-| toggle | -                 | Toggle the light from on -> off or from off -> on.             |
+| cmd_id | Parameters        | Description                                                                      |
+|--------|-------------------|----------------------------------------------------------------------------------|
+| on     | -                 | Turn the light on. Optionally set brightness and color values:                   |
+|        | brightness        | - dim the light to the given brightness value: 0..255.                           |
+|        | hue, saturation   | - adjust the color of the light. Hue: 0..360, saturation: 0..255.                |
+|        | color_temperature | - adjust the color temperature in percent: 0..100. 0% = coldest, 100% = warmest. |
+| off    | -                 | Turn the light off.                                                              |
+| toggle | -                 | Toggle the light from on -> off or from off -> on.                               |
 
 ### Events
 

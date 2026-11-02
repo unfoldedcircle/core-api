@@ -23,6 +23,17 @@ web-configurator, or provided as default user interface by a [remote entity](ent
 | slider       | [entity feature](#entity-feature-target) | Slider to read and set a numeric entity feature. See [slider widget](#slider).                            |
 | number       | number entity                            | Value of a [number entity](entities/entity_number.md) as slider or stepper. See [number widget](#number). |
 
+## Entity command parameters
+
+Icon and text items, button mappings and sequence steps send an entity command. If the command has parameters, the
+web-configurator shows an editor for them, based on the entity command metadata (`GET /api/cfg/entity/commands` in the
+[REST Core-API](https://unfoldedcircle.github.io/core-api/rest/)). The metadata is defined per entity type. The value
+range of a number parameter is either a static range, or it's loaded from the entity the command is configured for,
+with the same range as the [slider-capable features](#slider-capable-features). For example:
+
+- `set_value` of a number entity: options `min`, `max`, `step` and `unit`.
+- `target_temperature` of a climate entity: options `min_temperature`, `max_temperature` and `target_temperature_step`.
+
 ## Value formatting
 
 Widgets showing a numeric value, like the sensor, slider and number widgets, format the value with the effective number
