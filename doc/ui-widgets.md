@@ -193,10 +193,13 @@ The number widget configuration is set in the `number` property of the user inte
 
 | Property  | Type    | Default  | Description                                                              |
 |-----------|---------|----------|--------------------------------------------------------------------------|
-| number_id | string  | required | Number entity to show.                                                   |
+| number_id | string  | required | Number entity to show. Must be a configured number entity.               |
 | show_name | boolean | false    | Show the entity name as widget label instead of the item's `text` field. |
 
 Label rules are the same as for the sensor, select and slider widgets.
+
+Like the sensor and select widgets, the number entity doesn't have to be an included entity of the activity. This is
+different from the [slider widget](#slider), whose [entity feature target](#entity-feature-target) must be included.
 
 ### Representation
 
