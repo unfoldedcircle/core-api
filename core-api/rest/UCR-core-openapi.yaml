@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.54.0
+  version: 0.54.1
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7776,7 +7776,17 @@ paths:
         - cfg
       summary: Get entity command definitions.
       description: |
-        Meta-information about the entity commands.
+        Meta-information about the entity commands of all entity types.
+
+        The command metadata is used to build commands with parameters in a client, e.g. in button mappings, UI items and
+        sequence steps of an activity or macro. It describes the command parameters and how to show and validate them in
+        an editor.
+
+        The metadata is defined per entity type and doesn't refer to a specific entity. Some parameters load their limits
+        or selection lists from the entity the command is configured for, see `limits` in `EntityCmdParamNumber` and
+        `items` in `EntityCmdParamSelection`.
+
+        The commands available for a specific entity can be retrieved with the WebSocket `get_entity_commands` message.
       operationId: getEntityCommandMetadata
       responses:
         '200':
@@ -7790,69 +7800,35 @@ paths:
               examples:
                 default:
                   value:
-                    - id: button.press
-                      cmd_id: press
+                    - id: button.push
+                      cmd_id: push
                       name:
                         en: Press
                         de: Betätigen
                     - id: switch.on
                       cmd_id: 'on'
                       name:
-                        en: 'On'
-                        de: Ein
-                    - id: switch.off
-                      cmd_id: 'off'
-                      name:
-                        en: 'Off'
-                        de: Aus
-                    - id: switch.toggle
-                      cmd_id: toggle
-                      name:
-                        en: Toggle
-                        de: Umschalten
-                    - id: light.on
-                      cmd_id: 'on'
-                      name:
                         en: Turn on
                         de: Einschalten
-                    - id: light.off
+                    - id: switch.off
                       cmd_id: 'off'
                       name:
                         en: Turn off
                         de: Ausschalten
-                    - id: light.toggle
-                      cmd_id: toggle
-                      name:
-                        en: Toggle state
-                        de: Umschalten
-                    - id: light.dim
+                    - id: light.brightness_percent
                       cmd_id: 'on'
                       name:
-                        en: Set brightness
-                        de: Setze Helligkeit
+                        en: Set brightness in %
+                        de: Setze Helligkeit in %
                       params:
                         - name:
                             en: brightness
                             de: Helligkeit
-                          param: brightness
+                          param: brightness_percent
                           type: number
                           min: 0
                           max: 100
-                          step: 1
-                          unit: '%'
-                    - id: light.color_temperature
-                      cmd_id: 'on'
-                      name:
-                        en: Set color temperature
-                        de: Setze Farbtemperatur
-                      params:
-                        - name:
-                            en: Color temperature
-                            de: Farbtemperatur
-                          param: color_temperature
-                          type: number
-                          min: 0
-                          max: 100
+                          default: 50
                           step: 1
                           unit: '%'
                     - id: light.color
@@ -7876,9 +7852,66 @@ paths:
                           param: saturation
                           type: number
                           min: 0
+                          max: 255
+                          step: 1
+                    - id: media_player.select_source
+                      cmd_id: select_source
+                      name:
+                        en: Input source
+                        de: Eingang oder Quelle
+                      params:
+                        - name:
+                            en: Source
+                            de: Quelle
+                          param: source
+                          type: selection
+                          items:
+                            source: attributes
+                            field: source_list
+                    - id: number.set_value
+                      cmd_id: set_value
+                      name:
+                        en: Set value
+                        de: Wert setzen
+                      params:
+                        - name:
+                            en: Value
+                            de: Wert
+                          param: value
+                          type: number
+                          min: 0
                           max: 100
                           step: 1
-                          unit: '%'
+                          limits:
+                            source: options
+                            min: min
+                            max: max
+                            step: step
+                            unit: unit
+                        - name:
+                            en: Transition time
+                            de: Übergangszeit
+                          param: duration
+                          type: number
+                          optional: true
+                          min: 0
+                          unit: ms
+                    - id: number.increment
+                      cmd_id: increment
+                      name:
+                        en: Increase value
+                        de: Wert erhöhen
+                      params:
+                        - name:
+                            en: Step
+                            de: Schrittweite
+                          param: step
+                          type: number
+                          optional: true
+                          min: 0.000001
+                          limits:
+                            source: options
+                            step: step
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -13422,7 +13455,7 @@ components:
       type: object
       description: |
         Entity option changes. Only the user overrides in `user` can be changed, the options of the integration driver
-        can't be changed. Any other property is rejected.
+        can't be changed. Any other property is ignored.
 
         Only applied by the entity update operation, not when configuring an entity from an integration.
       additionalProperties: false
@@ -13437,7 +13470,7 @@ components:
             - `sensor` entity: `decimals` (integer 0..6).
             - `number` entity: `decimals` (integer 0..6), `display_mode` (`auto`, `slider`, `stepper`).
 
-            Other options or entity types are rejected with a validation error naming `options.user.<option>`.
+            Other options or entity types are ignored.
           type:
             - object
             - 'null'
@@ -17286,7 +17319,10 @@ components:
     EntityCmdParamNumber:
       type: object
       description: |
-        Number value parameter with optional limits.   
+        Number value parameter with optional limits.
+
+        The limits are either static values in this object, or they are loaded from the entity the command is configured
+        for with the `limits` object.
       allOf:
         - $ref: '#/components/schemas/EntityCmdParamCommon'
         - properties:
@@ -17309,28 +17345,52 @@ components:
               type: string
             limits:
               description: |
-                Optional reference to load `min`, `max`, `step` and `unit` from the entity object instead of the static
-                values. The static values are used as fallback if a referenced field is missing.
-                A referenced `min` or `max` field set to `null` means no lower or upper limit.
+                Optional: load `min`, `max`, `step` and `unit` of this parameter from the entity the command is configured
+                for, instead of using the static values of this object.
+
+                The command metadata is defined per entity type and doesn't refer to a specific entity. The entity is given
+                by the client context, e.g. the target entity of a button mapping, a UI item or a sequence step. This is
+                used when the value range depends on the entity, e.g. the `min` and `max` options of a number entity.
+
+                - `source` defines which object of the target entity holds the referenced properties.
+                - The `min`, `max`, `step` and `unit` fields each name a property in that object. Only the named properties
+                  are loaded: a field that is not set always uses the static value.
+                - The static value is also used as fallback if the target entity doesn't have the named property, or if the
+                  client doesn't know the target entity.
+                - A referenced `min` or `max` property set to `null` means no lower or upper limit.
+
+                Example: `{"source": "options", "min": "min_temperature"}` loads the minimum value from
+                `options.min_temperature` of the target entity.
               type: object
               properties:
                 source:
-                  description: Where to load the limits from.
+                  description: |
+                    Object of the target entity holding the referenced properties:
+                    - `options`: static entity options, provided by the integration driver in the entity definition.
+                    - `attributes`: current entity attributes. They can change at runtime with entity change events.
                   type: string
                   enum:
                     - attributes
                     - options
                 min:
-                  description: Field name in the source object holding the minimum value.
+                  description: |
+                    Name of the property in the `source` object of the target entity holding the minimum value.
+                    E.g. `min` for a number entity or `min_temperature` for a climate entity.
                   type: string
                 max:
-                  description: Field name in the source object holding the maximum value.
+                  description: |
+                    Name of the property in the `source` object of the target entity holding the maximum value.
+                    E.g. `max` for a number entity or `max_temperature` for a climate entity.
                   type: string
                 step:
-                  description: Field name in the source object holding the step size.
+                  description: |
+                    Name of the property in the `source` object of the target entity holding the step size.
+                    E.g. `step` for a number entity or `target_temperature_step` for a climate entity.
                   type: string
                 unit:
-                  description: Field name in the source object holding the unit label.
+                  description: |
+                    Name of the property in the `source` object of the target entity holding the unit label.
+                    E.g. `unit` for a number entity.
                   type: string
               required:
                 - source
@@ -17344,6 +17404,19 @@ components:
           max: 100
           step: 1
           unit: '%'
+        - name:
+            en: Value
+          param: value
+          type: number
+          min: 0
+          max: 100
+          step: 1
+          limits:
+            source: options
+            min: min
+            max: max
+            step: step
+            unit: unit
     EntityCmdParamBool:
       type: object
       description: Boolean value parameter.
@@ -17395,23 +17468,35 @@ components:
           default: Option 1
     EntityCmdParamSelection:
       type: object
-      description: Text value parameter with a selection list from another entity field.
+      description: |
+        Text value parameter with a selection list loaded from the entity the command is configured for.
+
+        The command metadata is defined per entity type and doesn't refer to a specific entity. The entity is given by the
+        client context, e.g. the target entity of a button mapping, a UI item or a sequence step.
       allOf:
         - $ref: '#/components/schemas/EntityCmdParamCommon'
         - properties:
             items:
-              description: Validation regex.
+              description: |
+                Reference to the property of the target entity holding the selection list.
+
+                Example: `{"source": "attributes", "field": "source_list"}` loads the selection list from
+                `attributes.source_list` of the target entity.
               type: object
               properties:
                 source:
-                  description: Where to load the selection list from.
+                  description: |
+                    Object of the target entity holding the referenced property:
+                    - `options`: static entity options, provided by the integration driver in the entity definition.
+                    - `attributes`: current entity attributes. They can change at runtime with entity change events.
                   type: string
                   enum:
                     - attributes
                     - options
                 field:
                   description: |
-                    Field name in the source object containing an array of strings for the parameter selection
+                    Name of the property in the `source` object of the target entity containing an array of strings for the
+                    parameter selection. E.g. `source_list` for a media player entity.
                   type: string
               required:
                 - source

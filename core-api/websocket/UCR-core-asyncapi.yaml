@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.47.0-beta
+  version: 0.47.1-beta
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1733,7 +1733,16 @@ components:
     get_entity_command_metadata:
       summary: 🔍 Get entity command definitions.
       description: |
-        Meta-information about the entity commands.
+        Meta-information about the entity commands of all entity types. Same data as `GET /api/cfg/entity/commands`.
+
+        The command metadata is used to build commands with parameters in a client, e.g. in button mappings, UI items
+        and sequence steps of an activity or macro. It describes the command parameters and how to show and validate
+        them in an editor.
+
+        The metadata is defined per entity type and doesn't refer to a specific entity. Some parameters load their
+        limits or selection lists from the entity the command is configured for. See the `EntityCommandMetadata`
+        object in the REST Core-API for the full definition, including `limits` of a number parameter and `items` of
+        a selection parameter.
       tags:
         - name: entity
       payload:
@@ -7921,7 +7930,9 @@ components:
               const: entity_command_metadata
             msg_data:
               type: array
-              description: See REST API for EntityCommandMetadata object definition
+              description: |
+                Entity command metadata of all entity types. See the `EntityCommandMetadata` object in the REST
+                Core-API for the object definition.
               items:
                 type: object
           required:
@@ -13695,7 +13706,7 @@ components:
           type: object
           description: |
             Entity option changes. Only the user overrides in `user` can be changed, the options of the integration
-            driver can't be changed. Any other property is rejected.
+            driver can't be changed. Any other property is ignored.
           additionalProperties: false
           properties:
             user:
@@ -13708,7 +13719,7 @@ components:
                 - `sensor` entity: `decimals` (integer 0..6).
                 - `number` entity: `decimals` (integer 0..6), `display_mode` (`auto`, `slider`, `stepper`).
 
-                Other options or entity types are rejected with a validation error naming `options.user.<option>`.
+                Other options or entity types are ignored.
               type:
                 - object
                 - 'null'
