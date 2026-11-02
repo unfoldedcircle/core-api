@@ -18,9 +18,10 @@ of a camera, a projector's lens shift, the speed of a fan, or a custom "scene in
 
 ## Features
 
-| Name  | R  | W  | Description                                                                |
-|-------|----|----|----------------------------------------------------------------------------|
-| value | ✅ | ✅ | Default feature of a number entity. Always present, even if not specified. |
+| Name       | R  | W  | Description                                                                                                  |
+|------------|----|----|--------------------------------------------------------------------------------------------------------------|
+| value      | ✅ | ✅ | Default feature of a number entity. Always present, even if not specified.                                   |
+| transition | ❌ | ✅ | The device supports a transition time to reach a new value: `duration` parameter of the `set_value` command. |
 
 - R: readable
     - ✅ Feature has a readable attribute to retrieve the current value.
@@ -28,6 +29,11 @@ of a camera, a projector's lens shift, the speed of a fan, or a custom "scene in
     - ✅ Feature has one or multiple commands to set the value.
 
 If the current value cannot be read from the device, the `readable` option can be set to `false`. See [Options](#options).
+
+The `transition` feature is optional and must only be set if the device supports it. Without it, the `duration`
+parameter of the `set_value` command is not offered to the user, e.g. in the command editor of the web-configurator.
+The Remote offers a separate set-value command with a transition time for entities with the `transition` feature; the
+driver always receives `set_value`.
 
 ### Attributes
 
@@ -158,7 +164,7 @@ requests in `msg_data.cmd_id`.
 | cmd_id    | Parameters | Description                                                                                                                     |
 |-----------|------------|---------------------------------------------------------------------------------------------------------------------------------|
 | set_value | value      | Set the value. The `value` parameter is within the `min` and `max` option range. The driver may round the value to `step`.       |
-|           | duration   | Optional: transition time in milliseconds to reach the new value, if supported by the device. Drivers may ignore this parameter. |
+|           | duration   | Optional, requires the `transition` feature: transition time in milliseconds to reach the new value. Drivers without the `transition` feature ignore this parameter. |
 | increment | step       | Increase the value by `step`. If not specified, the `step` option is used. The value is clamped at `max`, if specified.          |
 | decrement | step       | Decrease the value by `step`. If not specified, the `step` option is used. The value is clamped at `min`, if specified.          |
 
@@ -209,6 +215,25 @@ Generic number entity with a custom unit:
     "step": 0.5,
     "decimals": 1,
     "unit": "dB"
+  }
+}
+```
+
+Number entity with a transition time for the `set_value` command:
+
+```json
+{
+  "entity_id": "light-1_scene_intensity",
+  "entity_type": "number",
+  "features": ["value", "transition"],
+  "name": {
+    "en": "Scene intensity"
+  },
+  "options": {
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "unit": "%"
   }
 }
 ```
@@ -269,7 +294,7 @@ Unbounded counter without an upper limit:
 }
 ```
 
-With a transition time:
+With a transition time, requires the `transition` feature:
 
 ```json
 {

@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.17.0-beta'
+  version: '0.17.1-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2675,12 +2675,16 @@ components:
           properties:
             features:
               description: |
-                The number entity has a single `value` feature which is always present, even if not specified.
+                The `value` feature is always present, even if not specified.
+
+                The optional `transition` feature must only be set if the device supports a transition time to reach a
+                new value: the `duration` parameter of the `set_value` command.
               type: array
               items:
                 type: string
                 enum:
                   - value
+                  - transition
             device_class:
               description: |
                 Optional type of the value. This is used by the UI to show a matching default icon, a default unit and
