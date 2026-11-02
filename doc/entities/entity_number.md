@@ -102,7 +102,9 @@ Notes:
 - The `step` size should be compatible with `decimals`. A step size of 0.5 requires at least 1 decimal place to show
   every possible value.
 - With `readable: false` the Remote does not expect an `entity_change` event after a command and shows the last value
-  sent to the driver. This should be avoided whenever possible.
+  sent to the driver. The `increment` and `decrement` commands don't send a value: the Remote shows the last value plus
+  or minus the `step` option, clamped at `min` and `max`. This is only for display, the command is still sent without
+  a value. This should be avoided whenever possible.
 
 ### Value format
 
@@ -118,7 +120,7 @@ artifacts like `1.499999999999997`.
 
 ### User overrides
 
-The following options can be overridden by the user in the Remote. See [user overrides](README.md#user-overrides).
+The following options can be overridden by the user in the web-configurator. See [user overrides](README.md#user-overrides).
 
 | Name         | Description                                 |
 |--------------|---------------------------------------------|
@@ -161,7 +163,7 @@ requests in `msg_data.cmd_id`.
 | decrement | step       | Decrease the value by `step`. If not specified, the `step` option is used. The value is clamped at `min`, if specified.          |
 
 The `increment` and `decrement` commands are used for physical button mappings, e.g. `VOLUME_UP` and `VOLUME_DOWN`, and
-for D-pad navigation when a slider widget has the focus. The Remote does not calculate the new value itself, since the
+for D-pad navigation when a slider widget has the focus, if the screen offers D-pad navigation. The Remote does not calculate the new value itself, since the
 driver knows the actual value of the device.
 
 ### Events

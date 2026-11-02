@@ -96,7 +96,7 @@ If the `unit` attribute is not specified, the binary sensor is a generic on/off 
 
 ### User overrides
 
-The following options can be overridden by the user in the Remote. See [user overrides](README.md#user-overrides).
+The following options can be overridden by the user in the web-configurator. See [user overrides](README.md#user-overrides).
 
 | Name     | Description                                 |
 |----------|---------------------------------------------|

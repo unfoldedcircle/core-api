@@ -83,6 +83,9 @@ the value range, step and formatting of each feature. The following features can
 | climate      | target_temperature | ✅       | target_temperature  | `target_temperature { temperature }` | Options `min_temperature`, `max_temperature`, `target_temperature_step`         | °C / °F                       |
 
 - Default: the feature used if the `feature` property of the entity feature target is not specified.
+- `light.color_temperature`: if the light sets the `color_temperature_steps` option, the slider only offers this number
+  of positions, spread evenly over 0..100 and rounded to whole numbers. E.g. 3 steps: 0, 50, 100. Without the option,
+  the range is 0..100 with a step of 1.
 - The feature must be included in the `features` list of the entity, except for the `number.value` feature which is
   always present.
 - The feature must have a bounded value range. A number entity with option `min` or `max` set to `null` is unbounded
@@ -167,8 +170,8 @@ shown at the nearest end.
 
 ### Physical buttons
 
-When a slider widget has the focus during D-pad navigation, the left and right buttons (up and down for a vertical
-slider) decrease and increase the value by one step:
+If the screen offers D-pad navigation of the user interface items and a slider widget has the focus, the left and
+right buttons (up and down for a vertical slider) decrease and increase the value by one step:
 
 - `number` entity: `decrement` / `increment` commands.
 - Other entity types: the feature command with the current value plus or minus the step size.
@@ -223,8 +226,8 @@ different from the [slider widget](#slider), whose [entity feature target](#enti
 - Slider: the `set_value` command is sent when the slider is released.
 - The UI may allow entering a value directly, e.g. by tapping the value. The value is sent with the `set_value`
   command.
-- When the widget has the focus during D-pad navigation, the left and right buttons (up and down for a vertical slider)
-  send the `decrement` and `increment` commands.
+- If the screen offers D-pad navigation of the user interface items and the widget has the focus, the left and right
+  buttons (up and down for a vertical slider) send the `decrement` and `increment` commands.
 
 The value updates and feedback are the same as for the [slider widget](#value-updates-and-feedback).
 

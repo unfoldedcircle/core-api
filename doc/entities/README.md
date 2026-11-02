@@ -154,10 +154,12 @@ the `readable` option to `false`.
 
 #### User overrides
 
-Some options can be overridden by the user in the Remote, e.g. the number of decimal places of a sensor value. The user
-values are stored in the `options.user` object of the configured entity, using the same option names. They take
-precedence over the options of the integration driver.
+Some options can be overridden by the user, e.g. the number of decimal places of a sensor value. The user values are
+stored in the `options.user` object of the configured entity, using the same option names. They take precedence over
+the options of the integration driver.
 
+- The user values are edited in the web-configurator, with the entity update request of the Core-API. The Remote user
+  interface doesn't offer editing them, it applies them wherever the entity is shown.
 - The `user` option is reserved for the Remote. An integration driver must not send it, the Remote ignores it in the
   entity definition of a driver.
 - The user values are kept if the integration driver provides an updated entity definition.
