@@ -77,6 +77,7 @@ the value range, step and formatting of each feature. The following features can
 | light        | dim                | ✅       | brightness          | `on { brightness }`                  | 0..255                                                                          | 0..100 %                      |
 | light        | color_temperature  |         | color_temperature   | `on { color_temperature }`           | 0..100, option `color_temperature_steps`                                        | 0..100 %                      |
 | media_player | volume             | ✅       | volume              | `volume { volume }`                  | 0..100                                                                          | 0..100                        |
+| media_player | seek ¹             |         | media_position      | `seek { media_position }`            | 0..`media_duration` attribute                                                   | mm:ss                         |
 | cover        | position           | ✅       | position            | `position { position }`              | 0..100                                                                          | 0..100 %                      |
 | cover        | 🚧 tilt_position   |         | tilt_position       | `tilt { tilt_position }`             | 0..100                                                                          | 0..100 %                      |
 | climate      | target_temperature | ✅       | target_temperature  | `target_temperature { temperature }` | Options `min_temperature`, `max_temperature`, `target_temperature_step`         | °C / °F                       |
@@ -87,6 +88,9 @@ the value range, step and formatting of each feature. The following features can
 - The feature must have a bounded value range. A number entity with option `min` or `max` set to `null` is unbounded
   and cannot be used as an entity feature target, neither for a slider widget nor for the Remote 3 touch slider. The
   `min` and `max` properties of a slider widget only limit the range of a feature and cannot replace a missing limit.
+- ¹ Remote 3 touch slider only. The `seek` feature can't be used for a slider widget: its range changes with every
+  track, and the position moves by itself during playback. Seeking in a user interface page belongs in the
+  media-player widget.
 - 🚧 Planned feature.
 
 ## Slider
@@ -228,7 +232,8 @@ The value updates and feedback are the same as for the [slider widget](#value-up
 
 The Remote 3 touch slider is configured per activity in the `touch_slider` option with an
 [entity feature target](#entity-feature-target). If no target is specified, the default touch slider feature is
-active. The same [slider-capable features](#slider-capable-features) are supported as targets.
+active. The same [slider-capable features](#slider-capable-features) are supported as targets, including the
+touch slider only feature `media_player.seek`.
 
 ```json
 {
