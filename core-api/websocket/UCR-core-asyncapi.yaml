@@ -19464,6 +19464,8 @@ components:
         buttons (stepper). The representation follows the effective `display_mode` of the entity: the user override in
         `options.user`, otherwise the `display_mode` option of the entity. An unbounded number entity is always shown as a
         stepper.
+        The `number_id` must be a configured number entity. Like the sensor and select widgets, and unlike the slider
+        widget, the entity doesn't have to be an included entity of the activity.
         If the user interface `text` field is set, it is used as a widget label, except if `show_name` is set to true.
         If no widget label should be shown, omit the item's `text` field and set `show_name` to false.
 

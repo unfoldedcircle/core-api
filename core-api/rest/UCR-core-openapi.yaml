@@ -7888,12 +7888,31 @@ paths:
                             max: max
                             step: step
                             unit: unit
+                    - id: number.set_value_transition
+                      cmd_id: set_value
+                      name:
+                        en: Set value with transition
+                        de: Wert mit Übergang setzen
+                      params:
+                        - name:
+                            en: Value
+                            de: Wert
+                          param: value
+                          type: number
+                          min: 0
+                          max: 100
+                          step: 1
+                          limits:
+                            source: options
+                            min: min
+                            max: max
+                            step: step
+                            unit: unit
                         - name:
                             en: Transition time
                             de: Übergangszeit
                           param: duration
                           type: number
-                          optional: true
                           min: 0
                           unit: ms
                     - id: number.increment
