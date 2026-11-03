@@ -168,6 +168,9 @@ otherwise horizontal. Minimum sizes are 2x1 for a horizontal slider and 1x2 for 
 - `bar`: dragging changes the value relative to the current value, by the distance moved. A tap without movement doesn't
   change the value. A touch that starts on the slider belongs to the slider and doesn't swipe the page.
 - `buttons`: the `update_mode`, `icon_min`, `icon_max`, `color` and `fill` properties have no effect.
+- `buttons`: one step is one step of the shown value. For `light.dim`, which is shown as 0..100 %, that is 1 %
+  (2.55 of 0..255, rounded). For the other features it's the step of the feature, e.g. the `step` option of a
+  number entity or the `target_temperature_step` of a climate entity.
 - The Remote 3 touch slider has no style. These properties only exist for the slider widget.
 
 ### Color
