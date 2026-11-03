@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.47.1-beta
+  version: 0.48.0-beta
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -19362,6 +19362,49 @@ components:
         - on_release
         - live
       default: on_release
+    SliderStyle:
+      description: |
+        Visual style of the slider:
+        - `default`: thin slider, a rounded track with a fill up to the value. The label and value are shown above the
+          track.
+        - `bar`: level bar, the whole widget is the track. The label, value and icons are drawn inside the bar.
+        - `buttons`: stepper, the value between a decrease and an increase button. The `update_mode`, `icon_min`,
+          `icon_max`, `color` and `fill` properties have no effect.
+      type: string
+      enum:
+        - default
+        - bar
+        - buttons
+      default: default
+    SliderColor:
+      description: |
+        Fill color of the slider. The colors are roles of the Remote UI theme, not fixed color values.
+        - `auto`: the default of the entity feature.
+        - `neutral`: the primary foreground color of the theme.
+        - `entity`: the current color of the light. Only for the `light.dim` feature, other features use `auto`.
+        - `gradient`: the data gradient of the entity feature, e.g. cool to warm for a color temperature. Features without
+          a gradient use `neutral`.
+      type: string
+      enum:
+        - auto
+        - neutral
+        - entity
+        - gradient
+      default: auto
+    SliderFill:
+      description: |
+        How the value is drawn on the slider track:
+        - `auto`: the default of the entity feature.
+        - `start`: fill from the minimum end to the value.
+        - `center`: fill from 0 to the value. Only if the value range includes 0, otherwise `start` is used.
+        - `cursor`: no fill, only a marker at the value.
+      type: string
+      enum:
+        - auto
+        - start
+        - center
+        - cursor
+      default: auto
     UserInterfaceItemSlider:
       description: |
         Slider item configuration.
@@ -19400,6 +19443,12 @@ components:
               type: number
             update_mode:
               $ref: '#/components/schemas/SliderUpdateMode'
+            style:
+              $ref: '#/components/schemas/SliderStyle'
+            color:
+              $ref: '#/components/schemas/SliderColor'
+            fill:
+              $ref: '#/components/schemas/SliderFill'
       examples:
         - entity_id: denon.avr.zone_2
           feature: volume
@@ -19407,6 +19456,7 @@ components:
           icon_max: uc:volume-high
           max: 60
           update_mode: live
+          style: bar
     UserInterfaceItemNumber:
       description: |
         Number item configuration.

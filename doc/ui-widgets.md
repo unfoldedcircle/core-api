@@ -113,6 +113,7 @@ The slider configuration is set in the `slider` property of the user interface i
   "slider": {
     "entity_id": "denon.avr.zone_2",
     "feature": "volume",
+    "style": "bar",
     "show_value": true,
     "icon_min": "uc:volume-low",
     "icon_max": "uc:volume-high",
@@ -135,6 +136,9 @@ The slider configuration is set in the `slider` property of the user interface i
 | min         | number  | feature min  | Optional lower limit of the slider. Clamped to the value range of the feature.                                                                                           |
 | max         | number  | feature max  | Optional upper limit of the slider. Clamped to the value range of the feature.                                                                                           |
 | update_mode | enum    | on_release   | `on_release`: the value is sent once when the slider is released. `live`: values are sent while moving the slider, at most every 200 ms, and the final value on release. |
+| style       | enum    | default      | Visual style: `default`, `bar` or `buttons`. See [styles](#styles).                                                                                                      |
+| color       | enum    | auto         | Fill color: `auto`, `neutral`, `entity` or `gradient`. See [color](#color).                                                                                              |
+| fill        | enum    | auto         | How the value is drawn: `auto`, `start`, `center` or `cursor`. See [fill](#fill).                                                                                        |
 
 Label rules are the same as for the sensor and select widgets: if the item's `text` field is set, it is used as widget
 label, except if `show_name` is `true`. If no label should be shown, omit `text` and leave `show_name` at `false`.
@@ -151,12 +155,63 @@ otherwise horizontal. Minimum sizes are 2x1 for a horizontal slider and 1x2 for 
 | 1 x 3 | vertical    |
 | 2 x 2 | horizontal  |
 
+### Styles
+
+| Style   | Description                                                                                                                                                                       |
+|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| default | Thin slider: a rounded track with a fill up to the value. The label and value are shown above the track. This is the style of existing sliders.                                  |
+| bar     | Level bar: the whole widget is the track, with the same look as the brightness bar of the light detail view. Label, value and icons are drawn inside the bar.                   |
+| buttons | Stepper: the value between a decrease and an increase button. Each press sends the feature command with the current value minus or plus one step, for a `number` entity the `decrement` and `increment` commands. |
+
+- The [orientation and size](#orientation-and-size) rules apply to all styles. A vertical stepper has the increase
+  button at the top.
+- `bar`: dragging changes the value relative to the current value, by the distance moved. A tap without movement doesn't
+  change the value. A touch that starts on the slider belongs to the slider and doesn't swipe the page.
+- `buttons`: the `update_mode`, `icon_min`, `icon_max`, `color` and `fill` properties have no effect.
+- The Remote 3 touch slider has no style. These properties only exist for the slider widget.
+
+### Color
+
+The colors are roles of the Remote UI theme, not fixed color values. A theme or a design update can change the actual
+colors without a configuration change.
+
+| Color    | Fill                                                                                                                                  |
+|----------|---------------------------------------------------------------------------------------------------------------------------------------|
+| auto     | The default of the feature, see [style defaults](#style-defaults).                                                                    |
+| neutral  | The primary foreground color of the theme. The track uses the surface color of the theme.                                             |
+| entity   | The current color of the light, from the `hue` and `saturation` attributes. Only for the `light.dim` feature, other features use `auto`. Without a known color, `neutral` is used. |
+| gradient | The data gradient of the feature, see [style defaults](#style-defaults). Features without a gradient use `neutral`.                   |
+
+### Fill
+
+| Fill   | Description                                                                                                  |
+|--------|--------------------------------------------------------------------------------------------------------------|
+| auto   | The default of the feature, see [style defaults](#style-defaults).                                           |
+| start  | Fill from the minimum end to the value.                                                                      |
+| center | Fill from 0 to the value, e.g. for a bass level of -10..+10 dB. Only if the range includes 0, otherwise `start` is used. |
+| cursor | No fill, only a marker at the value, e.g. for a color temperature.                                          |
+
+If the feature has 10 positions or fewer, e.g. `light.color_temperature` with `color_temperature_steps` 3, the slider
+shows the positions and snaps to the nearest one on release.
+
+### Style defaults
+
+| Feature                    | `auto` color | Gradient                                     | `auto` fill                                  |
+|----------------------------|--------------|----------------------------------------------|----------------------------------------------|
+| number.value               | neutral      | -                                            | `center` if `min` < 0 < `max`, else `start`  |
+| light.dim                  | neutral      | dark to primary foreground                   | start                                        |
+| light.color_temperature    | gradient     | cool (0 %, coldest) to warm (100 %, warmest) | cursor                                       |
+| media_player.volume        | neutral      | -                                            | start                                        |
+| cover.position             | neutral      | -                                            | start                                        |
+| cover.tilt_position        | neutral      | -                                            | start                                        |
+| climate.target_temperature | neutral      | cool to heat                                 | start                                        |
+
 ### Limiting the range
 
 The optional `min` and `max` properties limit the slider to a sub-range of the feature. This allows for example a
 "safe volume" slider which never exceeds 60, or a brightness slider which cannot switch the light off. The limits are
-clamped to the value range of the feature. If the current entity value is outside the slider range, the slider knob is
-shown at the nearest end.
+clamped to the value range of the feature. If the current entity value is outside the slider range, the slider shows
+it at the nearest end.
 
 ### Value updates and feedback
 
