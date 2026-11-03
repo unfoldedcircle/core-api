@@ -14399,7 +14399,7 @@ components:
         Fill color of the slider. The colors are roles of the Remote UI theme, not fixed color values.
         - `auto`: the default of the entity feature.
         - `neutral`: the primary foreground color of the theme.
-        - `entity`: the current color of the light. Only for the `light.dim` feature, other features use `auto`.
+        - `entity`: the current color of the light. Only for the `light.dim` feature of a light with the `color` feature, other features use `auto`. A light without the `color` feature uses `neutral`.
         - `gradient`: the data gradient of the entity feature, e.g. cool to warm for a color temperature. Features without
           a gradient use `neutral`.
       type: string

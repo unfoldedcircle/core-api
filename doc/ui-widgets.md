@@ -182,7 +182,7 @@ colors without a configuration change.
 |----------|---------------------------------------------------------------------------------------------------------------------------------------|
 | auto     | The default of the feature, see [style defaults](#style-defaults).                                                                    |
 | neutral  | The primary foreground color of the theme. The track uses the surface color of the theme.                                             |
-| entity   | The current color of the light, from the `hue` and `saturation` attributes. Only for the `light.dim` feature, other features use `auto`. Without a known color, `neutral` is used. |
+| entity   | The current color of the light, from the `hue` and `saturation` attributes. Only for the `light.dim` feature of a light with the `color` feature, other features use `auto`. A light without the `color` feature, or without a known color, uses `neutral`. |
 | gradient | The data gradient of the feature, see [style defaults](#style-defaults). Features without a gradient use `neutral`.                   |
 
 ### Fill
