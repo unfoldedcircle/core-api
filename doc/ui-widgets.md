@@ -236,8 +236,8 @@ right buttons (up and down for a vertical slider) decrease and increase the valu
 
 ## Number
 
-The number widget shows a [number entity](entities/entity_number.md) with its default representation: either as a
-slider, or as a value field with decrement and increment buttons (stepper).
+The number widget shows a [number entity](entities/entity_number.md) either as a slider, or as a value field with
+decrement and increment buttons (stepper).
 
 ### Configuration
 
@@ -248,17 +248,20 @@ The number widget configuration is set in the `number` property of the user inte
   "type": "number",
   "text": "Bass",
   "number": {
-    "number_id": "amp-1_bass"
+    "number_id": "amp-1_bass",
+    "display_mode": "auto"
   },
   "location": { "x": 0, "y": 4 },
   "size": { "width": 4, "height": 1 }
 }
 ```
 
-| Property  | Type    | Default  | Description                                                              |
-|-----------|---------|----------|--------------------------------------------------------------------------|
-| number_id | string  | required | Number entity to show. Must be a configured number entity.               |
-| show_name | boolean | false    | Show the entity name as widget label instead of the item's `text` field. |
+| Property     | Type    | Default  | Description                                                                                         |
+|--------------|---------|----------|-----------------------------------------------------------------------------------------------------|
+| number_id    | string  | required | Number entity to show. Must be a configured number entity.                                          |
+| show_name    | boolean | false    | Show the entity name as widget label instead of the item's `text` field.                            |
+| display_mode | enum    | auto     | Representation: `auto`, `slider` or `stepper`. See [representation](#representation).               |
+| step         | number  |          | Step size of the decrement and increment buttons. If not set, the entity's `step` option is used. See [commands](#commands). |
 
 Label rules are the same as for the sensor, select and slider widgets.
 
@@ -267,25 +270,39 @@ different from the [slider widget](#slider), whose [entity feature target](#enti
 
 ### Representation
 
-- The effective [display mode](entities/entity_number.md#display-mode) of the entity defines the representation: the
-  user override, otherwise the `display_mode` option of the entity, otherwise `auto`.
-- An unbounded number entity, with `min` or `max` set to `null`, is always shown as a stepper.
+- The widget's `display_mode` defines the representation:
+
+  | display_mode | Representation                                                                                   |
+  |--------------|--------------------------------------------------------------------------------------------------|
+  | auto         | The effective [display mode](entities/entity_number.md#display-mode) of the entity: the user override, otherwise the `display_mode` option of the entity, otherwise `auto`. |
+  | slider       | A slider.                                                                                        |
+  | stepper      | A value field with decrement and increment buttons.                                              |
+
+  The widget's `slider` or `stepper` takes precedence over the display mode of the entity, including the user
+  override.
+- An unbounded number entity, with `min` or `max` set to `null`, is always shown as a stepper, also with
+  `display_mode: slider`.
+- The slider representation is the [slider widget](#slider) with the defaults: `style: default`, `color: auto` and
+  `fill: auto`, so the fill starts at 0 if the range spans 0.
 - The value is shown with the unit and the effective number of decimal places. See
   [value formatting](#value-formatting).
-- The widget has no representation setting of its own. For a slider with additional settings, like limits, icons or
-  live updates, use the [slider widget](#slider).
+- Decimal places are an entity setting, not a widget setting, so a value is shown the same everywhere.
+- For a slider with additional settings, like limits, icons, styles or live updates, use the [slider widget](#slider).
 - The orientation and the minimum size of the slider representation are the same as for the
   [slider widget](#orientation-and-size).
 
 ### Commands
 
-- Stepper: the decrement and increment buttons send the `decrement` and `increment` commands without a `step`
-  parameter. The integration driver uses the `step` option of the entity.
+- Stepper: the decrement and increment buttons send the `decrement` and `increment` commands. With the widget's `step`
+  set, it is sent as `step` parameter. Without it, the commands are sent without `step`, and the integration driver
+  uses the `step` option of the entity.
+- The widget's `step` should be a multiple of the entity's `step` option. The UI doesn't round it.
 - Slider: the `set_value` command is sent when the slider is released.
 - The UI may allow entering a value directly, e.g. by tapping the value. The value is sent with the `set_value`
   command.
 - If the screen offers D-pad navigation of the user interface items and the widget has the focus, the left and right
-  buttons (up and down for a vertical slider) send the `decrement` and `increment` commands.
+  buttons (up and down for a vertical slider) send the `decrement` and `increment` commands, with the widget's `step`
+  as for the stepper.
 
 The value updates and feedback are the same as for the [slider widget](#value-updates-and-feedback).
 

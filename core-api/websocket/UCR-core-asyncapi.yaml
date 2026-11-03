@@ -19460,10 +19460,10 @@ components:
     UserInterfaceItemNumber:
       description: |
         Number item configuration.
-        Shows a number entity with its default representation: a slider, or a value field with decrement and increment
-        buttons (stepper). The representation follows the effective `display_mode` of the entity: the user override in
-        `options.user`, otherwise the `display_mode` option of the entity. An unbounded number entity is always shown as a
-        stepper.
+        Shows a number entity as a slider, or as a value field with decrement and increment buttons (stepper). The
+        widget's `display_mode` defines the representation. With `auto`, the effective `display_mode` of the entity is
+        used: the user override in `options.user`, otherwise the `display_mode` option of the entity. An unbounded number
+        entity is always shown as a stepper.
         The `number_id` must be a configured number entity. Like the sensor and select widgets, and unlike the slider
         widget, the entity doesn't have to be an included entity of the activity.
         If the user interface `text` field is set, it is used as a widget label, except if `show_name` is set to true.
@@ -19479,10 +19479,35 @@ components:
           description: Show the number-entity name as widget label instead of the user interface item's `text` field.
           type: boolean
           default: false
+        display_mode:
+          $ref: '#/components/schemas/NumberWidgetDisplayMode'
+        step:
+          description: |
+            Step size of the decrement and increment buttons, sent as `step` parameter of the `decrement` and
+            `increment` commands. Only used by the stepper representation and the D-pad. If not set, the commands are
+            sent without `step`, and the integration driver uses the `step` option of the entity.
+            Should be a multiple of the `step` option of the entity.
+          type: number
+          minimum: 0.000001
       required:
         - number_id
       examples:
         - number_id: denon.avr.bass
+        - number_id: bedroom.sleep_timer
+          display_mode: stepper
+          step: 5
+    NumberWidgetDisplayMode:
+      description: |
+        Representation of a number widget:
+        - `auto`: the effective display mode of the entity. See the `display_mode` option of the number entity.
+        - `slider`: a slider. An unbounded number entity is shown as a stepper.
+        - `stepper`: a value field with decrement and increment buttons.
+      type: string
+      enum:
+        - auto
+        - slider
+        - stepper
+      default: auto
     GridLocation:
       description: Button placement in the grid with 0-based coordinates.
       type: object

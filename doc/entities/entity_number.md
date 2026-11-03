@@ -153,6 +153,8 @@ the entity control screen. It is comparable to the `mode` attribute of a Home As
 - The UI may ignore the hint, e.g. if there isn't enough space for a slider.
 - The user can override the display mode. The display mode of the user takes precedence over the option of the
   integration driver. If neither is set, `auto` is used.
+- A [number widget](../ui-widgets.md#number) in an activity user interface can set its own `display_mode`. A
+  `slider` or `stepper` of the widget takes precedence over the user override and the option of the integration driver.
 
 ## Integration API
 
