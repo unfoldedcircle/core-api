@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-c81ebc12.js";
+            window.path_to_searchindex_js = "searchindex-7c4bc41b.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-a810bdbd.js"></script>
+        <script src="toc-0bd7c578.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -311,6 +311,371 @@ collapsed or expanded.</p>
 <p><img src="img/groups.jpg" alt="Overview"></p>
 <p>Example of a group containing two lights in expanded mode.</p>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="user-interface-widgets"><a class="header" href="#user-interface-widgets">User Interface Widgets</a></h1>
+<p>Activity and remote-entity user interfaces consist of pages with a button grid. The user places <em>user interface items</em>
+in the grid, defines their size and, depending on the item type, links them to an entity command or to an entity.</p>
+<p>This page describes the user interface items which are bound to an entity, so called <em>widgets</em>, and the shared
+<em>entity feature target</em> used by the slider widget and the Remote 3 touch slider.</p>
+<p>The data model is defined in the <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core-API</a> in the
+<code>UserInterfaceItem</code> object. Integration drivers only define entities; the widgets are configured by the user in the
+web-configurator, or provided as default user interface by a <a href="#user-interface">remote entity</a>.</p>
+<h2 id="item-types"><a class="header" href="#item-types">Item types</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Bound to</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>icon</td><td>optional entity command</td><td>Icon button, either a UC icon or a custom icon.</td></tr>
+<tr><td>text</td><td>optional entity command</td><td>Text button.</td></tr>
+<tr><td>numpad</td><td>-</td><td>Number pad for digit commands.</td></tr>
+<tr><td>media_player</td><td>media-player entity</td><td>Media information and controls of a media-player entity.</td></tr>
+<tr><td>sensor</td><td>sensor entity</td><td>Value and unit of a <a href="#sensor-entity">sensor entity</a>.</td></tr>
+<tr><td>select</td><td>select entity</td><td>Option selection of a <a href="#select-entity">select entity</a>.</td></tr>
+<tr><td>slider</td><td><a href="#entity-feature-target">entity feature</a></td><td>Slider to read and set a numeric entity feature. See <a href="#slider">slider widget</a>.</td></tr>
+<tr><td>number</td><td>number entity</td><td>Value of a <a href="#number-entity">number entity</a> as slider or stepper. See <a href="#number">number widget</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="entity-command-parameters"><a class="header" href="#entity-command-parameters">Entity command parameters</a></h2>
+<p>Icon and text items, button mappings and sequence steps send an entity command. If the command has parameters, the
+web-configurator shows an editor for them, based on the entity command metadata (<code>GET /api/cfg/entity/commands</code> in the
+<a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core-API</a>). The metadata is defined per entity type. The value
+range of a number parameter is either a static range, or it’s loaded from the entity the command is configured for,
+with the same range as the <a href="#slider-capable-features">slider-capable features</a>. For example:</p>
+<ul>
+<li><code>set_value</code> of a number entity: options <code>min</code>, <code>max</code>, <code>step</code> and <code>unit</code>.</li>
+<li><code>target_temperature</code> of a climate entity: options <code>min_temperature</code>, <code>max_temperature</code> and <code>target_temperature_step</code>.</li>
+</ul>
+<h2 id="value-formatting"><a class="header" href="#value-formatting">Value formatting</a></h2>
+<p>Widgets showing a numeric value, like the sensor, slider and number widgets, format the value with the effective number
+of decimal places:</p>
+<ol>
+<li>The user override in the entity’s <code>options.user.decimals</code>, see <a href="#user-overrides">user overrides</a>.</li>
+<li>The <code>decimals</code> option of the entity.</li>
+<li>The automatic format of the entity type, see the value format of the <a href="#value-format">sensor</a>
+and <a href="#value-format-1">number</a> entity.</li>
+</ol>
+<p>Text values of a sensor entity are shown as they are. The values of the other slider-capable features are shown as
+defined in the <a href="#slider-capable-features">slider-capable features</a>.</p>
+<h2 id="entity-feature-target"><a class="header" href="#entity-feature-target">Entity feature target</a></h2>
+<p>An entity feature target references a numeric feature of an entity which can be read and set. It is used by:</p>
+<ul>
+<li>the <a href="#slider">slider widget</a> in a user interface page,</li>
+<li>the <a href="#remote-3-touch-slider">Remote 3 touch slider</a> configuration of an activity.</li>
+</ul>
+<pre><code class="language-json">{
+  "entity_id": "hass.main.light.living_room",
+  "feature": "dim"
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Required</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>entity_id</td><td>yes</td><td>The entity to control. It must be part of the included entities of the activity.</td></tr>
+<tr><td>feature</td><td>no</td><td>One of the <a href="#slider-capable-features">slider-capable features</a> of the entity. Defaults to the default slider feature of the entity type.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="slider-capable-features"><a class="header" href="#slider-capable-features">Slider-capable features</a></h3>
+<p>A slider-capable feature pairs one numeric entity attribute (read) with one entity command (write). The remote knows
+the value range, step and formatting of each feature. The following features can be used as entity feature target:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Entity type</th><th>Feature</th><th>Default</th><th>Attribute</th><th>Command</th><th>Range and step</th><th>Displayed as</th></tr>
+</thead>
+<tbody>
+<tr><td>number</td><td>value</td><td>✅</td><td>value</td><td><code>set_value { value }</code></td><td>Options <code>min</code>, <code>max</code>, <code>step</code></td><td>value with <code>decimals</code>, <code>unit</code></td></tr>
+<tr><td>light</td><td>dim</td><td>✅</td><td>brightness</td><td><code>on { brightness }</code></td><td>0..255</td><td>0..100 %</td></tr>
+<tr><td>light</td><td>color_temperature</td><td></td><td>color_temperature</td><td><code>on { color_temperature }</code></td><td>0..100, option <code>color_temperature_steps</code></td><td>0..100 %</td></tr>
+<tr><td>media_player</td><td>volume</td><td>✅</td><td>volume</td><td><code>volume { volume }</code></td><td>0..100</td><td>0..100</td></tr>
+<tr><td>media_player</td><td>seek ¹</td><td></td><td>media_position</td><td><code>seek { media_position }</code></td><td>0..<code>media_duration</code> attribute</td><td>mm:ss</td></tr>
+<tr><td>cover</td><td>position</td><td>✅</td><td>position</td><td><code>position { position }</code></td><td>0..100</td><td>0..100 %</td></tr>
+<tr><td>cover</td><td>🚧 tilt_position</td><td></td><td>tilt_position</td><td><code>tilt { tilt_position }</code></td><td>0..100</td><td>0..100 %</td></tr>
+<tr><td>climate</td><td>target_temperature</td><td>✅</td><td>target_temperature</td><td><code>target_temperature { temperature }</code></td><td>Options <code>min_temperature</code>, <code>max_temperature</code>, <code>target_temperature_step</code></td><td>°C / °F</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Default: the feature used if the <code>feature</code> property of the entity feature target is not specified.</li>
+<li><code>light.color_temperature</code>: if the light sets the <code>color_temperature_steps</code> option, the slider only offers this number
+of positions, spread evenly over 0..100 and rounded to whole numbers. E.g. 3 steps: 0, 50, 100. Without the option,
+the range is 0..100 with a step of 1.</li>
+<li>The feature must be included in the <code>features</code> list of the entity, except for the <code>number.value</code> feature which is
+always present.</li>
+<li>The feature must have a bounded value range. A number entity with option <code>min</code> or <code>max</code> set to <code>null</code> is unbounded
+and cannot be used as an entity feature target, neither for a slider widget nor for the Remote 3 touch slider. The
+<code>min</code> and <code>max</code> properties of a slider widget only limit the range of a feature and cannot replace a missing limit.</li>
+<li>¹ Remote 3 touch slider only. The <code>seek</code> feature can’t be used for a slider widget: its range changes with every
+track, and the position moves by itself during playback. Seeking in a user interface page belongs in the
+media-player widget.</li>
+<li>🚧 Planned feature.</li>
+</ul>
+<h2 id="slider"><a class="header" href="#slider">Slider</a></h2>
+<p>The slider widget renders a horizontal or vertical slider for an <a href="#entity-feature-target">entity feature target</a>. The
+current value is read from the entity attribute and updated with every <code>entity_change</code> event. Moving the slider sends
+the entity command with the new value.</p>
+<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
+<p>The slider configuration is set in the <code>slider</code> property of the user interface item:</p>
+<pre><code class="language-json">{
+  "type": "slider",
+  "text": "Volume",
+  "slider": {
+    "entity_id": "denon.avr.zone_2",
+    "feature": "volume",
+    "style": "bar",
+    "show_value": true,
+    "icon_min": "uc:volume-low",
+    "icon_max": "uc:volume-high",
+    "max": 60,
+    "update_mode": "live"
+  },
+  "location": { "x": 0, "y": 5 },
+  "size": { "width": 4, "height": 1 }
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>entity_id</td><td>string</td><td>required</td><td>Entity to control. See <a href="#entity-feature-target">entity feature target</a>.</td></tr>
+<tr><td>feature</td><td>string</td><td>type default</td><td>Slider-capable feature of the entity. See <a href="#entity-feature-target">entity feature target</a>.</td></tr>
+<tr><td>show_name</td><td>boolean</td><td>false</td><td>Show the entity name as widget label instead of the item’s <code>text</code> field.</td></tr>
+<tr><td>show_value</td><td>boolean</td><td>true</td><td>Show the current value and unit. See <a href="#value-formatting">value formatting</a>.</td></tr>
+<tr><td>icon_min</td><td>string</td><td></td><td>Optional icon identifier shown at the minimum end of the slider.</td></tr>
+<tr><td>icon_max</td><td>string</td><td></td><td>Optional icon identifier shown at the maximum end of the slider.</td></tr>
+<tr><td>min</td><td>number</td><td>feature min</td><td>Optional lower limit of the slider. Clamped to the value range of the feature.</td></tr>
+<tr><td>max</td><td>number</td><td>feature max</td><td>Optional upper limit of the slider. Clamped to the value range of the feature.</td></tr>
+<tr><td>update_mode</td><td>enum</td><td>on_release</td><td><code>on_release</code>: the value is sent once when the slider is released. <code>live</code>: values are sent while moving the slider, at most every 200 ms, and the final value on release.</td></tr>
+<tr><td>style</td><td>enum</td><td>default</td><td>Visual style: <code>default</code>, <code>bar</code> or <code>buttons</code>. See <a href="#styles">styles</a>.</td></tr>
+<tr><td>color</td><td>enum</td><td>auto</td><td>Fill color: <code>auto</code>, <code>neutral</code>, <code>entity</code> or <code>gradient</code>. See <a href="#color">color</a>.</td></tr>
+<tr><td>fill</td><td>enum</td><td>auto</td><td>How the value is drawn: <code>auto</code>, <code>start</code>, <code>center</code> or <code>cursor</code>. See <a href="#fill">fill</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Label rules are the same as for the sensor and select widgets: if the item’s <code>text</code> field is set, it is used as widget
+label, except if <code>show_name</code> is <code>true</code>. If no label should be shown, omit <code>text</code> and leave <code>show_name</code> at <code>false</code>.</p>
+<h3 id="orientation-and-size"><a class="header" href="#orientation-and-size">Orientation and size</a></h3>
+<p>The orientation is derived from the item size: if the height is larger than the width, the slider is vertical,
+otherwise horizontal. Minimum sizes are 2x1 for a horizontal slider and 1x2 for a vertical slider.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Size</th><th>Orientation</th></tr>
+</thead>
+<tbody>
+<tr><td>4 x 1</td><td>horizontal</td></tr>
+<tr><td>2 x 1</td><td>horizontal</td></tr>
+<tr><td>1 x 3</td><td>vertical</td></tr>
+<tr><td>2 x 2</td><td>horizontal</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="styles"><a class="header" href="#styles">Styles</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Style</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>default</td><td>Thin slider: a rounded track with a fill up to the value. The label and value are shown above the track. This is the style of existing sliders.</td></tr>
+<tr><td>bar</td><td>Level bar: the whole widget is the track, with the same look as the brightness bar of the light detail view. Label, value and icons are drawn inside the bar.</td></tr>
+<tr><td>buttons</td><td>Stepper: the value between a decrease and an increase button. Each press sends the feature command with the current value minus or plus one step, for a <code>number</code> entity the <code>decrement</code> and <code>increment</code> commands.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The <a href="#orientation-and-size">orientation and size</a> rules apply to all styles. A vertical stepper has the increase
+button at the top.</li>
+<li><code>bar</code>: dragging changes the value relative to the current value, by the distance moved. A tap without movement doesn’t
+change the value. A touch that starts on the slider belongs to the slider and doesn’t swipe the page.</li>
+<li><code>buttons</code>: the <code>update_mode</code>, <code>icon_min</code>, <code>icon_max</code>, <code>color</code> and <code>fill</code> properties have no effect.</li>
+<li><code>buttons</code>: one step is one step of the shown value. For <code>light.dim</code>, which is shown as 0..100 %, that is 1 %
+(2.55 of 0..255, rounded). For the other features it’s the step of the feature, e.g. the <code>step</code> option of a
+number entity or the <code>target_temperature_step</code> of a climate entity.</li>
+<li>The Remote 3 touch slider has no style. These properties only exist for the slider widget.</li>
+</ul>
+<h3 id="color"><a class="header" href="#color">Color</a></h3>
+<p>The colors are roles of the Remote UI theme, not fixed color values. A theme or a design update can change the actual
+colors without a configuration change.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Color</th><th>Fill</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>The default of the feature, see <a href="#style-defaults">style defaults</a>.</td></tr>
+<tr><td>neutral</td><td>The primary foreground color of the theme. The track uses the surface color of the theme.</td></tr>
+<tr><td>entity</td><td>The current color of the light, from the <code>hue</code> and <code>saturation</code> attributes. Only for the <code>light.dim</code> feature of a light with the <code>color</code> feature, other features use <code>auto</code>. A light without the <code>color</code> feature, or without a known color, uses <code>neutral</code>.</td></tr>
+<tr><td>gradient</td><td>The data gradient of the feature, see <a href="#style-defaults">style defaults</a>. Features without a gradient use <code>neutral</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="fill"><a class="header" href="#fill">Fill</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Fill</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>The default of the feature, see <a href="#style-defaults">style defaults</a>.</td></tr>
+<tr><td>start</td><td>Fill from the minimum end to the value.</td></tr>
+<tr><td>center</td><td>Fill from 0 to the value, e.g. for a bass level of -10..+10 dB. Only if the range includes 0, otherwise <code>start</code> is used.</td></tr>
+<tr><td>cursor</td><td>No fill, only a marker at the value, e.g. for a color temperature.</td></tr>
+</tbody>
+</table>
+</div>
+<p>If the feature has 10 positions or fewer, e.g. <code>light.color_temperature</code> with <code>color_temperature_steps</code> 3, the slider
+shows the positions and snaps to the nearest one on release.</p>
+<h3 id="style-defaults"><a class="header" href="#style-defaults">Style defaults</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th><code>auto</code> color</th><th>Gradient</th><th><code>auto</code> fill</th></tr>
+</thead>
+<tbody>
+<tr><td>number.value</td><td>neutral</td><td>-</td><td><code>center</code> if <code>min</code> &lt; 0 &lt; <code>max</code>, else <code>start</code></td></tr>
+<tr><td>light.dim</td><td>neutral</td><td>dark to primary foreground</td><td>start</td></tr>
+<tr><td>light.color_temperature</td><td>gradient</td><td>cool (0 %, coldest) to warm (100 %, warmest)</td><td>cursor</td></tr>
+<tr><td>media_player.volume</td><td>neutral</td><td>-</td><td>start</td></tr>
+<tr><td>cover.position</td><td>neutral</td><td>-</td><td>start</td></tr>
+<tr><td>cover.tilt_position</td><td>neutral</td><td>-</td><td>start</td></tr>
+<tr><td>climate.target_temperature</td><td>neutral</td><td>cool to heat</td><td>start</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="limiting-the-range"><a class="header" href="#limiting-the-range">Limiting the range</a></h3>
+<p>The optional <code>min</code> and <code>max</code> properties limit the slider to a sub-range of the feature. This allows for example a
+“safe volume” slider which never exceeds 60, or a brightness slider which cannot switch the light off. The limits are
+clamped to the value range of the feature. If the current entity value is outside the slider range, the slider shows
+it at the nearest end.</p>
+<h3 id="value-updates-and-feedback"><a class="header" href="#value-updates-and-feedback">Value updates and feedback</a></h3>
+<ul>
+<li>While the user moves the slider, the widget shows the selected value immediately.</li>
+<li>After the command has been sent, the widget follows the entity attribute from the <code>entity_change</code> events.</li>
+<li>If the integration driver doesn’t confirm the new value within a few seconds, the widget falls back to the last known
+attribute value. Exception: <a href="#number-entity">number entities</a> with option <code>readable: false</code> keep the last
+sent value.</li>
+<li><code>update_mode: live</code> is recommended for lights and volume, <code>on_release</code> for setpoints and covers. The remote never
+sends more than one command per 200 ms in live mode.</li>
+</ul>
+<h3 id="physical-buttons"><a class="header" href="#physical-buttons">Physical buttons</a></h3>
+<p>If the screen offers D-pad navigation of the user interface items and a slider widget has the focus, the left and
+right buttons (up and down for a vertical slider) decrease and increase the value by one step:</p>
+<ul>
+<li><code>number</code> entity: <code>decrement</code> / <code>increment</code> commands.</li>
+<li>Other entity types: the feature command with the current value plus or minus the step size.</li>
+</ul>
+<h2 id="number"><a class="header" href="#number">Number</a></h2>
+<p>The number widget shows a <a href="#number-entity">number entity</a> either as a slider, or as a value field with
+decrement and increment buttons (stepper).</p>
+<h3 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h3>
+<p>The number widget configuration is set in the <code>number</code> property of the user interface item:</p>
+<pre><code class="language-json">{
+  "type": "number",
+  "text": "Bass",
+  "number": {
+    "number_id": "amp-1_bass",
+    "display_mode": "auto"
+  },
+  "location": { "x": 0, "y": 4 },
+  "size": { "width": 4, "height": 1 }
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>number_id</td><td>string</td><td>required</td><td>Number entity to show. Must be a configured number entity.</td></tr>
+<tr><td>show_name</td><td>boolean</td><td>false</td><td>Show the entity name as widget label instead of the item’s <code>text</code> field.</td></tr>
+<tr><td>display_mode</td><td>enum</td><td>auto</td><td>Representation: <code>auto</code>, <code>slider</code> or <code>stepper</code>. See <a href="#representation">representation</a>.</td></tr>
+<tr><td>step</td><td>number</td><td></td><td>Step size of the decrement and increment buttons. If not set, the entity’s <code>step</code> option is used. See <a href="#commands">commands</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Label rules are the same as for the sensor, select and slider widgets.</p>
+<p>Like the sensor and select widgets, the number entity doesn’t have to be an included entity of the activity. This is
+different from the <a href="#slider">slider widget</a>, whose <a href="#entity-feature-target">entity feature target</a> must be included.</p>
+<h3 id="representation"><a class="header" href="#representation">Representation</a></h3>
+<ul>
+<li>
+<p>The widget’s <code>display_mode</code> defines the representation:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>display_mode</th><th>Representation</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>The effective <a href="#display-mode">display mode</a> of the entity: the user override, otherwise the <code>display_mode</code> option of the entity, otherwise <code>auto</code>.</td></tr>
+<tr><td>slider</td><td>A slider.</td></tr>
+<tr><td>stepper</td><td>A value field with decrement and increment buttons.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The widget’s <code>slider</code> or <code>stepper</code> takes precedence over the display mode of the entity, including the user
+override.</p>
+</li>
+<li>
+<p>An unbounded number entity, with <code>min</code> or <code>max</code> set to <code>null</code>, is always shown as a stepper, also with
+<code>display_mode: slider</code>.</p>
+</li>
+<li>
+<p>The slider representation is the <a href="#slider">slider widget</a> with the defaults: <code>style: default</code>, <code>color: auto</code> and
+<code>fill: auto</code>, so the fill starts at 0 if the range spans 0.</p>
+</li>
+<li>
+<p>The value is shown with the unit and the effective number of decimal places. See
+<a href="#value-formatting">value formatting</a>.</p>
+</li>
+<li>
+<p>Decimal places are an entity setting, not a widget setting, so a value is shown the same everywhere.</p>
+</li>
+<li>
+<p>For a slider with additional settings, like limits, icons, styles or live updates, use the <a href="#slider">slider widget</a>.</p>
+</li>
+<li>
+<p>The orientation and the minimum size of the slider representation are the same as for the
+<a href="#orientation-and-size">slider widget</a>.</p>
+</li>
+</ul>
+<h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
+<ul>
+<li>Stepper: the decrement and increment buttons send the <code>decrement</code> and <code>increment</code> commands. With the widget’s <code>step</code>
+set, it is sent as <code>step</code> parameter. Without it, the commands are sent without <code>step</code>, and the integration driver
+uses the <code>step</code> option of the entity.</li>
+<li>The widget’s <code>step</code> should be a multiple of the entity’s <code>step</code> option. The UI doesn’t round it.</li>
+<li>Slider: the <code>set_value</code> command is sent when the slider is released.</li>
+<li>The UI may allow entering a value directly, e.g. by tapping the value. The value is sent with the <code>set_value</code>
+command.</li>
+<li>If the screen offers D-pad navigation of the user interface items and the widget has the focus, the left and right
+buttons (up and down for a vertical slider) send the <code>decrement</code> and <code>increment</code> commands, with the widget’s <code>step</code>
+as for the stepper.</li>
+</ul>
+<p>The value updates and feedback are the same as for the <a href="#value-updates-and-feedback">slider widget</a>.</p>
+<h2 id="remote-3-touch-slider"><a class="header" href="#remote-3-touch-slider">Remote 3 touch slider</a></h2>
+<p>The Remote 3 touch slider is configured per activity in the <code>touch_slider</code> option with an
+<a href="#entity-feature-target">entity feature target</a>. If no target is specified, the default touch slider feature is
+active. The same <a href="#slider-capable-features">slider-capable features</a> are supported as targets, including the
+touch slider only feature <code>media_player.seek</code>.</p>
+<pre><code class="language-json">{
+  "touch_slider": {
+    "enabled": true,
+    "target": {
+      "entity_id": "amp-1_bass",
+      "feature": "value"
+    }
+  }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="remote-two-dns-sd-lookup-1"><a href="#remote-two-dns-sd-lookup-1" class="header">Remote Two DNS-SD lookup</a></h1>
 <h2 id="remote-two-dns-sd-lookup"><a class="header" href="#remote-two-dns-sd-lookup">Remote Two DNS-SD lookup</a></h2>
 <p>The Remote Two will announce itself as service type <code>_uc-remote._tcp</code>.</p>
@@ -375,6 +740,7 @@ message back to the remote to notify it about the updated state or attribute(s).
 <li><a href="#sensor-entity">Sensor</a></li>
 <li><a href="#ir-emitter-entity">IR-Emitter</a></li>
 <li><a href="#select-entity">Select</a></li>
+<li><a href="#number-entity">Number</a></li>
 <li><a href="#voice-assistant-entity">Voice Assistant</a></li>
 </ul>
 <p>The 🚧 icon within the entity descriptions indicates a planned feature.</p>
@@ -488,7 +854,34 @@ representation how an entity is presented to a user. E.g. a <code>cover</code> e
 <p>Options are feature modifiers to customize certain behaviour, e.g. the default <code>on_off</code> feature for a switch expects the
 current state to be retrievable. If a switch can’t provide its current state, it becomes a toggle switch with setting
 the <code>readable</code> option to <code>false</code>.</p>
-<h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
+<h4 id="user-overrides"><a class="header" href="#user-overrides">User overrides</a></h4>
+<p>Some options can be overridden by the user, e.g. the number of decimal places of a sensor value. The user values are
+stored in the <code>options.user</code> object of the configured entity, using the same option names. They take precedence over
+the options of the integration driver.</p>
+<ul>
+<li>The user values are edited in the web-configurator, with the entity update request of the Core-API. The Remote user
+interface doesn’t offer editing them, it applies them wherever the entity is shown.</li>
+<li>The <code>user</code> option is reserved for the Remote. An integration driver must not send it, the Remote ignores it in the
+entity definition of a driver.</li>
+<li>The user values are kept if the integration driver provides an updated entity definition.</li>
+<li>The entity documentation lists the options which can be overridden by the user.</li>
+</ul>
+<p>Example of a number entity with a user override of the <code>decimals</code> and <code>display_mode</code> options:</p>
+<pre><code class="language-json">{
+  "options": {
+    "min": 0,
+    "max": 100,
+    "step": 0.5,
+    "decimals": 1,
+    "display_mode": "auto",
+    "user": {
+      "decimals": 0,
+      "display_mode": "stepper"
+    }
+  }
+}
+</code></pre>
+<h3 id="commands-1"><a class="header" href="#commands-1">Commands</a></h3>
 <p>For all user or scene interactions with an entity, like switching it on or changing an attribute, the remote sends an
 <code>entity_command</code> message to the integration driver. This message contains the entity command with optional parameters
 to execute by the driver:</p>
@@ -594,7 +987,7 @@ should be used.</p>
 <h3 id="options-1"><a class="header" href="#options-1">Options</a></h3>
 <p>None: the button entity doesn’t support additional options.</p>
 <h2 id="integration-api-2"><a class="header" href="#integration-api-2">Integration API</a></h2>
-<h3 id="commands-1"><a class="header" href="#commands-1">Commands</a></h3>
+<h3 id="commands-2"><a class="header" href="#commands-2">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -695,7 +1088,7 @@ their current value.</p>
 </table>
 </div>
 <h2 id="integration-api-3"><a class="header" href="#integration-api-3">Integration API</a></h2>
-<h3 id="commands-2"><a class="header" href="#commands-2">Commands</a></h3>
+<h3 id="commands-3"><a class="header" href="#commands-3">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -861,7 +1254,7 @@ may be heating, cooling, idle, etc. at a specific point in time.</p>
 </thead>
 <tbody>
 <tr><td>temperature_unit</td><td>enum</td><td>CELSIUS</td><td>The unit of temperature measurement: <code>CELSIUS</code>, <code>FAHRENHEIT</code>. If not specified, the remote settings are used.</td></tr>
-<tr><td>target_temperature_step</td><td>number</td><td>0.5 / 1</td><td>Step value for the UI for setting the target temperature. Defaults: <code>CELSIUS</code> = 0.5, ’FAHRENHEIT` = 1. Smallest step size: 0.1</td></tr>
+<tr><td>target_temperature_step</td><td>number</td><td>0.5 / 1</td><td>Step value for the UI for setting the target temperature. Defaults: <code>CELSIUS</code> = 0.5, <code>FAHRENHEIT</code> = 1. Smallest step size: 0.1</td></tr>
 <tr><td>max_temperature</td><td>number</td><td>30</td><td>Maximum temperature to show in the UI for the target temperature range.</td></tr>
 <tr><td>min_temperature</td><td>number</td><td>10</td><td>Minimum temperature to show in the UI for the target temperature range.</td></tr>
 <tr><td>🚧 fan_modes</td><td>enum</td><td></td><td></td></tr>
@@ -869,8 +1262,13 @@ may be heating, cooling, idle, etc. at a specific point in time.</p>
 </table>
 </div>
 <p>🚧 Planned feature.</p>
+<p>All temperature values are given in the temperature unit of the entity, as defined by the <code>temperature_unit</code> option:
+the <code>current_temperature</code> and <code>target_temperature</code> attributes, the <code>max_temperature</code>, <code>min_temperature</code> and
+<code>target_temperature_step</code> options, and the <code>temperature</code> parameter of the <code>target_temperature</code> command.</p>
+<p>The range and step options also define the input range of the <code>temperature</code> command parameter in a command editor,
+e.g. in the web-configurator.</p>
 <h2 id="integration-api-4"><a class="header" href="#integration-api-4">Integration API</a></h2>
-<h3 id="commands-3"><a class="header" href="#commands-3">Commands</a></h3>
+<h3 id="commands-4"><a class="header" href="#commands-4">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests within <code>msg_data.cmd_id</code>.</p>
 <ul>
@@ -1083,7 +1481,7 @@ integration driver does not need to support the required tilt commands and event
 <h3 id="options-4"><a class="header" href="#options-4">Options</a></h3>
 <p>None: the cover entity doesn’t support additional options.</p>
 <h2 id="integration-api-5"><a class="header" href="#integration-api-5">Integration API</a></h2>
-<h3 id="commands-4"><a class="header" href="#commands-4">Commands</a></h3>
+<h3 id="commands-5"><a class="header" href="#commands-5">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -1332,7 +1730,7 @@ controlled like setting brightness, hue, color saturation and color temperature.
 </table>
 </div>
 <h2 id="integration-api-6"><a class="header" href="#integration-api-6">Integration API</a></h2>
-<h3 id="commands-5"><a class="header" href="#commands-5">Commands</a></h3>
+<h3 id="commands-6"><a class="header" href="#commands-6">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -1342,9 +1740,9 @@ requests in <code>msg_data.cmd_id</code>.</p>
 </thead>
 <tbody>
 <tr><td>on</td><td>-</td><td>Turn the light on. Optionally set brightness and color values:</td></tr>
-<tr><td></td><td>brightness</td><td>- dim the light to the given percentage value.</td></tr>
-<tr><td></td><td>hue, saturation</td><td>- adjust the color of the light.</td></tr>
-<tr><td></td><td>color_temperature</td><td>- adjust the color temperature.</td></tr>
+<tr><td></td><td>brightness</td><td>- dim the light to the given brightness value: 0..255.</td></tr>
+<tr><td></td><td>hue, saturation</td><td>- adjust the color of the light. Hue: 0..360, saturation: 0..255.</td></tr>
+<tr><td></td><td>color_temperature</td><td>- adjust the color temperature in percent: 0..100. 0% = coldest, 100% = warmest.</td></tr>
 <tr><td>off</td><td>-</td><td>Turn the light off.</td></tr>
 <tr><td>toggle</td><td>-</td><td>Toggle the light from on -&gt; off or from off -&gt; on.</td></tr>
 </tbody>
@@ -1511,7 +1909,7 @@ requests in <code>msg_data.cmd_id</code>.</p>
 </li>
 <li><a href="#integration-api-7">Integration API</a>
 <ul>
-<li><a href="#commands-6">Commands</a></li>
+<li><a href="#commands-7">Commands</a></li>
 <li><a href="#simple-commands">Simple Commands</a>
 <ul>
 <li><a href="#command-name-patterns">Command Name Patterns</a></li>
@@ -1760,7 +2158,7 @@ the media player with a different icon, behaviour etc.</p>
 <p>Using the <code>stable_ids</code> parameter for <code>browse</code> and <code>search</code> might incur a runtime cost and should only be used where
 stable ids are persisted, like in the <code>play_media</code> command.</p>
 <h2 id="integration-api-7"><a class="header" href="#integration-api-7">Integration API</a></h2>
-<h3 id="commands-6"><a class="header" href="#commands-6">Commands</a></h3>
+<h3 id="commands-7"><a class="header" href="#commands-7">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -2574,7 +2972,7 @@ grouping of similar commands.</p>
 <li>Volume control: <code>VOLUME_UP</code>, <code>VOLUME_DOWN</code>, <code>MUTE_TOGGLE</code>, <code>MUTE</code>, <code>UNMUTE</code></li>
 <li>Media playback: <code>PLAY_PAUSE</code>, <code>STOP</code>, <code>PREVIOUS</code>, <code>NEXT</code>, <code>FAST_FORWARD</code>, <code>REWIND</code></li>
 </ul>
-<p>See <a href="#commands-6">media-player entity commands</a> for further commands.</p>
+<p>See <a href="#commands-7">media-player entity commands</a> for further commands.</p>
 <p>Prefixes for other common functions:</p>
 <ul>
 <li><code>INPUT_</code>: source inputs, e.g. <code>INPUT_AUX1</code>, <code>INPUT_TV</code>, <code>INPUT_RADIO</code></li>
@@ -2651,7 +3049,7 @@ definition in the Core-API.</p>
   ]
 }
 </code></pre>
-<p>See <a href="#commands-7">Commands</a> about entity commands and their short vs fully qualified syntax. For example <code>on</code> and <code>off</code> vs
+<p>See <a href="#commands-8">Commands</a> about entity commands and their short vs fully qualified syntax. For example <code>on</code> and <code>off</code> vs
 <code>remote.on</code> and <code>remote.off</code>.</p>
 <p>Button identifiers for Remote Two:</p>
 <ul>
@@ -2762,7 +3160,7 @@ definition in the Core-API.</p>
 </ul>
 <p>The screen layout grid definition can be retrieved with the Core-API: <code>GET /api/cfg/device/screen_layout</code>.</p>
 <h2 id="integration-api-8"><a class="header" href="#integration-api-8">Integration API</a></h2>
-<h3 id="commands-7"><a class="header" href="#commands-7">Commands</a></h3>
+<h3 id="commands-8"><a class="header" href="#commands-8">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> WebSocket message to process the following
 command requests in <code>msg_data.cmd_id</code>. See <a href="#command-examples-6">Command examples</a> and <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a>
 for the full message structure.</p>
@@ -2797,7 +3195,7 @@ and controlled device.</li>
 </ul>
 <h4 id="using-commands-for-button-mappings-and-ui-elements"><a class="header" href="#using-commands-for-button-mappings-and-ui-elements">Using commands for button mappings and UI elements</a></h4>
 <p>‼️ Attention: the <code>cmd_id</code> for button mapping and UI item commands is slightly different than the remote-entity
-<a href="#commands-7">Commands</a>!</p>
+<a href="#commands-8">Commands</a>!</p>
 <ul>
 <li>Core-API button mapping and UI item commands:
 <ul>
@@ -2806,14 +3204,14 @@ and controlled device.</li>
 </li>
 <li>Integration-API entity commands:
 <ul>
-<li>The <code>cmd_id</code> value refers to the defined <a href="#commands-7">Commands</a> without the entity type prefix.</li>
+<li>The <code>cmd_id</code> value refers to the defined <a href="#commands-8">Commands</a> without the entity type prefix.</li>
 <li>A simple command will always be wrapped into the remote-entity command <code>send_cmd</code>.</li>
 </ul>
 </li>
 </ul>
 <p>When defining commands in button mappings or UI elements, either entity commands or simple commands can be used.</p>
 <ul>
-<li>Entity commands are all the commands an entity defines (see <code>cmd_id</code> column in <a href="#commands-7">Commands</a> above). Example:</li>
+<li>Entity commands are all the commands an entity defines (see <code>cmd_id</code> column in <a href="#commands-8">Commands</a> above). Example:</li>
 </ul>
 <pre><code class="language-json">{
   "cmd_id": "toggle"
@@ -3020,7 +3418,7 @@ interface.</p>
 </thead>
 <tbody>
 <tr><td>state</td><td>enum</td><td><a href="#states-8">States</a></td><td>Optional state of the sensor.</td></tr>
-<tr><td>value</td><td>number / string</td><td></td><td>The native measurement value of the sensor.</td></tr>
+<tr><td>value</td><td>number / string / null</td><td></td><td>The native measurement value of the sensor. <code>null</code>: no value, e.g. while unavailable.</td></tr>
 <tr><td>unit</td><td>string</td><td></td><td>Optional unit of the <code>value</code> if no default unit is set.</td></tr>
 </tbody>
 </table>
@@ -3030,6 +3428,21 @@ in the <code>device_class</code> or the specified <code>custom_unit</code> in th
 <p>If an integration driver gets the current unit from an external system together with the current value, it’s recommended
 to pass it on.<br>If the integration driver is in control of the unit, and it can’t change at runtime, the unit can be specified in the
 available entity definition as <code>options.custom_unit</code> and then omitted in <code>entity_change</code> events.</p>
+<h4 id="value-format"><a class="header" href="#value-format">Value format</a></h4>
+<ul>
+<li>A numeric measurement must be sent as a JSON number, not as a text value. Text values are shown as they are, without
+any formatting.</li>
+<li>Calculated values should be rounded to the resolution of the sensor, or at least to 15 significant digits, to remove
+floating point artifacts like <code>1.499999999999997</code>.</li>
+<li>The UI rounds a numeric value for display only:
+<ul>
+<li>With the <code>decimals</code> option, the value is shown with exactly this number of decimal places. E.g. <code>21</code> with
+<code>decimals: 1</code> is shown as <code>21.0</code>.</li>
+<li>Without the <code>decimals</code> option, floating point artifacts are removed and the value is shown with at most 2 decimal
+places, without trailing zeros. E.g. <code>21.40</code> is shown as <code>21.4</code>, <code>1.499999999999997</code> as <code>1.5</code>.</li>
+</ul>
+</li>
+</ul>
 <h3 id="states-8"><a class="header" href="#states-8">States</a></h3>
 <p>The <code>state</code> attribute is optional for a sensor.</p>
 <p>The sensor entity only supports the <code>ON</code> state and the <a href="#states">common entity states</a>.</p>
@@ -3052,10 +3465,13 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 </thead>
 <tbody>
 <tr><td>custom</td><td></td><td>Generic sensor with custom unit</td></tr>
+<tr><td>🚧 audio_level</td><td>dB</td><td>Audio level in decibel, e.g. the current volume of an AV receiver. Not intended for measured sound pressure levels.</td></tr>
 <tr><td>battery</td><td>%</td><td>Battery charge in %</td></tr>
 <tr><td>current</td><td>A</td><td>Electrical current in ampere</td></tr>
+<tr><td>🚧 duration</td><td>s</td><td>Time span, e.g. the remaining run time of a device. Supported units: <code>ms</code>, <code>s</code>, <code>min</code>, <code>h</code>, <code>d</code>. The UI may show the value as a time span, e.g. <code>1:30:00</code>.</td></tr>
 <tr><td>energy</td><td>kWh</td><td>Energy in kilowatt-hour</td></tr>
 <tr><td>humidity</td><td>%</td><td>Humidity in %</td></tr>
+<tr><td>🚧 illuminance</td><td>lx</td><td>Illuminance in lux.</td></tr>
 <tr><td>power</td><td>W</td><td>Power in watt or kilowatt</td></tr>
 <tr><td>temperature</td><td>°C</td><td>Temperature with automatic °C, °F conversion, depending on remote settings. Use <code>native_unit</code> option if the temperature is measured in °F.</td></tr>
 <tr><td>voltage</td><td>V</td><td>Voltage in volt</td></tr>
@@ -3063,6 +3479,9 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 </tbody>
 </table>
 </div>
+<p>The device classes are kept in sync with the <a href="#device-classes-11">number entity</a>: a device class has the
+same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
+makes sense for one of them, like the <code>custom</code> and <code>binary</code> sensor device classes.</p>
 <h4 id="binary-device-class"><a class="header" href="#binary-device-class">Binary Device Class</a></h4>
 <p>The <code>binary</code> device class allows specifying a binary sensor with two states in the <code>value</code> attribute: <code>on</code> and <code>off</code>.</p>
 <p>These values can mean different things depending on the <code>unit</code> attribute. For example, a binary sensor with the <code>unit</code>
@@ -3079,14 +3498,26 @@ means the window is open and <code>off</code> means the window is closed.</p>
 <tbody>
 <tr><td>custom_unit</td><td>text</td><td></td><td>Unit label for a custom sensor if <code>device_class</code> is not specified or to override a default unit.</td></tr>
 <tr><td>native_unit</td><td>text</td><td></td><td>The sensor’s native unit of measurement to perform automatic conversion. Applicable to device classes: <code>temperature</code>.</td></tr>
-<tr><td>decimals</td><td>number</td><td>0</td><td>Number of decimal places to show in the UI if the sensor provides the measurement as a number. Not applicable to string values.</td></tr>
+<tr><td>decimals</td><td>integer</td><td></td><td>Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values. If not set, at most 2 decimal places are shown. See <a href="#value-format">value format</a>.</td></tr>
 <tr><td>🚧 min_value</td><td>number</td><td></td><td>Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.</td></tr>
 <tr><td>🚧 max_value</td><td>number</td><td></td><td>Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.</td></tr>
 </tbody>
 </table>
 </div>
+<h3 id="user-overrides-1"><a class="header" href="#user-overrides-1">User overrides</a></h3>
+<p>The following options can be overridden by the user in the web-configurator. See <a href="entities/README.html#user-overrides">user overrides</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>decimals</td><td>Number of decimal places to show in the UI.</td></tr>
+</tbody>
+</table>
+</div>
 <h2 id="integration-api-9"><a class="header" href="#integration-api-9">Integration API</a></h2>
-<h3 id="commands-8"><a class="header" href="#commands-8">Commands</a></h3>
+<h3 id="commands-9"><a class="header" href="#commands-9">Commands</a></h3>
 <p>The sensor entity doesn’t support any commands.</p>
 <h3 id="events-8"><a class="header" href="#events-8">Events</a></h3>
 <p>The <code>entity_change</code> event must be emitted by the integration driver if the state or an attribute of a sensor changes.</p>
@@ -3098,7 +3529,7 @@ means the window is open and <code>off</code> means the window is closed.</p>
 </thead>
 <tbody>
 <tr><td>state</td><td>Optional entity <a href="#states-8">state</a>.</td></tr>
-<tr><td>value</td><td>The current sensor value.</td></tr>
+<tr><td>value</td><td>The current sensor value. <code>null</code> if there’s no value, e.g. while the sensor is unavailable.</td></tr>
 <tr><td>unit</td><td>Optional: the unit of measurement for the given <code>value</code>. If omitted, the configured entity unit is used.</td></tr>
 </tbody>
 </table>
@@ -3112,6 +3543,8 @@ means the window is open and <code>off</code> means the window is closed.</p>
 </li>
 <li>Only sending the <code>unit</code> attribute is not valid.</li>
 <li>If the state is never sent, the sensor is considered available (<code>ON</code>).</li>
+<li>If the sensor becomes unavailable or the value is unknown, <code>value</code> should be set to <code>null</code>. Otherwise the Remote keeps
+the last value.</li>
 </ul>
 <h3 id="event-examples-6"><a class="header" href="#event-examples-6">Event Examples</a></h3>
 <h4 id="state-change-event-3"><a class="header" href="#state-change-event-3">State Change Event</a></h4>
@@ -3130,7 +3563,7 @@ means the window is open and <code>off</code> means the window is closed.</p>
   }
 }
 </code></pre>
-<p>Sensor with a string value:</p>
+<p>Sensor with a text value:</p>
 <pre><code class="language-json">{
   "kind": "event",
   "msg": "entity_change",
@@ -3139,8 +3572,22 @@ means the window is open and <code>off</code> means the window is closed.</p>
     "entity_type": "sensor",
     "entity_id": "sensor-2",
     "attributes": {
-      "value": "231",
-      "unit": "V"
+      "value": "Charging"
+    }
+  }
+}
+</code></pre>
+<p>Sensor becoming unavailable:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-1",
+    "attributes": {
+      "state": "UNAVAILABLE",
+      "value": null
     }
   }
 }
@@ -3291,7 +3738,7 @@ functionality!</li>
 </li>
 </ul>
 <h2 id="integration-api-10"><a class="header" href="#integration-api-10">Integration API</a></h2>
-<h3 id="commands-9"><a class="header" href="#commands-9">Commands</a></h3>
+<h3 id="commands-10"><a class="header" href="#commands-10">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -3458,7 +3905,7 @@ changed at runtime.</p>
 <h3 id="options-10"><a class="header" href="#options-10">Options</a></h3>
 <p>None.</p>
 <h2 id="integration-api-11"><a class="header" href="#integration-api-11">Integration API</a></h2>
-<h3 id="commands-10"><a class="header" href="#commands-10">Commands</a></h3>
+<h3 id="commands-11"><a class="header" href="#commands-11">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
 requests in <code>msg_data.cmd_id</code>.</p>
 <div class="table-wrapper">
@@ -3594,6 +4041,413 @@ around to the last option if the first option is currently selected.</p>
 }
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
+<h1 id="number-entity"><a class="header" href="#number-entity">Number Entity</a></h1>
+<p>The number entity holds a single numeric value which can be read and set. It is the writable counterpart of the
+<a href="#sensor-entity">sensor entity</a> and the numeric counterpart of the <a href="#select-entity">select entity</a>.</p>
+<p>The value range, step size, and unit are defined by the integration driver in the entity options. The Remote renders a
+number entity as a slider or as a value field with increment and decrement buttons, depending on where it is used:</p>
+<ul>
+<li>On a profile page the entity is shown with its default representation. The <code>display_mode</code> option is a hint for the
+preferred representation, see <a href="#display-mode">Display Mode</a>.</li>
+<li>In an activity user interface, the <a href="#number">number widget</a> shows the entity with its default
+representation, and the <a href="#slider">slider widget</a> can be bound to the <code>value</code> feature. Both can be
+positioned freely in the page grid.</li>
+<li>The Remote 3 touch-slider can be assigned to the <code>value</code> feature.</li>
+</ul>
+<p>Typical use cases are device settings which don’t fit any other entity, for example an amplifier’s bass level, the zoom
+of a camera, a projector’s lens shift, the speed of a fan, or a custom “scene intensity” value.</p>
+<h2 id="features-11"><a class="header" href="#features-11">Features</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>R</th><th>W</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>value</td><td>✅</td><td>✅</td><td>Default feature of a number entity. Always present, even if not specified.</td></tr>
+<tr><td>transition</td><td>❌</td><td>✅</td><td>The device supports a transition time to reach a new value: <code>duration</code> parameter of the <code>set_value</code> command.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>R: readable
+<ul>
+<li>✅ Feature has a readable attribute to retrieve the current value.</li>
+</ul>
+</li>
+<li>W: writeable
+<ul>
+<li>✅ Feature has one or multiple commands to set the value.</li>
+</ul>
+</li>
+</ul>
+<p>If the current value cannot be read from the device, the <code>readable</code> option can be set to <code>false</code>. See <a href="#options-11">Options</a>.</p>
+<p>The <code>transition</code> feature is optional and must only be set if the device supports it. Without it, the <code>duration</code>
+parameter of the <code>set_value</code> command is not offered to the user, e.g. in the command editor of the web-configurator.
+The Remote offers a separate set-value command with a transition time for entities with the <code>transition</code> feature; the
+driver always receives <code>set_value</code>.</p>
+<h3 id="attributes-10"><a class="header" href="#attributes-10">Attributes</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Type</th><th>Values</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>state</td><td>enum</td><td><a href="#states-11">States</a></td><td>Optional state of the number entity.</td></tr>
+<tr><td>value</td><td>number / null</td><td></td><td>The current value. Must be within the <code>min</code> and <code>max</code> option range. <code>null</code>: no value, e.g. while unavailable.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="states-11"><a class="header" href="#states-11">States</a></h3>
+<p>The <code>state</code> attribute is optional for a number entity and defaults to <code>ON</code> if not specified.</p>
+<p>The number entity only supports the <code>ON</code> state and the <a href="#states">common entity states</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>ON</td><td>The number entity is available.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="device-classes-11"><a class="header" href="#device-classes-11">Device Classes</a></h3>
+<p>The optional device class specifies the type of the value. It is used by the UI to show a matching default icon, a
+default unit and to format the value. If not specified, the number entity is a generic number, and the <code>unit</code> option
+defines the unit label.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Default unit</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>audio_level</td><td>dB</td><td>Audio level in decibel, e.g. the volume, bass or treble of an AV receiver. Not intended for measured sound pressure levels.</td></tr>
+<tr><td>battery</td><td>%</td><td>Battery charge level, e.g. the minimum state of charge of a home battery.</td></tr>
+<tr><td>current</td><td>A</td><td>Electrical current in ampere, e.g. the charging current limit of a wallbox.</td></tr>
+<tr><td>duration</td><td>s</td><td>Time span, e.g. the run time of a timer. Supported units: <code>ms</code>, <code>s</code>, <code>min</code>, <code>h</code>, <code>d</code>. The UI may show the value as a time span, e.g. <code>1:30:00</code>.</td></tr>
+<tr><td>energy</td><td>kWh</td><td>Energy in kilowatt-hour.</td></tr>
+<tr><td>humidity</td><td>%</td><td>Relative humidity, e.g. the target humidity of a dehumidifier.</td></tr>
+<tr><td>illuminance</td><td>lx</td><td>Illuminance in lux, e.g. the brightness threshold of a motion sensor.</td></tr>
+<tr><td>power</td><td>W</td><td>Power in watt or kilowatt, e.g. a power limit.</td></tr>
+<tr><td>temperature</td><td>°C</td><td>Temperature, e.g. a temperature threshold or setpoint.</td></tr>
+<tr><td>voltage</td><td>V</td><td>Voltage in volt.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The device classes are kept in sync with the <a href="#device-classes-8">sensor entity</a>: a device class has the
+same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
+makes sense for one of them, like the <code>binary</code> sensor device class.</p>
+<ul>
+<li>The <code>unit</code> option overrides the default unit of the device class.</li>
+<li>There is no automatic unit conversion: <code>value</code>, <code>min</code>, <code>max</code> and <code>step</code> are always in the unit of the entity. Unlike
+the <a href="#sensor-entity">sensor entity</a>, a <code>temperature</code> number entity is not converted between °C and °F.</li>
+</ul>
+<h3 id="options-11"><a class="header" href="#options-11">Options</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>min</td><td>number | null</td><td>0</td><td>Minimum value (inclusive). <code>null</code>: no lower limit.</td></tr>
+<tr><td>max</td><td>number | null</td><td>100</td><td>Maximum value (inclusive). <code>null</code>: no upper limit.</td></tr>
+<tr><td>step</td><td>number</td><td>1</td><td>Step size between values, must be greater than 0. Smallest step size: 0.000001. Also used as default step for the <code>increment</code> and <code>decrement</code> commands.</td></tr>
+<tr><td>decimals</td><td>integer</td><td></td><td>Number of decimal places to show in the UI: 0..6. 0 = integer value. If not set, the decimal places are derived from <code>step</code>, <code>min</code> and <code>max</code>. See <a href="#value-format-1">value format</a>.</td></tr>
+<tr><td>unit</td><td>text</td><td></td><td>Optional unit label of the value, shown next to the value in the UI. E.g. <code>%</code>, <code>dB</code>, <code>°C</code>. Default: unit of the <a href="#device-classes-11">device class</a>.</td></tr>
+<tr><td>display_mode</td><td>enum</td><td>auto</td><td>Hint for the preferred default representation in the UI: <code>auto</code>, <code>slider</code>, <code>stepper</code>. See <a href="#display-mode">Display Mode</a>.</td></tr>
+<tr><td>readable</td><td>boolean</td><td>true</td><td>If set to false, the current value cannot be read from the device and the driver will not send <code>value</code> attribute updates. The Remote keeps the last sent value.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The option vocabulary is similar to the <code>number</code> field in the <a href="#driver-setup-1">driver setup settings</a>,
+with the following differences:</p>
+<ul>
+<li>The step size option is called <code>step</code> instead of <code>steps</code>.</li>
+<li><code>unit</code> is a plain text instead of a language text.</li>
+<li><code>min</code> and <code>max</code> have a default value. An unbounded range must be set explicitly with <code>null</code>.</li>
+</ul>
+<p>Notes:</p>
+<ul>
+<li>The options are static and are read when the entity is configured in the Remote. If the value range of a device
+changes, the integration driver has to send an updated entity definition with the <code>entity_available</code> event. Dynamic
+ranges in the entity attributes are not supported.
+<ul>
+<li>🚧 The <code>entity_available</code> event is not yet supported by the Remote. Until then, an updated entity definition is
+only applied when the Remote retrieves the available entities with the <code>get_available_entities</code> request.</li>
+</ul>
+</li>
+<li>The <code>step</code> size should be compatible with <code>decimals</code>. A step size of 0.5 requires at least 1 decimal place to show
+every possible value.</li>
+<li>With <code>readable: false</code> the Remote does not expect an <code>entity_change</code> event after a command and shows the last value
+sent to the driver. The <code>increment</code> and <code>decrement</code> commands don’t send a value: the Remote shows the last value plus
+or minus the <code>step</code> option, clamped at <code>min</code> and <code>max</code>. This is only for display, the command is still sent without
+a value. This should be avoided whenever possible.</li>
+</ul>
+<h3 id="value-format-1"><a class="header" href="#value-format-1">Value format</a></h3>
+<p>The UI rounds the value for display only and always shows it with the same number of decimal places:</p>
+<ul>
+<li>With the <code>decimals</code> option, the value is shown with exactly this number of decimal places. E.g. <code>21</code> with
+<code>decimals: 1</code> is shown as <code>21.0</code>.</li>
+<li>Without the <code>decimals</code> option, the number of decimal places of <code>step</code>, <code>min</code> and <code>max</code> is used. E.g. a step size
+of 0.5 shows 1 decimal place, a step size of 1 with <code>min: 0.5</code> or <code>max: 2.5</code> as well.</li>
+</ul>
+<p>Calculated values should be rounded to the step size, or at least to 15 significant digits, to remove floating point
+artifacts like <code>1.499999999999997</code>.</p>
+<h3 id="user-overrides-2"><a class="header" href="#user-overrides-2">User overrides</a></h3>
+<p>The following options can be overridden by the user in the web-configurator. See <a href="entities/README.html#user-overrides">user overrides</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>decimals</td><td>Number of decimal places to show in the UI.</td></tr>
+<tr><td>display_mode</td><td>Preferred default representation in the UI.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="display-mode"><a class="header" href="#display-mode">Display Mode</a></h3>
+<p>The <code>display_mode</code> option is a hint for the default representation of the number entity, e.g. on a profile page or in
+the entity control screen. It is comparable to the <code>mode</code> attribute of a Home Assistant number entity.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>Default. The UI chooses the representation based on the value range.</td></tr>
+<tr><td>slider</td><td>Prefer a slider. Only applicable to a bounded number entity: if <code>min</code> or <code>max</code> is <code>null</code>, the entity is shown as a stepper.</td></tr>
+<tr><td>stepper</td><td>Prefer a value field with increment and decrement buttons, e.g. for precise settings or a large value range.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>With <code>auto</code>, the UI uses the number of positions <code>(max - min) / step</code> to choose the representation: up to 256
+positions are rendered as a slider, more positions as a stepper. This is the same threshold as in Home Assistant.</li>
+<li>An unbounded number entity, with <code>min</code> or <code>max</code> set to <code>null</code>, is always rendered as a stepper. It cannot be used as a
+target for the <a href="#slider-capable-features">slider widget</a> or the Remote 3 touch-slider.</li>
+<li>The display mode doesn’t apply to a <a href="#slider">slider widget</a> in an activity user interface, or to the
+Remote 3 touch-slider. These are explicitly chosen by the user.</li>
+<li>The UI may ignore the hint, e.g. if there isn’t enough space for a slider.</li>
+<li>The user can override the display mode. The display mode of the user takes precedence over the option of the
+integration driver. If neither is set, <code>auto</code> is used.</li>
+<li>A <a href="#number">number widget</a> in an activity user interface can set its own <code>display_mode</code>. A
+<code>slider</code> or <code>stepper</code> of the widget takes precedence over the user override and the option of the integration driver.</li>
+</ul>
+<h2 id="integration-api-12"><a class="header" href="#integration-api-12">Integration API</a></h2>
+<h3 id="commands-12"><a class="header" href="#commands-12">Commands</a></h3>
+<p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command
+requests in <code>msg_data.cmd_id</code>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>cmd_id</th><th>Parameters</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>set_value</td><td>value</td><td>Set the value. The <code>value</code> parameter is within the <code>min</code> and <code>max</code> option range. The driver may round the value to <code>step</code>.</td></tr>
+<tr><td></td><td>duration</td><td>Optional, requires the <code>transition</code> feature: transition time in milliseconds to reach the new value. Drivers without the <code>transition</code> feature ignore this parameter.</td></tr>
+<tr><td>increment</td><td>step</td><td>Increase the value by <code>step</code>. If not specified, the <code>step</code> option is used. The value is clamped at <code>max</code>, if specified.</td></tr>
+<tr><td>decrement</td><td>step</td><td>Decrease the value by <code>step</code>. If not specified, the <code>step</code> option is used. The value is clamped at <code>min</code>, if specified.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The <code>increment</code> and <code>decrement</code> commands are used for physical button mappings, e.g. <code>VOLUME_UP</code> and <code>VOLUME_DOWN</code>, and
+for D-pad navigation when a slider widget has the focus, if the screen offers D-pad navigation. The Remote does not calculate the new value itself, since the
+driver knows the actual value of the device.</p>
+<h3 id="events-11"><a class="header" href="#events-11">Events</a></h3>
+<p>The <code>entity_change</code> event must be emitted by the integration driver if the state or the value of the number entity
+changes. Either after an <code>entity_command</code> or if the value has been updated otherwise, e.g. externally through a user or
+another system.</p>
+<p>The following attributes are supported:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>state</td><td>New entity <a href="#states-11">state</a>.</td></tr>
+<tr><td>value</td><td>Current value. <code>null</code> if there’s no value, e.g. while the entity is unavailable.</td></tr>
+</tbody>
+</table>
+</div>
+<p>At least one attribute must be specified in the <code>entity_change</code> message. If the entity <code>state</code> and the <code>value</code>
+attribute changed at the same time, they may both be included in the same message. It’s also valid to always send every
+attribute.</p>
+<p>If the entity becomes unavailable or the value is unknown, <code>value</code> should be set to <code>null</code>. Otherwise the Remote keeps
+the last value.</p>
+<p>The Remote shows the value set by the user immediately and then follows the <code>value</code> attribute in the <code>entity_change</code>
+event. If the driver doesn’t confirm the new value within a few seconds, the UI falls back to the last known value.
+Exception: with option <code>readable: false</code> the UI keeps the value sent to the driver.
+Drivers should therefore send the <code>entity_change</code> event as soon as the device has applied the new value.</p>
+<h3 id="entity-definition-examples"><a class="header" href="#entity-definition-examples">Entity definition examples</a></h3>
+<p>Generic number entity with a custom unit:</p>
+<pre><code class="language-json">{
+  "entity_id": "amp-1_bass",
+  "entity_type": "number",
+  "device_id": "amp-1",
+  "name": {
+    "en": "Bass"
+  },
+  "options": {
+    "min": -10,
+    "max": 10,
+    "step": 0.5,
+    "decimals": 1,
+    "unit": "dB"
+  }
+}
+</code></pre>
+<p>Number entity with a transition time for the <code>set_value</code> command:</p>
+<pre><code class="language-json">{
+  "entity_id": "light-1_scene_intensity",
+  "entity_type": "number",
+  "features": ["value", "transition"],
+  "name": {
+    "en": "Scene intensity"
+  },
+  "options": {
+    "min": 0,
+    "max": 100,
+    "step": 1,
+    "unit": "%"
+  }
+}
+</code></pre>
+<p>Number entity with a device class and its default unit <code>A</code>, preferably shown as a stepper:</p>
+<pre><code class="language-json">{
+  "entity_id": "wallbox-1_charging_current",
+  "entity_type": "number",
+  "device_class": "current",
+  "name": {
+    "en": "Charging current"
+  },
+  "options": {
+    "min": 6,
+    "max": 32,
+    "step": 1,
+    "display_mode": "stepper"
+  }
+}
+</code></pre>
+<p>Unbounded counter without an upper limit:</p>
+<pre><code class="language-json">{
+  "entity_id": "coffee_counter",
+  "entity_type": "number",
+  "name": {
+    "en": "Coffee cups"
+  },
+  "options": {
+    "min": 0,
+    "max": null,
+    "step": 1
+  }
+}
+</code></pre>
+<h3 id="command-examples-9"><a class="header" href="#command-examples-9">Command examples</a></h3>
+<h4 id="set_value"><a class="header" href="#set_value">set_value</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 129,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "amp-1_bass",
+    "cmd_id": "set_value",
+    "params": {
+      "value": 2.5
+    }
+  }
+}
+</code></pre>
+<p>With a transition time, requires the <code>transition</code> feature:</p>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 129,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "light-1_scene_intensity",
+    "cmd_id": "set_value",
+    "params": {
+      "value": 80,
+      "duration": 2000
+    }
+  }
+}
+</code></pre>
+<h4 id="increment"><a class="header" href="#increment">increment</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 130,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "amp-1_bass",
+    "cmd_id": "increment"
+  }
+}
+</code></pre>
+<p>If the <code>step</code> parameter is not specified, the <code>step</code> option of the entity is used.</p>
+<h4 id="decrement"><a class="header" href="#decrement">decrement</a></h4>
+<pre><code class="language-json">{
+  "kind": "req",
+  "id": 131,
+  "msg": "entity_command",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "amp-1_bass",
+    "cmd_id": "decrement",
+    "params": {
+      "step": 1
+    }
+  }
+}
+</code></pre>
+<h3 id="event-examples-9"><a class="header" href="#event-examples-9">Event examples</a></h3>
+<h4 id="value-changed"><a class="header" href="#value-changed">Value changed</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "amp-1_bass",
+    "attributes": {
+      "value": 2.5
+    }
+  }
+}
+</code></pre>
+<h4 id="entity-becoming-unavailable"><a class="header" href="#entity-becoming-unavailable">Entity becoming unavailable</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "amp-1_bass",
+    "attributes": {
+      "state": "UNAVAILABLE",
+      "value": null
+    }
+  }
+}
+</code></pre>
+<h4 id="entity-coming-online-with-the-current-value"><a class="header" href="#entity-coming-online-with-the-current-value">Entity coming online with the current value</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "number",
+    "entity_id": "amp-1_bass",
+    "attributes": {
+      "state": "ON",
+      "value": 0
+    }
+  }
+}
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div>
 <h1 id="voice-assistant-entity"><a class="header" href="#voice-assistant-entity">Voice Assistant Entity</a></h1>
 <blockquote class="blockquote-tag blockquote-tag-note">
 <p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
@@ -3606,7 +4460,7 @@ It can request an audio stream from the Remote’s microphone when the user push
 Amazon Alexa or Google Home.</p>
 <p>Please note that an integration does not have direct access to the microphone and cannot initiate voice recording.
 This is only possible by the user pressing the voice button.</p>
-<h2 id="features-11"><a class="header" href="#features-11">Features</a></h2>
+<h2 id="features-12"><a class="header" href="#features-12">Features</a></h2>
 <p>The features describe the capabilities of the voice assistant.</p>
 <p>Some devices only offer simple one-way voice command features, where the result of the command is shown or signaled on
 the device itself, for example, with a speech response on a smart speaker.
@@ -3627,18 +4481,18 @@ intent recognition and speech feedback are accessible.</p>
 </tbody>
 </table>
 </div>
-<h3 id="attributes-10"><a class="header" href="#attributes-10">Attributes</a></h3>
+<h3 id="attributes-11"><a class="header" href="#attributes-11">Attributes</a></h3>
 <div class="table-wrapper">
 <table>
 <thead>
 <tr><th>Attribute</th><th>Features</th><th>Type</th><th>Values</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td>state</td><td></td><td>enum</td><td><a href="#states-11">States</a></td><td>Default entity state attribute.</td></tr>
+<tr><td>state</td><td></td><td>enum</td><td><a href="#states-12">States</a></td><td>Default entity state attribute.</td></tr>
 </tbody>
 </table>
 </div>
-<h3 id="states-11"><a class="header" href="#states-11">States</a></h3>
+<h3 id="states-12"><a class="header" href="#states-12">States</a></h3>
 <p>The entity <code>state</code> attribute holds the following values:</p>
 <div class="table-wrapper">
 <table>
@@ -3652,9 +4506,9 @@ intent recognition and speech feedback are accessible.</p>
 </table>
 </div>
 <p>Also includes the <a href="#states">common entity states</a>.</p>
-<h3 id="device-classes-11"><a class="header" href="#device-classes-11">Device Classes</a></h3>
+<h3 id="device-classes-12"><a class="header" href="#device-classes-12">Device Classes</a></h3>
 <p>None.</p>
-<h3 id="options-11"><a class="header" href="#options-11">Options</a></h3>
+<h3 id="options-12"><a class="header" href="#options-12">Options</a></h3>
 <div class="table-wrapper">
 <table>
 <thead>
@@ -3713,7 +4567,7 @@ different languages or speech recognition engines.</p>
 </table>
 </div>
 <p>The profile identifier can be specified in the <code>profile_id</code> parameter of the <code>voice_start</code> command.</p>
-<h2 id="integration-api-12"><a class="header" href="#integration-api-12">Integration API</a></h2>
+<h2 id="integration-api-13"><a class="header" href="#integration-api-13">Integration API</a></h2>
 <p>The following sequence diagram shows the happy message flow of a voice command initiated by the UI. It’s a simplified
 representation of the communication between the various components, showing the relevant Core-API and Integration-API
 messages. The interaction between an integration driver and the voice assistant depends on the involved system and
@@ -3779,7 +4633,7 @@ available features.</p>
     R--)U: assistant_event (finished)
 </pre>
 
-<h3 id="commands-11"><a class="header" href="#commands-11">Commands</a></h3>
+<h3 id="commands-13"><a class="header" href="#commands-13">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> WebSocket message to process the following
 command requests in <code>msg_data.cmd_id</code>. See <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a>
 for the full message structure.</p>
@@ -3832,7 +4686,7 @@ in protocol buffer format (see <a href="https://github.com/unfoldedcircle/core-a
   }
 }
 </code></pre>
-<h3 id="events-11"><a class="header" href="#events-11">Events</a></h3>
+<h3 id="events-12"><a class="header" href="#events-12">Events</a></h3>
 <h4 id="entity-change-event"><a class="header" href="#entity-change-event">Entity change event</a></h4>
 <p>The regular <code>entity_change</code> event must be emitted by the integration driver if the state of the voice assistant changes.
 For example, if a voice assistant becomes unavailable because a required cloud service is no longer responding.</p>
@@ -3843,7 +4697,7 @@ For example, if a voice assistant becomes unavailable because a required cloud s
 <tr><th>Attribute</th><th>Description</th></tr>
 </thead>
 <tbody>
-<tr><td>state</td><td>New entity <a href="#states-11">state</a>.</td></tr>
+<tr><td>state</td><td>New entity <a href="#states-12">state</a>.</td></tr>
 </tbody>
 </table>
 </div>

@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c81ebc12.js";
+            window.path_to_searchindex_js = "../searchindex-7c4bc41b.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-a810bdbd.js"></script>
+        <script src="../toc-0bd7c578.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -191,7 +191,7 @@ interface.</p>
 </thead>
 <tbody>
 <tr><td>state</td><td>enum</td><td><a href="#states">States</a></td><td>Optional state of the sensor.</td></tr>
-<tr><td>value</td><td>number / string</td><td></td><td>The native measurement value of the sensor.</td></tr>
+<tr><td>value</td><td>number / string / null</td><td></td><td>The native measurement value of the sensor. <code>null</code>: no value, e.g. while unavailable.</td></tr>
 <tr><td>unit</td><td>string</td><td></td><td>Optional unit of the <code>value</code> if no default unit is set.</td></tr>
 </tbody>
 </table>
@@ -201,6 +201,21 @@ in the <code>device_class</code> or the specified <code>custom_unit</code> in th
 <p>If an integration driver gets the current unit from an external system together with the current value, it’s recommended
 to pass it on.<br>If the integration driver is in control of the unit, and it can’t change at runtime, the unit can be specified in the
 available entity definition as <code>options.custom_unit</code> and then omitted in <code>entity_change</code> events.</p>
+<h4 id="value-format"><a class="header" href="#value-format">Value format</a></h4>
+<ul>
+<li>A numeric measurement must be sent as a JSON number, not as a text value. Text values are shown as they are, without
+any formatting.</li>
+<li>Calculated values should be rounded to the resolution of the sensor, or at least to 15 significant digits, to remove
+floating point artifacts like <code>1.499999999999997</code>.</li>
+<li>The UI rounds a numeric value for display only:
+<ul>
+<li>With the <code>decimals</code> option, the value is shown with exactly this number of decimal places. E.g. <code>21</code> with
+<code>decimals: 1</code> is shown as <code>21.0</code>.</li>
+<li>Without the <code>decimals</code> option, floating point artifacts are removed and the value is shown with at most 2 decimal
+places, without trailing zeros. E.g. <code>21.40</code> is shown as <code>21.4</code>, <code>1.499999999999997</code> as <code>1.5</code>.</li>
+</ul>
+</li>
+</ul>
 <h3 id="states"><a class="header" href="#states">States</a></h3>
 <p>The <code>state</code> attribute is optional for a sensor.</p>
 <p>The sensor entity only supports the <code>ON</code> state and the <a href="index.html#states">common entity states</a>.</p>
@@ -223,10 +238,13 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 </thead>
 <tbody>
 <tr><td>custom</td><td></td><td>Generic sensor with custom unit</td></tr>
+<tr><td>🚧 audio_level</td><td>dB</td><td>Audio level in decibel, e.g. the current volume of an AV receiver. Not intended for measured sound pressure levels.</td></tr>
 <tr><td>battery</td><td>%</td><td>Battery charge in %</td></tr>
 <tr><td>current</td><td>A</td><td>Electrical current in ampere</td></tr>
+<tr><td>🚧 duration</td><td>s</td><td>Time span, e.g. the remaining run time of a device. Supported units: <code>ms</code>, <code>s</code>, <code>min</code>, <code>h</code>, <code>d</code>. The UI may show the value as a time span, e.g. <code>1:30:00</code>.</td></tr>
 <tr><td>energy</td><td>kWh</td><td>Energy in kilowatt-hour</td></tr>
 <tr><td>humidity</td><td>%</td><td>Humidity in %</td></tr>
+<tr><td>🚧 illuminance</td><td>lx</td><td>Illuminance in lux.</td></tr>
 <tr><td>power</td><td>W</td><td>Power in watt or kilowatt</td></tr>
 <tr><td>temperature</td><td>°C</td><td>Temperature with automatic °C, °F conversion, depending on remote settings. Use <code>native_unit</code> option if the temperature is measured in °F.</td></tr>
 <tr><td>voltage</td><td>V</td><td>Voltage in volt</td></tr>
@@ -234,6 +252,9 @@ available entity definition as <code>options.custom_unit</code> and then omitted
 </tbody>
 </table>
 </div>
+<p>The device classes are kept in sync with the <a href="entity_number.html#device-classes">number entity</a>: a device class has the
+same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
+makes sense for one of them, like the <code>custom</code> and <code>binary</code> sensor device classes.</p>
 <h4 id="binary-device-class"><a class="header" href="#binary-device-class">Binary Device Class</a></h4>
 <p>The <code>binary</code> device class allows specifying a binary sensor with two states in the <code>value</code> attribute: <code>on</code> and <code>off</code>.</p>
 <p>These values can mean different things depending on the <code>unit</code> attribute. For example, a binary sensor with the <code>unit</code>
@@ -250,9 +271,21 @@ means the window is open and <code>off</code> means the window is closed.</p>
 <tbody>
 <tr><td>custom_unit</td><td>text</td><td></td><td>Unit label for a custom sensor if <code>device_class</code> is not specified or to override a default unit.</td></tr>
 <tr><td>native_unit</td><td>text</td><td></td><td>The sensor’s native unit of measurement to perform automatic conversion. Applicable to device classes: <code>temperature</code>.</td></tr>
-<tr><td>decimals</td><td>number</td><td>0</td><td>Number of decimal places to show in the UI if the sensor provides the measurement as a number. Not applicable to string values.</td></tr>
+<tr><td>decimals</td><td>integer</td><td></td><td>Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values. If not set, at most 2 decimal places are shown. See <a href="#value-format">value format</a>.</td></tr>
 <tr><td>🚧 min_value</td><td>number</td><td></td><td>Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.</td></tr>
 <tr><td>🚧 max_value</td><td>number</td><td></td><td>Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="user-overrides"><a class="header" href="#user-overrides">User overrides</a></h3>
+<p>The following options can be overridden by the user in the web-configurator. See <a href="README.html#user-overrides">user overrides</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>decimals</td><td>Number of decimal places to show in the UI.</td></tr>
 </tbody>
 </table>
 </div>
@@ -269,7 +302,7 @@ means the window is open and <code>off</code> means the window is closed.</p>
 </thead>
 <tbody>
 <tr><td>state</td><td>Optional entity <a href="#states">state</a>.</td></tr>
-<tr><td>value</td><td>The current sensor value.</td></tr>
+<tr><td>value</td><td>The current sensor value. <code>null</code> if there’s no value, e.g. while the sensor is unavailable.</td></tr>
 <tr><td>unit</td><td>Optional: the unit of measurement for the given <code>value</code>. If omitted, the configured entity unit is used.</td></tr>
 </tbody>
 </table>
@@ -283,6 +316,8 @@ means the window is open and <code>off</code> means the window is closed.</p>
 </li>
 <li>Only sending the <code>unit</code> attribute is not valid.</li>
 <li>If the state is never sent, the sensor is considered available (<code>ON</code>).</li>
+<li>If the sensor becomes unavailable or the value is unknown, <code>value</code> should be set to <code>null</code>. Otherwise the Remote keeps
+the last value.</li>
 </ul>
 <h3 id="event-examples"><a class="header" href="#event-examples">Event Examples</a></h3>
 <h4 id="state-change-event"><a class="header" href="#state-change-event">State Change Event</a></h4>
@@ -301,7 +336,7 @@ means the window is open and <code>off</code> means the window is closed.</p>
   }
 }
 </code></pre>
-<p>Sensor with a string value:</p>
+<p>Sensor with a text value:</p>
 <pre><code class="language-json">{
   "kind": "event",
   "msg": "entity_change",
@@ -310,8 +345,22 @@ means the window is open and <code>off</code> means the window is closed.</p>
     "entity_type": "sensor",
     "entity_id": "sensor-2",
     "attributes": {
-      "value": "231",
-      "unit": "V"
+      "value": "Charging"
+    }
+  }
+}
+</code></pre>
+<p>Sensor becoming unavailable:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-1",
+    "attributes": {
+      "state": "UNAVAILABLE",
+      "value": null
     }
   }
 }

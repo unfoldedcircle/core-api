@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c81ebc12.js";
+            window.path_to_searchindex_js = "../searchindex-7c4bc41b.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-a810bdbd.js"></script>
+        <script src="../toc-0bd7c578.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -196,6 +196,7 @@ message back to the remote to notify it about the updated state or attribute(s).
 <li><a href="entity_sensor.html">Sensor</a></li>
 <li><a href="entity_ir_emitter.html">IR-Emitter</a></li>
 <li><a href="entity_select.html">Select</a></li>
+<li><a href="entity_number.html">Number</a></li>
 <li><a href="entity_voice_assistant.html">Voice Assistant</a></li>
 </ul>
 <p>The 🚧 icon within the entity descriptions indicates a planned feature.</p>
@@ -309,6 +310,33 @@ representation how an entity is presented to a user. E.g. a <code>cover</code> e
 <p>Options are feature modifiers to customize certain behaviour, e.g. the default <code>on_off</code> feature for a switch expects the
 current state to be retrievable. If a switch can’t provide its current state, it becomes a toggle switch with setting
 the <code>readable</code> option to <code>false</code>.</p>
+<h4 id="user-overrides"><a class="header" href="#user-overrides">User overrides</a></h4>
+<p>Some options can be overridden by the user, e.g. the number of decimal places of a sensor value. The user values are
+stored in the <code>options.user</code> object of the configured entity, using the same option names. They take precedence over
+the options of the integration driver.</p>
+<ul>
+<li>The user values are edited in the web-configurator, with the entity update request of the Core-API. The Remote user
+interface doesn’t offer editing them, it applies them wherever the entity is shown.</li>
+<li>The <code>user</code> option is reserved for the Remote. An integration driver must not send it, the Remote ignores it in the
+entity definition of a driver.</li>
+<li>The user values are kept if the integration driver provides an updated entity definition.</li>
+<li>The entity documentation lists the options which can be overridden by the user.</li>
+</ul>
+<p>Example of a number entity with a user override of the <code>decimals</code> and <code>display_mode</code> options:</p>
+<pre><code class="language-json">{
+  "options": {
+    "min": 0,
+    "max": 100,
+    "step": 0.5,
+    "decimals": 1,
+    "display_mode": "auto",
+    "user": {
+      "decimals": 0,
+      "display_mode": "stepper"
+    }
+  }
+}
+</code></pre>
 <h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
 <p>For all user or scene interactions with an entity, like switching it on or changing an attribute, the remote sends an
 <code>entity_command</code> message to the integration driver. This message contains the entity command with optional parameters

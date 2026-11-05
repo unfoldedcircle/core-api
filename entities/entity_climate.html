@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c81ebc12.js";
+            window.path_to_searchindex_js = "../searchindex-7c4bc41b.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-a810bdbd.js"></script>
+        <script src="../toc-0bd7c578.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -245,7 +245,7 @@ may be heating, cooling, idle, etc. at a specific point in time.</p>
 </thead>
 <tbody>
 <tr><td>temperature_unit</td><td>enum</td><td>CELSIUS</td><td>The unit of temperature measurement: <code>CELSIUS</code>, <code>FAHRENHEIT</code>. If not specified, the remote settings are used.</td></tr>
-<tr><td>target_temperature_step</td><td>number</td><td>0.5 / 1</td><td>Step value for the UI for setting the target temperature. Defaults: <code>CELSIUS</code> = 0.5, ’FAHRENHEIT` = 1. Smallest step size: 0.1</td></tr>
+<tr><td>target_temperature_step</td><td>number</td><td>0.5 / 1</td><td>Step value for the UI for setting the target temperature. Defaults: <code>CELSIUS</code> = 0.5, <code>FAHRENHEIT</code> = 1. Smallest step size: 0.1</td></tr>
 <tr><td>max_temperature</td><td>number</td><td>30</td><td>Maximum temperature to show in the UI for the target temperature range.</td></tr>
 <tr><td>min_temperature</td><td>number</td><td>10</td><td>Minimum temperature to show in the UI for the target temperature range.</td></tr>
 <tr><td>🚧 fan_modes</td><td>enum</td><td></td><td></td></tr>
@@ -253,6 +253,11 @@ may be heating, cooling, idle, etc. at a specific point in time.</p>
 </table>
 </div>
 <p>🚧 Planned feature.</p>
+<p>All temperature values are given in the temperature unit of the entity, as defined by the <code>temperature_unit</code> option:
+the <code>current_temperature</code> and <code>target_temperature</code> attributes, the <code>max_temperature</code>, <code>min_temperature</code> and
+<code>target_temperature_step</code> options, and the <code>temperature</code> parameter of the <code>target_temperature</code> command.</p>
+<p>The range and step options also define the input range of the <code>temperature</code> command parameter in a command editor,
+e.g. in the web-configurator.</p>
 <h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
 <h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> message to process the following command

@@ -1,0 +1,600 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>User interface widgets - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="favicon-8114d1fc.png">
+        <link rel="stylesheet" href="css/variables-8adf115d.css">
+        <link rel="stylesheet" href="css/general-2459343d.css">
+        <link rel="stylesheet" href="css/chrome-ae938929.css">
+        <link rel="stylesheet" href="css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "searchindex-7c4bc41b.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="toc-0bd7c578.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="user-interface-widgets"><a class="header" href="#user-interface-widgets">User Interface Widgets</a></h1>
+<p>Activity and remote-entity user interfaces consist of pages with a button grid. The user places <em>user interface items</em>
+in the grid, defines their size and, depending on the item type, links them to an entity command or to an entity.</p>
+<p>This page describes the user interface items which are bound to an entity, so called <em>widgets</em>, and the shared
+<em>entity feature target</em> used by the slider widget and the Remote 3 touch slider.</p>
+<p>The data model is defined in the <a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core-API</a> in the
+<code>UserInterfaceItem</code> object. Integration drivers only define entities; the widgets are configured by the user in the
+web-configurator, or provided as default user interface by a <a href="entities/entity_remote.html#user-interface">remote entity</a>.</p>
+<h2 id="item-types"><a class="header" href="#item-types">Item types</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Type</th><th>Bound to</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>icon</td><td>optional entity command</td><td>Icon button, either a UC icon or a custom icon.</td></tr>
+<tr><td>text</td><td>optional entity command</td><td>Text button.</td></tr>
+<tr><td>numpad</td><td>-</td><td>Number pad for digit commands.</td></tr>
+<tr><td>media_player</td><td>media-player entity</td><td>Media information and controls of a media-player entity.</td></tr>
+<tr><td>sensor</td><td>sensor entity</td><td>Value and unit of a <a href="entities/entity_sensor.html">sensor entity</a>.</td></tr>
+<tr><td>select</td><td>select entity</td><td>Option selection of a <a href="entities/entity_select.html">select entity</a>.</td></tr>
+<tr><td>slider</td><td><a href="#entity-feature-target">entity feature</a></td><td>Slider to read and set a numeric entity feature. See <a href="#slider">slider widget</a>.</td></tr>
+<tr><td>number</td><td>number entity</td><td>Value of a <a href="entities/entity_number.html">number entity</a> as slider or stepper. See <a href="#number">number widget</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="entity-command-parameters"><a class="header" href="#entity-command-parameters">Entity command parameters</a></h2>
+<p>Icon and text items, button mappings and sequence steps send an entity command. If the command has parameters, the
+web-configurator shows an editor for them, based on the entity command metadata (<code>GET /api/cfg/entity/commands</code> in the
+<a href="https://unfoldedcircle.github.io/core-api/rest/">REST Core-API</a>). The metadata is defined per entity type. The value
+range of a number parameter is either a static range, or it’s loaded from the entity the command is configured for,
+with the same range as the <a href="#slider-capable-features">slider-capable features</a>. For example:</p>
+<ul>
+<li><code>set_value</code> of a number entity: options <code>min</code>, <code>max</code>, <code>step</code> and <code>unit</code>.</li>
+<li><code>target_temperature</code> of a climate entity: options <code>min_temperature</code>, <code>max_temperature</code> and <code>target_temperature_step</code>.</li>
+</ul>
+<h2 id="value-formatting"><a class="header" href="#value-formatting">Value formatting</a></h2>
+<p>Widgets showing a numeric value, like the sensor, slider and number widgets, format the value with the effective number
+of decimal places:</p>
+<ol>
+<li>The user override in the entity’s <code>options.user.decimals</code>, see <a href="entities/index.html#user-overrides">user overrides</a>.</li>
+<li>The <code>decimals</code> option of the entity.</li>
+<li>The automatic format of the entity type, see the value format of the <a href="entities/entity_sensor.html#value-format">sensor</a>
+and <a href="entities/entity_number.html#value-format">number</a> entity.</li>
+</ol>
+<p>Text values of a sensor entity are shown as they are. The values of the other slider-capable features are shown as
+defined in the <a href="#slider-capable-features">slider-capable features</a>.</p>
+<h2 id="entity-feature-target"><a class="header" href="#entity-feature-target">Entity feature target</a></h2>
+<p>An entity feature target references a numeric feature of an entity which can be read and set. It is used by:</p>
+<ul>
+<li>the <a href="#slider">slider widget</a> in a user interface page,</li>
+<li>the <a href="#remote-3-touch-slider">Remote 3 touch slider</a> configuration of an activity.</li>
+</ul>
+<pre><code class="language-json">{
+  "entity_id": "hass.main.light.living_room",
+  "feature": "dim"
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Required</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>entity_id</td><td>yes</td><td>The entity to control. It must be part of the included entities of the activity.</td></tr>
+<tr><td>feature</td><td>no</td><td>One of the <a href="#slider-capable-features">slider-capable features</a> of the entity. Defaults to the default slider feature of the entity type.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="slider-capable-features"><a class="header" href="#slider-capable-features">Slider-capable features</a></h3>
+<p>A slider-capable feature pairs one numeric entity attribute (read) with one entity command (write). The remote knows
+the value range, step and formatting of each feature. The following features can be used as entity feature target:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Entity type</th><th>Feature</th><th>Default</th><th>Attribute</th><th>Command</th><th>Range and step</th><th>Displayed as</th></tr>
+</thead>
+<tbody>
+<tr><td>number</td><td>value</td><td>✅</td><td>value</td><td><code>set_value { value }</code></td><td>Options <code>min</code>, <code>max</code>, <code>step</code></td><td>value with <code>decimals</code>, <code>unit</code></td></tr>
+<tr><td>light</td><td>dim</td><td>✅</td><td>brightness</td><td><code>on { brightness }</code></td><td>0..255</td><td>0..100 %</td></tr>
+<tr><td>light</td><td>color_temperature</td><td></td><td>color_temperature</td><td><code>on { color_temperature }</code></td><td>0..100, option <code>color_temperature_steps</code></td><td>0..100 %</td></tr>
+<tr><td>media_player</td><td>volume</td><td>✅</td><td>volume</td><td><code>volume { volume }</code></td><td>0..100</td><td>0..100</td></tr>
+<tr><td>media_player</td><td>seek ¹</td><td></td><td>media_position</td><td><code>seek { media_position }</code></td><td>0..<code>media_duration</code> attribute</td><td>mm:ss</td></tr>
+<tr><td>cover</td><td>position</td><td>✅</td><td>position</td><td><code>position { position }</code></td><td>0..100</td><td>0..100 %</td></tr>
+<tr><td>cover</td><td>🚧 tilt_position</td><td></td><td>tilt_position</td><td><code>tilt { tilt_position }</code></td><td>0..100</td><td>0..100 %</td></tr>
+<tr><td>climate</td><td>target_temperature</td><td>✅</td><td>target_temperature</td><td><code>target_temperature { temperature }</code></td><td>Options <code>min_temperature</code>, <code>max_temperature</code>, <code>target_temperature_step</code></td><td>°C / °F</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Default: the feature used if the <code>feature</code> property of the entity feature target is not specified.</li>
+<li><code>light.color_temperature</code>: if the light sets the <code>color_temperature_steps</code> option, the slider only offers this number
+of positions, spread evenly over 0..100 and rounded to whole numbers. E.g. 3 steps: 0, 50, 100. Without the option,
+the range is 0..100 with a step of 1.</li>
+<li>The feature must be included in the <code>features</code> list of the entity, except for the <code>number.value</code> feature which is
+always present.</li>
+<li>The feature must have a bounded value range. A number entity with option <code>min</code> or <code>max</code> set to <code>null</code> is unbounded
+and cannot be used as an entity feature target, neither for a slider widget nor for the Remote 3 touch slider. The
+<code>min</code> and <code>max</code> properties of a slider widget only limit the range of a feature and cannot replace a missing limit.</li>
+<li>¹ Remote 3 touch slider only. The <code>seek</code> feature can’t be used for a slider widget: its range changes with every
+track, and the position moves by itself during playback. Seeking in a user interface page belongs in the
+media-player widget.</li>
+<li>🚧 Planned feature.</li>
+</ul>
+<h2 id="slider"><a class="header" href="#slider">Slider</a></h2>
+<p>The slider widget renders a horizontal or vertical slider for an <a href="#entity-feature-target">entity feature target</a>. The
+current value is read from the entity attribute and updated with every <code>entity_change</code> event. Moving the slider sends
+the entity command with the new value.</p>
+<h3 id="configuration"><a class="header" href="#configuration">Configuration</a></h3>
+<p>The slider configuration is set in the <code>slider</code> property of the user interface item:</p>
+<pre><code class="language-json">{
+  "type": "slider",
+  "text": "Volume",
+  "slider": {
+    "entity_id": "denon.avr.zone_2",
+    "feature": "volume",
+    "style": "bar",
+    "show_value": true,
+    "icon_min": "uc:volume-low",
+    "icon_max": "uc:volume-high",
+    "max": 60,
+    "update_mode": "live"
+  },
+  "location": { "x": 0, "y": 5 },
+  "size": { "width": 4, "height": 1 }
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>entity_id</td><td>string</td><td>required</td><td>Entity to control. See <a href="#entity-feature-target">entity feature target</a>.</td></tr>
+<tr><td>feature</td><td>string</td><td>type default</td><td>Slider-capable feature of the entity. See <a href="#entity-feature-target">entity feature target</a>.</td></tr>
+<tr><td>show_name</td><td>boolean</td><td>false</td><td>Show the entity name as widget label instead of the item’s <code>text</code> field.</td></tr>
+<tr><td>show_value</td><td>boolean</td><td>true</td><td>Show the current value and unit. See <a href="#value-formatting">value formatting</a>.</td></tr>
+<tr><td>icon_min</td><td>string</td><td></td><td>Optional icon identifier shown at the minimum end of the slider.</td></tr>
+<tr><td>icon_max</td><td>string</td><td></td><td>Optional icon identifier shown at the maximum end of the slider.</td></tr>
+<tr><td>min</td><td>number</td><td>feature min</td><td>Optional lower limit of the slider. Clamped to the value range of the feature.</td></tr>
+<tr><td>max</td><td>number</td><td>feature max</td><td>Optional upper limit of the slider. Clamped to the value range of the feature.</td></tr>
+<tr><td>update_mode</td><td>enum</td><td>on_release</td><td><code>on_release</code>: the value is sent once when the slider is released. <code>live</code>: values are sent while moving the slider, at most every 200 ms, and the final value on release.</td></tr>
+<tr><td>style</td><td>enum</td><td>default</td><td>Visual style: <code>default</code>, <code>bar</code> or <code>buttons</code>. See <a href="#styles">styles</a>.</td></tr>
+<tr><td>color</td><td>enum</td><td>auto</td><td>Fill color: <code>auto</code>, <code>neutral</code>, <code>entity</code> or <code>gradient</code>. See <a href="#color">color</a>.</td></tr>
+<tr><td>fill</td><td>enum</td><td>auto</td><td>How the value is drawn: <code>auto</code>, <code>start</code>, <code>center</code> or <code>cursor</code>. See <a href="#fill">fill</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Label rules are the same as for the sensor and select widgets: if the item’s <code>text</code> field is set, it is used as widget
+label, except if <code>show_name</code> is <code>true</code>. If no label should be shown, omit <code>text</code> and leave <code>show_name</code> at <code>false</code>.</p>
+<h3 id="orientation-and-size"><a class="header" href="#orientation-and-size">Orientation and size</a></h3>
+<p>The orientation is derived from the item size: if the height is larger than the width, the slider is vertical,
+otherwise horizontal. Minimum sizes are 2x1 for a horizontal slider and 1x2 for a vertical slider.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Size</th><th>Orientation</th></tr>
+</thead>
+<tbody>
+<tr><td>4 x 1</td><td>horizontal</td></tr>
+<tr><td>2 x 1</td><td>horizontal</td></tr>
+<tr><td>1 x 3</td><td>vertical</td></tr>
+<tr><td>2 x 2</td><td>horizontal</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="styles"><a class="header" href="#styles">Styles</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Style</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>default</td><td>Thin slider: a rounded track with a fill up to the value. The label and value are shown above the track. This is the style of existing sliders.</td></tr>
+<tr><td>bar</td><td>Level bar: the whole widget is the track, with the same look as the brightness bar of the light detail view. Label, value and icons are drawn inside the bar.</td></tr>
+<tr><td>buttons</td><td>Stepper: the value between a decrease and an increase button. Each press sends the feature command with the current value minus or plus one step, for a <code>number</code> entity the <code>decrement</code> and <code>increment</code> commands.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The <a href="#orientation-and-size">orientation and size</a> rules apply to all styles. A vertical stepper has the increase
+button at the top.</li>
+<li><code>bar</code>: dragging changes the value relative to the current value, by the distance moved. A tap without movement doesn’t
+change the value. A touch that starts on the slider belongs to the slider and doesn’t swipe the page.</li>
+<li><code>buttons</code>: the <code>update_mode</code>, <code>icon_min</code>, <code>icon_max</code>, <code>color</code> and <code>fill</code> properties have no effect.</li>
+<li><code>buttons</code>: one step is one step of the shown value. For <code>light.dim</code>, which is shown as 0..100 %, that is 1 %
+(2.55 of 0..255, rounded). For the other features it’s the step of the feature, e.g. the <code>step</code> option of a
+number entity or the <code>target_temperature_step</code> of a climate entity.</li>
+<li>The Remote 3 touch slider has no style. These properties only exist for the slider widget.</li>
+</ul>
+<h3 id="color"><a class="header" href="#color">Color</a></h3>
+<p>The colors are roles of the Remote UI theme, not fixed color values. A theme or a design update can change the actual
+colors without a configuration change.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Color</th><th>Fill</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>The default of the feature, see <a href="#style-defaults">style defaults</a>.</td></tr>
+<tr><td>neutral</td><td>The primary foreground color of the theme. The track uses the surface color of the theme.</td></tr>
+<tr><td>entity</td><td>The current color of the light, from the <code>hue</code> and <code>saturation</code> attributes. Only for the <code>light.dim</code> feature of a light with the <code>color</code> feature, other features use <code>auto</code>. A light without the <code>color</code> feature, or without a known color, uses <code>neutral</code>.</td></tr>
+<tr><td>gradient</td><td>The data gradient of the feature, see <a href="#style-defaults">style defaults</a>. Features without a gradient use <code>neutral</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="fill"><a class="header" href="#fill">Fill</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Fill</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>The default of the feature, see <a href="#style-defaults">style defaults</a>.</td></tr>
+<tr><td>start</td><td>Fill from the minimum end to the value.</td></tr>
+<tr><td>center</td><td>Fill from 0 to the value, e.g. for a bass level of -10..+10 dB. Only if the range includes 0, otherwise <code>start</code> is used.</td></tr>
+<tr><td>cursor</td><td>No fill, only a marker at the value, e.g. for a color temperature.</td></tr>
+</tbody>
+</table>
+</div>
+<p>If the feature has 10 positions or fewer, e.g. <code>light.color_temperature</code> with <code>color_temperature_steps</code> 3, the slider
+shows the positions and snaps to the nearest one on release.</p>
+<h3 id="style-defaults"><a class="header" href="#style-defaults">Style defaults</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Feature</th><th><code>auto</code> color</th><th>Gradient</th><th><code>auto</code> fill</th></tr>
+</thead>
+<tbody>
+<tr><td>number.value</td><td>neutral</td><td>-</td><td><code>center</code> if <code>min</code> &lt; 0 &lt; <code>max</code>, else <code>start</code></td></tr>
+<tr><td>light.dim</td><td>neutral</td><td>dark to primary foreground</td><td>start</td></tr>
+<tr><td>light.color_temperature</td><td>gradient</td><td>cool (0 %, coldest) to warm (100 %, warmest)</td><td>cursor</td></tr>
+<tr><td>media_player.volume</td><td>neutral</td><td>-</td><td>start</td></tr>
+<tr><td>cover.position</td><td>neutral</td><td>-</td><td>start</td></tr>
+<tr><td>cover.tilt_position</td><td>neutral</td><td>-</td><td>start</td></tr>
+<tr><td>climate.target_temperature</td><td>neutral</td><td>cool to heat</td><td>start</td></tr>
+</tbody>
+</table>
+</div>
+<h3 id="limiting-the-range"><a class="header" href="#limiting-the-range">Limiting the range</a></h3>
+<p>The optional <code>min</code> and <code>max</code> properties limit the slider to a sub-range of the feature. This allows for example a
+“safe volume” slider which never exceeds 60, or a brightness slider which cannot switch the light off. The limits are
+clamped to the value range of the feature. If the current entity value is outside the slider range, the slider shows
+it at the nearest end.</p>
+<h3 id="value-updates-and-feedback"><a class="header" href="#value-updates-and-feedback">Value updates and feedback</a></h3>
+<ul>
+<li>While the user moves the slider, the widget shows the selected value immediately.</li>
+<li>After the command has been sent, the widget follows the entity attribute from the <code>entity_change</code> events.</li>
+<li>If the integration driver doesn’t confirm the new value within a few seconds, the widget falls back to the last known
+attribute value. Exception: <a href="entities/entity_number.html">number entities</a> with option <code>readable: false</code> keep the last
+sent value.</li>
+<li><code>update_mode: live</code> is recommended for lights and volume, <code>on_release</code> for setpoints and covers. The remote never
+sends more than one command per 200 ms in live mode.</li>
+</ul>
+<h3 id="physical-buttons"><a class="header" href="#physical-buttons">Physical buttons</a></h3>
+<p>If the screen offers D-pad navigation of the user interface items and a slider widget has the focus, the left and
+right buttons (up and down for a vertical slider) decrease and increase the value by one step:</p>
+<ul>
+<li><code>number</code> entity: <code>decrement</code> / <code>increment</code> commands.</li>
+<li>Other entity types: the feature command with the current value plus or minus the step size.</li>
+</ul>
+<h2 id="number"><a class="header" href="#number">Number</a></h2>
+<p>The number widget shows a <a href="entities/entity_number.html">number entity</a> either as a slider, or as a value field with
+decrement and increment buttons (stepper).</p>
+<h3 id="configuration-1"><a class="header" href="#configuration-1">Configuration</a></h3>
+<p>The number widget configuration is set in the <code>number</code> property of the user interface item:</p>
+<pre><code class="language-json">{
+  "type": "number",
+  "text": "Bass",
+  "number": {
+    "number_id": "amp-1_bass",
+    "display_mode": "auto"
+  },
+  "location": { "x": 0, "y": 4 },
+  "size": { "width": 4, "height": 1 }
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>number_id</td><td>string</td><td>required</td><td>Number entity to show. Must be a configured number entity.</td></tr>
+<tr><td>show_name</td><td>boolean</td><td>false</td><td>Show the entity name as widget label instead of the item’s <code>text</code> field.</td></tr>
+<tr><td>display_mode</td><td>enum</td><td>auto</td><td>Representation: <code>auto</code>, <code>slider</code> or <code>stepper</code>. See <a href="#representation">representation</a>.</td></tr>
+<tr><td>step</td><td>number</td><td></td><td>Step size of the decrement and increment buttons. If not set, the entity’s <code>step</code> option is used. See <a href="#commands">commands</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Label rules are the same as for the sensor, select and slider widgets.</p>
+<p>Like the sensor and select widgets, the number entity doesn’t have to be an included entity of the activity. This is
+different from the <a href="#slider">slider widget</a>, whose <a href="#entity-feature-target">entity feature target</a> must be included.</p>
+<h3 id="representation"><a class="header" href="#representation">Representation</a></h3>
+<ul>
+<li>
+<p>The widget’s <code>display_mode</code> defines the representation:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>display_mode</th><th>Representation</th></tr>
+</thead>
+<tbody>
+<tr><td>auto</td><td>The effective <a href="entities/entity_number.html#display-mode">display mode</a> of the entity: the user override, otherwise the <code>display_mode</code> option of the entity, otherwise <code>auto</code>.</td></tr>
+<tr><td>slider</td><td>A slider.</td></tr>
+<tr><td>stepper</td><td>A value field with decrement and increment buttons.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The widget’s <code>slider</code> or <code>stepper</code> takes precedence over the display mode of the entity, including the user
+override.</p>
+</li>
+<li>
+<p>An unbounded number entity, with <code>min</code> or <code>max</code> set to <code>null</code>, is always shown as a stepper, also with
+<code>display_mode: slider</code>.</p>
+</li>
+<li>
+<p>The slider representation is the <a href="#slider">slider widget</a> with the defaults: <code>style: default</code>, <code>color: auto</code> and
+<code>fill: auto</code>, so the fill starts at 0 if the range spans 0.</p>
+</li>
+<li>
+<p>The value is shown with the unit and the effective number of decimal places. See
+<a href="#value-formatting">value formatting</a>.</p>
+</li>
+<li>
+<p>Decimal places are an entity setting, not a widget setting, so a value is shown the same everywhere.</p>
+</li>
+<li>
+<p>For a slider with additional settings, like limits, icons, styles or live updates, use the <a href="#slider">slider widget</a>.</p>
+</li>
+<li>
+<p>The orientation and the minimum size of the slider representation are the same as for the
+<a href="#orientation-and-size">slider widget</a>.</p>
+</li>
+</ul>
+<h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
+<ul>
+<li>Stepper: the decrement and increment buttons send the <code>decrement</code> and <code>increment</code> commands. With the widget’s <code>step</code>
+set, it is sent as <code>step</code> parameter. Without it, the commands are sent without <code>step</code>, and the integration driver
+uses the <code>step</code> option of the entity.</li>
+<li>The widget’s <code>step</code> should be a multiple of the entity’s <code>step</code> option. The UI doesn’t round it.</li>
+<li>Slider: the <code>set_value</code> command is sent when the slider is released.</li>
+<li>The UI may allow entering a value directly, e.g. by tapping the value. The value is sent with the <code>set_value</code>
+command.</li>
+<li>If the screen offers D-pad navigation of the user interface items and the widget has the focus, the left and right
+buttons (up and down for a vertical slider) send the <code>decrement</code> and <code>increment</code> commands, with the widget’s <code>step</code>
+as for the stepper.</li>
+</ul>
+<p>The value updates and feedback are the same as for the <a href="#value-updates-and-feedback">slider widget</a>.</p>
+<h2 id="remote-3-touch-slider"><a class="header" href="#remote-3-touch-slider">Remote 3 touch slider</a></h2>
+<p>The Remote 3 touch slider is configured per activity in the <code>touch_slider</code> option with an
+<a href="#entity-feature-target">entity feature target</a>. If no target is specified, the default touch slider feature is
+active. The same <a href="#slider-capable-features">slider-capable features</a> are supported as targets, including the
+touch slider only feature <code>media_player.seek</code>.</p>
+<pre><code class="language-json">{
+  "touch_slider": {
+    "enabled": true,
+    "target": {
+      "entity_id": "amp-1_bass",
+      "feature": "value"
+    }
+  }
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="remote-ui.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="discovery.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="remote-ui.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="discovery.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr-ef4e11c1.min.js"></script>
+        <script src="mark-09e88c2c.min.js"></script>
+        <script src="searcher-c2a407aa.js"></script>
+
+        <script src="clipboard-1626706a.min.js"></script>
+        <script src="highlight-abc7f01d.js"></script>
+        <script src="book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="mermaid-eefea253.min.js"></script>
+        <script src="mermaid-init-ccf746f1.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

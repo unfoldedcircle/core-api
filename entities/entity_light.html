@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-c81ebc12.js";
+            window.path_to_searchindex_js = "../searchindex-7c4bc41b.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-a810bdbd.js"></script>
+        <script src="../toc-0bd7c578.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -247,9 +247,9 @@ requests in <code>msg_data.cmd_id</code>.</p>
 </thead>
 <tbody>
 <tr><td>on</td><td>-</td><td>Turn the light on. Optionally set brightness and color values:</td></tr>
-<tr><td></td><td>brightness</td><td>- dim the light to the given percentage value.</td></tr>
-<tr><td></td><td>hue, saturation</td><td>- adjust the color of the light.</td></tr>
-<tr><td></td><td>color_temperature</td><td>- adjust the color temperature.</td></tr>
+<tr><td></td><td>brightness</td><td>- dim the light to the given brightness value: 0..255.</td></tr>
+<tr><td></td><td>hue, saturation</td><td>- adjust the color of the light. Hue: 0..360, saturation: 0..255.</td></tr>
+<tr><td></td><td>color_temperature</td><td>- adjust the color temperature in percent: 0..100. 0% = coldest, 100% = warmest.</td></tr>
 <tr><td>off</td><td>-</td><td>Turn the light off.</td></tr>
 <tr><td>toggle</td><td>-</td><td>Toggle the light from on -&gt; off or from off -&gt; on.</td></tr>
 </tbody>
