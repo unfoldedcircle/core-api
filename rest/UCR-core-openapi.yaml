@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.55.0
+  version: 0.55.1
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7071,7 +7071,8 @@ paths:
         required: true
       responses:
         '201':
-          description: Successful operation returning the page identifier in the response.
+          description: |
+            Successful operation returning the created page. `items` is omitted if the page was created without items.
           content:
             application/json:
               schema:
@@ -7099,7 +7100,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Page'
+                $ref: '#/components/schemas/Pages'
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -7156,6 +7157,13 @@ paths:
       tags:
         - profiles
       summary: Update properties of a page.
+      description: |
+        Partial update: only the provided properties are changed, a missing property keeps its value.
+
+        Send only the properties to change. A client changing only the `items` must not send the `name`: the name it holds
+        may be outdated, and sending it reverts a rename made by another client in the meantime.
+
+        The page order is changed with the `pages` property of the profile update.
       operationId: updatePage
       parameters:
         - $ref: '#/components/parameters/profile_id'
@@ -7193,6 +7201,8 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
     delete:
       tags:
         - profiles
@@ -7227,11 +7237,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/GroupUpdate'
+              $ref: '#/components/schemas/GroupCreate'
         required: true
       responses:
         '201':
-          description: Successful operation returning the page identifier in the response.
+          description: |
+            Successful operation returning the created group. `entities` is omitted if the group was created without
+            entities.
           content:
             application/json:
               schema:
@@ -7316,6 +7328,8 @@ paths:
       tags:
         - profiles
       summary: Update properties of a group.
+      description: |
+        Partial update: only the provided properties are changed, a missing property keeps its value.
       operationId: updateGroup
       parameters:
         - $ref: '#/components/parameters/profile_id'
@@ -7342,6 +7356,8 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
     delete:
       tags:
         - profiles
@@ -12123,7 +12139,9 @@ components:
           description: MAC address of the remote
           type: string
         api:
-          description: API version
+          description: |
+            Version of the Core-API answering the request: `info.version` of its specification.
+            The REST and the WebSocket Core-API are versioned separately, so each reports its own version.
           type: string
         core:
           description: Core service version
@@ -14475,6 +14493,18 @@ components:
           max: 60
           update_mode: live
           style: bar
+    NumberWidgetDisplayMode:
+      description: |
+        Representation of a number widget:
+        - `auto`: the effective display mode of the entity. See the `display_mode` option of the number entity.
+        - `slider`: a slider. An unbounded number entity is shown as a stepper.
+        - `stepper`: a value field with decrement and increment buttons.
+      type: string
+      enum:
+        - auto
+        - slider
+        - stepper
+      default: auto
     UserInterfaceItemNumber:
       description: |
         Number item configuration.
@@ -14501,9 +14531,9 @@ components:
           $ref: '#/components/schemas/NumberWidgetDisplayMode'
         step:
           description: |
-            Step size of the decrement and increment buttons, sent as `step` parameter of the `decrement` and
-            `increment` commands. Only used by the stepper representation and the D-pad. If not set, the commands are
-            sent without `step`, and the integration driver uses the `step` option of the entity.
+            Step size of the decrement and increment buttons, sent as `step` parameter of the `decrement` and `increment`
+            commands. Only used by the stepper representation. If not set, the commands are sent without `step`, and the
+            integration driver uses the `step` option of the entity.
             Should be a multiple of the `step` option of the entity.
           type: number
           minimum: 0.000001
@@ -14514,18 +14544,6 @@ components:
         - number_id: bedroom.sleep_timer
           display_mode: stepper
           step: 5
-    NumberWidgetDisplayMode:
-      description: |
-        Representation of a number widget:
-        - `auto`: the effective display mode of the entity. See the `display_mode` option of the number entity.
-        - `slider`: a slider. An unbounded number entity is shown as a stepper.
-        - `stepper`: a value field with decrement and increment buttons.
-      type: string
-      enum:
-        - auto
-        - slider
-        - stepper
-      default: auto
     GridLocation:
       description: Button placement in the grid with 0-based coordinates.
       type: object
@@ -16607,7 +16625,7 @@ components:
           description: Optional image identifier
         items:
           type: array
-          description: Page items
+          description: Page items. Omitted in the response of creating a page without items.
           items:
             $ref: '#/components/schemas/PageItem'
         pos:
@@ -16619,8 +16637,11 @@ components:
         - page_id
         - profile_id
         - name
-        - items
         - pos
+    Pages:
+      type: array
+      items:
+        $ref: '#/components/schemas/Page'
     ImageIdentifier:
       type: string
       format: ^[a-z][a-z0-9]+:[a-zA-Z0-9\-_\.]+$
@@ -16636,6 +16657,9 @@ components:
     PageCreate:
       type: object
       properties:
+        page_id:
+          $ref: '#/components/schemas/SimpleId'
+          description: Optional page identifier, generated if missing. An existing identifier fails with error code 422.
         name:
           $ref: '#/components/schemas/Name'
         image:
@@ -16661,6 +16685,7 @@ components:
           $ref: '#/components/schemas/Name'
         image:
           $ref: '#/components/schemas/ImageIdentifier'
+          description: Image identifier with the `custom:` prefix. An empty string removes the image.
         items:
           type: array
           description: |
@@ -16684,7 +16709,8 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         entities:
           type: array
-          description: Entity identifiers belonging to the group
+          description: |
+            Entity identifiers belonging to the group. Omitted in the response of creating a group without entities.
           items:
             $ref: '#/components/schemas/EntityId'
         description:
@@ -16693,11 +16719,30 @@ components:
         - group_id
         - profile_id
         - name
-        - entities
     Groups:
       type: array
       items:
         $ref: '#/components/schemas/Group'
+    GroupCreate:
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/SimpleId'
+          description: Optional group identifier, generated if missing. An existing identifier fails with error code 422.
+        name:
+          $ref: '#/components/schemas/Name'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entities:
+          type: array
+          description: |
+            Optional group entities.
+          items:
+            $ref: '#/components/schemas/EntityId'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - name
     GroupUpdate:
       type: object
       properties:
@@ -16705,6 +16750,7 @@ components:
           $ref: '#/components/schemas/Name'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
+          description: Icon identifier. An empty string removes the icon.
         entities:
           type: array
           description: |
@@ -16715,6 +16761,7 @@ components:
             $ref: '#/components/schemas/EntityId'
         description:
           $ref: '#/components/schemas/Description'
+          description: Group description. An empty string removes the description.
     CfgBt:
       type: object
       properties:
@@ -19162,10 +19209,6 @@ components:
           description: Absolute index of the currently playing item within the full queue.
       required:
         - items
-    Pages:
-      type: array
-      items:
-        $ref: '#/components/schemas/Page'
     UiId:
       type: string
       format: ^[a-zA-Z0-9\-_]+$
