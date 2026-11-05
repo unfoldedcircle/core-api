@@ -10,6 +10,24 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.48.1
+### Added
+- Optional identifier (`page_id`) and position (`pos`) in `add_page`.
+- Optional identifier (`group_id`) in `add_group`.
+- Support for removing an image, icon or description by passing an empty string in page and group updates.
+
+### Changed
+- `add_page` and `add_group` response returns the created UI page (`PageMsg`) or group (`GroupMsg`) instead of a generic result.
+- Clarified partial update behavior for `update_page` and `update_group`.
+- Clarified that warning events are only delivered to subscribers of the `all` event channel.
+- Clarified `api` version in version information response.
+
+### Fixed
+- Message identifier for deleting all groups in a profile changed to `delete_groups_in_profile`.
+- Schema definitions for creating and updating UI pages (`PageCreateData`, `PageUpdateData`) and groups (`GroupCreateData`, `GroupUpdateData`).
+- Refactored `WarningEvent` schema with nullable properties.
+- Removed obsolete D-pad reference from number widget step description.
+
 ## 0.48.0-beta
 ### Added
 - Slider and number user interface widgets.

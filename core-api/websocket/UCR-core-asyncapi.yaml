@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.48.0-beta
+  version: 0.48.1
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -5266,33 +5266,28 @@ components:
         - `profile_id` is mandatory.
         - `page_id` is not required and is created automatically.
         - `name` is mandatory and must be unique within the profile.
+        - `pos` is optional, the default is the last position.
+
+        The response carries the created page. `items` is omitted if the page was created without items.
       payload:
         $ref: '#/components/schemas/AddPageMsg'
       x-response:
-        summary: 🚀 Command result message
+        summary: 🧪 UI page data response.
+        tags:
+          - name: profile
         payload:
-          $ref: '#/components/schemas/CommonResp'
-        examples:
-          - payload:
-              kind: resp
-              req_id: 123
-              msg: result
-              code: 200
-              msg_data: {}
-          - payload:
-              kind: resp
-              req_id: 124
-              msg: result
-              code: 400
-              msg_data:
-                code: INV_ARGUMENT
-                message: Invalid argument. Foo must be a positive number.
+          $ref: '#/components/schemas/PageMsg'
     update_page:
       summary: 🧪 Update a UI page.
       tags:
         - name: profile
       description: |
+        Partial update: only the provided properties are changed, a missing property keeps its value.
+
         - `profile_id` and `page_id` are mandatory.
+        - Send only the properties to change. A client changing only the `items` must not send the `name`: the name it
+          holds may be outdated, and sending it reverts a rename made by another client in the meantime.
+        - The page order is changed with the `pages` property of `update_profile`.
       payload:
         $ref: '#/components/schemas/UpdatePageMsg'
       x-response:
@@ -5399,32 +5394,23 @@ components:
         - `profile_id` is mandatory.
         - `group_id` is not required and is created automatically.
         - `name` is mandatory and must be unique within the profile.
+
+        The response carries the created group. `entities` is omitted if the group was created without entities.
       tags:
         - name: profile
       payload:
         $ref: '#/components/schemas/AddGroupMsg'
       x-response:
-        summary: 🚀 Command result message
+        summary: 🧪 UI group data response.
+        tags:
+          - name: profile
         payload:
-          $ref: '#/components/schemas/CommonResp'
-        examples:
-          - payload:
-              kind: resp
-              req_id: 123
-              msg: result
-              code: 200
-              msg_data: {}
-          - payload:
-              kind: resp
-              req_id: 124
-              msg: result
-              code: 400
-              msg_data:
-                code: INV_ARGUMENT
-                message: Invalid argument. Foo must be a positive number.
+          $ref: '#/components/schemas/GroupMsg'
     update_group:
       summary: 🧪 Update a UI group.
       description: |
+        Partial update: only the provided properties are changed, a missing property keeps its value.
+
         - `profile_id` and `group_id` are mandatory.
       tags:
         - name: profile
@@ -6334,6 +6320,9 @@ components:
       summary: 🔍 System warning event.
       description: |
         Emitted for important system events like low battery or shutdown events.
+
+        There is no dedicated event channel for warnings: only sessions subscribed to the `all` event channel
+        receive it.
       tags:
         - name: event
       payload:
@@ -9402,7 +9391,7 @@ components:
               type: string
               const: add_page
             msg_data:
-              $ref: '#/components/schemas/PageData'
+              $ref: '#/components/schemas/PageCreateData'
           required:
             - msg
             - msg_data
@@ -9415,7 +9404,7 @@ components:
               type: string
               const: update_page
             msg_data:
-              $ref: '#/components/schemas/PageData'
+              $ref: '#/components/schemas/PageUpdateData'
           required:
             - msg
             - msg_data
@@ -9538,7 +9527,7 @@ components:
               type: string
               const: add_group
             msg_data:
-              $ref: '#/components/schemas/GroupData'
+              $ref: '#/components/schemas/GroupCreateData'
           required:
             - msg
             - msg_data
@@ -9551,7 +9540,7 @@ components:
               type: string
               const: update_group
             msg_data:
-              $ref: '#/components/schemas/GroupData'
+              $ref: '#/components/schemas/GroupUpdateData'
           required:
             - msg
             - msg_data
@@ -9587,7 +9576,7 @@ components:
         - properties:
             msg:
               type: string
-              const: delete_group
+              const: delete_groups_in_profile
             msg_data:
               type: object
               properties:
@@ -13425,35 +13414,26 @@ components:
             - msg
     WarningEvent:
       type: object
-      allOf:
-        - $ref: '#/components/schemas/CommonEvent'
-        - properties:
-            msg:
-              type: string
-              const: warning
-            cat:
-              type: string
-              const: DEVICE
-            msg_data:
-              type: object
-              properties:
-                event:
-                  type: string
-                  enum:
-                    - LOW_BATTERY
-                    - OPEN_CASE
-                    - BATTERY_UNDERVOLT
-                shutdown:
-                  description: System initiated forced shutdown
-                  type: boolean
-                message:
-                  description: debug message
-                  type: string
-              required:
-                - event
-          required:
-            - msg
-            - msg_data
+      description: Payload of the `warning` event.
+      properties:
+        event:
+          type: string
+          enum:
+            - LOW_BATTERY
+            - OPEN_CASE
+            - BATTERY_UNDERVOLT
+        shutdown:
+          description: System initiated forced shutdown. `null` if no shutdown is initiated.
+          type:
+            - boolean
+            - 'null'
+        message:
+          description: Debug message. `null` if not available.
+          type:
+            - string
+            - 'null'
+      required:
+        - event
     MsgId:
       description: Request message ID which is reflected in response message.
       type: integer
@@ -13511,7 +13491,9 @@ components:
           description: MAC address of the remote
           type: string
         api:
-          description: API version
+          description: |
+            Version of the Core-API answering the request: `info.version` of its specification.
+            The REST and the WebSocket Core-API are versioned separately, so each reports its own version.
           type: string
         core:
           description: Core service version
@@ -16593,7 +16575,8 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         entities:
           type: array
-          description: Entity identifiers belonging to the group
+          description: |
+            Entity identifiers belonging to the group. Omitted in the response of creating a group without entities.
           items:
             $ref: '#/components/schemas/EntityId'
         description:
@@ -16602,8 +16585,8 @@ components:
         - group_id
         - profile_id
         - name
-        - entities
     GroupData:
+      description: Profile group data of a profile change event.
       type: object
       properties:
         group_id:
@@ -16617,6 +16600,55 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         entities:
           type: array
+          description: Group entities
+          items:
+            $ref: '#/components/schemas/SimpleId'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - group_id
+        - profile_id
+        - name
+    GroupCreateData:
+      description: Profile group data to create a group.
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        entities:
+          type: array
+          description: Optional group entities.
+          items:
+            $ref: '#/components/schemas/SimpleId'
+        description:
+          $ref: '#/components/schemas/Description'
+      required:
+        - profile_id
+        - name
+    GroupUpdateData:
+      description: |
+        Profile group data to update an existing group. Missing properties are not updated.
+      type: object
+      properties:
+        group_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Group name
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+          description: Icon identifier. An empty string removes the icon.
+        entities:
+          type: array
           description: |
             Changed or re-ordered group entities.
             An empty array remove all entities.
@@ -16625,6 +16657,10 @@ components:
             $ref: '#/components/schemas/SimpleId'
         description:
           $ref: '#/components/schemas/Description'
+          description: Group description. An empty string removes the description.
+      required:
+        - group_id
+        - profile_id
     IconIdentifier:
       type: string
       format: ^[a-z][a-z0-9]+:[a-zA-Z0-9\-_\.]+$
@@ -16673,7 +16709,7 @@ components:
           description: Optional image identifier
         items:
           type: array
-          description: Page items
+          description: Page items. Omitted in the response of creating a page without items.
           items:
             $ref: '#/components/schemas/PageItem'
         pos:
@@ -16685,7 +16721,6 @@ components:
         - page_id
         - profile_id
         - name
-        - items
         - pos
     PageItem:
       type: object
@@ -16707,7 +16742,7 @@ components:
         - required:
             - group_id
     PageData:
-      description: Profile page data to create or update an existing page.
+      description: Profile page data of a profile change event.
       type: object
       properties:
         page_id:
@@ -16721,6 +16756,59 @@ components:
           $ref: '#/components/schemas/ImageIdentifier'
         items:
           type: array
+          description: Page items
+          items:
+            $ref: '#/components/schemas/PageItem'
+      required:
+        - page_id
+        - profile_id
+        - name
+    PageCreateData:
+      description: Profile page data to create a page.
+      type: object
+      properties:
+        page_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Page name
+        image:
+          $ref: '#/components/schemas/ImageIdentifier'
+        items:
+          type: array
+          description: Optional page items.
+          items:
+            $ref: '#/components/schemas/PageItem'
+        pos:
+          type: integer
+          format: int32
+          minimum: 1
+          description: |
+            Optional 1-based position of the page within the profile. Default: last position.
+            Existing pages at or after this position move back by one.
+      required:
+        - profile_id
+        - name
+    PageUpdateData:
+      description: |
+        Profile page data to update an existing page. Missing properties are not updated.
+      type: object
+      properties:
+        page_id:
+          $ref: '#/components/schemas/SimpleId'
+        profile_id:
+          $ref: '#/components/schemas/SimpleId'
+        name:
+          $ref: '#/components/schemas/Name'
+          description: Page name
+        image:
+          description: Page image. An empty string removes the image.
+          type: string
+          maxLength: 255
+        items:
+          type: array
           description: |
             Changed or re-ordered page items.
             - An empty array removes all items.
@@ -16730,7 +16818,6 @@ components:
       required:
         - page_id
         - profile_id
-        - name
     Profiles:
       type: array
       items:
@@ -19457,6 +19544,18 @@ components:
           max: 60
           update_mode: live
           style: bar
+    NumberWidgetDisplayMode:
+      description: |
+        Representation of a number widget:
+        - `auto`: the effective display mode of the entity. See the `display_mode` option of the number entity.
+        - `slider`: a slider. An unbounded number entity is shown as a stepper.
+        - `stepper`: a value field with decrement and increment buttons.
+      type: string
+      enum:
+        - auto
+        - slider
+        - stepper
+      default: auto
     UserInterfaceItemNumber:
       description: |
         Number item configuration.
@@ -19483,9 +19582,9 @@ components:
           $ref: '#/components/schemas/NumberWidgetDisplayMode'
         step:
           description: |
-            Step size of the decrement and increment buttons, sent as `step` parameter of the `decrement` and
-            `increment` commands. Only used by the stepper representation and the D-pad. If not set, the commands are
-            sent without `step`, and the integration driver uses the `step` option of the entity.
+            Step size of the decrement and increment buttons, sent as `step` parameter of the `decrement` and `increment`
+            commands. Only used by the stepper representation. If not set, the commands are sent without `step`, and the
+            integration driver uses the `step` option of the entity.
             Should be a multiple of the `step` option of the entity.
           type: number
           minimum: 0.000001
@@ -19496,18 +19595,6 @@ components:
         - number_id: bedroom.sleep_timer
           display_mode: stepper
           step: 5
-    NumberWidgetDisplayMode:
-      description: |
-        Representation of a number widget:
-        - `auto`: the effective display mode of the entity. See the `display_mode` option of the number entity.
-        - `slider`: a slider. An unbounded number entity is shown as a stepper.
-        - `stepper`: a value field with decrement and increment buttons.
-      type: string
-      enum:
-        - auto
-        - slider
-        - stepper
-      default: auto
     GridLocation:
       description: Button placement in the grid with 0-based coordinates.
       type: object
