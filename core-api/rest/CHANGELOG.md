@@ -10,6 +10,23 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.55.0
+### Added
+- SVG and JPEG support for icon and TV channel icon uploads, with validation rules for static SVG icons.
+- Slider and number user interface widgets.
+- User entity option overrides with `PATCH /entities/{entityId}/options`.
+- Dynamic limits and selection lists in entity command parameter metadata.
+- Protected Management Frames (PMF) configuration in WiFi network settings.
+
+### Changed
+- Refactored entity feature targeting for slider and touch slider widgets.
+- Extended WiFi network modification to update password and PMF mode.
+- Renamed WiFi network state `AUTHENTICATED` to `AUTHENTICATING`.
+- Clarified WiFi connection, PMF selection and reconnection behavior.
+
+### Fixed
+- Command identifier in entity command metadata example (`button.push`).
+
 ## 0.52.0
 ### Fixed
 - OAuth2 authorization callback endpoint.

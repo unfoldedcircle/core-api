@@ -10,6 +10,19 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.48.0-beta
+### Added
+- Slider and number user interface widgets.
+- User entity option overrides with `update_entity`.
+- Dynamic limits and selection lists in entity command parameter metadata.
+- Protected Management Frames (PMF) configuration in WiFi network settings.
+
+### Changed
+- Refactored entity feature targeting for slider and touch slider widgets.
+- Extended WiFi network modification to update password and PMF mode.
+- Renamed WiFi network state `AUTHENTICATED` to `AUTHENTICATING`.
+- Clarified WiFi connection, PMF selection and reconnection behavior.
+
 ## 0.45.0-beta
 - Add missing messages for achieving the same functionality as the REST Core-API; mainly remote-entity, activity, activity-group, macro features.
 

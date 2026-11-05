@@ -35,7 +35,21 @@ _Changes in the next release_
 - Dock 3 external port configuration.
 - Voice Assistant support.
 - Select Entity support.
+- Number Entity support.
+- User interface widget documentation with the new slider and number widgets.
+- User overrides of entity options in `options.user`: `decimals` of the sensor entity, `decimals` and `display_mode` of
+  the number entity.
+- Sensor and number entity: value format rules, `null` value while unavailable. Without the `decimals` option, a sensor
+  value is shown with at most 2 decimal places, and a number value with the decimal places of `step`, `min` and
+  `max`.
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
+
+### Fixed
+- Core APIs: document how the `limits` of a number parameter and the `items` of a selection parameter in the entity
+  command metadata reference the entity the command is configured for.
+- Light entity: the `brightness` parameter of the `on` command is 0..255, not a percentage value.
+- Integration-API: the sensor entity option `custom_unit` is a plain text, as in the sensor entity documentation and
+  the Remote implementation. The AsyncAPI definition wrongly referenced a language text.
 
 ---
 

@@ -60,12 +60,19 @@ None.
 | Name                    | Type   | Default | Description                                                                                                                    |
 |-------------------------|--------|---------|--------------------------------------------------------------------------------------------------------------------------------|
 | temperature_unit        | enum   | CELSIUS | The unit of temperature measurement: `CELSIUS`, `FAHRENHEIT`. If not specified, the remote settings are used.                  |
-| target_temperature_step | number | 0.5 / 1 | Step value for the UI for setting the target temperature. Defaults: `CELSIUS` = 0.5, 'FAHRENHEIT` = 1. Smallest step size: 0.1 |
+| target_temperature_step | number | 0.5 / 1 | Step value for the UI for setting the target temperature. Defaults: `CELSIUS` = 0.5, `FAHRENHEIT` = 1. Smallest step size: 0.1 |
 | max_temperature         | number | 30      | Maximum temperature to show in the UI for the target temperature range.                                                        |
 | min_temperature         | number | 10      | Minimum temperature to show in the UI for the target temperature range.                                                        |
 | 🚧 fan_modes            | enum   |         |                                                                                                                                |
 
 🚧 Planned feature.
+
+All temperature values are given in the temperature unit of the entity, as defined by the `temperature_unit` option:
+the `current_temperature` and `target_temperature` attributes, the `max_temperature`, `min_temperature` and
+`target_temperature_step` options, and the `temperature` parameter of the `target_temperature` command.
+
+The range and step options also define the input range of the `temperature` command parameter in a command editor,
+e.g. in the web-configurator.
 
 ## Integration API
 
