@@ -10,6 +10,23 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.55.1
+### Added
+- Optional identifier (`page_id`) and position (`pos`) when creating a UI page.
+- Optional identifier (`group_id`) when creating a UI group.
+- Support for removing an image, icon or description by passing an empty string in page and group updates.
+
+### Changed
+- Creating a UI page or group returns the created page or group entity instead of only the identifier.
+- Clarified partial update behavior for UI pages and groups.
+- Clarified `api` version in version information response.
+
+### Fixed
+- Schema definition for fetching UI pages (`GET /profiles/{profileId}/pages`).
+- Schema definitions for creating and updating UI pages (`PageCreate`, `PageUpdate`) and groups (`GroupCreate`, `GroupUpdate`).
+- Duplicate identifier validation on UI page and group creation returning 422 Unprocessable Entity.
+- Removed obsolete D-pad reference from number widget step description.
+
 ## 0.55.0
 ### Added
 - SVG and JPEG support for icon and TV channel icon uploads, with validation rules for static SVG icons.
