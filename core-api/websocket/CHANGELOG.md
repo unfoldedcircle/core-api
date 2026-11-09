@@ -10,6 +10,12 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.50.0
+### Added
+- New `backup_job_change` event emitted on backup job state, phase, and progress changes.
+- New `backup_jobs` event channel for subscribing to backup job notifications.
+- Schema definitions for backup job events (`BackupJobChangeEventMsg`, `BackupJobEvent`, `BackupJobType`, `BackupJobState`, `BackupJobProgress`, `BackupJobError`, `BackupJobArchive`).
+
 ## 0.48.1
 ### Added
 - Optional identifier (`page_id`) and position (`pos`) in `add_page`.
