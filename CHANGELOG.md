@@ -43,6 +43,8 @@ _Changes in the next release_
   value is shown with at most 2 decimal places, and a number value with the decimal places of `step`, `min` and
   `max`.
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
+- Asynchronous backup export and restore jobs.
+- Custom integrations support in backup export and restore operations.
 
 ### Fixed
 - Core APIs: document how the `limits` of a number parameter and the `items` of a selection parameter in the entity

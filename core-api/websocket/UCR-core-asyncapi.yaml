@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.48.1
+  version: 0.50.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -642,6 +642,7 @@ channels:
           - $ref: '#/components/messages/integration_discovery'
           - $ref: '#/components/messages/integration_setup_change'
           - $ref: '#/components/messages/software_update'
+          - $ref: '#/components/messages/backup_job_change'
           - $ref: '#/components/messages/power_mode_change'
           - $ref: '#/components/messages/battery_status'
           - $ref: '#/components/messages/ambient_light_change'
@@ -6466,6 +6467,33 @@ components:
         - name: event
       payload:
         $ref: '#/components/schemas/SoftwareUpdateEventMsg'
+    backup_job_change:
+      summary: 🧪 Backup job change event.
+      description: |
+        Emitted whenever a backup job changes its state, enters a new phase or moves to the next item of a phase
+        (`progress.current_item`, the custom integration being processed). Subscribe to the `backup_jobs` event channel
+        to receive it.
+
+        A backup job is a backup creation (`EXPORT`, `SNAPSHOT`) or a restore (`RESTORE`) that runs on the device. The
+        event is emitted for every job, whichever client started it and whichever REST operation started it, the
+        synchronous `GET /system/backup/export` and `PUT /system/backup/restore` included. A client sees the progress
+        of a backup it did not start itself.
+
+        Every event is a complete snapshot of the job, not a delta. A client that missed events reads the current
+        state with the REST operation `GET /system/backup/jobs/{job_id}`. An event may be dropped for a client that is
+        too slow to receive it, so do not rely on seeing every phase or the final state: poll the job if the final
+        event is missing.
+
+        The event carries the state of the job: `job_id`, `type`, `state`, `progress`, `created_at`, and, if set,
+        `finished_at`, `error` and `archive`. It does **not** carry the result data: the `report` of an export or
+        restore and the `snapshot` of a snapshot job are only returned by the REST operation. `archive` is present for a
+        completed export while its archive is retained. It disappears with the event that announces the release of the
+        archive. The remaining lease time `archive.expires_in_sec` is a snapshot of the time of the event, it is not
+        updated while the lease runs down.
+      tags:
+        - name: event
+      payload:
+        $ref: '#/components/schemas/BackupJobChangeEventMsg'
     power_mode_change:
       summary: 🧪 Power mode change event.
       description: |
@@ -10448,6 +10476,7 @@ components:
             - ambient_light
             - assistant
             - network
+            - backup_jobs
         - {}
     WarningEventMsg:
       type: object
@@ -13298,6 +13327,22 @@ components:
           required:
             - msg
             - msg_data
+    BackupJobChangeEventMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonEvent'
+        - properties:
+            msg:
+              type: string
+              const: backup_job_change
+            cat:
+              type: string
+              const: REMOTE
+            msg_data:
+              $ref: '#/components/schemas/BackupJobEvent'
+          required:
+            - msg
+            - msg_data
     SoftwareUpdateEventMsg:
       type: object
       allOf:
@@ -16119,6 +16164,56 @@ components:
       required:
         - state
         - update_id
+    BackupJobEvent:
+      type: object
+      description: |
+        State of a backup job without its result data. This is the payload of the `backup_job_change` event and the
+        part of a REST `BackupJob` that is common to both APIs.
+
+        The `report` of an export or restore and the `snapshot` of a snapshot job are not part of it.
+      properties:
+        job_id:
+          description: Job identifier, a UUID.
+          type: string
+        type:
+          $ref: '#/components/schemas/BackupJobType'
+        state:
+          $ref: '#/components/schemas/BackupJobState'
+        progress:
+          $ref: '#/components/schemas/BackupJobProgress'
+        created_at:
+          description: Time the job was created.
+          type: string
+          format: date-time
+        finished_at:
+          description: Time the job ended. Only set once the job is no longer `RUNNING`.
+          type: string
+          format: date-time
+        error:
+          $ref: '#/components/schemas/BackupJobError'
+        archive:
+          $ref: '#/components/schemas/BackupJobArchive'
+      required:
+        - job_id
+        - type
+        - state
+        - progress
+        - created_at
+      examples:
+        - job_id: 3f2b8c1e-6a4d-4f0e-9b57-0c1d2e3f4a5b
+          type: EXPORT
+          state: COMPLETED
+          progress:
+            phase: FINALIZE
+            current_step: 13
+            total_steps: 13
+          created_at: '2026-11-05T15:30:01+01:00'
+          finished_at: '2026-11-05T15:30:12+01:00'
+          archive:
+            filename: UCR3_2026-11-05_153012.backup
+            size: 2370274
+            lease_window_sec: 300
+            expires_in_sec: 300
     SoftwareUpdateEvent:
       type: object
       properties:
@@ -20106,3 +20201,138 @@ components:
         - id
         - configured
         - discovery_type
+    BackupJobType:
+      type: string
+      description: |
+        Operation a backup job performs.
+        - `EXPORT`: create a backup archive that is retained for download, started with `POST /system/backup/export` or
+          `GET /system/backup/export`.
+        - `SNAPSHOT`: create a backup snapshot and store it on the device, started with
+          `POST /system/backup/snapshots`.
+        - `RESTORE`: restore a backup archive, started with `POST /system/backup/restore`, `PUT /system/backup/restore` or
+          `PUT /system/backup/snapshots/{id}`.
+      enum:
+        - EXPORT
+        - SNAPSHOT
+        - RESTORE
+    BackupJobState:
+      type: string
+      description: |
+        Lifecycle state of a backup job. `RUNNING` is the only state that changes. A job ends in exactly one of the other
+        states.
+        - `RUNNING`: the job is in progress.
+        - `COMPLETED`: the job finished and carries its result.
+        - `FAILED`: the job failed, see `error`. A failed export or snapshot leaves no archive behind.
+        - `CANCELED`: a running export or snapshot was cancelled. It leaves no archive behind.
+      enum:
+        - RUNNING
+        - COMPLETED
+        - FAILED
+        - CANCELED
+    BackupJobProgress:
+      type: object
+      description: |
+        Phase progress of a backup job. A job reports the phase it is in, not the share of work done: the phases differ in
+        duration and a long phase shows no movement.
+      properties:
+        phase:
+          description: |
+            Name of the current phase. `PREPARE` is the first phase of every job.
+            - Export and snapshot: `PREPARE`, `DATABASE`, `INTEGRATIONS`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`,
+              `REMOTES`, `BLUETOOTH`, `PROFILES`, `DOCKS`, `RESOURCES`, `SETTINGS`, `FINALIZE`.
+            - Restore: `PREPARE`, `INTEGRATIONS`, `REMOTES`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`, `DOCKS`,
+              `SETTINGS`, `RESOURCES`, `PROFILES`, `BLUETOOTH`.
+
+            The set of phases may change in a future release. Use `current_step` and `total_steps` for a progress display
+            and the name for information only.
+          type: string
+        current_step:
+          description: One-based index of the current phase.
+          type: integer
+          format: int32
+        total_steps:
+          description: |
+            Number of phases of the job. The database is not part of an export on the simulator, which therefore has one
+            phase less.
+          type: integer
+          format: int32
+        current_item:
+          description: |
+            Item the current phase is processing, where a phase names its items. Only the custom integrations of an export
+            or restore are named: the driver id of the custom integration that is being archived, removed or installed, in
+            the `INTEGRATIONS` phase.
+
+            An item is not a step: `current_step` and `total_steps` do not change. A change of item is announced like a
+            change of phase. The item stays set for the rest of the phase and is cleared when the next phase is entered; it is
+            omitted while no item is set. A job that fails or is cancelled while it processes an item keeps it.
+          type: string
+      required:
+        - phase
+        - current_step
+        - total_steps
+      examples:
+        - phase: INTEGRATIONS
+          current_step: 3
+          total_steps: 13
+        - phase: INTEGRATIONS
+          current_step: 3
+          total_steps: 13
+          current_item: my_custom_driver
+    BackupJobError:
+      type: object
+      description: Cause of a failed backup job. The values are those of the error response the failure would have been.
+      properties:
+        code:
+          description: Error code, e.g. `NOT_FOUND`, `BAD_REQUEST` or `INTERNAL_SERVER_ERROR`.
+          type: string
+        message:
+          description: Error message.
+          type: string
+      required:
+        - code
+        - message
+      examples:
+        - code: CONFLICT
+          message: Maximum backup count reached. Please delete an old backup first
+    BackupJobArchive:
+      type: object
+      description: |
+        The archive of a completed export job, retained on the device under a lease until it is downloaded or discarded.
+
+        The lease starts when the export completes and is renewed in full by every accepted download request of the
+        archive. Querying the job does **not** renew it. The lease does not run while a download is in progress and starts
+        again when the last download has ended. When it expires, the device removes the archive and the `archive` object
+        disappears from the job. The job itself stays.
+
+        The device stays awake while the archive is retained and while it is being downloaded.
+      properties:
+        filename:
+          description: Attachment filename of the archive download.
+          type: string
+        size:
+          description: Archive size in bytes.
+          type: integer
+          format: int64
+        lease_window_sec:
+          description: Lease window in seconds. A download request renews the lease for this long.
+          type: integer
+          format: int64
+        expires_in_sec:
+          description: |
+            Remaining lease time in seconds, until the archive is removed. It is the whole `lease_window_sec` while a
+            download is in progress. `0` is only reported once the lease has expired.
+
+            A snapshot of the moment the job was read or the event was sent. The `backup_job_change` event is not repeated
+            while the lease runs down: calculate the remaining time from the time of receipt.
+          type: integer
+          format: int64
+      required:
+        - filename
+        - size
+        - lease_window_sec
+        - expires_in_sec
+      examples:
+        - filename: UCR3_2026-11-05_153012.backup
+          size: 2370274
+          lease_window_sec: 300
+          expires_in_sec: 300

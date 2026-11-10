@@ -10,6 +10,21 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.57.0
+### Added
+- Asynchronous backup export and restore jobs:
+  - Start backup export job (`POST /system/backup/export`) with optional custom integration archiving.
+  - Start backup restore job (`POST /system/backup/restore`) with optional custom integration restoration.
+  - Retrieve active and finished backup jobs (`GET /system/backup/jobs`, `GET /system/backup/jobs/{job_id}`).
+  - Cancel a running backup job (`DELETE /system/backup/jobs/{job_id}`).
+  - Download backup export archive with an archive lease (`GET /system/backup/jobs/{job_id}/archive`).
+- Custom integrations support in backup export and restore operations.
+- Properties `full_backup`, `custom_integrations`, and `report` in `BackupSnapshot`.
+
+### Changed
+- Relaxed SVG icon validation rules for viewBox aspect ratio (between 1:4 and 4:1) and allowed relative and absolute dimension units up to 1024 px at 96 dpi.
+- Synchronous backup and snapshot operations return 409 Conflict when a backup job is active, and 503 Service Unavailable when the device is suspending or disk space is insufficient.
+
 ## 0.55.1
 ### Added
 - Optional identifier (`page_id`) and position (`pos`) when creating a UI page.

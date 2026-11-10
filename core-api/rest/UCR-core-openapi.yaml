@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.55.1
+  version: 0.57.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1182,8 +1182,9 @@ paths:
 
         SVG files (`Icon` and `TvChannelIcon` only) are validated as a whole and must be a static icon the device can
         render: plain UTF-8 XML (no compressed `svgz`), no DOCTYPE or processing instructions, a root `svg` element in the
-        SVG namespace with a `viewBox` whose aspect ratio is between 1:2 and 2:1, and a declared `width` / `height`, if
-        present, of at most 1024 px without other units. Allowed elements: `svg`, `g`, `defs`, `use`, `path`, `rect`,
+        SVG namespace with a `viewBox` whose aspect ratio is between 1:4 and 4:1. A declared `width` / `height` may be
+        `auto`, relative (`%`, `em`, `ex`) or absolute (no unit, `px`, `pt`, `mm`, `cm`, `in`) of at most 1024 px at
+        96 dpi (e.g. 768pt, 270mm); other units are rejected. Allowed elements: `svg`, `g`, `defs`, `use`, `path`, `rect`,
         `circle`, `ellipse`, `line`, `polyline`, `polygon`, `linearGradient`, `radialGradient`, `stop`, `title`, `desc`;
         at most 500 elements, nested at most 16 levels deep. Event handler attributes (`on*`) are not allowed, and
         references (`href`, `url()`) may only point to an element in the same document (`#id`).
@@ -10223,11 +10224,16 @@ paths:
         - Administrator pin.
         - Web-configurator pin.
         - Any API-keys created with the Core-API.
+        - Custom integrations. Only `POST /system/backup/export` can include them.
 
         Error codes:
         - `403`: forbidden, only an administrator account may create a backup.
-        - `409`: conflict, a backup or restore process is already running.
-        - `507`: not enough disk space available.
+        - `409`: conflict, a backup or restore process is already running, also one started with `POST /system/backup/export`
+          or `POST /system/backup/restore` by another client.
+        - `503`: not enough disk space available, or the device is suspending.
+
+        The request is answered when the backup archive is complete. The request may take long if the device holds a lot of
+        data. A client with a request timeout should use `POST /system/backup/export` instead, which answers immediately.
       operationId: exportBackup
       responses:
         '200':
@@ -10248,6 +10254,91 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '409':
           $ref: '#/components/responses/Err409Conflict'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+    post:
+      tags:
+        - system
+      summary: Start a device configuration backup export job.
+      description: |
+        Start creating a full device configuration backup as a backup job. The request is answered as soon as the job is
+        accepted and does not wait for the archive. This is the preferred way to create a backup: the success of the backup
+        does not depend on how long a client keeps a request open.
+
+        - The job is a `BackupJob` of type `EXPORT`. Follow it with `GET /system/backup/jobs/{job_id}` or the
+          `backup_job_change` event of the WebSocket Core-API. The job continues if the client disconnects.
+        - The `Location` response header and the `job_id` identify the job.
+        - When the job is `COMPLETED`, download the archive with `GET /system/backup/jobs/{job_id}/archive`. The archive is
+          retained for a limited time only, see that operation about the archive lease.
+        - The archive has the same content as the archive of `GET /system/backup/export`, with the same limitations and
+          warnings about personal information and the integrations and docks that are stopped during the backup. With the
+          `custom_integrations` option it also contains the custom integrations, see below.
+        - A running `EXPORT` job can be cancelled with `DELETE /system/backup/jobs/{job_id}`.
+        - Only one backup job runs at a time. This includes all backup operations: the synchronous
+          `GET /system/backup/export`, `PUT /system/backup/restore` and the snapshot operations are refused with `409`
+          while a job runs, and the other way round. A new job replaces the finished job and its retained archive.
+        - The device does not suspend while the job runs, while its archive is retained and while it is downloaded.
+        - It is recommended to perform the backup while the remote is in the docking station.
+        - At least 100 MB must be free to start the backup process.
+
+        The request body is optional. Without a body, or with an empty body, no option is set.
+
+        Custom integrations are only included with `"custom_integrations": true`:
+        - The backup contains each installed custom integration: its driver, its configured entities and an installation
+          archive with its program files, configuration and data. A restore job installs it from there, see
+          `POST /system/backup/restore`.
+        - Each custom integration is disconnected from the start of the backup until its own installation archive is
+          written. Its service is stopped only while that archive is written. Afterwards the integration is started and
+          connected again as it was before the backup. All other integrations are started again before the first custom
+          integration is archived.
+        - The custom integrations are archived one after the other. `progress.current_item` of the job names the one being
+          archived. A cancellation takes effect between two custom integrations. A cancelled or failed backup starts every
+          custom integration again that it has not started yet.
+        - A custom integration that cannot be exported, or whose installation archive exceeds 200 MB, is left out of the
+          backup and reported as an error of that integration in the `report` of the job. The backup continues.
+        - The backup can grow to about 2.1 GB with the maximum of 10 custom integrations. The free space required to start
+          the job includes the installed size of the custom integrations: their program files, not their configuration
+          and data.
+        - External access tokens (OAuth) are not part of a backup. An integration that uses them has to be authorized
+          again after a restore.
+        - Without the option each custom integration is left out and named in a warning of the report.
+
+        Error codes:
+        - `400`: bad request, the request body is not valid JSON or an option has the wrong type.
+        - `403`: forbidden, only an administrator account may create a backup.
+        - `409`: conflict, a backup or restore process is already running. The running job is not affected.
+        - `503`: the device is suspending. Try again once it is awake.
+        - `507`: not enough disk space available, including the space for the custom integrations if they are included.
+          No job is created.
+      operationId: startBackupExport
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BackupExportOptions'
+      responses:
+        '202':
+          description: The backup job was accepted and is running.
+          headers:
+            Location:
+              description: Path of the backup job resource, `/api/system/backup/jobs/{job_id}`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupJob'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
         '507':
           $ref: '#/components/responses/Err507InsufficientStorage'
   /system/backup/restore:
@@ -10272,13 +10363,22 @@ paths:
         - WiFi configuration, administrator pin and web-configurator pin are not overwritten by a system restore.
         - All integrations and docks will be disconnected and stopped during restore.
         - The device must have enough free disk space to restore the backup. At least 100 MB must be free to start the restore process.
+        - The maximum upload size is 100 MB.
+        - Custom integrations are only restored by `POST /system/backup/restore`. This operation and the restore of a
+          snapshot never install, update or remove a custom integration: each custom integration in the backup is skipped
+          and named in a warning of the report.
 
         Error codes:
         - `400`: bad request, backup archive is invalid or corrupt. Check logs for further details.
         - `403`: forbidden, only an administrator account may restore a backup.
-        - `409`: conflict, a backup or restore process is already running.
+        - `409`: conflict, a backup or restore process is already running, also one started with
+          `POST /system/backup/export` or `POST /system/backup/restore` by another client.
         - `500`: internal server error, the backup archive could not be processed. Check logs for further details.
-        - `507`: not enough disk space available.
+        - `503`: the device is suspending, or the declared size of the archive does not fit the free disk space.
+        - `507`: not enough disk space available to start the restore process.
+
+        The request is answered when the restore has finished. A client with a request timeout should use
+        `POST /system/backup/restore` instead, which answers as soon as the upload is validated.
       operationId: restoreBackup
       parameters:
         - $ref: '#/components/parameters/merge'
@@ -10308,8 +10408,320 @@ paths:
           $ref: '#/components/responses/Err409Conflict'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
         '507':
           $ref: '#/components/responses/Err507InsufficientStorage'
+    post:
+      tags:
+        - system
+      summary: Upload a device configuration backup and start a restore job.
+      description: |
+        Upload a backup archive and restore the UC Remote device configuration from it as a backup job. The request is
+        answered as soon as the upload is stored and validated, and does not wait for the restore. This is the preferred
+        way to restore a backup: the success of the restore does not depend on how long a client keeps a request open.
+
+        - The archive is validated **before** the job starts and before any existing configuration is modified: it must be
+          readable, within the archive limits, of a supported backup version and fit the free disk space. An archive that
+          is refused leaves no job behind, the uploaded file is removed and the device configuration is unchanged.
+        - The job is a `BackupJob` of type `RESTORE`. Follow it with `GET /system/backup/jobs/{job_id}` or the
+          `backup_job_change` event of the WebSocket Core-API. The job continues if the client disconnects.
+        - The `Location` response header and the `job_id` identify the job.
+        - The result of the restore is the `report` of the completed job. A restore that could not restore some items still
+          completes: the affected items are listed in the report. Only an error that aborts the restore fails the job.
+        - A running restore **cannot be cancelled** because a restore is not transactional:
+          `DELETE /system/backup/jobs/{job_id}` answers `409`.
+        - Only one backup job runs at a time. This includes all backup operations: the synchronous operations are refused
+          with `409` while a job runs, and the other way round. The request is refused before the upload is read if a job
+          is running. A new job replaces the finished job and its retained archive.
+        - The uploaded archive is removed when the job has ended.
+        - The device does not suspend while the job runs.
+        - The device will not automatically restart after a system restore. See `PUT /system/backup/restore` for the
+          attention notes about the restore, they apply as well.
+        - The maximum upload size is 2100 MB. Before the upload is read, the free space must be at least 100 MB plus the
+          `Content-Length` of the request. A request without a `Content-Length` is only limited by the maximum upload size.
+          The device is kept from suspending once the job runs, not while the archive is uploaded.
+
+        Custom integrations, see the `custom_integrations` option of `POST /system/backup/export`:
+
+        ⚠️ Restoring a backup that contains custom integrations **installs executable code from the backup** on the device,
+        as `POST /intg/install` does. Only restore a backup from a trusted source, or set `custom_integrations=false`.
+
+        - With `custom_integrations=true` (the default), each custom integration in the backup is installed through the
+          custom integration installer that `POST /intg/install` uses, with its checks of the archive and its limit of 10
+          custom integrations: one that is installed is updated, one that is not is installed. Afterwards its integration
+          instances and configured entities are restored from the backup.
+        - A restore without merging (`merge=false`) of a backup that was created with custom integrations first removes
+          **all** installed custom integrations, also those that are not in the backup. No other restore removes a custom
+          integration.
+        - A merging restore of an installed custom integration is an update: configuration files that exist on the device
+          are kept, program files are replaced, and the data files of the backup are copied over the existing ones.
+        - The driver of a custom integration is registered from the installation archive. A custom integration that was
+          disabled when the backup was created is disabled again after the restore.
+        - With `custom_integrations=false`, no custom integration is installed, updated or removed. Each custom integration
+          in the backup is skipped and named in a warning of the report.
+        - The custom integrations are installed one after the other, in the `INTEGRATIONS` phase. `progress.current_item`
+          of the job names the one being removed or installed.
+        - A custom integration that cannot be extracted, installed or updated is an error of that integration in the
+          report, and its instances and entities are not restored. The restore continues. The same applies to an
+          installation archive larger than 200 MB, and to more than 10 custom integrations in a backup: the surplus is
+          reported and not installed.
+        - An installed custom integration that cannot be removed is an error of that integration in the report. It stays
+          installed and is updated from the backup if the backup contains it.
+        - External access tokens (OAuth) are not part of a backup. An integration that uses them has to be authorized
+          again after the restore.
+
+        Error codes:
+        - `400`: bad request, the upload is invalid: no `file` part, a filename that does not end in `.backup`, an upload
+          that is too large, or a backup archive that is invalid or corrupt, has too many entries or declares an invalid
+          backup version. Check logs for further details.
+        - `403`: forbidden, only an administrator account may restore a backup. No upload is stored.
+        - `404`: the backup archive contains no metadata and is not a backup archive.
+        - `408`: request timeout, the upload stalled.
+        - `409`: conflict, a backup or restore process is already running, or the backup version of the archive is not
+          supported.
+        - `500`: internal server error, the backup archive could not be processed. Check logs for further details.
+        - `503`: the device is suspending, or the declared size of the archive does not fit the free disk space.
+        - `507`: not enough disk space available. Before the upload is read, 100 MB plus the `Content-Length` of the
+          request must be free. No job is created.
+      operationId: startBackupRestore
+      parameters:
+        - $ref: '#/components/parameters/merge'
+        - name: custom_integrations
+          in: query
+          description: |
+            Install the custom integrations the backup contains. `false` leaves them out: no custom integration is
+            installed, updated or removed.
+          required: false
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '202':
+          description: The backup archive was accepted and the restore job is running.
+          headers:
+            Location:
+              description: Path of the backup job resource, `/api/system/backup/jobs/{job_id}`.
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupJob'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '408':
+          $ref: '#/components/responses/Err408RequestTimeout'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+        '500':
+          $ref: '#/components/responses/Err500InternalServerError'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
+        '507':
+          $ref: '#/components/responses/Err507InsufficientStorage'
+  /system/backup/jobs:
+    get:
+      tags:
+        - system
+      summary: Get the latest backup job.
+      description: |
+        Retrieve the latest backup job, whether it is running or has ended. This allows a client that does not know a job
+        identifier, e.g. after a reload, to find an operation it did not start itself, or one started by another client.
+
+        The device keeps one backup job: the list contains at most one item and is empty if no job is known. The latest
+        job stays until it is discarded with `DELETE /system/backup/jobs/{job_id}`, a new job starts, or the service
+        restarts.
+
+        Querying a job does not renew the lease of its archive.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account may query backup jobs.
+      operationId: getBackupJobs
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupJobs'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /system/backup/jobs/{job_id}:
+    get:
+      tags:
+        - system
+      summary: Get the state of a backup job.
+      description: |
+        Retrieve the state, the progress and, once the job has ended, the result of a backup job. A client can poll this
+        resource. The `backup_job_change` event of the WebSocket Core-API announces the same changes.
+
+        The result depends on the job type:
+        - `EXPORT`: `report` and, while the archive is retained, `archive`. Download the archive with
+          `GET /system/backup/jobs/{job_id}/archive`.
+        - `SNAPSHOT`: `snapshot`, the description of the stored snapshot.
+        - `RESTORE`: `report`.
+
+        A failed job carries `error`.
+
+        Querying a job does **not** renew the lease of its archive. Only an accepted archive download does.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account may query backup jobs.
+        - `404`: the job is unknown or was discarded. The device keeps only the latest job in memory: a job is also gone
+          after a new job was started or the service restarted. Treat this as "start again".
+      operationId: getBackupJob
+      parameters:
+        - $ref: '#/components/parameters/backup_job_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupJob'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    delete:
+      tags:
+        - system
+      summary: Cancel or discard a backup job.
+      description: |
+        The effect depends on the state of the job:
+        - A **running** `EXPORT` or `SNAPSHOT` job is cancelled. Cancelling is cooperative: the job stops when it enters
+          its next phase, removes its partial archive and ends as `CANCELED`. Integrations and services the export had
+          stopped are running again. The response is the job as it is now, which may still be `RUNNING`: follow the job
+          for its final state.
+        - A **running** `RESTORE` job cannot be cancelled, because a restore is not transactional. It answers `409` and the
+          restore continues.
+        - A job that has **ended** is discarded: it is removed and its archive with it. The response is the discarded
+          job. The device may suspend again after its archive is removed.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account may cancel or discard a backup job.
+        - `404`: the job is unknown or was already discarded.
+        - `409`: conflict, a running restore cannot be cancelled.
+      operationId: deleteBackupJob
+      parameters:
+        - $ref: '#/components/parameters/backup_job_id'
+      responses:
+        '200':
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BackupJob'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
+  /system/backup/jobs/{job_id}/archive:
+    get:
+      tags:
+        - system
+      summary: Download the archive of a completed export job.
+      description: |
+        Download the backup archive of a completed `EXPORT` job as a file. The response has a declared length, and partial
+        requests with the `Range` header are supported, so an interrupted download can be resumed without building the
+        archive again. The request needs no request body and no custom header: the browser can download it directly.
+        Authenticate with Basic Auth, a Bearer token or the session cookie.
+
+        The returned backup archive can be restored with `PUT /system/backup/restore` or `POST /system/backup/restore`.
+        See `GET /system/backup/export` for the content of the archive and the information it contains.
+
+        **Archive lease**
+
+        The device does not keep the archive for good. It is retained under a lease, reported in the `archive` object of
+        the job:
+        - The lease window is `archive.lease_window_sec` (300 seconds), and starts when the export completes.
+        - Every accepted download request, a `Range` request included, renews the lease for a whole window. A client that
+          wants to keep the archive without downloading it yet can request a small range.
+        - Querying the job (`GET /system/backup/jobs/{job_id}`) or receiving events does **not** renew the lease.
+        - The lease does not run while a download is in progress. A slow download is not interrupted by the lease. The
+          lease starts again once the last download has ended.
+        - When the lease expires, or the job is discarded or replaced by a new job, the device removes the archive. A
+          download that is in progress at that moment is completed. A later request answers `404`.
+
+        The device stays awake while the archive is retained and while it is being downloaded. The device may suspend once
+        the archive is released.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account may download a backup archive.
+        - `404`: the job is unknown or was discarded, the job is not an export job (a restore or snapshot job has no
+          archive to download), or the archive was already released because its lease expired.
+        - `409`: conflict, the export job is not completed: it is still running, failed or was cancelled.
+      operationId: getBackupJobArchive
+      parameters:
+        - $ref: '#/components/parameters/backup_job_id'
+        - name: Range
+          in: header
+          description: Request a part of the archive, e.g. `bytes=1048576-` to resume a download.
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Binary backup archive.
+          headers:
+            content-disposition:
+              description: Attachment filename.
+              schema:
+                type: string
+            content-length:
+              description: Archive size in bytes.
+              schema:
+                type: integer
+                format: int64
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '206':
+          description: Requested part of the binary backup archive.
+          headers:
+            content-range:
+              description: Returned byte range and total size of the archive.
+              schema:
+                type: string
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '409':
+          $ref: '#/components/responses/Err409Conflict'
   /system/backup/snapshots:
     get:
       tags:
@@ -10347,6 +10759,7 @@ paths:
         Response codes:
         - `403`: forbidden, only an administrator account may create a backup.
         - `409`: conflict, a maximum of 50 backups can be stored on the device, or a backup or restore process is already running.
+        - `503`: the device is suspending. Try again once it is awake.
         - `507`: a minimum of 100 MB free space on the device is required to create a new backup.
       operationId: createBackupSnapshot
       responses:
@@ -10362,6 +10775,8 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '409':
           $ref: '#/components/responses/Err409Conflict'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
         '507':
           $ref: '#/components/responses/Err507InsufficientStorage'
     delete:
@@ -10433,11 +10848,14 @@ paths:
         Please see `PUT /system/backup/restore` operation about restoring a backup.
 
         Response codes:
-        - `403`: forbidden, only an administrator account may create a backup.
+        - `400`: bad request, the stored backup archive is invalid or corrupt, has too many entries or declares an
+          invalid backup version. Check logs for further details.
+        - `403`: forbidden, only an administrator account may restore a backup.
         - `404`: system backup snapshot not found.
-        - `409`: conflict, a backup or restore process is already running.
+        - `409`: conflict, a backup or restore process is already running, or the backup version of the snapshot is not
+          supported.
         - `500`: internal server error, the backup archive could not be processed. Check logs for further details.
-        - `507`: not enough disk space available.
+        - `503`: the device is suspending, or the declared size of the archive does not fit the free disk space.
       operationId: restoreBackupSnapshot
       parameters:
         - $ref: '#/components/parameters/backup_id'
@@ -10449,6 +10867,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BackupReports'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -10459,8 +10879,8 @@ paths:
           $ref: '#/components/responses/Err409Conflict'
         '500':
           $ref: '#/components/responses/Err500InternalServerError'
-        '507':
-          $ref: '#/components/responses/Err507InsufficientStorage'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
     delete:
       tags:
         - system
@@ -12088,6 +12508,13 @@ components:
       required: false
       schema:
         type: boolean
+    backup_job_id:
+      name: job_id
+      in: path
+      description: Backup job identifier
+      required: true
+      schema:
+        type: string
     backup_id:
       name: id
       in: path
@@ -18367,37 +18794,203 @@ components:
           type: string
         hw_revision:
           type: string
-    BackupReportItem:
-      type: string
-      enum:
-        - db
-        - integration_driver
-        - integration
-        - activity
-        - macro
-        - remote
-        - profile
-        - dock
-        - resource
-    BackupReport:
+    BackupExportOptions:
       type: object
+      description: Options of a backup export job. Every option is optional.
       properties:
-        item:
-          $ref: '#/components/schemas/BackupReportItem'
-        available:
+        custom_integrations:
+          description: |
+            Include the installed custom integrations: each one with its driver, its configured entities and an
+            installation archive of its program files, configuration and data.
+          type: boolean
+          default: false
+      examples:
+        - custom_integrations: true
+    BackupJobType:
+      type: string
+      description: |
+        Operation a backup job performs.
+        - `EXPORT`: create a backup archive that is retained for download, started with `POST /system/backup/export` or
+          `GET /system/backup/export`.
+        - `SNAPSHOT`: create a backup snapshot and store it on the device, started with
+          `POST /system/backup/snapshots`.
+        - `RESTORE`: restore a backup archive, started with `POST /system/backup/restore`, `PUT /system/backup/restore` or
+          `PUT /system/backup/snapshots/{id}`.
+      enum:
+        - EXPORT
+        - SNAPSHOT
+        - RESTORE
+    BackupJobState:
+      type: string
+      description: |
+        Lifecycle state of a backup job. `RUNNING` is the only state that changes. A job ends in exactly one of the other
+        states.
+        - `RUNNING`: the job is in progress.
+        - `COMPLETED`: the job finished and carries its result.
+        - `FAILED`: the job failed, see `error`. A failed export or snapshot leaves no archive behind.
+        - `CANCELED`: a running export or snapshot was cancelled. It leaves no archive behind.
+      enum:
+        - RUNNING
+        - COMPLETED
+        - FAILED
+        - CANCELED
+    BackupJobProgress:
+      type: object
+      description: |
+        Phase progress of a backup job. A job reports the phase it is in, not the share of work done: the phases differ in
+        duration and a long phase shows no movement.
+      properties:
+        phase:
+          description: |
+            Name of the current phase. `PREPARE` is the first phase of every job.
+            - Export and snapshot: `PREPARE`, `DATABASE`, `INTEGRATIONS`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`,
+              `REMOTES`, `BLUETOOTH`, `PROFILES`, `DOCKS`, `RESOURCES`, `SETTINGS`, `FINALIZE`.
+            - Restore: `PREPARE`, `INTEGRATIONS`, `REMOTES`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`, `DOCKS`,
+              `SETTINGS`, `RESOURCES`, `PROFILES`, `BLUETOOTH`.
+
+            The set of phases may change in a future release. Use `current_step` and `total_steps` for a progress display
+            and the name for information only.
+          type: string
+        current_step:
+          description: One-based index of the current phase.
           type: integer
           format: int32
-        ok:
+        total_steps:
+          description: |
+            Number of phases of the job. The database is not part of an export on the simulator, which therefore has one
+            phase less.
           type: integer
           format: int32
+        current_item:
+          description: |
+            Item the current phase is processing, where a phase names its items. Only the custom integrations of an export
+            or restore are named: the driver id of the custom integration that is being archived, removed or installed, in
+            the `INTEGRATIONS` phase.
+
+            An item is not a step: `current_step` and `total_steps` do not change. A change of item is announced like a
+            change of phase. The item stays set for the rest of the phase and is cleared when the next phase is entered; it is
+            omitted while no item is set. A job that fails or is cancelled while it processes an item keeps it.
+          type: string
       required:
-        - item
-        - available
-        - ok
-    BackupReports:
-      type: array
-      items:
-        $ref: '#/components/schemas/BackupReport'
+        - phase
+        - current_step
+        - total_steps
+      examples:
+        - phase: INTEGRATIONS
+          current_step: 3
+          total_steps: 13
+        - phase: INTEGRATIONS
+          current_step: 3
+          total_steps: 13
+          current_item: my_custom_driver
+    BackupJobError:
+      type: object
+      description: Cause of a failed backup job. The values are those of the error response the failure would have been.
+      properties:
+        code:
+          description: Error code, e.g. `NOT_FOUND`, `BAD_REQUEST` or `INTERNAL_SERVER_ERROR`.
+          type: string
+        message:
+          description: Error message.
+          type: string
+      required:
+        - code
+        - message
+      examples:
+        - code: CONFLICT
+          message: Maximum backup count reached. Please delete an old backup first
+    BackupJobArchive:
+      type: object
+      description: |
+        The archive of a completed export job, retained on the device under a lease until it is downloaded or discarded.
+
+        The lease starts when the export completes and is renewed in full by every accepted download request of the
+        archive. Querying the job does **not** renew it. The lease does not run while a download is in progress and starts
+        again when the last download has ended. When it expires, the device removes the archive and the `archive` object
+        disappears from the job. The job itself stays.
+
+        The device stays awake while the archive is retained and while it is being downloaded.
+      properties:
+        filename:
+          description: Attachment filename of the archive download.
+          type: string
+        size:
+          description: Archive size in bytes.
+          type: integer
+          format: int64
+        lease_window_sec:
+          description: Lease window in seconds. A download request renews the lease for this long.
+          type: integer
+          format: int64
+        expires_in_sec:
+          description: |
+            Remaining lease time in seconds, until the archive is removed. It is the whole `lease_window_sec` while a
+            download is in progress. `0` is only reported once the lease has expired.
+
+            A snapshot of the moment the job was read or the event was sent. The `backup_job_change` event is not repeated
+            while the lease runs down: calculate the remaining time from the time of receipt.
+          type: integer
+          format: int64
+      required:
+        - filename
+        - size
+        - lease_window_sec
+        - expires_in_sec
+      examples:
+        - filename: UCR3_2026-11-05_153012.backup
+          size: 2370274
+          lease_window_sec: 300
+          expires_in_sec: 300
+    BackupJobEvent:
+      type: object
+      description: |
+        State of a backup job without its result data. This is the payload of the `backup_job_change` event and the
+        part of a REST `BackupJob` that is common to both APIs.
+
+        The `report` of an export or restore and the `snapshot` of a snapshot job are not part of it.
+      properties:
+        job_id:
+          description: Job identifier, a UUID.
+          type: string
+        type:
+          $ref: '#/components/schemas/BackupJobType'
+        state:
+          $ref: '#/components/schemas/BackupJobState'
+        progress:
+          $ref: '#/components/schemas/BackupJobProgress'
+        created_at:
+          description: Time the job was created.
+          type: string
+          format: date-time
+        finished_at:
+          description: Time the job ended. Only set once the job is no longer `RUNNING`.
+          type: string
+          format: date-time
+        error:
+          $ref: '#/components/schemas/BackupJobError'
+        archive:
+          $ref: '#/components/schemas/BackupJobArchive'
+      required:
+        - job_id
+        - type
+        - state
+        - progress
+        - created_at
+      examples:
+        - job_id: 3f2b8c1e-6a4d-4f0e-9b57-0c1d2e3f4a5b
+          type: EXPORT
+          state: COMPLETED
+          progress:
+            phase: FINALIZE
+            current_step: 13
+            total_steps: 13
+          created_at: '2026-11-05T15:30:01+01:00'
+          finished_at: '2026-11-05T15:30:12+01:00'
+          archive:
+            filename: UCR3_2026-11-05_153012.backup
+            size: 2370274
+            lease_window_sec: 300
+            expires_in_sec: 300
     BackupSnapshot:
       type: object
       properties:
@@ -18411,7 +19004,7 @@ components:
         size:
           description: Archive size in bytes
           type: integer
-          format: int32
+          format: int64
       required:
         - id
         - creation_date
@@ -18420,11 +19013,164 @@ components:
         - id: UCR2_2023-09-17_145305
           creation_date: '2023-09-17T14:53:05+02:00'
           size: 2370274
+    BackupReportItem:
+      type: string
+      description: |
+        Type of the items in a report group. More types may be added: a client should show an unknown type as is.
+      enum:
+        - db
+        - integration_driver
+        - integration
+        - activity
+        - activity_group
+        - macro
+        - remote
+        - profile
+        - dock
+        - resource
+        - setting
+        - bt
+        - other
+    BackupReportItemMessages:
+      type: object
+      description: Warnings and errors of one item of a backup or a restore.
+      properties:
+        name:
+          description: Name of the item in English, or in its default language. May be empty.
+          type: string
+        warnings:
+          description: The item was backed up or restored with a limitation, or was skipped on purpose.
+          type: array
+          items:
+            type: string
+        errors:
+          description: The item could not be backed up or restored.
+          type: array
+          items:
+            type: string
+      required:
+        - name
+        - warnings
+        - errors
+    BackupReport:
+      type: object
+      description: Result of one group of items of a backup or a restore.
+      properties:
+        item:
+          $ref: '#/components/schemas/BackupReportItem'
+        kind:
+          description: |
+            Subgroup, for an item type that is reported in several groups. Omitted otherwise.
+            - `integration`: name of the integration driver whose configured entities are counted.
+            - `remote`: the kind of remote entities (`IR`, `BT`, `External`), or `IR dataset` for the IR datasets.
+            - `resource`: the resource type.
+          type: string
+        available:
+          description: |
+            Number of items in the group: found on the device for a backup, found in the backup archive for a restore.
+          type: integer
+          format: int32
+        ok:
+          description: |
+            Number of items that were backed up or restored completely. An item of which a part could not be backed up or
+            restored is not counted, and has an error in `messages`: for example an integration whose configuration files
+            could not be exported. An error that does not concern the content of the backup, such as an integration that
+            could not be started again, does not reduce the count.
+          type: integer
+          format: int32
+        messages:
+          description: |
+            Warnings and errors of individual items. The key is the identifier of the item, for example an entity id, a
+            profile id or an integration driver id. Only items with a warning or an error are listed. Omitted if there is
+            none.
+
+            A warning or an error that concerns the group as a whole and no single item is listed under the key `*`, with
+            the name `General`.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/BackupReportItemMessages'
+      required:
+        - item
+        - available
+        - ok
+    BackupReports:
+      type: array
+      description: |
+        Report of a backup or a restore: one entry per group of items. An item that could not be backed up or restored does
+        not fail the operation, it is reported in the `messages` of its group.
+      items:
+        $ref: '#/components/schemas/BackupReport'
+      examples:
+        - - item: profile
+            available: 2
+            ok: 2
+          - item: integration_driver
+            available: 3
+            ok: 2
+            messages:
+              '*':
+                name: General
+                warnings:
+                  - Could not stop all local integration drivers to access configuration.
+                errors: []
+              my_custom_driver:
+                name: My custom driver
+                warnings:
+                  - 'Custom integration skipped, this restore does not install custom integrations: my_custom_driver'
+                errors: []
+          - item: integration
+            kind: Home Assistant
+            available: 12
+            ok: 12
+          - item: resource
+            kind: Icon
+            available: 4
+            ok: 4
+    BackupJob:
+      description: |
+        A backup job: a backup creation or restore that runs on the device independently of the request that started it.
+
+        The device runs one backup job at a time. The latest job stays queryable after it has ended, until it is
+        discarded, a new job starts, or the service restarts.
+      allOf:
+        - $ref: '#/components/schemas/BackupJobEvent'
+        - type: object
+          properties:
+            snapshot:
+              description: Stored snapshot. Only set for a completed `SNAPSHOT` job.
+              $ref: '#/components/schemas/BackupSnapshot'
+            report:
+              description: |
+                Report of the backed up or restored items. Only set for a completed `EXPORT` or `RESTORE` job.
+
+                A restore that could not restore some items still completes: look for the affected items in the report.
+              $ref: '#/components/schemas/BackupReports'
+      examples:
+        - job_id: 3f2b8c1e-6a4d-4f0e-9b57-0c1d2e3f4a5b
+          type: RESTORE
+          state: COMPLETED
+          progress:
+            phase: BLUETOOTH
+            current_step: 11
+            total_steps: 11
+          created_at: '2026-11-05T15:30:01+01:00'
+          finished_at: '2026-11-05T15:30:12+01:00'
+          report:
+            - item: profile
+              available: 2
+              ok: 2
+    BackupJobs:
+      type: array
+      description: The latest backup job. The list is empty if no job is known.
+      items:
+        $ref: '#/components/schemas/BackupJob'
     BackupMetadataVersion:
       type: object
       properties:
         backup:
-          description: Version of the backup data model in [SemVer](https://semver.org/) format.
+          description: |
+            Version of the backup data model in [SemVer](https://semver.org/) format. The current version is `1.1.0`. A
+            restore accepts every version with major version `1`.
           type: string
         core:
           description: Core app version
@@ -18444,21 +19190,46 @@ components:
           description: Creation date of the backup snapshot
           type: string
           format: date-time
+        full_backup:
+          description: The backup contains the full device configuration. Always `true`, a partial backup is not created.
+          type: boolean
+        custom_integrations:
+          description: |
+            The backup was created with the option to include the custom integrations. The backup then contains every
+            custom integration that was installed and could be exported, which can be none.
+
+            A snapshot never includes custom integrations: the value is `false` for every stored snapshot. The field is
+            also part of the `backup.json` metadata file in an exported backup archive, where it is absent in backups
+            created before backup model version `1.1.0`. Absent means `false`.
+          type: boolean
         version:
           $ref: '#/components/schemas/BackupMetadataVersion'
         report:
-          $ref: '#/components/schemas/BackupReport'
+          description: Report of the backed up items, written when the backup was created.
+          $ref: '#/components/schemas/BackupReports'
       required:
         - id
         - creation_date
+        - full_backup
+        - custom_integrations
         - version
       examples:
         - id: UCR2_2023-09-17_145305
           creation_date: '2023-09-17T14:53:05+00:00'
+          full_backup: true
+          custom_integrations: false
           version:
             backup: 1.0.0
             core: 0.34.5-beta
             os: 1.2.0
+          report:
+            - item: profile
+              available: 2
+              ok: 2
+            - item: integration
+              kind: Home Assistant
+              available: 12
+              ok: 12
     CustomComponent:
       description: Type of custom component.
       type: string
