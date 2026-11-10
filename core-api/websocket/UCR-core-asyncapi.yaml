@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.50.0
+  version: 0.50.1
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -478,6 +478,7 @@ channels:
           - $ref: '#/components/messages/wifi_scan_status'
           - $ref: '#/components/messages/wifi_networks'
           - $ref: '#/components/messages/wifi_network'
+          - $ref: '#/components/messages/wifi_network_created'
           - $ref: '#/components/messages/bt_pairing_started'
           - $ref: '#/components/messages/bt_pairing_auth_request'
           - $ref: '#/components/messages/bt_pairing_complete'
@@ -4735,9 +4736,24 @@ components:
       payload:
         $ref: '#/components/schemas/WifiNetworksMsg'
     add_wifi_network:
-      summary: 🧪 Create a new WiFi network configuration.
+      summary: 🧪 Create a new WiFi network configuration and connect to it.
       description: |
-        Add a new network configuration for the given SSID.
+        Add a new network configuration for the given SSID, enable and save it, and start connecting to it.
+        The response only carries the `id` of the new network and is sent as soon as the connection attempt
+        has started; it does not report the connection result. Clients should not send `wifi_network_command`
+        `ENABLE`, `SELECT` or `JOIN` for the new network afterwards.
+
+        The connection attempt keeps every other saved network enabled as fallback, like `wifi_network_command`
+        `JOIN`. The new network stays saved, even if the connection attempt fails. The outcome arrives as a
+        `wifi_change` event:
+        - `CONNECTED`: the device is connected. This event usually has no `id`: use `get_wifi_status` to check
+          that the new network is the connected one.
+        - `WRONG_KEY` with the `id` of the new network: the password is wrong.
+        - `NETWORK_NOT_FOUND` with the `id` of the new network: the network was not found, the connection or
+          authentication failed for another reason, the attempt timed out or was aborted. A `NETWORK_NOT_FOUND` without `id` is not the outcome, see `WifiEvent`.
+
+        If the connection attempt cannot be started, the network is still created and its `id` returned.
+
         For an open network without password the `password` field must be omitted (do not send an empty password value).
 
         The optional `security` field selects the security type (open, WPA/WPA2-PSK, WPA3-SAE, WPA2/WPA3 transition mode).
@@ -4756,11 +4772,23 @@ components:
       payload:
         $ref: '#/components/schemas/WifiAddNetworkMsg'
       x-response:
-        summary: 🧪 WiFi network configuration.
+        summary: 🧪 Identifier of the created WiFi network configuration.
+        description: |
+          Response to `add_wifi_network`. The message name is `wifi_network`, like the response to `get_wifi_network`,
+          but `msg_data` only contains the `id` of the new network.
         tags:
           - name: wifi
         payload:
-          $ref: '#/components/schemas/WifiNetworkMsg'
+          $ref: '#/components/schemas/WifiNetworkCreatedMsg'
+    wifi_network_created:
+      summary: 🧪 Identifier of the created WiFi network configuration.
+      description: |
+        Response to `add_wifi_network`. The message name is `wifi_network`, like the response to `get_wifi_network`,
+        but `msg_data` only contains the `id` of the new network.
+      tags:
+        - name: wifi
+      payload:
+        $ref: '#/components/schemas/WifiNetworkCreatedMsg'
     del_all_wifi_networks:
       summary: 🧪 Delete all configured WiFi networks.
       description: |
@@ -9016,6 +9044,25 @@ components:
               $ref: '#/components/schemas/SavedNetwork'
           required:
             - msg
+    WifiNetworkCreatedMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonResp'
+        - properties:
+            msg:
+              type: string
+              const: wifi_network
+            msg_data:
+              type: object
+              properties:
+                id:
+                  description: Network identification, used for further operations on this network.
+                  type: integer
+              required:
+                - id
+          required:
+            - msg
+            - msg_data
     WifiUpdateNetworkMsg:
       type: object
       allOf:
@@ -17139,6 +17186,7 @@ components:
         ssid_hex:
           description: |
             Hex encoded string of the native SSID byte array, returned from a network scan.
+          type: string
           minLength: 2
           maxLength: 64
         password:
@@ -17260,7 +17308,9 @@ components:
           $ref: '#/components/schemas/WifiEvent'
         id:
           type: integer
-          description: Saved network the event refers to. Only present when the event concerns a specific network.
+          description: |
+            Saved network the event refers to. Only present when the event concerns a specific network.
+            See `WifiEvent` for the meaning of `NETWORK_NOT_FOUND` with and without `id`.
         ssid_hex:
           type: string
           description: Hexstring of the network's native SSID, where known.
@@ -17272,7 +17322,15 @@ components:
         - `SCAN_STARTED`: Network scan started.
         - `SCAN_COMPLETED`: New network scan results available.
         - `SCAN_FAILED`: Network scanning failed.
-        - `NETWORK_NOT_FOUND`: No suitable network was found.
+        - `NETWORK_NOT_FOUND`: No suitable network was found. The event has two meanings:
+          - With an `id`: a connection attempt to that network failed. It was started by `add_wifi_network`,
+            `wifi_network_command` `SELECT` or `JOIN`, or a password change with `update_wifi_network`. The network
+            was not found in repeated scans, the connection or authentication failed for another reason than a
+            wrong password, no result arrived in time, the attempt was aborted, or a newer connection attempt
+            replaced it. A wrong password is reported as `WRONG_KEY` instead.
+          - Without an `id`: a scan did not find any enabled network. This is a notice from the WiFi driver after a
+            scan, not a failure. It can occur several times during a connection attempt, so a client waiting for
+            a connection attempt must not treat it as the attempt's failure.
         - `WRONG_KEY`: Authentication failure due to an invalid pre-shared key.
         - `NETWORK_ADDED`: A new network profile was added.
         - `NETWORK_REMOVED`: A network profile was removed.
