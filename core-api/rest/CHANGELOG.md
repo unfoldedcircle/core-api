@@ -10,6 +10,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.57.2
+### Fixed
+- Added missing 400 Bad Request response schema to `GET /ir/emitters`.
+
 ## 0.57.1
 ### Changed
 - Extended SVG icon validation rules to support `style`, `switch`, `a`, `metadata`, `filter` with primitives (`fe*`), `clipPath` and `marker` in `defs`, editor metadata in custom namespaces, and defined style syntax constraints.

@@ -10,6 +10,17 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.50.2
+### Added
+- Documented error handling (code 400) when creating or updating a group (`add_group`, `update_group`) with unknown entity identifiers.
+- Documented substring search behavior and sanitization rules for `text_search` in `EntityFilter` and `AvailableEntityFilter`.
+
+### Changed
+- Updated `Paging` schema `limit` range to 1..100 with error code 400 `VALIDATION_ERROR` for out-of-range values.
+
+### Fixed
+- Fixed `paging` schema reference in `get_docks` response (`DocksMsg`) to use `Pagination` instead of `Paging`.
+
 ## 0.50.1
 ### Changed
 - Adding a WiFi network (`add_wifi_network`) immediately enables, saves, and starts connecting to it while keeping existing networks enabled as fallback.
