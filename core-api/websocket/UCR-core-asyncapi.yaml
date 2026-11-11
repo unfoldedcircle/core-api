@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.50.2
+  version: 0.50.3
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -8351,6 +8351,18 @@ components:
                   $ref: '#/components/schemas/DockFilter'
                 paging:
                   $ref: '#/components/schemas/Paging'
+                sort:
+                  description: Sort field. If omitted, docks are sorted by name.
+                  type: string
+                  enum:
+                    - name
+                    - created
+                order:
+                  description: Sort order. If omitted, ascending order is used.
+                  type: string
+                  enum:
+                    - asc
+                    - desc
           required:
             - msg
     DocksMsg:
@@ -9947,6 +9959,21 @@ components:
                   $ref: '#/components/schemas/EnabledFilter'
                 paging:
                   $ref: '#/components/schemas/Paging'
+                sort:
+                  description: Sort field. If omitted, integrations are sorted by friendly name.
+                  type: string
+                  enum:
+                    - name
+                    - created
+                order:
+                  description: Sort order. If omitted, ascending order is used.
+                  type: string
+                  enum:
+                    - asc
+                    - desc
+                lang:
+                  description: Language for friendly-name sorting. If omitted, the configured system locale is used.
+                  type: string
           required:
             - msg
     IntegrationsMsg:
@@ -13710,7 +13737,7 @@ components:
             Substring search in the entity name, entity identifier and integration name, case-insensitive for ASCII
             letters. The characters `%`, `*`, `&`, `;`, `#`, `/`, `\`, `"`, `'` and `--` are removed from the text
             before searching, and `_` matches any single character.
-            A txt made only of removed characters, matches all entities, like a missing `text_search`.
+            A text made only of removed characters, matches all entities, like a missing `text_search`.
 
             Known limitation: the entity and integration names are searched in their stored form, which includes the
             language codes and JSON syntax of all languages. For example, `en` or `{` matches every entity.
