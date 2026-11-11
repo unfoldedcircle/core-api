@@ -10,6 +10,15 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.57.1
+### Changed
+- Extended SVG icon validation rules to support `style`, `switch`, `a`, `metadata`, `filter` with primitives (`fe*`), `clipPath` and `marker` in `defs`, editor metadata in custom namespaces, and defined style syntax constraints.
+- Creating a WiFi network (`POST /system/wifi/networks`) immediately enables, saves, and starts connecting to it while keeping existing networks enabled as fallback, returning only the network `id`.
+
+### Fixed
+- Added missing `string` type to `ssid_hex` in `SavedNetwork` schema.
+- Specified required `id` property in `POST /system/wifi/networks` response schema.
+
 ## 0.57.0
 ### Added
 - Asynchronous backup export and restore jobs:

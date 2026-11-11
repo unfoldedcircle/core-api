@@ -10,6 +10,15 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.50.1
+### Changed
+- Adding a WiFi network (`add_wifi_network`) immediately enables, saves, and starts connecting to it while keeping existing networks enabled as fallback.
+- Clarified `wifi_change` event behavior, distinguishing `NETWORK_NOT_FOUND` with an `id` (failed connection attempt) from `NETWORK_NOT_FOUND` without an `id` (driver scan notice).
+
+### Fixed
+- Response schema for `add_wifi_network` returns `WifiNetworkCreatedMsg` (`wifi_network_created`) containing only the network `id` instead of `WifiNetworkMsg`.
+- Added missing `string` type to `ssid_hex` in `SavedNetwork` schema.
+
 ## 0.50.0
 ### Added
 - New `backup_job_change` event emitted on backup job state, phase, and progress changes.

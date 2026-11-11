@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.57.0
+  version: 0.57.1
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1185,9 +1185,16 @@ paths:
         SVG namespace with a `viewBox` whose aspect ratio is between 1:4 and 4:1. A declared `width` / `height` may be
         `auto`, relative (`%`, `em`, `ex`) or absolute (no unit, `px`, `pt`, `mm`, `cm`, `in`) of at most 1024 px at
         96 dpi (e.g. 768pt, 270mm); other units are rejected. Allowed elements: `svg`, `g`, `defs`, `use`, `path`, `rect`,
-        `circle`, `ellipse`, `line`, `polyline`, `polygon`, `linearGradient`, `radialGradient`, `stop`, `title`, `desc`;
-        at most 500 elements, nested at most 16 levels deep. Event handler attributes (`on*`) are not allowed, and
-        references (`href`, `url()`) may only point to an element in the same document (`#id`).
+        `circle`, `ellipse`, `line`, `polyline`, `polygon`, `linearGradient`, `radialGradient`, `stop`, `title`, `desc`,
+        `switch`, `a`, `style`, `metadata`, `filter` with its primitives (`fe*` except `feImage`), and `clipPath` and
+        `marker` inside `defs` only; at most 500 elements, nested at most 16 levels deep. Editor metadata (elements in a
+        namespace other than SVG and XHTML, e.g. `sodipodi:namedview`, `rdf:RDF`) is accepted if it contains no SVG element
+        and is not named like an SVG element; it counts towards the limits. A `style` element must not contain at-rules
+        (`@`), backslash escapes, `!important`, `var()`, `url()` other than `url(#id)`, attribute selectors or
+        pseudo-classes. Event handler attributes (`on*`) are not allowed, and references (`href`, `url()`) may only point
+        to an element in the same document (`#id`). Acceptance is best effort: the device ignores filters, clip paths,
+        markers and the attributes of `a`, so an accepted icon may look different on the device than in a browser, and the
+        child a `switch` displays can depend on the device language (`systemLanguage`).
 
         Uploaded resources are verified, if they match expected formats. Status codes: 
         - `400`: resource doesn't confirm to the expected parameters.
@@ -11997,10 +12004,20 @@ paths:
     post:
       tags:
         - system
-      summary: Create a new Wifi network configuration.
+      summary: Create a new Wifi network configuration and connect to it.
       operationId: addWifiNetwork
       description: |
-        Add a new network configuration for the given SSID.
+        Add a new network configuration for the given SSID, enable and save it, and start connecting to it.
+        The response only carries the `id` of the new network and is sent as soon as the connection attempt
+        has started; it does not report the connection result. Clients should not enable, select or join the
+        new network afterwards.
+
+        The connection attempt keeps every other saved network enabled as fallback, like the `JOIN` command.
+        The new network stays saved, even if the connection attempt fails. The outcome is reported in the
+        WebSocket `wifi_change` event: `CONNECTED` (usually without `id`), or `WRONG_KEY` / `NETWORK_NOT_FOUND`
+        with the `id` of the new network. If the connection attempt cannot be started, the network is still
+        created and its `id` returned.
+
         For an open network without password the `password` field must be omitted (do not send an empty password value).
 
         The optional `security` field selects the security type (open, WPA/WPA2-PSK, WPA3-SAE, WPA2/WPA3 transition mode).
@@ -12028,7 +12045,10 @@ paths:
                 type: object
                 properties:
                   id:
+                    description: Network identification, used for further operations on this network.
                     type: integer
+                required:
+                  - id
         '400':
           $ref: '#/components/responses/Err400BadRequest'
         '401':
@@ -19864,6 +19884,7 @@ components:
         ssid_hex:
           description: |
             Hex encoded string of the native SSID byte array, returned from a network scan.
+          type: string
           minLength: 2
           maxLength: 64
         password:
