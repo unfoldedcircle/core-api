@@ -10,6 +10,11 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.50.3
+### Added
+- Sorting and order parameters (`sort`, `order`) for `get_docks`.
+- Sorting, order, and language parameters (`sort`, `order`, `lang`) for `get_integrations`.
+
 ## 0.50.2
 ### Added
 - Documented error handling (code 400) when creating or updating a group (`add_group`, `update_group`) with unknown entity identifiers.
