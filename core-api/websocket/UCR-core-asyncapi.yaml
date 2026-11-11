@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.50.1
+  version: 0.50.2
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -5425,6 +5425,9 @@ components:
         - `name` is mandatory and must be unique within the profile.
 
         The response carries the created group. `entities` is omitted if the group was created without entities.
+
+        An unknown entity identifier in `entities` fails with error code 400. The message gives the number of unknown
+        identifiers and names up to 10 of them. No group is created.
       tags:
         - name: profile
       payload:
@@ -5441,6 +5444,9 @@ components:
         Partial update: only the provided properties are changed, a missing property keeps its value.
 
         - `profile_id` and `group_id` are mandatory.
+
+        An unknown entity identifier in `entities` fails with error code 400. The message gives the number of unknown
+        identifiers and names up to 10 of them. A refused update changes nothing.
       tags:
         - name: profile
       payload:
@@ -8361,7 +8367,7 @@ components:
                 filter:
                   $ref: '#/components/schemas/DockFilter'
                 paging:
-                  $ref: '#/components/schemas/Paging'
+                  $ref: '#/components/schemas/Pagination'
                 docks:
                   type: array
                   items:
@@ -13536,11 +13542,13 @@ components:
       type: object
       properties:
         limit:
-          description: Number of returned items per page.
+          description: |
+            Number of returned items per page. A value outside 1..100 fails with error code 400 `VALIDATION_ERROR`.
           type: integer
           format: int32
           default: 10
-          minimum: 10
+          minimum: 1
+          maximum: 100
         page:
           description: Current page number. 1-based.
           type: integer
@@ -13667,6 +13675,8 @@ components:
         entities:
           $ref: '#/components/schemas/AvailEntitiesFilter'
         text_search:
+          description: |
+            Case-insensitive substring search in the entity name (all languages), entity identifier and area.
           type: string
           minLength: 1
           maxLength: 50
@@ -13696,6 +13706,14 @@ components:
             description: Activity-, macro-entity identifier, or a profile page, group identifier.
             type: string
         text_search:
+          description: |
+            Substring search in the entity name, entity identifier and integration name, case-insensitive for ASCII
+            letters. The characters `%`, `*`, `&`, `;`, `#`, `/`, `\`, `"`, `'` and `--` are removed from the text
+            before searching, and `_` matches any single character.
+            A txt made only of removed characters, matches all entities, like a missing `text_search`.
+
+            Known limitation: the entity and integration names are searched in their stored form, which includes the
+            language codes and JSON syntax of all languages. For example, `en` or `{` matches every entity.
           type: string
           minLength: 1
           maxLength: 50
