@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.57.1
+  version: 0.57.2
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -5276,6 +5276,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/IrEmitters'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
