@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.57.2
+  version: 0.57.4
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -7001,7 +7001,8 @@ paths:
         - `profile_id` is mandatory and can't be changed.
         - an empty `icon` value removes an existing icon identifier.
         - a missing `pages` property will not change the page order.
-        - ⚠️ an empty `pages` array removes all pages and groups in the profile!
+        - ⚠️ an empty `pages` array removes all pages in the profile! The groups of the profile are kept, they are
+          removed with `DELETE /profiles/{profileId}/groups`.
         - ⚠️ missing page identifiers in the `pages` array will remove the page configuration!
       operationId: updateProfile
       parameters:
@@ -7294,6 +7295,7 @@ paths:
       tags:
         - profiles
       summary: Delete all groups of the profile.
+      description: The groups are also removed from the pages that show them.
       operationId: deleteAllGroupsInProfile
       parameters:
         - $ref: '#/components/parameters/profile_id'
@@ -7372,6 +7374,7 @@ paths:
       tags:
         - profiles
       summary: Delete a group of the profile.
+      description: The group is also removed from the pages that show it.
       operationId: deleteGroup
       parameters:
         - $ref: '#/components/parameters/profile_id'
@@ -17036,7 +17039,7 @@ components:
         pages:
           description: |
             Used for update only: modify page order or delete pages in profile.
-            - An empty `pages` array will delete all pages and containing groups!
+            - An empty `pages` array will delete all pages! The groups of the profile are kept.
             - If the property is missing, the existing page configuration will not be changed.
           type: array
           items:
@@ -17124,7 +17127,8 @@ components:
           format: int32
           minimum: 1
           description: |
-            Optional 1-based position of the page within the profile. Default: last position
+            Optional 1-based position of the page within the profile. Default: last position.
+            Existing pages at or after this position move back by one. A position past the end appends the page.
       required:
         - name
     PageUpdate:
