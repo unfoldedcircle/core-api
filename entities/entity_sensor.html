@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-7c4bc41b.js";
+            window.path_to_searchindex_js = "../searchindex-894b02e6.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-0bd7c578.js"></script>
@@ -180,6 +180,7 @@ interface.</p>
 <ul>
 <li>The <code>custom</code> device class allows arbitrary text values and unit labels.</li>
 <li>The <code>temperature</code> device class performs automatic conversion between °C and °F.</li>
+<li>The <code>timestamp</code>, <code>date</code> and <code>duration</code> device classes are formatted by the UI as a date, time or time span.</li>
 </ul>
 <h2 id="features"><a class="header" href="#features">Features</a></h2>
 <p>The sensor entity has no features.</p>
@@ -216,6 +217,69 @@ places, without trailing zeros. E.g. <code>21.40</code> is shown as <code>21.4</
 </ul>
 </li>
 </ul>
+<h4 id="date-time-and-duration-values"><a class="header" href="#date-time-and-duration-values">Date, time and duration values</a></h4>
+<p>The <code>timestamp</code>, <code>date</code> and <code>duration</code> device classes tell the UI that the value is a point in time, a calendar date
+or a time span. The integration driver sends the value in a machine-readable format and must not format it for display.
+The UI formats the value with the localization settings of the Remote: time zone, 12 / 24 hour time format and language.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Device class</th><th>Value type</th><th>Value format</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr><td>timestamp</td><td>string</td><td>Date and time in <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a> format, including the UTC offset.</td><td><code>"2026-11-15T04:23:31+00:00"</code></td></tr>
+<tr><td>date</td><td>string</td><td>Calendar date in ISO 8601 format: <code>YYYY-MM-DD</code>.</td><td><code>"2026-11-15"</code></td></tr>
+<tr><td>duration</td><td>number</td><td>Time span in the unit of the sensor.</td><td><code>7.8</code> with unit <code>d</code></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><code>timestamp</code>:
+<ul>
+<li>The UTC offset is required, either as <code>Z</code> or as <code>±hh:mm</code>. The UI converts the value to the time zone of the Remote.</li>
+<li>The UI may show a point in time relative to the current time, e.g. <code>in 3 hours</code>.</li>
+</ul>
+</li>
+<li><code>date</code>: the value has no time zone and is shown as is, in the date format of the configured language.</li>
+<li><code>duration</code>: supported units are <code>ms</code>, <code>s</code>, <code>min</code>, <code>h</code> and <code>d</code>. Default if not specified: <code>s</code>. See
+<a href="#duration-format">duration format</a>.</li>
+<li>The <code>decimals</code> option is not used for the <code>timestamp</code> and <code>date</code> device classes.</li>
+<li>A value which is not in the specified format is shown as text, without any formatting.</li>
+<li>A UI which doesn’t support these device classes shows the value as for a <code>custom</code> sensor: unformatted with the
+optional unit.</li>
+</ul>
+<h5 id="duration-format"><a class="header" href="#duration-format">Duration format</a></h5>
+<p>Units <code>d</code>, <code>h</code> and <code>min</code>: the value is shown as a time span, in the unit of the sensor and the next smaller unit.</p>
+<ol>
+<li>With the <code>decimals</code> option, the value is first rounded to this number of decimal places.</li>
+<li>The integer part of the value, rounded down, is shown in the unit of the sensor. This unit is always shown.</li>
+<li>The fractional part is converted to the next smaller unit and rounded down: <code>d</code> → hours, <code>h</code> → minutes, <code>min</code> →
+seconds. It is only shown if it is not zero.</li>
+<li>The units are shown with the short unit labels of the configured language.</li>
+</ol>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>Unit</th><th><code>decimals</code></th><th>Shown as</th></tr>
+</thead>
+<tbody>
+<tr><td>1.5</td><td><code>h</code></td><td></td><td><code>1h 30m</code></td></tr>
+<tr><td>93</td><td><code>h</code></td><td></td><td><code>93h</code></td></tr>
+<tr><td>2.75</td><td><code>h</code></td><td>0</td><td><code>3h</code></td></tr>
+<tr><td>3.9</td><td><code>d</code></td><td></td><td><code>3d 21h</code></td></tr>
+<tr><td>90.5</td><td><code>min</code></td><td></td><td><code>90m 30s</code></td></tr>
+<tr><td>0.25</td><td><code>min</code></td><td></td><td><code>0m 15s</code></td></tr>
+<tr><td>-2</td><td><code>h</code></td><td></td><td><code>-2h</code></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The value is not converted to a larger unit: <code>93</code> hours are shown as <code>93h</code> and not as <code>3d 21h</code>.</li>
+<li>A negative value with a fractional part is shown as a number with the unit, e.g. <code>-1.5 h</code>.</li>
+</ul>
+<p>Units <code>s</code> and <code>ms</code>: the value is shown as a number with the unit, like any other numeric sensor value and with the
+<code>decimals</code> option. E.g. <code>673492 s</code>. An integration driver should provide a long time span in a larger unit to get a
+readable value.</p>
 <h3 id="states"><a class="header" href="#states">States</a></h3>
 <p>The <code>state</code> attribute is optional for a sensor.</p>
 <p>The sensor entity only supports the <code>ON</code> state and the <a href="index.html#states">common entity states</a>.</p>
@@ -241,12 +305,14 @@ places, without trailing zeros. E.g. <code>21.40</code> is shown as <code>21.4</
 <tr><td>🚧 audio_level</td><td>dB</td><td>Audio level in decibel, e.g. the current volume of an AV receiver. Not intended for measured sound pressure levels.</td></tr>
 <tr><td>battery</td><td>%</td><td>Battery charge in %</td></tr>
 <tr><td>current</td><td>A</td><td>Electrical current in ampere</td></tr>
-<tr><td>🚧 duration</td><td>s</td><td>Time span, e.g. the remaining run time of a device. Supported units: <code>ms</code>, <code>s</code>, <code>min</code>, <code>h</code>, <code>d</code>. The UI may show the value as a time span, e.g. <code>1:30:00</code>.</td></tr>
+<tr><td>date</td><td></td><td>Calendar date without a time. See <a href="#date-time-and-duration-values">date, time and duration values</a>.</td></tr>
+<tr><td>duration</td><td>s</td><td>Time span, e.g. the remaining run time of a device. See <a href="#date-time-and-duration-values">date, time and duration values</a>.</td></tr>
 <tr><td>energy</td><td>kWh</td><td>Energy in kilowatt-hour</td></tr>
 <tr><td>humidity</td><td>%</td><td>Humidity in %</td></tr>
 <tr><td>🚧 illuminance</td><td>lx</td><td>Illuminance in lux.</td></tr>
 <tr><td>power</td><td>W</td><td>Power in watt or kilowatt</td></tr>
 <tr><td>temperature</td><td>°C</td><td>Temperature with automatic °C, °F conversion, depending on remote settings. Use <code>native_unit</code> option if the temperature is measured in °F.</td></tr>
+<tr><td>timestamp</td><td></td><td>Point in time, e.g. the next scheduled backup. See <a href="#date-time-and-duration-values">date, time and duration values</a>.</td></tr>
 <tr><td>voltage</td><td>V</td><td>Voltage in volt</td></tr>
 <tr><td>binary</td><td></td><td>Binary sensor. The binary specific device class is stored in the <code>unit</code> attribute.</td></tr>
 </tbody>
@@ -254,7 +320,7 @@ places, without trailing zeros. E.g. <code>21.40</code> is shown as <code>21.4</
 </div>
 <p>The device classes are kept in sync with the <a href="entity_number.html#device-classes">number entity</a>: a device class has the
 same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
-makes sense for one of them, like the <code>custom</code> and <code>binary</code> sensor device classes.</p>
+makes sense for one of them, like the <code>custom</code>, <code>binary</code>, <code>date</code> and <code>timestamp</code> sensor device classes.</p>
 <h4 id="binary-device-class"><a class="header" href="#binary-device-class">Binary Device Class</a></h4>
 <p>The <code>binary</code> device class allows specifying a binary sensor with two states in the <code>value</code> attribute: <code>on</code> and <code>off</code>.</p>
 <p>These values can mean different things depending on the <code>unit</code> attribute. For example, a binary sensor with the <code>unit</code>
@@ -271,7 +337,7 @@ means the window is open and <code>off</code> means the window is closed.</p>
 <tbody>
 <tr><td>custom_unit</td><td>text</td><td></td><td>Unit label for a custom sensor if <code>device_class</code> is not specified or to override a default unit.</td></tr>
 <tr><td>native_unit</td><td>text</td><td></td><td>The sensor’s native unit of measurement to perform automatic conversion. Applicable to device classes: <code>temperature</code>.</td></tr>
-<tr><td>decimals</td><td>integer</td><td></td><td>Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values. If not set, at most 2 decimal places are shown. See <a href="#value-format">value format</a>.</td></tr>
+<tr><td>decimals</td><td>integer</td><td></td><td>Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values and the <code>timestamp</code> and <code>date</code> device classes. If not set, at most 2 decimal places are shown. See <a href="#value-format">value format</a>.</td></tr>
 <tr><td>🚧 min_value</td><td>number</td><td></td><td>Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.</td></tr>
 <tr><td>🚧 max_value</td><td>number</td><td></td><td>Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.</td></tr>
 </tbody>
@@ -346,6 +412,35 @@ the last value.</li>
     "entity_id": "sensor-2",
     "attributes": {
       "value": "Charging"
+    }
+  }
+}
+</code></pre>
+<p>Sensor with a <code>timestamp</code> device class:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-3",
+    "attributes": {
+      "value": "2026-11-15T04:23:31+00:00"
+    }
+  }
+}
+</code></pre>
+<p>Sensor with a <code>duration</code> device class:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-4",
+    "attributes": {
+      "value": 7.8,
+      "unit": "d"
     }
   }
 }
