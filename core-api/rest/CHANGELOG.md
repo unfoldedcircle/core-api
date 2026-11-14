@@ -10,6 +10,12 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.57.4
+### Changed
+- Clarified that updating a profile (`PUT /profiles/{profileId}`) with an empty `pages` array removes all pages in the profile while keeping its groups.
+- Clarified that deleting a group (`DELETE /profiles/{profileId}/groups/{groupId}`) or all groups (`DELETE /profiles/{profileId}/groups`) also removes the group(s) from the pages that show them.
+- Clarified page creation (`POST /profiles/{profileId}/pages`) positioning behavior: `pos` specifies the 1-based position within the profile (existing pages at or after this position move back by one), and a position past the end appends the page.
+
 ## 0.57.2
 ### Fixed
 - Added missing 400 Bad Request response schema to `GET /ir/emitters`.

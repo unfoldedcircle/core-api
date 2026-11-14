@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.50.3
+  version: 0.50.4
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -5164,8 +5164,13 @@ components:
         - `profile_id` is mandatory and can't be changed.
         - an empty `icon` value removes an existing icon identifier.
         - a missing `pages` property will not change the page order.
-        - ⚠️ an empty `pages` array removes all pages and groups in the profile!
+        - ⚠️ an empty `pages` array removes all pages in the profile! The groups of the profile are kept, they are
+          removed with `delete_groups_in_profile`.
         - ⚠️ missing page identifiers in the `pages` array will remove the page configuration!
+
+        A `pages` property, also one that only changes the page order, is reported with a profile `profile_change`
+        event of type `CHANGE` without the pages: reload them with `get_pages`. After it, each removed page is
+        reported with a page `profile_change` event of type `DELETE`.
       tags:
         - name: profile
       payload:
@@ -5295,9 +5300,11 @@ components:
         - `profile_id` is mandatory.
         - `page_id` is not required and is created automatically.
         - `name` is mandatory and must be unique within the profile.
-        - `pos` is optional, the default is the last position.
+        - `pos` is optional, the default is the last position. The page is inserted at this position of the page list
+          returned by `get_pages`, and the pages at or after it move back by one. A `pos` past the end appends the
+          page.
 
-        The response carries the created page. `items` is omitted if the page was created without items.
+        The response carries the created page with its position in the page list. `items` is omitted if the page was created without items.
       payload:
         $ref: '#/components/schemas/AddPageMsg'
       x-response:
@@ -5462,6 +5469,9 @@ components:
       description: |
         An unknown group fails with error code 404. Mirrors the REST operation
         `DELETE /profiles/{profileId}/groups/{groupId}`; `profile_id` is optional.
+
+        The group is also removed from the pages that show it. Besides the group `profile_change` event of type
+        `DELETE`, each of these pages is reported with a page `profile_change` event of type `CHANGE`.
       tags:
         - name: profile
       payload:
@@ -5487,6 +5497,9 @@ components:
                 message: Invalid argument. Foo must be a positive number.
     delete_groups_in_profile:
       summary: 🧪 Delete all groups in a profile.
+      description: |
+        The groups are also removed from the pages that show them. Besides the profile `profile_change` event of type
+        `CHANGE`, each of these pages is reported with a page `profile_change` event of type `CHANGE`.
       tags:
         - name: profile
       payload:
@@ -16974,7 +16987,7 @@ components:
           minimum: 1
           description: |
             Optional 1-based position of the page within the profile. Default: last position.
-            Existing pages at or after this position move back by one.
+            Existing pages at or after this position move back by one. A position past the end appends the page.
       required:
         - profile_id
         - name
@@ -17046,7 +17059,7 @@ components:
         pages:
           description: |
             Used for update only: modify page order or delete pages in profile.
-            - An empty `pages` array will delete all pages and containing groups!
+            - An empty `pages` array will delete all pages! The groups of the profile are kept.
             - If the property is missing, the existing page configuration will not be changed.
           type: array
           items:

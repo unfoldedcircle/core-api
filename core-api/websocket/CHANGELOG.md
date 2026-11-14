@@ -10,6 +10,13 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.50.4
+### Changed
+- Clarified that updating a profile (`update_profile`) with an empty `pages` array removes all pages in the profile while keeping its groups.
+- Documented event behavior when updating profile pages: emits a profile `profile_change` event of type `CHANGE` (without pages) followed by a page `profile_change` event of type `DELETE` for each removed page.
+- Clarified page creation (`add_page`) positioning behavior: `pos` specifies the 1-based position in the page list (existing pages at or after it move back by one), a position past the end appends the page, and the response carries the created page with its position.
+- Clarified that deleting a group (`delete_group`) or all groups (`delete_groups_in_profile`) also removes the group(s) from pages that show them, emitting a `profile_change` event of type `CHANGE` for each affected page.
+
 ## 0.50.3
 ### Added
 - Sorting and order parameters (`sort`, `order`) for `get_docks`.
