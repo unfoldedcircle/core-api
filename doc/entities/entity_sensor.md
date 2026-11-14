@@ -6,6 +6,7 @@ interface.
 
 - The `custom` device class allows arbitrary text values and unit labels.
 - The `temperature` device class performs automatic conversion between °C and °F.
+- The `timestamp`, `date` and `duration` device classes are formatted by the UI as a date, time or time span.
 
 ## Features
 
@@ -39,6 +40,56 @@ available entity definition as `options.custom_unit` and then omitted in `entity
   - Without the `decimals` option, floating point artifacts are removed and the value is shown with at most 2 decimal
     places, without trailing zeros. E.g. `21.40` is shown as `21.4`, `1.499999999999997` as `1.5`.
 
+#### Date, time and duration values
+
+The `timestamp`, `date` and `duration` device classes tell the UI that the value is a point in time, a calendar date
+or a time span. The integration driver sends the value in a machine-readable format and must not format it for display.
+The UI formats the value with the localization settings of the Remote: time zone, 12 / 24 hour time format and language.
+
+| Device class | Value type | Value format                                                                                          | Example                       |
+|--------------|------------|-------------------------------------------------------------------------------------------------------|-------------------------------|
+| timestamp    | string     | Date and time in [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) format, including the UTC offset. | `"2026-11-15T04:23:31+00:00"` |
+| date         | string     | Calendar date in ISO 8601 format: `YYYY-MM-DD`.                                                       | `"2026-11-15"`                |
+| duration     | number     | Time span in the unit of the sensor.                                                                  | `7.8` with unit `d`           |
+
+- `timestamp`:
+  - The UTC offset is required, either as `Z` or as `±hh:mm`. The UI converts the value to the time zone of the Remote.
+  - The UI may show a point in time relative to the current time, e.g. `in 3 hours`.
+- `date`: the value has no time zone and is shown as is, in the date format of the configured language.
+- `duration`: supported units are `ms`, `s`, `min`, `h` and `d`. Default if not specified: `s`. See
+  [duration format](#duration-format).
+- The `decimals` option is not used for the `timestamp` and `date` device classes.
+- A value which is not in the specified format is shown as text, without any formatting.
+- A UI which doesn't support these device classes shows the value as for a `custom` sensor: unformatted with the
+  optional unit.
+
+##### Duration format
+
+Units `d`, `h` and `min`: the value is shown as a time span, in the unit of the sensor and the next smaller unit.
+
+1. With the `decimals` option, the value is first rounded to this number of decimal places.
+2. The integer part of the value, rounded down, is shown in the unit of the sensor. This unit is always shown.
+3. The fractional part is converted to the next smaller unit and rounded down: `d` → hours, `h` → minutes, `min` →
+   seconds. It is only shown if it is not zero.
+4. The units are shown with the short unit labels of the configured language.
+
+| Value | Unit  | `decimals` | Shown as  |
+|-------|-------|------------|-----------|
+| 1.5   | `h`   |            | `1h 30m`  |
+| 93    | `h`   |            | `93h`     |
+| 2.75  | `h`   | 0          | `3h`      |
+| 3.9   | `d`   |            | `3d 21h`  |
+| 90.5  | `min` |            | `90m 30s` |
+| 0.25  | `min` |            | `0m 15s`  |
+| -2    | `h`   |            | `-2h`     |
+
+- The value is not converted to a larger unit: `93` hours are shown as `93h` and not as `3d 21h`.
+- A negative value with a fractional part is shown as a number with the unit, e.g. `-1.5 h`.
+
+Units `s` and `ms`: the value is shown as a number with the unit, like any other numeric sensor value and with the
+`decimals` option. E.g. `673492 s`. An integration driver should provide a long time span in a larger unit to get a
+readable value.
+
 ### States
 
 The `state` attribute is optional for a sensor.
@@ -59,18 +110,20 @@ The device class specifies the type of sensor. Default if not specified: `custom
 | 🚧 audio_level | dB           | Audio level in decibel, e.g. the current volume of an AV receiver. Not intended for measured sound pressure levels.                                        |
 | battery       | %            | Battery charge in %                                                                                                                                        |
 | current       | A            | Electrical current in ampere                                                                                                                               |
-| 🚧 duration    | s            | Time span, e.g. the remaining run time of a device. Supported units: `ms`, `s`, `min`, `h`, `d`. The UI may show the value as a time span, e.g. `1:30:00`. |
+| date        |              | Calendar date without a time. See [date, time and duration values](#date-time-and-duration-values).                                                        |
+| duration    | s            | Time span, e.g. the remaining run time of a device. See [date, time and duration values](#date-time-and-duration-values).                                  |
 | energy        | kWh          | Energy in kilowatt-hour                                                                                                                                    |
 | humidity      | %            | Humidity in %                                                                                                                                              |
 | 🚧 illuminance | lx           | Illuminance in lux.                                                                                                                                        |
 | power         | W            | Power in watt or kilowatt                                                                                                                                  |
 | temperature   | °C           | Temperature with automatic °C, °F conversion, depending on remote settings. Use `native_unit` option if the temperature is measured in °F.                 |
+| timestamp   |              | Point in time, e.g. the next scheduled backup. See [date, time and duration values](#date-time-and-duration-values).                                       |
 | voltage       | V            | Voltage in volt                                                                                                                                            |
 | binary        |              | Binary sensor. The binary specific device class is stored in the `unit` attribute.                                                                         |
 
 The device classes are kept in sync with the [number entity](entity_number.md#device-classes): a device class has the
 same name, default unit and meaning in both entities. New device classes are added to both entities, unless a class only
-makes sense for one of them, like the `custom` and `binary` sensor device classes.
+makes sense for one of them, like the `custom`, `binary`, `date` and `timestamp` sensor device classes.
 
 #### Binary Device Class
 
@@ -90,7 +143,7 @@ If the `unit` attribute is not specified, the binary sensor is a generic on/off 
 |-------------|---------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | custom_unit | text    |         | Unit label for a custom sensor if `device_class` is not specified or to override a default unit.                                                                                                                       |
 | native_unit | text    |         | The sensor's native unit of measurement to perform automatic conversion. Applicable to device classes: `temperature`.                                                                                                  |
-| decimals    | integer |         | Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values. If not set, at most 2 decimal places are shown. See [value format](#value-format). |
+| decimals    | integer |         | Number of decimal places to show in the UI if the sensor provides the measurement as a number: 0..6. Not applicable to text values and the `timestamp` and `date` device classes. If not set, at most 2 decimal places are shown. See [value format](#value-format). |
 | 🚧 min_value | number  |         | Optional minimum value of the sensor output. This can be used in the UI for graphs or gauges.                                                                                                                          |
 | 🚧 max_value | number  |         | Optional maximum value of the sensor output. This can be used in the UI for graphs or gauges.                                                                                                                          |
 
@@ -162,6 +215,41 @@ Sensor with a text value:
     "entity_id": "sensor-2",
     "attributes": {
       "value": "Charging"
+    }
+  }
+}
+```
+
+Sensor with a `timestamp` device class:
+
+```json
+{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-3",
+    "attributes": {
+      "value": "2026-11-15T04:23:31+00:00"
+    }
+  }
+}
+```
+
+Sensor with a `duration` device class:
+
+```json
+{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "sensor",
+    "entity_id": "sensor-4",
+    "attributes": {
+      "value": 7.8,
+      "unit": "d"
     }
   }
 }
