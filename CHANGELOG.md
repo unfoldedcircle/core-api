@@ -42,6 +42,8 @@ _Changes in the next release_
 - Sensor and number entity: value format rules, `null` value while unavailable. Without the `decimals` option, a sensor
   value is shown with at most 2 decimal places, and a number value with the decimal places of `step`, `min` and
   `max`.
+- Sensor entity: new device classes `timestamp`, `date` and `duration` for date, time and time span values, which are
+  formatted by the UI.
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
 - Asynchronous backup export and restore jobs.
 - Custom integrations support in backup export and restore operations.

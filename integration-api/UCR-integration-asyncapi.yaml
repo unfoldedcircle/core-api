@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.17.1-beta'
+  version: '0.17.2-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -2574,6 +2574,7 @@ components:
       
         - The `custom` device class allows arbitrary UI labels and units.
         - The `temperature` device class performs automatic conversion between °C and °F.
+        - The `timestamp`, `date` and `duration` device classes are formatted by the UI as a date, time or time span.
 
         See [sensor entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_sensor.md)
         for more information.
@@ -2588,20 +2589,32 @@ components:
 
                 The device classes are kept in sync with the `number` entity.
 
-                🚧 Planned device classes: `audio_level`, `duration`, `illuminance`.
+                Date, time and time span values. The value is sent in a machine-readable format and is formatted by
+                the UI with the localization settings of the Remote. A UI without support for these device classes
+                shows the value as for a `custom` sensor.
+                - `timestamp`: point in time. Value: text in RFC 3339 format, including the UTC offset, e.g.
+                  `2026-11-15T04:23:31+00:00`.
+                - `date`: calendar date. Value: text in ISO 8601 format `YYYY-MM-DD`, e.g. `2026-11-15`.
+                - `duration`: time span. Value: number in the unit of the sensor: `ms`, `s` (default), `min`, `h` or
+                  `d`. A value in `min`, `h` or `d` is shown as a time span, e.g. `1.5` hours as `1h 30m`. A value in
+                  `ms` or `s` is shown as a number with the unit.
+
+                Planned device classes: `audio_level`, `illuminance`.
               type: string
               enum:
                 - custom
                 - battery
                 - current
+                - date
+                - duration
                 - energy
                 - humidity
                 - power
                 - temperature
+                - timestamp
                 - voltage
                 - binary
 #                - audio_level
-#                - duration
 #                - illuminance
 #                - air_quality_index
 #                - carbon_dioxide
