@@ -86,9 +86,31 @@ Units `d`, `h` and `min`: the value is shown as a time span, in the unit of the 
 - The value is not converted to a larger unit: `93` hours are shown as `93h` and not as `3d 21h`.
 - A negative value with a fractional part is shown as a number with the unit, e.g. `-1.5 h`.
 
-Units `s` and `ms`: the value is shown as a number with the unit, like any other numeric sensor value and with the
-`decimals` option. E.g. `673492 s`. An integration driver should provide a long time span in a larger unit to get a
-readable value.
+Unit `s`: a value of 120 seconds or more is shown as a time span, in the largest unit it fills and the next smaller
+unit.
+
+1. With the `decimals` option, the value is first rounded to this number of decimal places.
+2. The largest unit is days from 86400 seconds on, hours from 3600 seconds on, otherwise minutes.
+3. The rest is converted to the next smaller unit and rounded down. It is only shown if it is not zero. Smaller units
+   are not shown.
+4. A negative value is shown like a positive one, with a leading minus sign.
+
+| Value  | Unit | Shown as  |
+|--------|------|-----------|
+| 119    | `s`  | `119 s`   |
+| 120    | `s`  | `2m`      |
+| 121    | `s`  | `2m 1s`   |
+| 3605   | `s`  | `1h`      |
+| 4056   | `s`  | `1h 7m`   |
+| 673492 | `s`  | `7d 19h`  |
+| -33952 | `s`  | `-9h 25m` |
+
+- Less than 120 seconds are shown as a number with the unit, like any other numeric sensor value and with the
+  `decimals` option.
+- An integration driver doesn't have to convert a duration in seconds to a larger unit to get a readable value.
+
+Unit `ms`: the value is shown as a number with the unit, like any other numeric sensor value and with the `decimals`
+option.
 
 ### States
 

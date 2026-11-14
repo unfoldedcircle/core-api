@@ -2597,7 +2597,8 @@ components:
                 - `date`: calendar date. Value: text in ISO 8601 format `YYYY-MM-DD`, e.g. `2026-11-15`.
                 - `duration`: time span. Value: number in the unit of the sensor: `ms`, `s` (default), `min`, `h` or
                   `d`. A value in `min`, `h` or `d` is shown as a time span, e.g. `1.5` hours as `1h 30m`. A value in
-                  `ms` or `s` is shown as a number with the unit.
+                  `s` is shown as a time span from 120 seconds on, e.g. `673492` seconds as `7d 19h`. Less than 120
+                  seconds and a value in `ms` are shown as a number with the unit.
 
                 Planned device classes: `audio_level`, `illuminance`.
               type: string
