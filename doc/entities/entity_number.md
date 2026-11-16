@@ -63,7 +63,7 @@ defines the unit label.
 | audio_level    | dB           | Audio level in decibel, e.g. the volume, bass or treble of an AV receiver. Not intended for measured sound pressure levels.                      |
 | battery        | %            | Battery charge level, e.g. the minimum state of charge of a home battery.                                                                       |
 | current        | A            | Electrical current in ampere, e.g. the charging current limit of a wallbox.                                                                     |
-| duration       | s            | Time span, e.g. the run time of a timer. Supported units: `ms`, `s`, `min`, `h`, `d`. The UI may show the value as a time span, e.g. `1:30:00`. |
+| duration       | s            | Time span, e.g. the run time of a timer. Supported units: `ms`, `s`, `min`, `h`, `d`. The UI may show the value as a time span, e.g. `1h 30m`.  |
 | energy         | kWh          | Energy in kilowatt-hour.                                                                                                                        |
 | humidity       | %            | Relative humidity, e.g. the target humidity of a dehumidifier.                                                                                  |
 | illuminance    | lx           | Illuminance in lux, e.g. the brightness threshold of a motion sensor.                                                                           |
