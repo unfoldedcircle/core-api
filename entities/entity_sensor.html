@@ -35,7 +35,7 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-894b02e6.js";
+            window.path_to_searchindex_js = "../searchindex-ee495ce9.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../toc-0bd7c578.js"></script>
@@ -277,9 +277,38 @@ seconds. It is only shown if it is not zero.</li>
 <li>The value is not converted to a larger unit: <code>93</code> hours are shown as <code>93h</code> and not as <code>3d 21h</code>.</li>
 <li>A negative value with a fractional part is shown as a number with the unit, e.g. <code>-1.5 h</code>.</li>
 </ul>
-<p>Units <code>s</code> and <code>ms</code>: the value is shown as a number with the unit, like any other numeric sensor value and with the
-<code>decimals</code> option. E.g. <code>673492 s</code>. An integration driver should provide a long time span in a larger unit to get a
-readable value.</p>
+<p>Unit <code>s</code>: a value of 120 seconds or more is shown as a time span, in the largest unit it fills and the next smaller
+unit.</p>
+<ol>
+<li>With the <code>decimals</code> option, the value is first rounded to this number of decimal places.</li>
+<li>The largest unit is days from 86400 seconds on, hours from 3600 seconds on, otherwise minutes.</li>
+<li>The rest is converted to the next smaller unit and rounded down. It is only shown if it is not zero. Smaller units
+are not shown.</li>
+<li>A negative value is shown like a positive one, with a leading minus sign.</li>
+</ol>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>Unit</th><th>Shown as</th></tr>
+</thead>
+<tbody>
+<tr><td>119</td><td><code>s</code></td><td><code>119 s</code></td></tr>
+<tr><td>120</td><td><code>s</code></td><td><code>2m</code></td></tr>
+<tr><td>121</td><td><code>s</code></td><td><code>2m 1s</code></td></tr>
+<tr><td>3605</td><td><code>s</code></td><td><code>1h</code></td></tr>
+<tr><td>4056</td><td><code>s</code></td><td><code>1h 7m</code></td></tr>
+<tr><td>673492</td><td><code>s</code></td><td><code>7d 19h</code></td></tr>
+<tr><td>-33952</td><td><code>s</code></td><td><code>-9h 25m</code></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Less than 120 seconds are shown as a number with the unit, like any other numeric sensor value and with the
+<code>decimals</code> option.</li>
+<li>An integration driver doesn’t have to convert a duration in seconds to a larger unit to get a readable value.</li>
+</ul>
+<p>Unit <code>ms</code>: the value is shown as a number with the unit, like any other numeric sensor value and with the <code>decimals</code>
+option.</p>
 <h3 id="states"><a class="header" href="#states">States</a></h3>
 <p>The <code>state</code> attribute is optional for a sensor.</p>
 <p>The sensor entity only supports the <code>ON</code> state and the <a href="index.html#states">common entity states</a>.</p>
