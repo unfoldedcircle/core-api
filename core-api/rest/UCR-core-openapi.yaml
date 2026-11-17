@@ -6961,9 +6961,10 @@ paths:
         The values of the secret options `auth.password`, `auth.token`, `auth.header_value` and `cookies[].value` are
         omitted in the response, which contains the `has_*` flags instead. See `WebviewOptions`.
 
-        The new web view can be cloned from another web view entity identifier in `clone_from`, including its secret
-        options. A new name must be specified. The `icon`, `description` and `options` fields can still be specified
-        and override the copied data.
+        The new web view can be cloned from another web view entity identifier in `clone_from`: it gets the effective
+        options of that web view, with its user overrides applied, including its secret options. A new name must be
+        specified. The `icon` and `description` are not copied and can be specified. Specified `options` are applied to
+        the copied options like in an update, see `WebviewCreate`.
       operationId: createWebview
       requestBody:
         content:
@@ -7080,7 +7081,8 @@ paths:
         Update one or multiple properties of a web view entity. The omitted properties are ignored and not deleted.
 
         - User-defined web views: the name, icon, description and options can be changed. See `WebviewUpdate` for how
-          options and secret options are updated.
+          options and secret options are updated. A user-defined web view has no user overrides: an option in
+          `options.user` is refused with error code `400`.
         - Web views from integrations: the name, icon, description and the user overrides in `options.user` can be
           changed. Any other option is refused with error code `422`.
       parameters:
@@ -14359,10 +14361,15 @@ components:
             Options which can be overridden:
             - `sensor` entity: `decimals` (integer 0..6).
             - `number` entity: `decimals` (integer 0..6), `display_mode` (`auto`, `slider`, `stepper`).
-            - `webview` entity from an integration driver: `zoom` (integer 25..400), `reload_interval` (integer
-              0..86400), `show_navigation` (boolean).
+            - `webview` entity from an integration driver: `zoom` (integer 25..400), `reload_interval` (integer 0 or
+              10..86400), `show_navigation` (boolean).
 
-            Other options or entity types are ignored.
+            Other options or entity types are refused with a validation error: error code `400` (`VALIDATION_ERROR`)
+            with the field `options.user.<option>` and the code `INVALID`. An invalid value is refused the same way.
+            For an entity type without options which can be overridden, `user` can only be an empty object or `null`.
+
+            A user-defined web view has no user overrides, like an entity type without options which can be
+            overridden: its options are changed directly with `PATCH /webviews/{entityId}`.
           type:
             - object
             - 'null'
@@ -17611,7 +17618,10 @@ components:
     WebviewUserOptions:
       description: |
         User overrides of the options of a web view from an integration driver. In an update request they are merged key
-        by key with the existing overrides: a value sets the override, `null` removes it.
+        by key with the existing overrides: a value sets the override, `null` removes it. `null` instead of an object
+        removes all overrides.
+
+        A user-defined web view has no user overrides, see `WebviewUpdate`.
       type: object
       properties:
         zoom:
@@ -17732,8 +17742,11 @@ components:
         Dedicated request object to create a new user-defined web view. Either `options` with `url`, or `clone_from`
         must be specified.
 
-        With `clone_from`, the options of the given web view are copied, including the secret options. Specified
-        `options` replace the copied options.
+        With `clone_from`, the new web view starts with the effective options of the given web view, including the secret
+        options: its options with its user overrides in `user` applied. The new web view is a user-defined web view
+        without user overrides. Only the options are copied, not the `icon` and the `description`. Specified `options`
+        are applied to the copied options like in an update, see `WebviewUpdate`: an omitted option keeps the copied
+        value, a specified option replaces it, `null` removes it.
       type: object
       properties:
         name:
@@ -17779,13 +17792,17 @@ components:
 
         Options of a user-defined web view (`editable: true`):
         - An omitted option is not changed.
+        - `null` removes the option: its default applies. `url` is required and can't be removed.
         - `auth`, `tls` and `cookies` replace the stored object or list. Secrets: see `WebviewAuth` and
           `WebviewCookie`. An empty `tls` object removes the certificate exception, an empty `cookies` list removes all
           cookies, `auth.type: none` removes the credentials.
         - An empty `background_color` uses the background color of the UI theme again.
+        - A user-defined web view has no user overrides: `user` can only be an empty object or `null`. An option in
+          `user` is refused with a validation error: error code `400` (`VALIDATION_ERROR`) with the field
+          `options.user.<option>` and the code `INVALID`.
 
         Options of a web view from an integration driver (`editable: false`): only the user overrides in `user` can be
-        changed. Any other option is refused with error code `422`.
+        changed, see `WebviewUserOptions`. Any other option is refused with error code `422`.
       type: object
       properties:
         name:
@@ -19765,9 +19782,9 @@ components:
           description: |
             Name of the current phase. `PREPARE` is the first phase of every job.
             - Export and snapshot: `PREPARE`, `DATABASE`, `INTEGRATIONS`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`,
-              `REMOTES`, `BLUETOOTH`, `PROFILES`, `DOCKS`, `RESOURCES`, `SETTINGS`, `FINALIZE`.
-            - Restore: `PREPARE`, `INTEGRATIONS`, `REMOTES`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`, `DOCKS`,
-              `SETTINGS`, `RESOURCES`, `PROFILES`, `BLUETOOTH`.
+              `REMOTES`, `WEBVIEWS`, `BLUETOOTH`, `PROFILES`, `DOCKS`, `RESOURCES`, `SETTINGS`, `FINALIZE`.
+            - Restore: `PREPARE`, `INTEGRATIONS`, `REMOTES`, `WEBVIEWS`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`,
+              `DOCKS`, `SETTINGS`, `RESOURCES`, `PROFILES`, `BLUETOOTH`.
 
             The set of phases may change in a future release. Use `current_step` and `total_steps` for a progress display
             and the name for information only.
@@ -19938,6 +19955,9 @@ components:
       type: string
       description: |
         Type of the items in a report group. More types may be added: a client should show an unknown type as is.
+
+        `webview` counts the user-defined web views. A web view from an integration is counted with the configured
+        entities of its integration (`integration`).
       enum:
         - db
         - integration_driver
@@ -19951,6 +19971,7 @@ components:
         - resource
         - setting
         - bt
+        - webview
         - other
     BackupReportItemMessages:
       type: object

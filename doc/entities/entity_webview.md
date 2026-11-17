@@ -310,8 +310,9 @@ See [user overrides](README.md#user-overrides).
 | show_navigation | Navigation controls in the fullscreen web view.     |
 
 - The URL, authentication, TLS, cookie and user agent options can't be overridden: they belong to the integration
-  driver.
-- The options of a user-defined web view are changed directly, without overrides.
+  driver. Any other option in `options.user` is refused with error code `400`.
+- A user-defined web view has no user overrides: its options are changed directly. An option in `options.user` is
+  refused with error code `400`.
 
 ## Global web view settings
 
