@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.57.4
+  version: 0.57.5
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -13479,8 +13479,15 @@ components:
         device_discovery:
           description: Driver supports multi-device discovery. **Not yet supported**.
           type: boolean
+        instance_count:
+          description: 'Response field only: number of integration instances of this driver.'
+          type: integer
+          minimum: 0
         setup_data_schema:
-          $ref: '#/components/schemas/SettingsPage'
+          description: Driver setup metadata. `null` if the driver has no setup data schema.
+          oneOf:
+            - $ref: '#/components/schemas/SettingsPage'
+            - type: 'null'
         release_date:
           description: Release date of the driver.
           type: string
@@ -13515,6 +13522,10 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         enabled:
           type: boolean
+        instance_count:
+          description: Number of integration instances of this driver.
+          type: integer
+          minimum: 0
         driver_state:
           $ref: '#/components/schemas/DriverState'
       required:
@@ -19596,13 +19607,13 @@ components:
           description: Installed system version.
           type: string
         available:
+          description: Available system updates. Omitted if there is no update available.
           type: array
           items:
             $ref: '#/components/schemas/AvailableSystemUpdate'
       required:
         - update_check_enabled
         - installed_version
-        - available
     SystemUpdateState:
       type: string
       enum:

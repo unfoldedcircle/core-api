@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.50.4
+  version: 0.50.5
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -1496,8 +1496,8 @@ components:
         - changing the update channel is intended for closed user groups only.  
           ⚠️ High chance of breaking changes, bugs and loosing data!
         - other channels than `default` might require an access token in `channel_token`.
-        - ⚠️ Changing the update channel or token requires a device restart, otherwise the automated updates will not use
-             the new channel!
+        - a changed update channel or token is applied immediately, no device restart is required. The response field
+          `restart_required` tells if a changed setting requires a restart.
       payload:
         $ref: '#/components/schemas/SetSoftwareUpdateCfgMsg'
       x-response:
@@ -6311,6 +6311,8 @@ components:
       description: |
         Subscribe to one or multiple event channels.
 
+        - A new session is subscribed to the `all` channel. Unsubscribe from `all` first to receive only specific
+          channels.
         - The special `all` channel will deliver all available events and clear all other subscriptions for the session.
         - If the session is already subscribed to the `all` channel, any other channels are ignored.
         - The special `entities` channel will deliver all entity and activity-group related events. This includes all
@@ -6509,7 +6511,8 @@ components:
     software_update:
       summary: 🧪 Software update event.
       description: |
-        Emitted during a system update to receive start, stop and progress events.
+        Emitted during a system update to receive start, stop and progress events. Subscribe to the `software_updates`
+        event channel to receive it.
       tags:
         - name: event
       payload:
@@ -8423,8 +8426,11 @@ components:
             msg:
               type: string
               const: dock
+            msg_data:
+              $ref: '#/components/schemas/DockConfiguration'
           required:
             - msg
+            - msg_data
     DeleteAllDocksMsg:
       type: object
       allOf:
@@ -9730,7 +9736,7 @@ components:
                   items:
                     $ref: '#/components/schemas/IntegrationStatus'
               required:
-                - drivers
+                - status
           required:
             - msg
     IntegrationCmdMsg:
@@ -10467,7 +10473,7 @@ components:
                   items:
                     $ref: '#/components/schemas/EventChannel'
               required:
-                - events
+                - channels
           required:
             - msg
     SubscribeEventsMsg:
@@ -10486,7 +10492,7 @@ components:
                   items:
                     $ref: '#/components/schemas/EventChannel'
               required:
-                - events
+                - channels
           required:
             - msg
             - msg_data
@@ -10516,7 +10522,7 @@ components:
                   items:
                     $ref: '#/components/schemas/EventChannel'
               required:
-                - events
+                - channels
           required:
             - msg
             - msg_data
@@ -10536,7 +10542,7 @@ components:
                   items:
                     $ref: '#/components/schemas/EventChannel'
               required:
-                - events
+                - channels
           required:
             - msg
     EventChannel:
@@ -10564,9 +10570,11 @@ components:
             - profiles
             - emitters
             - docks
-            - software_update
+            - software_updates
             - battery_status
             - ambient_light
+            - wifi
+            - bt
             - assistant
             - network
             - backup_jobs
@@ -15028,22 +15036,23 @@ components:
     IntegrationStatus:
       type: object
       description: |
-        Integration instance status information. Intended to be used in a general overview of the integration drivers.
+        Integration status information. Intended to be used in a general overview of the integration drivers and instances.
       properties:
+        driver_id:
+          $ref: '#/components/schemas/DriverId'
         integration_id:
           $ref: '#/components/schemas/IntegrationId'
         name:
           $ref: '#/components/schemas/LanguageText'
         icon:
           $ref: '#/components/schemas/IconIdentifier'
-        device_state:
-          $ref: '#/components/schemas/DeviceState'
-        driver_state:
-          $ref: '#/components/schemas/DriverState'
+        driver_type:
+          $ref: '#/components/schemas/IntegrationDriverType'
         state:
           $ref: '#/components/schemas/IntegrationState'
-        enabled:
-          type: boolean
+      required:
+        - name
+        - driver_type
     DeviceState:
       type: string
       enum:
@@ -15060,18 +15069,6 @@ components:
         - CONNECTING
         - ACTIVE
         - RECONNECTING
-        - ERROR
-    IntegrationState:
-      type: string
-      enum:
-        - NOT_CONFIGURED
-        - UNKNOWN
-        - IDLE
-        - CONNECTING
-        - CONNECTED
-        - DISCONNECTED
-        - RECONNECTING
-        - ACTIVE
         - ERROR
     IntegrationDriverType:
       type: string
@@ -15107,6 +15104,10 @@ components:
           $ref: '#/components/schemas/IconIdentifier'
         enabled:
           type: boolean
+        instance_count:
+          description: Number of integration instances of this driver.
+          type: integer
+          minimum: 0
         driver_state:
           $ref: '#/components/schemas/DriverState'
       required:
@@ -15179,8 +15180,15 @@ components:
         device_discovery:
           description: Driver supports multi-device discovery. **Not yet supported**.
           type: boolean
+        instance_count:
+          description: 'Response field only: number of integration instances of this driver.'
+          type: integer
+          minimum: 0
         setup_data_schema:
-          $ref: '#/components/schemas/SettingsPage'
+          description: Driver setup metadata. `null` if the driver has no setup data schema.
+          oneOf:
+            - $ref: '#/components/schemas/SettingsPage'
+            - type: 'null'
         release_date:
           description: Release date of the driver.
           type: string
@@ -15535,7 +15543,9 @@ components:
         driver_id:
           $ref: '#/components/schemas/DriverId'
         new_state:
-          $ref: '#/components/schemas/IntegrationDriverUpdate'
+          description: The changed integration driver. The `token` is never included.
+          allOf:
+            - $ref: '#/components/schemas/IntegrationDriver'
       required:
         - event_type
         - driver_id
@@ -15546,18 +15556,30 @@ components:
       properties:
         event_type:
           $ref: '#/components/schemas/DefaultChangeEventType'
+        driver_id:
+          $ref: '#/components/schemas/DriverId'
         integration_id:
           $ref: '#/components/schemas/IntegrationId'
         new_state:
-          $ref: '#/components/schemas/IntegrationUpdate'
+          description: The changed integration instance. `setup_data` is always empty.
+          allOf:
+            - $ref: '#/components/schemas/Integration'
       required:
         - event_type
+        - driver_id
         - integration_id
     IntegrationStateData:
       type: object
+      description: |
+        A device state change of an integration instance carries `integration_id` and `device_state`.
+        A state change of the integration driver carries `driver_state` only.
       properties:
         driver_id:
           $ref: '#/components/schemas/DriverId'
+        integration_id:
+          description: Integration instance identifier. Only set for a device state change of an instance.
+          allOf:
+            - $ref: '#/components/schemas/IntegrationId'
         device_state:
           $ref: '#/components/schemas/DeviceState'
         driver_state:
@@ -15749,7 +15771,9 @@ components:
       type: object
       properties:
         active:
+          description: Filter by active or inactive docks. If omitted, only active docks are returned or counted.
           type: boolean
+          default: true
     DockChangeData:
       type: object
       description: |
@@ -16200,13 +16224,13 @@ components:
           description: Installed system version.
           type: string
         available:
+          description: Available system updates. Omitted if there is no update available.
           type: array
           items:
             $ref: '#/components/schemas/AvailableSystemUpdate'
       required:
         - update_check_enabled
         - installed_version
-        - available
     AvailableSystemUpdate:
       type: object
       properties:
@@ -20235,6 +20259,18 @@ components:
         - AUTO
         - REQUIRED
         - NONE
+    IntegrationState:
+      type: string
+      enum:
+        - NOT_CONFIGURED
+        - UNKNOWN
+        - IDLE
+        - CONNECTING
+        - CONNECTED
+        - DISCONNECTED
+        - RECONNECTING
+        - ACTIVE
+        - ERROR
     IntegrationDiscovery:
       type: object
       properties:
