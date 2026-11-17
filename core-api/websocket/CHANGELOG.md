@@ -10,6 +10,11 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.51.0
+### Added
+- 👷 Draft: Web View Entity support (`webview`): user-defined web views, global web view settings, the `webview` activity
+  user interface widget, and web view commands routed to the user interface.
+
 ## 0.50.4
 ### Changed
 - Clarified that updating a profile (`update_profile`) with an empty `pages` array removes all pages in the profile while keeping its groups.

@@ -47,6 +47,8 @@ _Changes in the next release_
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
 - Asynchronous backup export and restore jobs.
 - Custom integrations support in backup export and restore operations.
+- 👷 Draft: Web View Entity support (`webview`) to show a web page on the Remote, provided by an integration driver or
+  defined by the user. The Remote now also supports the Integration-API `entity_available` and `entity_removed` events.
 
 ### Fixed
 - Core APIs: document how the `limits` of a number parameter and the `items` of a selection parameter in the entity
