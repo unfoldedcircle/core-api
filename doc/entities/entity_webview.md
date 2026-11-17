@@ -239,7 +239,7 @@ page. At most 20 cookies.
 | Name                | Type    | Default              | Description                                                                                                                                                         |
 |---------------------|---------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | zoom                | integer | 100                  | Page zoom in percent: 25..400. The page is laid out for the zoomed size, e.g. 60 to show a dashboard made for tablets.                                               |
-| background_color    | string  | theme background     | Background color while the page is loading and behind transparent pages, as `#RRGGBB`. If not set, the background color of the UI theme is used.                     |
+| background_color    | string  | `#FFFFFF`            | Background color while the page is loading and behind transparent pages, as `#RRGGBB`. If not set, white `#FFFFFF` is used.                                          |
 | user_agent          | string  | default              | `default`: the user agent of the Remote, which identifies the Remote and its firmware version. `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or the desktop layout of a page. Any other value: a custom user agent string, at most 256 characters. |
 
 - `user_agent` is sent in the `User-Agent` header of every request of the web view, and returned to scripts of the page

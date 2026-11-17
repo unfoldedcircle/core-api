@@ -19247,10 +19247,11 @@ components:
           default: 100
         background_color:
           description: |
-            Background color while the page is loading, as `#RRGGBB`. Empty or not set: background color of the UI
-            theme.
+            Background color while the page is loading and behind transparent pages, as `#RRGGBB`. Empty or not set:
+            white `#FFFFFF`.
           type: string
           pattern: ^(#[0-9a-fA-F]{6})?$
+          default: '#FFFFFF'
         show_navigation:
           description: Show back, forward, reload and close controls in the fullscreen web view.
           type: boolean
@@ -19367,7 +19368,7 @@ components:
         - `auth`, `tls` and `cookies` replace the stored object or list. Secrets: see `WebviewAuth` and
           `WebviewCookie`. An empty `tls` object removes the certificate exception, an empty `cookies` list removes all
           cookies, `auth.type: none` removes the credentials.
-        - An empty `background_color` uses the background color of the UI theme again.
+        - An empty `background_color` restores the default white `#FFFFFF`.
         - A user-defined web view has no user overrides: `user` can only be an empty object or `null`. An option in
           `user` is refused with a validation error: error code `400` (`VALIDATION_ERROR`) with the field
           `options.user.<option>` and the code `INVALID`.

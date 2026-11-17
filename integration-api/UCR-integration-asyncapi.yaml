@@ -2893,9 +2893,11 @@ components:
           default: 100
         background_color:
           description: |
-            Background color while the page is loading, as `#RRGGBB`. Default: background color of the UI theme.
+            Background color while the page is loading and behind transparent pages, as `#RRGGBB`. Default: white
+            `#FFFFFF`.
           type: string
           pattern: '^#[0-9a-fA-F]{6}$'
+          default: '#FFFFFF'
         show_navigation:
           description: |
             Show back, forward, reload and close controls in the fullscreen web view. Can be overridden by the user.
