@@ -9196,6 +9196,9 @@ paths:
               volume buttons keep their normal function:
                 value:
                   volume_buttons: volume
+              channel buttons keep their normal function:
+                value:
+                  channel_buttons: channel
         required: true
       responses:
         '200':
@@ -18585,11 +18588,27 @@ components:
           examples:
             - zoom
             - volume
+        channel_buttons:
+          description: |
+            Function of CHANNEL up and down in the fullscreen web view.
+            - `scroll`: CHANNEL up and down scroll the page by one screen.
+            - `channel`: CHANNEL up and down keep their normal function: the button mapping of the active activity, or,
+              when the web view was opened from a profile page and not from an activity, the normal handling of the
+              Remote.
+          type: string
+          enum:
+            - scroll
+            - channel
+          default: scroll
+          examples:
+            - scroll
+            - channel
       required:
         - allow_invalid_certificates
         - color_scheme
         - website_data
         - volume_buttons
+        - channel_buttons
     CfgAll:
       type: object
       properties:
@@ -19162,6 +19181,14 @@ components:
             - volume
           examples:
             - volume
+        channel_buttons:
+          description: Function of CHANNEL up and down in the fullscreen web view. See `CfgWebview`.
+          type: string
+          enum:
+            - scroll
+            - channel
+          examples:
+            - channel
     DockId:
       type: string
       format: ^[a-zA-Z0-9\-\.]+$
