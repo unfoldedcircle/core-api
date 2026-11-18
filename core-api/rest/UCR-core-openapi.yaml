@@ -9193,6 +9193,9 @@ paths:
               clear all website data on close:
                 value:
                   website_data: clear_all_on_close
+              volume buttons keep their normal function:
+                value:
+                  volume_buttons: volume
         required: true
       responses:
         '200':
@@ -18567,10 +18570,26 @@ components:
             - clear_cache_on_close
             - clear_all_on_close
           default: keep
+        volume_buttons:
+          description: |
+            Function of VOLUME up and down in the fullscreen web view.
+            - `zoom`: VOLUME up and down zoom the page in and out.
+            - `volume`: VOLUME up and down keep their normal function: the button mapping of the active activity, or,
+              when the web view was opened from a profile page and not from an activity, the normal volume handling of
+              the Remote, e.g. the volume of the active media player.
+          type: string
+          enum:
+            - zoom
+            - volume
+          default: zoom
+          examples:
+            - zoom
+            - volume
       required:
         - allow_invalid_certificates
         - color_scheme
         - website_data
+        - volume_buttons
     CfgAll:
       type: object
       properties:
@@ -19135,6 +19154,14 @@ components:
             - keep
             - clear_cache_on_close
             - clear_all_on_close
+        volume_buttons:
+          description: Function of VOLUME up and down in the fullscreen web view. See `CfgWebview`.
+          type: string
+          enum:
+            - zoom
+            - volume
+          examples:
+            - volume
     DockId:
       type: string
       format: ^[a-zA-Z0-9\-\.]+$

@@ -405,7 +405,8 @@ Example:
 
 An icon or text item with the command `webview.open` opens the web view fullscreen, on top of the activity screen.
 Closing it returns to the activity. The web view entity must be an included entity of the activity. A page doesn't
-need a web view widget for this. In the fullscreen web view, VOLUME up and down zoom the page, see
+need a web view widget for this. In the fullscreen web view, VOLUME up and down zoom the page by default, or keep the
+button mapping of the activity with the global web view setting `volume_buttons: volume`, see
 [fullscreen web view](entities/entity_webview.md#fullscreen-web-view).
 
 ```json

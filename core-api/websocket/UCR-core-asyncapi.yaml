@@ -15501,10 +15501,26 @@ components:
             - clear_cache_on_close
             - clear_all_on_close
           default: keep
+        volume_buttons:
+          description: |
+            Function of VOLUME up and down in the fullscreen web view.
+            - `zoom`: VOLUME up and down zoom the page in and out.
+            - `volume`: VOLUME up and down keep their normal function: the button mapping of the active activity, or,
+              when the web view was opened from a profile page and not from an activity, the normal volume handling of
+              the Remote, e.g. the volume of the active media player.
+          type: string
+          enum:
+            - zoom
+            - volume
+          default: zoom
+          examples:
+            - zoom
+            - volume
       required:
         - allow_invalid_certificates
         - color_scheme
         - website_data
+        - volume_buttons
     CfgWebviewUpdate:
       description: |
         Update object for the global web view settings. A missing field keeps the old value.
@@ -15527,6 +15543,14 @@ components:
             - keep
             - clear_cache_on_close
             - clear_all_on_close
+        volume_buttons:
+          description: Function of VOLUME up and down in the fullscreen web view. See `CfgWebview`.
+          type: string
+          enum:
+            - zoom
+            - volume
+          examples:
+            - volume
     VoiceAssistants:
       type: array
       items:

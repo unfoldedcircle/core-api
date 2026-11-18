@@ -326,6 +326,7 @@ buttons to clear the cache and the website data.
 | allow_invalid_certificates | boolean | false   | Allow invalid TLS certificates for all web views. See [below](#allow-invalid-tls-certificates-for-all-web-views).                     |
 | color_scheme               | enum    | dark    | Color scheme for the pages: `light` or `dark`. See [color scheme](#color-scheme).                                                   |
 | website_data               | enum    | keep    | What happens with the website data when a web view is closed: `keep`, `clear_cache_on_close` or `clear_all_on_close`. See [website data](#website-data). |
+| volume_buttons             | enum    | zoom    | Function of VOLUME up and down in the fullscreen web view: `zoom` or `volume`. See [fullscreen web view](#fullscreen-web-view).     |
 
 Core-API:
 
@@ -407,10 +408,14 @@ interactive.
   - HOME closes the web view and shows the home screen.
   - The D-pad and OK are sent to the page.
   - CHANNEL up and down scroll the page by one screen.
-  - VOLUME up and down zoom the page in and out, one step per press: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200,
-    250 and 300 %. The zoom starts at the effective `zoom` option of the entity: the user override, otherwise the
-    option, otherwise 100 %. The changed zoom only applies until the web view is closed: it isn't saved to the entity.
-    VOLUME does nothing while a dialog or the on-screen keyboard is open.
+  - VOLUME up and down depend on the global setting [`volume_buttons`](#global-web-view-settings):
+    - `zoom` (default): VOLUME up and down zoom the page in and out, one step per press: 50, 67, 75, 80, 90, 100, 110,
+      125, 150, 175, 200, 250 and 300 %. The zoom starts at the effective `zoom` option of the entity: the user
+      override, otherwise the option, otherwise 100 %. The changed zoom only applies until the web view is closed: it
+      isn't saved to the entity. VOLUME does nothing while a dialog or the on-screen keyboard is open.
+    - `volume`: VOLUME up and down keep their normal function: the button mapping of the active activity, or, when the
+      web view was opened from a profile page and not from an activity, the normal volume handling of the Remote, e.g.
+      the volume of the active media player.
   - The other buttons keep their function, e.g. MUTE, the color buttons, PREV, NEXT and POWER keep the button mapping
     of the active activity.
 - HTTP login requests of the page without configured credentials, and `alert`, `confirm` and `prompt` dialogs of the
