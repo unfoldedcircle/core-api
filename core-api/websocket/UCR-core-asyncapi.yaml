@@ -15469,8 +15469,8 @@ components:
 
             ⚠️ This turns off the certificate check for every page and every resource loaded by any web view, including
             third-party hosts like content delivery networks, embedded pages and redirect targets. A man-in-the-middle
-            attack on any of these connections is not detected. This is an administrator decision for the whole
-            Remote: prefer the `tls` option of a web view entity, which only applies to the host of its `url` option.
+            attack on any of these connections is not detected. The setting applies to the whole Remote: prefer the
+            `tls` option of a web view entity, which only applies to the host of its `url` option.
           type: boolean
           default: false
         color_scheme:

@@ -317,8 +317,9 @@ See [user overrides](README.md#user-overrides).
 ## Global web view settings
 
 The global web view settings apply to all web views on the Remote: user-defined web views and web views from
-integration drivers. They are system settings, not entity options, and are changed by an administrator in the
-web-configurator.
+integration drivers. They are system settings, not entity options. They are changed on the Remote in Settings → Web
+view, or by an administrator in the web-configurator or with the Core-API. The settings page on the Remote also has
+buttons to clear the cache and the website data.
 
 | Name                       | Type    | Default | Description                                                                                                                         |
 |----------------------------|---------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
@@ -350,8 +351,8 @@ drivers.
 > hosts like content delivery networks, embedded pages and redirect targets. A man-in-the-middle attack on any of these
 > connections is not detected, and the credentials and cookies of the web views can be intercepted.
 >
-> This is an administrator decision for the whole Remote. Prefer the `tls` option of a web view entity: it only applies
-> to the host of its `url` option, and with `certificate_sha256` only to the expected certificate.
+> The setting applies to the whole Remote. Prefer the `tls` option of a web view entity: it only applies to the host
+> of its `url` option, and with `certificate_sha256` only to the expected certificate.
 
 - The setting applies to the next page load. Shown pages are not reloaded.
 
@@ -373,8 +374,8 @@ workers.
   login made by the user in a web view stays valid, as long as the web server accepts it.
 - Credentials entered in a login dialog of a web view are kept until the user interface restarts. Credentials
   configured in the `auth` option of a web view entity are sent again automatically.
-- Clearing website data, with the `website_data` setting or with the `clear_cache` and `clear_data`
-  [commands](#commands), affects all web views.
+- Clearing website data, with the `website_data` setting, the clear buttons in the web view settings of the Remote, or
+  the `clear_cache` and `clear_data` [commands](#commands), affects all web views.
 
 `website_data` defines what happens with the website data when a web view is closed: when the fullscreen web view is
 closed, or when the activity user interface page with the web view widget is left.
@@ -396,16 +397,22 @@ tapped.
 ### Fullscreen web view
 
 The fullscreen web view covers the whole screen. It is opened by tapping a profile page tile, by the `open`
-[command](#commands), or by tapping a web view widget which is not interactive.
+[command](#commands), e.g. from an icon on an activity user interface page, or by tapping a web view widget which is not
+interactive.
 
 - With the `show_navigation` option, the web view shows controls to go back, go forward, reload the page and close the
   web view.
-- Button handling:
+- Button handling, also on top of an activity screen:
   - BACK closes the web view and returns to the previous screen.
   - HOME closes the web view and shows the home screen.
   - The D-pad and OK are sent to the page.
   - CHANNEL up and down scroll the page by one screen.
-  - The other buttons keep their function, e.g. the volume buttons of the active activity.
+  - VOLUME up and down zoom the page in and out, one step per press: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200,
+    250 and 300 %. The zoom starts at the effective `zoom` option of the entity: the user override, otherwise the
+    option, otherwise 100 %. The changed zoom only applies until the web view is closed: it isn't saved to the entity.
+    VOLUME does nothing while a dialog or the on-screen keyboard is open.
+  - The other buttons keep their function, e.g. MUTE, the color buttons, PREV, NEXT and POWER keep the button mapping
+    of the active activity.
 - HTTP login requests of the page without configured credentials, and `alert`, `confirm` and `prompt` dialogs of the
   page, are shown as dialogs of the UI.
 
