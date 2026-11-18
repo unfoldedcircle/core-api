@@ -15491,8 +15491,8 @@ components:
             - `keep`: the website data is kept, also across restarts of the user interface and the Remote.
             - `clear_cache_on_close`: the HTTP cache is cleared.
             - `clear_all_on_close`: all website data is cleared: cookies, cache, local storage, IndexedDB and service
-              workers, and the credentials entered in a login dialog. Pages which rely on a cookie login ask to log in
-              again. The configured credentials and cookies of a web view entity are sent again automatically.
+              workers. Pages which rely on a cookie login ask to log in again. The configured credentials and cookies of
+              a web view entity are sent again automatically.
 
             Credentials entered in a login dialog are kept until the user interface restarts.
           type: string

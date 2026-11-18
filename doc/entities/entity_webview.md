@@ -379,11 +379,11 @@ workers.
 `website_data` defines what happens with the website data when a web view is closed: when the fullscreen web view is
 closed, or when the activity user interface page with the web view widget is left.
 
-| Value                | Description                                                                                                                                                                                                                                                   |
-|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| keep                 | Default. The website data is kept, also across restarts of the user interface and the Remote.                                                                                                                                                                 |
-| clear_cache_on_close | The HTTP cache is cleared whenever a web view is closed.                                                                                                                                                                                                      |
-| clear_all_on_close   | All website data and the credentials entered in a login dialog are cleared whenever a web view is closed. Pages which rely on a cookie login ask to log in again. The configured credentials and cookies of a web view entity are sent again automatically. |
+| Value                | Description                                                                                                                                                                                                                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| keep                 | Default. The website data is kept, also across restarts of the user interface and the Remote.                                                                                                                                                                                                  |
+| clear_cache_on_close | The HTTP cache is cleared whenever a web view is closed.                                                                                                                                                                                                                                       |
+| clear_all_on_close   | All website data is cleared whenever a web view is closed. Pages which rely on a cookie login ask to log in again. Credentials entered in a login dialog are kept until the user interface restarts. The configured credentials and cookies of a web view entity are sent again automatically. |
 
 ## User interface
 
@@ -428,12 +428,12 @@ other entities: in activity on- and off-sequences, macros, button mappings, acti
 `PUT /api/entities/{entityId}/command` or `execute_entity_command` from any Core-API client. Tapping a tile opens the
 web view.
 
-| cmd_id      | Core-API cmd_id     | Parameters | Description                                                                                                                                                                                                       |
-|-------------|---------------------|------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| open        | webview.open        | -          | Wake the display and show the web view fullscreen with its start page. See [open](#open).                                                                                                                         |
-| reload      | webview.reload      | -          | Reload the shown page: in the fullscreen web view or in the widget. No effect if the web view isn't shown.                                                                                                        |
-| clear_cache | webview.clear_cache | -          | Clear the HTTP cache of all web views and reload the shown page.                                                                                                                                                  |
-| clear_data  | webview.clear_data  | -          | Clear all website data of all web views and the credentials entered in a login dialog. Pages which rely on a cookie login ask to log in again. The shown page is reloaded.                                        |
+| cmd_id      | Core-API cmd_id     | Parameters | Description                                                                                                                                                                                                    |
+|-------------|---------------------|------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| open        | webview.open        | -          | Wake the display and show the web view fullscreen with its start page. See [open](#open).                                                                                                                      |
+| reload      | webview.reload      | -          | Reload the shown page: in the fullscreen web view or in the widget. No effect if the web view isn't shown.                                                                                                     |
+| clear_cache | webview.clear_cache | -          | Clear the HTTP cache of all web views and reload the shown page.                                                                                                                                               |
+| clear_data  | webview.clear_data  | -          | Clear all website data of all web views. Pages which rely on a cookie login ask to log in again. Credentials entered in a login dialog are kept until the user interface restarts. The shown page is reloaded. |
 
 - All web views share their [website data](#website-data): `clear_cache` and `clear_data` clear the data of all web
   views.
