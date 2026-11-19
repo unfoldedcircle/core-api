@@ -9195,12 +9195,20 @@ paths:
               clear all website data on close:
                 value:
                   website_data: clear_all_on_close
-              volume buttons keep their normal function:
+              VOLUME keeps the button mapping of the activity:
                 value:
-                  volume_buttons: volume
-              channel buttons keep their normal function:
+                  buttons:
+                    VOLUME_UP:
+                      action: pass
+                    VOLUME_DOWN:
+                      action: pass
+              BACK goes back in the history, CHANNEL up is reset to its default:
                 value:
-                  channel_buttons: channel
+                  buttons:
+                    BACK:
+                      action: function
+                      function: back_or_close
+                    CHANNEL_UP: null
         required: true
       responses:
         '200':
@@ -17623,11 +17631,197 @@ components:
           format: date-time
       required:
         - name
+    WebviewButton:
+      description: |
+        Physical button of the Remote which can be changed in the fullscreen web view, with the same identifier as in the
+        button mapping of an activity. Not every Remote model has all buttons: `RED`, `GREEN`, `YELLOW` and `BLUE` are
+        only on the Remote Two, `RECORD`, `STOP` and `MENU` only on the Remote 3.
+
+        The other buttons have a fixed function in the web view and can't be changed: `HOME` always closes the web view
+        and shows the home screen, `POWER` and `VOICE` keep their normal function.
+      type: string
+      enum:
+        - BACK
+        - DPAD_UP
+        - DPAD_DOWN
+        - DPAD_LEFT
+        - DPAD_RIGHT
+        - DPAD_MIDDLE
+        - VOLUME_UP
+        - VOLUME_DOWN
+        - CHANNEL_UP
+        - CHANNEL_DOWN
+        - MUTE
+        - PREV
+        - PLAY
+        - NEXT
+        - STOP
+        - RECORD
+        - MENU
+        - RED
+        - GREEN
+        - YELLOW
+        - BLUE
+    WebviewButtonFunction:
+      description: |
+        Web view function of a physical button:
+        - `zoom_in`, `zoom_out`: zoom the page in or out by one step: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200,
+          250 and 300 %. The zoom starts at the effective `zoom` option of the web view. The changed zoom only applies
+          until the web view is closed: it isn't saved to the entity. No effect while a dialog or the on-screen keyboard
+          is open.
+        - `zoom_reset`: zoom back to the effective `zoom` option of the web view.
+        - `scroll_up`, `scroll_down`: scroll the page up or down by a small step.
+        - `page_up`, `page_down`: scroll the page up or down by one screen.
+        - `top`, `bottom`: scroll to the top or the bottom of the page.
+        - `back`, `forward`: go back or forward in the history of the web view.
+        - `back_or_close`: go back in the history, or close the web view on its first page.
+        - `reload`: reload the page.
+        - `stop`: stop loading the page.
+        - `close`: close the web view and return to the previous screen.
+        - `toggle_navigation`: show or hide the navigation controls, see the `show_navigation` option. The change isn't
+          saved to the entity.
+        - `focus_next`, `focus_previous`: move the focus to the next or the previous element of the page, like `Tab` and
+          `Shift+Tab` on a keyboard.
+        - `none`: the button does nothing.
+      type: string
+      enum:
+        - zoom_in
+        - zoom_out
+        - zoom_reset
+        - scroll_up
+        - scroll_down
+        - page_up
+        - page_down
+        - top
+        - bottom
+        - back
+        - forward
+        - back_or_close
+        - reload
+        - stop
+        - close
+        - toggle_navigation
+        - focus_next
+        - focus_previous
+        - none
+    WebviewButtonKey:
+      description: |
+        Key event of a physical button, sent to the page: a `KeyboardEvent.key` value of the
+        [UI Events key values](https://www.w3.org/TR/uievents-key/). The page receives a key event with this `key` and the
+        matching `code`. Any button can send any of these keys.
+      type: string
+      enum:
+        - ArrowUp
+        - ArrowDown
+        - ArrowLeft
+        - ArrowRight
+        - Enter
+        - Escape
+        - Backspace
+        - Tab
+        - PageUp
+        - PageDown
+        - Home
+        - End
+        - ContextMenu
+        - BrowserBack
+        - BrowserForward
+        - BrowserRefresh
+        - BrowserStop
+        - Exit
+        - AudioVolumeUp
+        - AudioVolumeDown
+        - AudioVolumeMute
+        - ChannelUp
+        - ChannelDown
+        - MediaPlayPause
+        - MediaPlay
+        - MediaPause
+        - MediaStop
+        - MediaRecord
+        - MediaRewind
+        - MediaFastForward
+        - MediaTrackPrevious
+        - MediaTrackNext
+        - ColorF0Red
+        - ColorF1Green
+        - ColorF2Yellow
+        - ColorF3Blue
+    WebviewButtonAction:
+      description: |
+        Action of a physical button in the fullscreen web view:
+        - `pass`: the button keeps its function in the layer below the web view: the button mapping of the activity if the
+          web view is shown on top of an activity, otherwise the function of the button on the screen below, e.g. the
+          normal volume handling of the Remote on a profile page.
+        - `function`: the web view function in `function`, see `WebviewButtonFunction`.
+        - `key`: the key event in `key` is sent to the page, see `WebviewButtonKey`.
+
+        `function` is required for the `function` action and not allowed otherwise. `key` is required for the `key` action
+        and not allowed otherwise.
+
+        A held button repeats key events and the functions `scroll_up`, `scroll_down`, `page_up` and `page_down`. All other
+        functions act once per press. A `pass` button behaves like in the layer below.
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - pass
+            - function
+            - key
+        function:
+          $ref: '#/components/schemas/WebviewButtonFunction'
+        key:
+          $ref: '#/components/schemas/WebviewButtonKey'
+      required:
+        - action
+      examples:
+        - action: function
+          function: zoom_in
+        - action: key
+          key: ChannelUp
+        - action: pass
+    WebviewButtons:
+      description: |
+        Function of single physical buttons in the fullscreen web view of this web view: a `WebviewButtonAction` per button
+        identifier (`WebviewButton`). It only contains the buttons which differ from the global web view setting `buttons`
+        (`CfgWebview`), e.g. to keep the button mapping of the activity for VOLUME up and down, or to send the CHANNEL
+        keys to a page which handles them itself.
+
+        The action of a button is taken from the first of:
+        1. the user override in `user.buttons`, only for a web view from an integration driver,
+        2. this option,
+        3. the global web view setting `buttons`, which contains the default actions.
+
+        The buttons only apply to the fullscreen web view. In the web view widget of an activity, the buttons keep the
+        button mapping of the activity.
+
+        An unknown button or a button with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with error code `400`
+        (`VALIDATION_ERROR`) with the field `options.buttons.<button>` and the code `INVALID`.
+      type: object
+      propertyNames:
+        $ref: '#/components/schemas/WebviewButton'
+      additionalProperties:
+        $ref: '#/components/schemas/WebviewButtonAction'
+      examples:
+        - BACK:
+            action: function
+            function: back_or_close
+          VOLUME_UP:
+            action: pass
+          VOLUME_DOWN:
+            action: pass
+          CHANNEL_UP:
+            action: key
+            key: ChannelUp
+          CHANNEL_DOWN:
+            action: key
+            key: ChannelDown
     WebviewUserOptions:
       description: |
         User overrides of the options of a web view from an integration driver. In an update request they are merged key
         by key with the existing overrides: a value sets the override, `null` removes it. `null` instead of an object
-        removes all overrides.
+        removes all overrides. `buttons` is merged button by button in the same way.
 
         A user-defined web view has no user overrides, see `WebviewUpdate`.
       type: object
@@ -17648,6 +17842,20 @@ components:
           type:
             - boolean
             - 'null'
+        buttons:
+          description: |
+            User overrides of single buttons, see `WebviewButtons`. A button with an action sets its override, `null`
+            removes it. An unknown button or a button with a fixed function is refused with error code `400`
+            (`VALIDATION_ERROR`) with the field `options.user.buttons.<button>` and the code `INVALID`.
+          type:
+            - object
+            - 'null'
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            anyOf:
+              - $ref: '#/components/schemas/WebviewButtonAction'
+              - type: 'null'
     WebviewOptions:
       description: |
         Options of a web view entity. See the [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md)
@@ -17723,6 +17931,8 @@ components:
           minimum: 0
           maximum: 86400
           default: 0
+        buttons:
+          $ref: '#/components/schemas/WebviewButtons'
         user:
           $ref: '#/components/schemas/WebviewUserOptions'
       examples:
@@ -17744,8 +17954,17 @@ components:
               has_value: true
           reload_interval: 60
           show_navigation: true
+          buttons:
+            CHANNEL_UP:
+              action: function
+              function: reload
           user:
             zoom: 60
+            buttons:
+              VOLUME_UP:
+                action: pass
+              VOLUME_DOWN:
+                action: pass
     WebviewCreate:
       description: |
         Dedicated request object to create a new user-defined web view. Either `options` with `url`, or `clone_from`
@@ -17805,6 +18024,9 @@ components:
           `WebviewCookie`. An empty `tls` object removes the certificate exception, an empty `cookies` list removes all
           cookies, `auth.type: none` removes the credentials.
         - An empty `background_color` restores the default white `#FFFFFF`.
+        - `buttons` is merged button by button with the stored buttons: a button with an action sets it, `null` removes
+          it and the global web view setting applies again. `null` instead of the object removes all buttons. See
+          `WebviewButtons`.
         - A user-defined web view has no user overrides: `user` can only be an empty object or `null`. An option in
           `user` is refused with a validation error: error code `400` (`VALIDATION_ERROR`) with the field
           `options.user.<option>` and the code `INVALID`.
@@ -18574,42 +18796,81 @@ components:
             - clear_cache_on_close
             - clear_all_on_close
           default: keep
-        volume_buttons:
+        buttons:
           description: |
-            Function of VOLUME up and down in the fullscreen web view.
-            - `zoom`: VOLUME up and down zoom the page in and out.
-            - `volume`: VOLUME up and down keep their normal function: the button mapping of the active activity, or,
-              when the web view was opened from a profile page and not from an activity, the normal volume handling of
-              the Remote, e.g. the volume of the active media player.
-          type: string
-          enum:
-            - zoom
-            - volume
-          default: zoom
+            Function of the physical buttons in the fullscreen web view, for all web views: a `WebviewButtonAction` per
+            button identifier (`WebviewButton`). A web view entity can change single buttons with its `buttons` option.
+
+            The response contains every button of the Remote model which can be changed, with its configured action or
+            its default action:
+
+            | Button                                               | Default action                                      |
+            |------------------------------------------------------|-----------------------------------------------------|
+            | `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`    | key `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+            | `DPAD_MIDDLE`                                        | key `Enter`                                         |
+            | `BACK`                                               | function `close`                                    |
+            | `VOLUME_UP`, `VOLUME_DOWN`                           | function `zoom_in`, `zoom_out`                      |
+            | `CHANNEL_UP`, `CHANNEL_DOWN`                         | function `page_up`, `page_down`                     |
+            | `MENU`                                               | key `ContextMenu`                                   |
+            | All other buttons                                    | `pass`                                              |
+
+            `HOME`, `POWER` and `VOICE` have a fixed function and are not part of the settings, see `WebviewButton`.
+          type: object
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            $ref: '#/components/schemas/WebviewButtonAction'
           examples:
-            - zoom
-            - volume
-        channel_buttons:
-          description: |
-            Function of CHANNEL up and down in the fullscreen web view.
-            - `scroll`: CHANNEL up and down scroll the page by one screen.
-            - `channel`: CHANNEL up and down keep their normal function: the button mapping of the active activity, or,
-              when the web view was opened from a profile page and not from an activity, the normal handling of the
-              Remote.
-          type: string
-          enum:
-            - scroll
-            - channel
-          default: scroll
-          examples:
-            - scroll
-            - channel
+            - BACK:
+                action: function
+                function: close
+              DPAD_UP:
+                action: key
+                key: ArrowUp
+              DPAD_DOWN:
+                action: key
+                key: ArrowDown
+              DPAD_LEFT:
+                action: key
+                key: ArrowLeft
+              DPAD_RIGHT:
+                action: key
+                key: ArrowRight
+              DPAD_MIDDLE:
+                action: key
+                key: Enter
+              VOLUME_UP:
+                action: function
+                function: zoom_in
+              VOLUME_DOWN:
+                action: function
+                function: zoom_out
+              CHANNEL_UP:
+                action: function
+                function: page_up
+              CHANNEL_DOWN:
+                action: function
+                function: page_down
+              MUTE:
+                action: pass
+              PREV:
+                action: pass
+              PLAY:
+                action: pass
+              NEXT:
+                action: pass
+              STOP:
+                action: pass
+              RECORD:
+                action: pass
+              MENU:
+                action: key
+                key: ContextMenu
       required:
         - allow_invalid_certificates
         - color_scheme
         - website_data
-        - volume_buttons
-        - channel_buttons
+        - buttons
     CfgAll:
       type: object
       properties:
@@ -19174,22 +19435,32 @@ components:
             - keep
             - clear_cache_on_close
             - clear_all_on_close
-        volume_buttons:
-          description: Function of VOLUME up and down in the fullscreen web view. See `CfgWebview`.
-          type: string
-          enum:
-            - zoom
-            - volume
+        buttons:
+          description: |
+            Changes of single buttons, merged with the configured buttons: a button which is not in the object keeps its
+            action, an action replaces the action of the button, `null` resets the button to its default action. See
+            `CfgWebview`.
+
+            - Buttons of another Remote model are accepted and stored, e.g. from a backup of another model. The settings
+              only contain the buttons of the Remote model.
+            - An unknown button or a button with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with error code
+              `400` (`VALIDATION_ERROR`) with the field `buttons.<button>` and the code `INVALID`.
+          type: object
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            anyOf:
+              - $ref: '#/components/schemas/WebviewButtonAction'
+              - type: 'null'
           examples:
-            - volume
-        channel_buttons:
-          description: Function of CHANNEL up and down in the fullscreen web view. See `CfgWebview`.
-          type: string
-          enum:
-            - scroll
-            - channel
-          examples:
-            - channel
+            - VOLUME_UP:
+                action: pass
+              VOLUME_DOWN:
+                action: pass
+            - BACK:
+                action: function
+                function: back_or_close
+              CHANNEL_UP: null
     DockId:
       type: string
       format: ^[a-zA-Z0-9\-\.]+$

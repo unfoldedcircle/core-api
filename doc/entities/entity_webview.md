@@ -263,6 +263,110 @@ page. At most 20 cookies.
 - A reload ends open dialogs of the page.
 - The reload interval pauses while the web view is hidden or the display is off.
 
+#### Buttons
+
+The `buttons` object changes the function of single physical buttons in the [fullscreen web view](#fullscreen-web-view),
+e.g. to send the CHANNEL buttons as key events to a page which handles them itself, or to keep the button mapping of
+the activity for VOLUME up and down.
+
+| Name    | Type   | Default | Description                                                                                                         |
+|---------|--------|---------|---------------------------------------------------------------------------------------------------------------------|
+| buttons | object |         | An action per button identifier. Only the buttons which differ from the [global setting](#global-web-view-settings). |
+
+```json
+{
+  "buttons": {
+    "BACK": { "action": "function", "function": "back_or_close" },
+    "VOLUME_UP": { "action": "pass" },
+    "VOLUME_DOWN": { "action": "pass" },
+    "CHANNEL_UP": { "action": "key", "key": "ChannelUp" },
+    "CHANNEL_DOWN": { "action": "key", "key": "ChannelDown" }
+  }
+}
+```
+
+The key is the identifier of the physical button, the same as in the button mapping of an activity:
+
+| Buttons                                                                                                                                  | Remote model |
+|------------------------------------------------------------------------------------------------------------------------------------------|--------------|
+| `BACK`, `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_MIDDLE`, `VOLUME_UP`, `VOLUME_DOWN`, `CHANNEL_UP`, `CHANNEL_DOWN`, `MUTE`, `PREV`, `PLAY`, `NEXT` | All          |
+| `STOP`, `RECORD`, `MENU`                                                                                                                 | Remote 3     |
+| `RED`, `GREEN`, `YELLOW`, `BLUE`                                                                                                         | Remote Two   |
+
+- `HOME`, `POWER` and `VOICE` have a fixed function and can't be changed: HOME always closes the web view and shows the
+  home screen, POWER and VOICE keep their normal function.
+- A button with a fixed function or an unknown button is refused with error code `400` (`VALIDATION_ERROR`) with the
+  field `options.buttons.<button>` and the code `INVALID`.
+- The buttons only apply to the fullscreen web view. In the [web view widget](#activity-widget), the buttons keep the
+  button mapping of the activity.
+
+The value is an object with the `action` of the button:
+
+| action   | Description                                                                                                                                                                                                                                                           |
+|----------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| pass     | The button keeps its function in the layer below the web view: the button mapping of the activity if the web view is shown on top of an activity, otherwise the function of the button on the screen below, e.g. the normal volume handling of the Remote on a profile page. |
+| function | The web view function in `function`, see below.                                                                                                                                                                                                                       |
+| key      | The key event in `key` is sent to the page, see below.                                                                                                                                                                                                                |
+
+`function` is required for the `function` action and not allowed otherwise. `key` is required for the `key` action
+and not allowed otherwise.
+
+Web view functions:
+
+| function                    | Description                                                                                                                                                                                                                                                  |
+|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| zoom_in, zoom_out           | Zoom the page in or out by one step: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250 and 300 %. The zoom starts at the effective `zoom` option of the entity. The changed zoom only applies until the web view is closed: it isn't saved to the entity. No effect while a dialog or the on-screen keyboard is open. |
+| zoom_reset                  | Zoom back to the effective `zoom` option of the entity.                                                                                                                                                                                                      |
+| scroll_up, scroll_down      | Scroll the page up or down by a small step.                                                                                                                                                                                                                  |
+| page_up, page_down          | Scroll the page up or down by one screen.                                                                                                                                                                                                                    |
+| top, bottom                 | Scroll to the top or the bottom of the page.                                                                                                                                                                                                                 |
+| back, forward               | Go back or forward in the history of the web view.                                                                                                                                                                                                           |
+| back_or_close               | Go back in the history, or close the web view on its first page.                                                                                                                                                                                             |
+| reload                      | Reload the page.                                                                                                                                                                                                                                             |
+| stop                        | Stop loading the page.                                                                                                                                                                                                                                       |
+| close                       | Close the web view and return to the previous screen.                                                                                                                                                                                                        |
+| toggle_navigation           | Show or hide the navigation controls, see `show_navigation`. The change isn't saved to the entity.                                                                                                                                                           |
+| focus_next, focus_previous  | Move the focus to the next or the previous element of the page, like `Tab` and `Shift+Tab` on a keyboard.                                                                                                                                                    |
+| none                        | The button does nothing.                                                                                                                                                                                                                                     |
+
+Keys: the `KeyboardEvent.key` values of the [UI Events key values](https://www.w3.org/TR/uievents-key/) `ArrowUp`,
+`ArrowDown`, `ArrowLeft`, `ArrowRight`, `Enter`, `Escape`, `Backspace`, `Tab`, `PageUp`, `PageDown`, `Home`, `End`,
+`ContextMenu`, `BrowserBack`, `BrowserForward`, `BrowserRefresh`, `BrowserStop`, `Exit`, `AudioVolumeUp`,
+`AudioVolumeDown`, `AudioVolumeMute`, `ChannelUp`, `ChannelDown`, `MediaPlayPause`, `MediaPlay`, `MediaPause`,
+`MediaStop`, `MediaRecord`, `MediaRewind`, `MediaFastForward`, `MediaTrackPrevious`, `MediaTrackNext`, `ColorF0Red`,
+`ColorF1Green`, `ColorF2Yellow` and `ColorF3Blue`.
+
+- The page receives a key event with this `key` and the matching `code`, like from a keyboard.
+- Any button can send any of these keys, e.g. `ColorF0Red` from the PLAY button.
+
+Held buttons:
+
+- A held button repeats key events and the functions `scroll_up`, `scroll_down`, `page_up` and `page_down`.
+- All other functions act once per press, e.g. a held VOLUME up zooms in by one step.
+- A `pass` button behaves like in the layer below.
+
+The action of a button is taken from the first of:
+
+1. the [user override](#user-overrides) in `options.user.buttons`, only for a web view from an integration driver,
+2. the `buttons` option of the web view,
+3. the [global web view setting](#global-web-view-settings) `buttons`, which contains the default actions.
+
+Default actions, if neither the global setting nor the web view changes a button:
+
+| Button                                            | Default action                                        |
+|---------------------------------------------------|-------------------------------------------------------|
+| `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT` | key `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+| `DPAD_MIDDLE`                                     | key `Enter`                                           |
+| `BACK`                                            | function `close`                                      |
+| `VOLUME_UP`, `VOLUME_DOWN`                        | function `zoom_in`, `zoom_out`                        |
+| `CHANNEL_UP`, `CHANNEL_DOWN`                      | function `page_up`, `page_down`                       |
+| `MENU`                                            | key `ContextMenu`                                     |
+| All other buttons                                 | `pass`                                                |
+
+Updating the buttons of a user-defined web view with the Core-API: `buttons` is merged button by button with the
+stored buttons. An action sets a button, `null` removes it and the global setting applies again. `null` instead of the
+object removes all buttons.
+
 ### Secret options
 
 The following options are secrets. They are part of the entity options: an integration driver sets them in the entity
@@ -308,9 +412,13 @@ See [user overrides](README.md#user-overrides).
 | zoom            | Page zoom in percent.                               |
 | reload_interval | Reload interval in seconds.                         |
 | show_navigation | Navigation controls in the fullscreen web view.     |
+| buttons         | Function of single buttons, see [buttons](#buttons). |
 
 - The URL, authentication, TLS, cookie and user agent options can't be overridden: they belong to the integration
   driver. Any other option in `options.user` is refused with error code `400`.
+- `buttons` is merged button by button: an override of a button replaces the action of the driver for this button,
+  `null` removes the override. A button with a fixed function or an unknown button is refused with error code `400`
+  with the field `options.user.buttons.<button>`.
 - A user-defined web view has no user overrides: its options are changed directly. An option in `options.user` is
   refused with error code `400`.
 
@@ -326,8 +434,7 @@ buttons to clear the cache and the website data.
 | allow_invalid_certificates | boolean | false   | Allow invalid TLS certificates for all web views. See [below](#allow-invalid-tls-certificates-for-all-web-views).                     |
 | color_scheme               | enum    | dark    | Color scheme for the pages: `light` or `dark`. See [color scheme](#color-scheme).                                                   |
 | website_data               | enum    | keep    | What happens with the website data when a web view is closed: `keep`, `clear_cache_on_close` or `clear_all_on_close`. See [website data](#website-data). |
-| volume_buttons             | enum    | zoom    | Function of VOLUME up and down in the fullscreen web view: `zoom` or `volume`. See [fullscreen web view](#fullscreen-web-view).     |
-| channel_buttons            | enum    | scroll  | Function of CHANNEL up and down in the fullscreen web view: `scroll` or `channel`. See [fullscreen web view](#fullscreen-web-view). |
+| buttons                    | object  |         | Function of the physical buttons in the fullscreen web view. See [button settings](#button-settings).                               |
 
 Core-API:
 
@@ -340,6 +447,34 @@ Core-API:
   values with `DELETE /api/cfg` and `reset_configuration`.
 - A change is reported with the `configuration_change` event.
 - Changing the settings requires the `admin` scope. Other API keys are refused with error code `403`.
+
+### Button settings
+
+`buttons` defines the function of the physical buttons in the [fullscreen web view](#fullscreen-web-view) for all web
+views: an action per button identifier, in the same format as the [buttons](#buttons) option of a web view. A web view
+can change single buttons with its `buttons` option.
+
+- The settings contain every button of the Remote model which can be changed, with its configured action or its
+  [default action](#buttons).
+- A change is merged button by button: a button which is not in the request keeps its action, an action replaces the
+  action of the button, `null` resets the button to its default action.
+- Buttons of another Remote model are accepted and stored, e.g. from a backup of another model. The settings only
+  contain the buttons of the Remote model.
+- A button with a fixed function (`HOME`, `POWER`, `VOICE`) or an unknown button is refused with error code `400`
+  (`VALIDATION_ERROR`) with the field `buttons.<button>` and the code `INVALID`.
+
+Keep the button mapping of the activity for VOLUME up and down, and reset BACK to its default action
+(`PATCH /api/cfg/webview`):
+
+```json
+{
+  "buttons": {
+    "VOLUME_UP": { "action": "pass" },
+    "VOLUME_DOWN": { "action": "pass" },
+    "BACK": null
+  }
+}
+```
 
 ### Allow invalid TLS certificates for all web views
 
@@ -405,23 +540,13 @@ interactive.
 - With the `show_navigation` option, the web view shows controls to go back, go forward, reload the page and close the
   web view.
 - Button handling, also on top of an activity screen:
-  - BACK closes the web view and returns to the previous screen.
   - HOME closes the web view and shows the home screen.
-  - The D-pad and OK are sent to the page.
-  - CHANNEL up and down depend on the global setting [`channel_buttons`](#global-web-view-settings):
-    - `scroll` (default): CHANNEL up and down scroll the page by one screen.
-    - `channel`: CHANNEL up and down keep their normal function: the button mapping of the active activity, or, when
-      the web view was opened from a profile page and not from an activity, the normal handling of the Remote.
-  - VOLUME up and down depend on the global setting [`volume_buttons`](#global-web-view-settings):
-    - `zoom` (default): VOLUME up and down zoom the page in and out, one step per press: 50, 67, 75, 80, 90, 100, 110,
-      125, 150, 175, 200, 250 and 300 %. The zoom starts at the effective `zoom` option of the entity: the user
-      override, otherwise the option, otherwise 100 %. The changed zoom only applies until the web view is closed: it
-      isn't saved to the entity. VOLUME does nothing while a dialog or the on-screen keyboard is open.
-    - `volume`: VOLUME up and down keep their normal function: the button mapping of the active activity, or, when the
-      web view was opened from a profile page and not from an activity, the normal volume handling of the Remote, e.g.
-      the volume of the active media player.
-  - The other buttons keep their function, e.g. MUTE, the color buttons, PREV, NEXT and POWER keep the button mapping
-    of the active activity.
+  - POWER and VOICE keep their normal function.
+  - All other buttons have the action of the [buttons](#buttons) option of the web view and the
+    [global button settings](#button-settings). By default, BACK closes the web view, the D-pad sends the arrow keys
+    and OK the `Enter` key to the page, VOLUME up and down zoom the page in and out, CHANNEL up and down scroll the
+    page by one screen, and MENU sends the `ContextMenu` key. The other buttons keep their function, e.g. MUTE, PREV,
+    PLAY, NEXT and the color buttons keep the button mapping of the active activity.
 - HTTP login requests of the page without configured credentials, and `alert`, `confirm` and `prompt` dialogs of the
   page, are shown as dialogs of the UI.
 

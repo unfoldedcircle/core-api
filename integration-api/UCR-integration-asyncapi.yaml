@@ -2911,6 +2911,8 @@ components:
           minimum: 0
           maximum: 86400
           default: 0
+        buttons:
+          $ref: '#/components/schemas/webviewButtons'
       required:
         - url
       examples:
@@ -2930,6 +2932,145 @@ components:
               value: compact
           reload_interval: 60
           show_navigation: true
+          buttons:
+            CHANNEL_UP:
+              action: key
+              key: ChannelUp
+            CHANNEL_DOWN:
+              action: key
+              key: ChannelDown
+
+    webviewButtons:
+      description: |
+        Function of single physical buttons in the fullscreen web view: a `webviewButtonAction` per button identifier.
+        Only set the buttons which the page needs, e.g. to send the CHANNEL keys to a page which handles them itself.
+        The other buttons keep the global web view settings of the Remote, which also define the default actions. Can be
+        overridden by the user, button by button.
+
+        Buttons: `BACK`, `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_MIDDLE`, `VOLUME_UP`, `VOLUME_DOWN`,
+        `CHANNEL_UP`, `CHANNEL_DOWN`, `MUTE`, `PREV`, `PLAY`, `NEXT`, `STOP`, `RECORD`, `MENU`, `RED`, `GREEN`,
+        `YELLOW` and `BLUE`. Not every Remote model has all buttons. `HOME`, `POWER` and `VOICE` have a fixed function:
+        a web view entity with one of them, or with an unknown button, is refused.
+
+        The buttons only apply to the fullscreen web view, not to the web view widget of an activity.
+      type: object
+      propertyNames:
+        type: string
+        enum:
+          - BACK
+          - DPAD_UP
+          - DPAD_DOWN
+          - DPAD_LEFT
+          - DPAD_RIGHT
+          - DPAD_MIDDLE
+          - VOLUME_UP
+          - VOLUME_DOWN
+          - CHANNEL_UP
+          - CHANNEL_DOWN
+          - MUTE
+          - PREV
+          - PLAY
+          - NEXT
+          - STOP
+          - RECORD
+          - MENU
+          - RED
+          - GREEN
+          - YELLOW
+          - BLUE
+      additionalProperties:
+        $ref: '#/components/schemas/webviewButtonAction'
+
+    webviewButtonAction:
+      description: |
+        Action of a physical button in the fullscreen web view:
+        - `pass`: the button keeps its function in the layer below the web view, e.g. the button mapping of the
+          activity.
+        - `function`: the web view function in `function`, e.g. `zoom_in` or `page_down`.
+        - `key`: the key event in `key` is sent to the page: a `KeyboardEvent.key` value of the
+          [UI Events key values](https://www.w3.org/TR/uievents-key/), with the matching `code`.
+
+        `function` is required for the `function` action and not allowed otherwise. `key` is required for the `key`
+        action and not allowed otherwise. See the
+        [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#buttons)
+        for the functions and the keys.
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - pass
+            - function
+            - key
+        function:
+          type: string
+          enum:
+            - zoom_in
+            - zoom_out
+            - zoom_reset
+            - scroll_up
+            - scroll_down
+            - page_up
+            - page_down
+            - top
+            - bottom
+            - back
+            - forward
+            - back_or_close
+            - reload
+            - stop
+            - close
+            - toggle_navigation
+            - focus_next
+            - focus_previous
+            - none
+        key:
+          type: string
+          enum:
+            - ArrowUp
+            - ArrowDown
+            - ArrowLeft
+            - ArrowRight
+            - Enter
+            - Escape
+            - Backspace
+            - Tab
+            - PageUp
+            - PageDown
+            - Home
+            - End
+            - ContextMenu
+            - BrowserBack
+            - BrowserForward
+            - BrowserRefresh
+            - BrowserStop
+            - Exit
+            - AudioVolumeUp
+            - AudioVolumeDown
+            - AudioVolumeMute
+            - ChannelUp
+            - ChannelDown
+            - MediaPlayPause
+            - MediaPlay
+            - MediaPause
+            - MediaStop
+            - MediaRecord
+            - MediaRewind
+            - MediaFastForward
+            - MediaTrackPrevious
+            - MediaTrackNext
+            - ColorF0Red
+            - ColorF1Green
+            - ColorF2Yellow
+            - ColorF3Blue
+      required:
+        - action
+      examples:
+        - action: key
+          key: ChannelUp
+        - action: function
+          function: page_down
+        - action: pass
 
     webviewAuth:
       description: |
