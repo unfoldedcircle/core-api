@@ -6952,6 +6952,8 @@ paths:
         by integration drivers. User-defined web views belong to the internal integration `uc_web.main`, their entity
         identifier is `uc_web.main.<uuid>`.
 
+        A maximum of 100 user-defined web views can be created.
+
         To create a new web view at least a name and the `url` option must be provided. The `icon` and `description`
         properties are optional and can be set later with the `PATCH` update operation.
 
@@ -6961,8 +6963,8 @@ paths:
         The values of the secret options `auth.password`, `auth.token`, `auth.header_value` and `cookies[].value` are
         omitted in the response, which contains the `has_*` flags instead. See `WebviewOptions`.
 
-        The new web view can be cloned from another web view entity identifier in `clone_from`: it gets the effective
-        options of that web view, with its user overrides applied, including its secret options. A new name must be
+        The new web view can be cloned from another user-defined web view entity identifier in `clone_from`: it gets the
+        options of that web view, including its secret options. Web views from integrations cannot be cloned. A new name must be
         specified. The `icon` and `description` are not copied and can be specified. Specified `options` are applied to
         the copied options like in an update, see `WebviewCreate`.
       operationId: createWebview
@@ -17747,13 +17749,12 @@ components:
     WebviewCreate:
       description: |
         Dedicated request object to create a new user-defined web view. Either `options` with `url`, or `clone_from`
-        must be specified.
+        must be specified. A maximum of 100 user-defined web views can be created.
 
-        With `clone_from`, the new web view starts with the effective options of the given web view, including the secret
-        options: its options with its user overrides in `user` applied. The new web view is a user-defined web view
-        without user overrides. Only the options are copied, not the `icon` and the `description`. Specified `options`
-        are applied to the copied options like in an update, see `WebviewUpdate`: an omitted option keeps the copied
-        value, a specified option replaces it, `null` removes it.
+        With `clone_from`, the new web view starts with the options of the given user-defined web view, including the secret
+        options. Only user-defined web views can be cloned, web views from integrations cannot be cloned. Only the options are copied,
+        not the `icon` and the `description`. Specified `options` are applied to the copied options like in an update, see `WebviewUpdate`:
+        an omitted option keeps the copied value, a specified option replaces it, `null` removes it.
       type: object
       properties:
         name:
