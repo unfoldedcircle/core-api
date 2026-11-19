@@ -336,7 +336,10 @@ Keys: the `KeyboardEvent.key` values of the [UI Events key values](https://www.w
 `MediaStop`, `MediaRecord`, `MediaRewind`, `MediaFastForward`, `MediaTrackPrevious`, `MediaTrackNext`, `ColorF0Red`,
 `ColorF1Green`, `ColorF2Yellow` and `ColorF3Blue`.
 
-- The page receives a key event with this `key` and the matching `code`, like from a keyboard.
+- The page receives a real key event with this `key`, like from a keyboard. Its `code` is the
+  [UI Events code value](https://www.w3.org/TR/uievents-code/) of the corresponding keyboard key where one exists,
+  otherwise `Unidentified`: for `Exit`, `ChannelUp`, `ChannelDown`, `MediaPlay`, `MediaPause`, `MediaRecord`,
+  `MediaRewind`, `MediaFastForward` and the color keys `ColorF0Red` to `ColorF3Blue`.
 - Any button can send any of these keys, e.g. `ColorF0Red` from the PLAY button.
 
 Held buttons:

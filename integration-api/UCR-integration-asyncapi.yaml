@@ -2987,8 +2987,10 @@ components:
         - `pass`: the button keeps its function in the layer below the web view, e.g. the button mapping of the
           activity.
         - `function`: the web view function in `function`, e.g. `zoom_in` or `page_down`.
-        - `key`: the key event in `key` is sent to the page: a `KeyboardEvent.key` value of the
-          [UI Events key values](https://www.w3.org/TR/uievents-key/), with the matching `code`.
+        - `key`: a real key event with the `key` in `key` is sent to the page: a `KeyboardEvent.key` value of the
+          [UI Events key values](https://www.w3.org/TR/uievents-key/). Its `code` is the UI Events code value of the
+          corresponding keyboard key where one exists, otherwise `Unidentified`, e.g. for `ChannelUp` and the color
+          keys.
 
         `function` is required for the `function` action and not allowed otherwise. `key` is required for the `key`
         action and not allowed otherwise. See the
