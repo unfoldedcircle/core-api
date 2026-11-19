@@ -15520,6 +15520,9 @@ components:
             | All other buttons                                    | `pass`                                              |
 
             `HOME`, `POWER` and `VOICE` have a fixed function and are not part of the settings, see `WebviewButton`.
+
+            A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+            activities: the buttons which the model doesn't have are removed.
           type: object
           propertyNames:
             $ref: '#/components/schemas/WebviewButton'
@@ -15604,10 +15607,9 @@ components:
             action, an action replaces the action of the button, `null` resets the button to its default action. See
             `CfgWebview`.
 
-            - Buttons of another Remote model are accepted and stored, e.g. from a backup of another model. The settings
-              only contain the buttons of the Remote model.
-            - An unknown button or a button with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with error code
-              `400` (`VALIDATION_ERROR`) with the field `buttons.<button>` and the code `INVALID`.
+            Only the buttons of the Remote model can be changed. A button which the model doesn't have, e.g. `MENU` on a
+            Remote Two, an unknown button or a button with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with
+            error code `400` (`VALIDATION_ERROR`) with the field `buttons.<button>` and the code `INVALID`.
           type: object
           propertyNames:
             $ref: '#/components/schemas/WebviewButton'
@@ -19427,8 +19429,13 @@ components:
         The buttons only apply to the fullscreen web view. In the web view widget of an activity, the buttons keep the
         button mapping of the activity.
 
-        An unknown button or a button with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with error code `400`
-        (`VALIDATION_ERROR`) with the field `options.buttons.<button>` and the code `INVALID`.
+        Only the buttons of the Remote model can be set. A button which the model doesn't have, an unknown button or a button
+        with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with error code `400` (`VALIDATION_ERROR`) with the
+        field `options.buttons.<button>` and the code `INVALID`.
+        - In the entity definition of an integration driver, the buttons which the Remote model doesn't have are ignored: a
+          driver can use the same definition for all models.
+        - A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+          activities: the buttons which the model doesn't have are removed, also from the user overrides.
       type: object
       propertyNames:
         $ref: '#/components/schemas/WebviewButton'
@@ -19476,8 +19483,9 @@ components:
         buttons:
           description: |
             User overrides of single buttons, see `WebviewButtons`. A button with an action sets its override, `null`
-            removes it. An unknown button or a button with a fixed function is refused with error code `400`
-            (`VALIDATION_ERROR`) with the field `options.user.buttons.<button>` and the code `INVALID`.
+            removes it. A button which the Remote model doesn't have, an unknown button or a button with a fixed function
+            is refused with error code `400` (`VALIDATION_ERROR`) with the field `options.user.buttons.<button>` and the
+            code `INVALID`.
           type:
             - object
             - 'null'

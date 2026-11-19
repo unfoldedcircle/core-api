@@ -2949,7 +2949,8 @@ components:
 
         Buttons: `BACK`, `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_MIDDLE`, `VOLUME_UP`, `VOLUME_DOWN`,
         `CHANNEL_UP`, `CHANNEL_DOWN`, `MUTE`, `PREV`, `PLAY`, `NEXT`, `STOP`, `RECORD`, `MENU`, `RED`, `GREEN`,
-        `YELLOW` and `BLUE`. Not every Remote model has all buttons. `HOME`, `POWER` and `VOICE` have a fixed function:
+        `YELLOW` and `BLUE`. Not every Remote model has all buttons: the buttons which the Remote model doesn't have are
+        ignored, so the same definition can be used for all models. `HOME`, `POWER` and `VOICE` have a fixed function:
         a web view entity with one of them, or with an unknown button, is refused.
 
         The buttons only apply to the fullscreen web view, not to the web view widget of an activity.

@@ -295,8 +295,13 @@ The key is the identifier of the physical button, the same as in the button mapp
 
 - `HOME`, `POWER` and `VOICE` have a fixed function and can't be changed: HOME always closes the web view and shows the
   home screen, POWER and VOICE keep their normal function.
-- A button with a fixed function or an unknown button is refused with error code `400` (`VALIDATION_ERROR`) with the
-  field `options.buttons.<button>` and the code `INVALID`.
+- Only the buttons of the Remote model can be set, like in the button mapping of an activity. A button which the model
+  doesn't have, e.g. `MENU` on a Remote Two, a button with a fixed function or an unknown button is refused with error
+  code `400` (`VALIDATION_ERROR`) with the field `options.buttons.<button>` and the code `INVALID`.
+- In the entity definition of an integration driver, the buttons which the Remote model doesn't have are ignored: a
+  driver can use the same definition for all models.
+- A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+  activities: the buttons which the model doesn't have are removed, also from the user overrides.
 - The buttons only apply to the fullscreen web view. In the [web view widget](#activity-widget), the buttons keep the
   button mapping of the activity.
 
@@ -420,8 +425,8 @@ See [user overrides](README.md#user-overrides).
 - The URL, authentication, TLS, cookie and user agent options can't be overridden: they belong to the integration
   driver. Any other option in `options.user` is refused with error code `400`.
 - `buttons` is merged button by button: an override of a button replaces the action of the driver for this button,
-  `null` removes the override. A button with a fixed function or an unknown button is refused with error code `400`
-  with the field `options.user.buttons.<button>`.
+  `null` removes the override. A button which the Remote model doesn't have, a button with a fixed function or an
+  unknown button is refused with error code `400` with the field `options.user.buttons.<button>`.
 - A user-defined web view has no user overrides: its options are changed directly. An option in `options.user` is
   refused with error code `400`.
 
@@ -461,10 +466,11 @@ can change single buttons with its `buttons` option.
   [default action](#buttons).
 - A change is merged button by button: a button which is not in the request keeps its action, an action replaces the
   action of the button, `null` resets the button to its default action.
-- Buttons of another Remote model are accepted and stored, e.g. from a backup of another model. The settings only
-  contain the buttons of the Remote model.
-- A button with a fixed function (`HOME`, `POWER`, `VOICE`) or an unknown button is refused with error code `400`
+- Only the buttons of the Remote model can be changed. A button which the model doesn't have, e.g. `MENU` on a Remote
+  Two, a button with a fixed function (`HOME`, `POWER`, `VOICE`) or an unknown button is refused with error code `400`
   (`VALIDATION_ERROR`) with the field `buttons.<button>` and the code `INVALID`.
+- A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+  activities: the buttons which the model doesn't have are removed.
 
 Keep the button mapping of the activity for VOLUME up and down, and reset BACK to its default action
 (`PATCH /api/cfg/webview`):
