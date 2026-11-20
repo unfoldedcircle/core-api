@@ -1209,6 +1209,10 @@ components:
         $ref: '#/components/schemas/AmbientLightMsg'
     reset_configuration:
       summary: 🧪 Reset all settings to default values.
+      description: |
+        Mirrors the REST operation `DELETE /cfg`.
+
+        - Access: requires the `admin` scope; other sessions are refused with error code `403`.
       payload:
         $ref: '#/components/schemas/ResetConfigurationMsg'
       x-response:

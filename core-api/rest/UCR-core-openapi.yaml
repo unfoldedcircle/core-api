@@ -7744,6 +7744,9 @@ paths:
       summary: Reset all settings to default values.
       description: |
         This resets all system configuration settings to factory defaults. Integration & profile settings are not affected.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account or an API key with the `admin` scope may reset the settings.
       operationId: resetAllSettings
       responses:
         '200':

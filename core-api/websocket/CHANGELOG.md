@@ -15,6 +15,9 @@ This section contains unreleased changes which will be part of an upcoming relea
 - 👷 Draft: Web View Entity support (`webview`): user-defined web views, global web view settings, the `webview` activity
   user interface widget, and web view commands routed to the user interface.
 
+### Changed
+- `reset_configuration` (mirrors `DELETE /cfg`) requires the `admin` scope; other sessions get `403`.
+
 ## 0.50.4
 ### Changed
 - Clarified that updating a profile (`update_profile`) with an empty `pages` array removes all pages in the profile while keeping its groups.
