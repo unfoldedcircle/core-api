@@ -240,6 +240,7 @@ channels:
           - $ref: '#/components/messages/set_voice_control_cfg'
           - $ref: '#/components/messages/get_webview_cfg'
           - $ref: '#/components/messages/set_webview_cfg'
+          - $ref: '#/components/messages/get_webview_button_presets'
           - $ref: '#/components/messages/get_voice_assistants'
           - $ref: '#/components/messages/get_entity_types'
           - $ref: '#/components/messages/get_entity'
@@ -446,6 +447,7 @@ channels:
           - $ref: '#/components/messages/sound_cfg'
           - $ref: '#/components/messages/voice_control_cfg'
           - $ref: '#/components/messages/webview_cfg'
+          - $ref: '#/components/messages/webview_button_presets'
           - $ref: '#/components/messages/voice_assistants'
           - $ref: '#/components/messages/entity_types'
           - $ref: '#/components/messages/entities'
@@ -1707,6 +1709,30 @@ components:
       summary: 👷 Global web view settings response.
       payload:
         $ref: '#/components/schemas/WebviewCfgMsg'
+    get_webview_button_presets:
+      summary: 👷 Get the web view button presets.
+      description: |
+        Presets of button actions for the fullscreen web view, to set several buttons at once. Each preset only
+        contains the buttons it covers, and only the buttons of the Remote model. See `WebviewButtonPreset` for the
+        presets.
+
+        A client applies a preset with an existing button update, e.g. `set_webview_cfg` with the `buttons` of the
+        preset: only these buttons change, every other button keeps its action. There is no request to apply a
+        preset.
+
+        - Access: like `get_webview_cfg`, the presets can be read without the `admin` scope.
+
+        Mirrors the REST operation `GET /cfg/webview/button_presets`.
+      payload:
+        $ref: '#/components/schemas/GetWebviewButtonPresetsMsg'
+      x-response:
+        summary: 👷 Web view button presets response.
+        payload:
+          $ref: '#/components/schemas/WebviewButtonPresetsMsg'
+    webview_button_presets:
+      summary: 👷 Web view button presets response.
+      payload:
+        $ref: '#/components/schemas/WebviewButtonPresetsMsg'
     get_voice_assistants:
       summary: 🔍 Get available voice assistants.
       payload:
@@ -8171,6 +8197,30 @@ components:
               const: webview_cfg
             msg_data:
               $ref: '#/components/schemas/CfgWebview'
+          required:
+            - msg
+    GetWebviewButtonPresetsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonReq'
+        - properties:
+            msg:
+              type: string
+              const: get_webview_button_presets
+          required:
+            - msg
+    WebviewButtonPresetsMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonResp'
+        - properties:
+            msg:
+              type: string
+              const: webview_button_presets
+            msg_data:
+              type: array
+              items:
+                $ref: '#/components/schemas/WebviewButtonPreset'
           required:
             - msg
     GetVoiceAssistantsMsg:
@@ -15523,6 +15573,9 @@ components:
 
             A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
             activities: the buttons which the model doesn't have are removed.
+
+            Presets to set several buttons at once: `GET /cfg/webview/button_presets` and `get_webview_button_presets`, see
+            `WebviewButtonPreset`.
           type: object
           propertyNames:
             $ref: '#/components/schemas/WebviewButton'
@@ -19455,6 +19508,59 @@ components:
           CHANNEL_DOWN:
             action: key
             key: ChannelDown
+    WebviewButtonPreset:
+      description: |
+        👷 Draft. A preset of button actions for the fullscreen web view, to set several buttons at once. A preset only
+        contains the buttons it covers, and only the buttons of the Remote model. `HOME`, `POWER` and `VOICE` are never
+        part of a preset.
+
+        The Core-API has no operation to apply a preset: a client sends the `buttons` of the preset with an existing button
+        update, which only changes these buttons, every other button keeps its action:
+        - the global web view setting `buttons` (`CfgWebviewUpdate`),
+        - the `buttons` option of a user-defined web view (`WebviewButtons`),
+        - the user override `options.user.buttons` of a web view from an integration driver (`WebviewUserOptions`).
+
+        | Button                                            | `web_view_functions`            | `page_keys`                                                      |
+        |---------------------------------------------------|---------------------------------|------------------------------------------------------------------|
+        | `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT` | –                               | key `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`            |
+        | `DPAD_MIDDLE`                                     | –                               | key `Enter`                                                      |
+        | `BACK`                                            | function `back_or_close`        | key `Escape`                                                     |
+        | `VOLUME_UP`, `VOLUME_DOWN`                        | function `zoom_in`, `zoom_out`  | key `AudioVolumeUp`, `AudioVolumeDown`                           |
+        | `MUTE`                                            | function `zoom_reset`           | key `AudioVolumeMute`                                            |
+        | `CHANNEL_UP`, `CHANNEL_DOWN`                      | function `page_up`, `page_down` | key `ChannelUp`, `ChannelDown`                                   |
+        | `PREV`, `NEXT`                                    | function `back`, `forward`      | key `MediaTrackPrevious`, `MediaTrackNext`                       |
+        | `PLAY`                                            | function `reload`               | key `MediaPlayPause`                                             |
+        | `STOP`                                            | function `stop`                 | key `MediaStop`                                                  |
+        | `RECORD`                                          | –                               | key `MediaRecord`                                                |
+        | `MENU`                                            | function `toggle_navigation`    | key `ContextMenu`                                                |
+        | `RED`, `GREEN`, `YELLOW`, `BLUE`                  | –                               | key `ColorF0Red`, `ColorF1Green`, `ColorF2Yellow`, `ColorF3Blue` |
+
+        –: the button is not part of the preset and keeps its action.
+      type: object
+      properties:
+        id:
+          description: |
+            Identifier of the preset:
+            - `web_view_functions`: the web view functions, e.g. VOLUME zooms the page, PREV and NEXT go back and forward
+              in the history.
+            - `page_keys`: key events for a page which handles the buttons of the Remote itself.
+
+            A client must ignore a preset with an unknown identifier: more presets can be added. The Core-API has no names
+            for the presets: a client names them itself.
+          type: string
+          examples:
+            - web_view_functions
+            - page_keys
+        buttons:
+          description: The action of every button of the preset.
+          type: object
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            $ref: '#/components/schemas/WebviewButtonAction'
+      required:
+        - id
+        - buttons
     WebviewUserOptions:
       description: |
         User overrides of the options of a web view from an integration driver. In an update request they are merged key

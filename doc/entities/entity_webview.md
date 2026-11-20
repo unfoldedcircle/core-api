@@ -375,6 +375,8 @@ Updating the buttons of a user-defined web view with the Core-API: `buttons` is 
 stored buttons. An action sets a button, `null` removes it and the global setting applies again. `null` instead of the
 object removes all buttons.
 
+To set several buttons at once, a client can apply a [button preset](#button-presets).
+
 ### Secret options
 
 The following options are secrets. They are part of the entity options: an integration driver sets them in the entity
@@ -446,10 +448,11 @@ buttons to clear the cache and the website data.
 
 Core-API:
 
-| Operation                    | REST Core-API            | WebSocket Core-API                |
-|------------------------------|--------------------------|-----------------------------------|
-| Get the settings             | `GET /api/cfg/webview`   | `get_webview_cfg`                 |
-| Change one or more settings  | `PATCH /api/cfg/webview` | `set_webview_cfg`                 |
+| Operation                    | REST Core-API                         | WebSocket Core-API           |
+|------------------------------|---------------------------------------|------------------------------|
+| Get the settings             | `GET /api/cfg/webview`                | `get_webview_cfg`            |
+| Change one or more settings  | `PATCH /api/cfg/webview`              | `set_webview_cfg`            |
+| Get the button presets       | `GET /api/cfg/webview/button_presets` | `get_webview_button_presets` |
 
 - The settings are part of all system settings in `GET /api/cfg` and `get_configuration`, and are reset to the default
   values with `DELETE /api/cfg` and `reset_configuration`.
@@ -483,6 +486,62 @@ Keep the button mapping of the activity for VOLUME up and down, and reset BACK t
     "BACK": null
   }
 }
+```
+
+### Button presets
+
+A button preset sets several buttons at once, e.g. all buttons for a page which handles the buttons of the Remote
+itself. The presets of the Remote model are read with `GET /api/cfg/webview/button_presets` or
+`get_webview_button_presets`, also without the `admin` scope.
+
+- A preset has an `id` and the `buttons` it covers, in the format of the [buttons](#buttons) option. It only contains
+  the buttons of the Remote model, e.g. `STOP` only on a Remote 3 and the color buttons only on a Remote Two. `HOME`,
+  `POWER` and `VOICE` are never part of a preset.
+- There is no operation to apply a preset. A client sends the `buttons` of the preset with an existing button update:
+  the [global setting](#button-settings) `buttons`, the `buttons` option of a user-defined web view or the
+  [user override](#user-overrides) `options.user.buttons` of a web view from an integration driver. Only the buttons of
+  the preset change, every other button keeps its action.
+- A client must ignore a preset with an unknown `id`: more presets can be added. The Core-API has no names for the
+  presets: a client names them itself.
+
+| Button                                            | `web_view_functions`            | `page_keys`                                                      |
+|---------------------------------------------------|---------------------------------|------------------------------------------------------------------|
+| `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT` | –                               | key `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`            |
+| `DPAD_MIDDLE`                                     | –                               | key `Enter`                                                      |
+| `BACK`                                            | function `back_or_close`        | key `Escape`                                                     |
+| `VOLUME_UP`, `VOLUME_DOWN`                        | function `zoom_in`, `zoom_out`  | key `AudioVolumeUp`, `AudioVolumeDown`                           |
+| `MUTE`                                            | function `zoom_reset`           | key `AudioVolumeMute`                                            |
+| `CHANNEL_UP`, `CHANNEL_DOWN`                      | function `page_up`, `page_down` | key `ChannelUp`, `ChannelDown`                                   |
+| `PREV`, `NEXT`                                    | function `back`, `forward`      | key `MediaTrackPrevious`, `MediaTrackNext`                       |
+| `PLAY`                                            | function `reload`               | key `MediaPlayPause`                                             |
+| `STOP`                                            | function `stop`                 | key `MediaStop`                                                  |
+| `RECORD`                                          | –                               | key `MediaRecord`                                                |
+| `MENU`                                            | function `toggle_navigation`    | key `ContextMenu`                                                |
+| `RED`, `GREEN`, `YELLOW`, `BLUE`                  | –                               | key `ColorF0Red`, `ColorF1Green`, `ColorF2Yellow`, `ColorF3Blue` |
+
+–: the button is not part of the preset and keeps its action.
+
+Presets on a Remote Two, shortened:
+
+```json
+[
+  {
+    "id": "web_view_functions",
+    "buttons": {
+      "BACK": { "action": "function", "function": "back_or_close" },
+      "VOLUME_UP": { "action": "function", "function": "zoom_in" },
+      "VOLUME_DOWN": { "action": "function", "function": "zoom_out" }
+    }
+  },
+  {
+    "id": "page_keys",
+    "buttons": {
+      "DPAD_MIDDLE": { "action": "key", "key": "Enter" },
+      "BACK": { "action": "key", "key": "Escape" },
+      "RED": { "action": "key", "key": "ColorF0Red" }
+    }
+  }
+]
 ```
 
 ### Allow invalid TLS certificates for all web views
