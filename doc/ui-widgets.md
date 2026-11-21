@@ -22,7 +22,7 @@ web-configurator, or provided as default user interface by a [remote entity](ent
 | select       | select entity                            | Option selection of a [select entity](entities/entity_select.md).                                         |
 | slider       | [entity feature](#entity-feature-target) | Slider to read and set a numeric entity feature. See [slider widget](#slider).                            |
 | number       | number entity                            | Value of a [number entity](entities/entity_number.md) as slider or stepper. See [number widget](#number). |
-| webview      | web view entity                          | 👷 Web page of a [web view entity](entities/entity_webview.md). See [web view widget](#web-view).          |
+| webview      | web view entity                          | Web page of a [web view entity](entities/entity_webview.md). See [web view widget](#web-view).            |
 
 ## Entity command parameters
 
@@ -310,7 +310,7 @@ The value updates and feedback are the same as for the [slider widget](#value-up
 ## Web view
 
 > [!NOTE]
-> 👷 Draft: the web view widget is a proposal and not yet supported by the Remote firmware.
+> The web view widget is supported in Remote firmware 2.14.0 and newer.
 
 The web view widget shows the web page of a [web view entity](entities/entity_webview.md) in an activity user interface
 page, e.g. a dashboard next to the media player controls.
@@ -398,8 +398,11 @@ Example:
 - The physical buttons keep the button mapping of the activity, e.g. the volume buttons. The
   [commands](entities/entity_webview.md#commands) of the web view entity, e.g. `webview.reload`, can be mapped to a
   button or placed as an icon or text item on a page.
-- If the web view entity is deleted or unavailable, or the Remote has no web view support, the widget shows an empty
-  placeholder. The widget is not removed automatically.
+- The widget shows no dialogs of the page and no login dialog, see the
+  [activity widget](entities/entity_webview.md#activity-widget) of the web view entity.
+- If the web view entity is deleted or unavailable, or the Remote has no web view support, the widget shows a
+  placeholder with an icon. The widget is only removed automatically when the web view entity is removed from the
+  included entities of the activity.
 
 ### Opening the web view fullscreen
 

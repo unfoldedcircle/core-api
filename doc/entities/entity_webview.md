@@ -1,8 +1,7 @@
 # Web View Entity
 
 > [!NOTE]
-> 👷 Draft: the web view entity is a proposal and not yet supported by the Remote firmware. See
-> [open issues](#open-issues).
+> The web view entity is supported in Remote firmware 2.14.0 and newer.
 
 <!-- TOC -->
 - [Availability](#availability)
@@ -19,7 +18,6 @@
 - [Commands](#commands)
 - [Core-API](#core-api)
 - [Integration API](#integration-api)
-- [Open issues](#open-issues)
 <!-- TOC -->
 
 ---
@@ -73,10 +71,8 @@ A web view entity requires a Remote whose user interface can show web views. Not
 > A Remote with an older firmware doesn't know the `webview` entity type and rejects the complete `available_entities`
 > response if it contains a web view entity: none of the driver's entities can then be configured.
 >
-> - Only include web view entities in `available_entities` if the `supported_entity_types` response of the
->   `get_supported_entity_types` request contains `webview`.
-> - Alternatively, a driver which always provides web view entities can declare the minimum Core-API version in
->   `min_core_api` of its driver metadata.
+> Only include web view entities in `available_entities` if the `supported_entity_types` response of the
+> `get_supported_entity_types` request contains `webview`.
 
 ## Not supported
 
@@ -105,7 +101,8 @@ Logins and security:
 - Saving passwords and filling in forms automatically.
 
 Input:
-- Pinch-to-zoom might not be available on all Remote models. Use the `zoom` option to scale a page.
+- Pinch-to-zoom might not be available on all Remote models. Use the `zoom` option, or the `zoom_in` and `zoom_out`
+  button functions, to scale a page.
 
 ## Features
 
@@ -176,23 +173,29 @@ The `auth` object defines the credentials which the web view sends to the origin
   page of another site or a redirect target on another host, never receive them.
 - `basic`: the user name and password are sent as answer to an HTTP authentication request (status `401`) of the origin.
   They are not sent preemptively: the first request is sent without credentials. The same credentials answer a Digest
-  authentication request. Proxy authentication requests are never answered.
-  - If the server rejects the credentials, the UI shows its login dialog.
-- `bearer` and `header`: the header is added to every HTTP request to the origin: the page, its resources like scripts,
-  styles and images, and `fetch` / `XMLHttpRequest` calls. It is removed if a request is redirected to another origin.
-  - WebSocket connections of the page are not guaranteed to receive the header.
+  authentication request. The configured credentials never answer a proxy authentication request.
+  - If the server rejects the credentials, the fullscreen web view shows its login dialog. The
+    [web view widget](#activity-widget) shows no login dialog.
+- `bearer` and `header`: the header is added to every HTTP request to the origin while the web view shows a page of the
+  origin: the page, its resources like scripts, styles and images, and `fetch` / `XMLHttpRequest` calls. It is removed
+  if a request is redirected to another origin.
+  - WebSocket connections and requests of service workers don't receive the header.
   - `header_name` must be a valid HTTP header name of at most 64 characters. The following headers can't be set: `Host`,
     `Cookie`, `Content-Length`, `Content-Type`, `Connection`, `Transfer-Encoding`, `Upgrade`, `Origin`, `Referer`, and
     all headers starting with `Proxy-` or `Sec-`.
-- With an `http://` URL the credentials are sent unencrypted. The web-configurator should show a warning.
+  - The token and the header value must only contain visible ASCII characters, spaces and tabs, without a space or a
+    tab at the start or the end. The web view doesn't send a header with another value, and it doesn't send the headers
+    `Cookie2`, `Expect`, `Keep-Alive`, `TE`, `Trailer` and `User-Agent`.
+- With an `http://` URL the page and the credentials are sent unencrypted. The web-configurator shows a note at an
+  `http://` URL.
 - If `auth.type` changes, the secret options of the previous type are removed.
 
 #### TLS certificates
 
 By default, a page with an invalid TLS certificate, e.g. a self-signed certificate, an expired certificate or a
-certificate of an unknown certificate authority, isn't loaded: the web view shows an error page. The `tls` object allows
-an exception for the host of the `url` option. Certificate errors of all hosts can only be ignored with the global
-setting [allow invalid TLS certificates for all web views](#allow-invalid-tls-certificates-for-all-web-views).
+certificate of an unknown certificate authority, isn't loaded: the web view shows an error message. The `tls` object
+allows an exception for the host of the `url` option. Certificate errors of all hosts can only be ignored with the
+global setting [allow invalid TLS certificates for all web views](#allow-invalid-tls-certificates-for-all-web-views).
 
 | Name                          | Type    | Default | Description                                                                                                                                                                    |
 |-------------------------------|---------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -207,10 +210,12 @@ setting [allow invalid TLS certificates for all web views](#allow-invalid-tls-ce
 - `certificate_sha256` is the recommended option: it only accepts the expected certificate. With
   `allow_invalid_certificate`, any certificate presented for the host is accepted, which allows a man-in-the-middle
   attack on that host.
-- A renewed self-signed certificate has a new fingerprint. The web view then shows an error page until the fingerprint
-  is updated.
+- A renewed self-signed certificate has a new fingerprint. The web view then shows an error message until the
+  fingerprint is updated.
 - All web views share their [website data](#website-data): a certificate accepted for one web view is also accepted by
   the other web views.
+- An accepted certificate stays accepted until the user interface restarts, also if the `tls` option is changed or
+  removed, or the website data is cleared.
 - The global setting [allow invalid TLS certificates for all web views](#allow-invalid-tls-certificates-for-all-web-views)
   overrides the `tls` options: if it is enabled, every web view accepts invalid certificates of all hosts.
 
@@ -223,15 +228,18 @@ page. At most 20 cookies.
 |----------------------|--------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------|
 | cookies[].name       | string             | required                   | Cookie name, at most 256 characters.                                                                            |
 | cookies[].value      | string, write-only | required                   | Cookie value, at most 4096 characters. A valid cookie value according to RFC 6265.                              |
-| cookies[].domain     | string             | host of `url`              | Domain of the cookie: the host of the `url` option or a parent domain of it. If not set, the cookie is only sent to the host of `url` (host-only cookie). |
-| cookies[].path       | string             | `/`                        | Path of the cookie.                                                                                             |
+| cookies[].domain     | string             | host of `url`              | Domain of the cookie: the host of the `url` option or a parent domain of it, at most 255 characters. If not set, the cookie is only sent to the host of `url` (host-only cookie). |
+| cookies[].path       | string             | `/`                        | Path of the cookie, at most 1024 characters.                                                                    |
 | cookies[].secure     | boolean            | true for an `https://` URL | Only send the cookie over HTTPS.                                                                                |
 | cookies[].http_only  | boolean            | false                      | Hide the cookie from scripts of the page.                                                                       |
 | cookies[].expires    | string             |                            | Expiry date in [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) format, e.g. `2027-01-01T00:00:00Z`. If not set, the cookie is a session cookie. |
 
 - The cookies are set each time the web view is opened, before the start page is loaded. A cookie which has been
   changed or deleted by the page is set to the configured value again the next time the web view is opened.
-- A cookie with a `domain` outside of the host of the `url` option, or a public suffix like `com`, is refused.
+- A cookie with a `domain` outside of the host of the `url` option, or a top-level domain like `com`, is refused with
+  error code `400`.
+- The web view doesn't set any of the configured cookies if one of them is invalid, e.g. a cookie name which is not an
+  RFC 6265 token, or a `domain` which is a public suffix like `co.uk`. The page is then loaded without them.
 - Cookies set by the page, e.g. after a login, are kept like the other [website data](#website-data).
 
 #### Display
@@ -240,10 +248,14 @@ page. At most 20 cookies.
 |---------------------|---------|----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | zoom                | integer | 100                  | Page zoom in percent: 25..400. The page is laid out for the zoomed size, e.g. 60 to show a dashboard made for tablets.                                               |
 | background_color    | string  | `#FFFFFF`            | Background color while the page is loading and behind transparent pages, as `#RRGGBB`. If not set, white `#FFFFFF` is used.                                          |
-| user_agent          | string  | default              | `default`: the user agent of the Remote, which identifies the Remote and its firmware version. `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or the desktop layout of a page. Any other value: a custom user agent string, at most 256 characters. |
+| user_agent          | string  | default              | `default`: the user agent of the Remote, which identifies the Remote and its firmware version. `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or the desktop layout of a page. Any other value: a custom user agent string, at most 256 visible ASCII characters and spaces. |
 
 - `user_agent` is sent in the `User-Agent` header of every request of the web view, and returned to scripts of the page
-  in `navigator.userAgent`. A changed user agent applies to the next page load.
+  in `navigator.userAgent`.
+- The web view uses the `default` user agent instead of a custom user agent with other characters, e.g. non-ASCII
+  characters.
+- A change of the `url`, `auth`, `tls`, `cookies` or `user_agent` option loads the start page of a shown web view
+  again.
 
 #### Navigation
 
@@ -261,7 +273,8 @@ page. At most 20 cookies.
 - The page is loaded when the web view is shown and unloaded when it's closed: the fullscreen web view when it's
   closed, a widget when its activity user interface page is left.
 - A reload ends open dialogs of the page.
-- The reload interval pauses while the web view is hidden or the display is off.
+- The reload interval stops while the web view is hidden or the display is off, and starts again with the full
+  interval when the page is shown again.
 
 #### Buttons
 
@@ -271,7 +284,7 @@ the activity for VOLUME up and down.
 
 | Name    | Type   | Default | Description                                                                                                         |
 |---------|--------|---------|---------------------------------------------------------------------------------------------------------------------|
-| buttons | object |         | An action per button identifier. Only the buttons which differ from the [global setting](#global-web-view-settings). |
+| buttons | object |         | An action per button identifier, for the buttons which this web view sets. The other buttons have the action of the [global setting](#global-web-view-settings). |
 
 ```json
 {
@@ -323,8 +336,8 @@ Web view functions:
 | zoom_in, zoom_out           | Zoom the page in or out by one step: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250 and 300 %. The zoom starts at the effective `zoom` option of the entity. The changed zoom only applies until the web view is closed: it isn't saved to the entity. No effect while a dialog or the on-screen keyboard is open. |
 | zoom_reset                  | Zoom back to the effective `zoom` option of the entity.                                                                                                                                                                                                      |
 | scroll_up, scroll_down      | Scroll the page up or down by a small step.                                                                                                                                                                                                                  |
-| page_up, page_down          | Scroll the page up or down by one screen.                                                                                                                                                                                                                    |
-| top, bottom                 | Scroll to the top or the bottom of the page.                                                                                                                                                                                                                 |
+| page_up, page_down          | Scroll the page up or down by one screen, like the `PageUp` and `PageDown` keys. In a focused text field, they move the cursor.                                                                                                                              |
+| top, bottom                 | Scroll to the top or the bottom of the page, like the `Home` and `End` keys. In a focused text field, they move the cursor.                                                                                                                                  |
 | back, forward               | Go back or forward in the history of the web view.                                                                                                                                                                                                           |
 | back_or_close               | Go back in the history, or close the web view on its first page.                                                                                                                                                                                             |
 | reload                      | Reload the page.                                                                                                                                                                                                                                             |
@@ -407,10 +420,16 @@ The Remote protects the secret values with one central rule:
 
 Updating a user-defined web view with the Core-API:
 
-- A missing secret keeps the stored value.
-- An empty string removes the stored value.
+- A missing `auth` secret keeps the stored value, as long as `auth.type` doesn't change.
+- An empty string removes the stored `auth` secret.
+- If `auth.type` changes, the secrets of the previous type are removed. `auth.type: none` removes all credentials.
 - The `cookies` list replaces the stored list. A cookie without `value` keeps the stored value of the cookie with the
-  same `name`, `domain` and `path`. A new cookie without `value` is refused with error code `400`.
+  same `name`, `domain` and `path`. A new cookie without `value`, or a cookie with an empty `value`, is refused with
+  error code `400`.
+
+> [!NOTE]
+> A backup of the Remote contains the stored secret values of the web views: passwords, tokens, header values and
+> cookie values. Keep backup files private.
 
 ### User overrides
 
@@ -426,9 +445,11 @@ See [user overrides](README.md#user-overrides).
 
 - The URL, authentication, TLS, cookie and user agent options can't be overridden: they belong to the integration
   driver. Any other option in `options.user` is refused with error code `400`.
+- `null` removes an override: the option of the integration driver applies again.
 - `buttons` is merged button by button: an override of a button replaces the action of the driver for this button,
-  `null` removes the override. A button which the Remote model doesn't have, a button with a fixed function or an
-  unknown button is refused with error code `400` with the field `options.user.buttons.<button>`.
+  `null` removes the override. `null` instead of the object removes all button overrides. A button which the Remote
+  model doesn't have, a button with a fixed function or an unknown button is refused with error code `400` with the
+  field `options.user.buttons.<button>`.
 - A user-defined web view has no user overrides: its options are changed directly. An option in `options.user` is
   refused with error code `400`.
 
@@ -559,15 +580,15 @@ drivers.
 > The setting applies to the whole Remote. Prefer the `tls` option of a web view entity: it only applies to the host
 > of its `url` option, and with `certificate_sha256` only to the expected certificate.
 
-- The setting applies to the next page load. Shown pages are not reloaded.
+- The setting applies to new connections. Shown pages are not reloaded.
 
 ### Color scheme
 
 `color_scheme` sets the CSS media feature `prefers-color-scheme` for all web views: `light` or `dark`. Default: `dark`.
 
 - A page can query it, e.g. a dashboard with a light and a dark theme shows the matching theme.
-- Only pages which support `prefers-color-scheme` react to it. It doesn't force a theme onto other pages, and it's not
-  sent as an HTTP header.
+- Only pages which support `prefers-color-scheme`, or declare the CSS property `color-scheme`, react to it. It doesn't
+  force a theme onto other pages, and it's not sent as an HTTP header.
 
 ### Website data
 
@@ -576,7 +597,8 @@ workers.
 
 - A login in one web view also applies to the other web views of the same site.
 - With `website_data: keep`, the website data is kept across restarts of the user interface and the Remote. A cookie
-  login made by the user in a web view stays valid, as long as the web server accepts it.
+  login made by the user in a web view stays valid, as long as the web server accepts it. Session cookies, i.e.
+  cookies without an expiry date, end when the user interface restarts.
 - Credentials entered in a login dialog of a web view are kept until the user interface restarts. Credentials
   configured in the `auth` option of a web view entity are sent again automatically.
 - Clearing website data, with the `website_data` setting, the clear buttons in the web view settings of the Remote, or
@@ -602,8 +624,8 @@ tapped.
 ### Fullscreen web view
 
 The fullscreen web view covers the whole screen. It is opened by tapping a profile page tile, by the `open`
-[command](#commands), e.g. from an icon on an activity user interface page, or by tapping a web view widget which is not
-interactive.
+[command](#commands), e.g. from an icon on an activity user interface page, by tapping a web view widget which is not
+interactive, or from the list of included entities of an activity.
 
 - With the `show_navigation` option, the web view shows controls to go back, go forward, reload the page and close the
   web view.
@@ -615,8 +637,12 @@ interactive.
     and OK the `Enter` key to the page, VOLUME up and down zoom the page in and out, CHANNEL up and down scroll the
     page by one screen, and MENU sends the `ContextMenu` key. The other buttons keep their function, e.g. MUTE, PREV,
     PLAY, NEXT and the color buttons keep the button mapping of the active activity.
+  - While the on-screen keyboard is shown, the D-pad and OK are sent to the text field of the page.
+  - While a page couldn't be loaded, OK loads it again.
 - HTTP login requests of the page without configured credentials, and `alert`, `confirm` and `prompt` dialogs of the
-  page, are shown as dialogs of the UI.
+  page, are shown as dialogs of the UI. While a dialog is shown, BACK and HOME close the dialog, and the other buttons
+  have no effect.
+- While the web view entity is unavailable, the web view shows a message instead of the page. Its tile doesn't open it.
 
 ### Activity widget
 
@@ -629,6 +655,10 @@ The [web view widget](../ui-widgets.md#web-view) shows the web page in an activi
 
 The UI shows one web page at a time: while a fullscreen web view is open, the page of a widget is unloaded and loaded
 again afterwards.
+
+The widget shows no dialogs: `alert`, `confirm` and `prompt` dialogs of the page are answered with cancel. An HTTP
+login request without configured credentials, or after rejected credentials, is answered without credentials: the
+widget shows the error page of the server. Open the web view fullscreen to log in.
 
 ## Commands
 
@@ -650,7 +680,8 @@ web view.
 ### Open
 
 - `open` always wakes the display.
-- The web view is shown fullscreen on top of the current screen. Closing it returns to the previous screen.
+- The web view is shown fullscreen on top of the current screen. Closing it returns to the previous screen. An entity
+  screen which is open on top of an activity is closed first: closing the web view returns to the activity.
 - If an activity is being started, e.g. if `open` is a step of its on-sequence, the web view opens after the loading
   screen of the activity, on top of the activity screen.
 - If the web view is already open, it stays as is. Another open web view is replaced.
@@ -661,11 +692,12 @@ The Core routes the commands of entity types which the user interface executes, 
 locally installed user interface app, not to the integration of the entity. This applies to user-defined web views and
 to web views from integration drivers: web view commands are never sent to an integration driver.
 
-- The user interface answers when it has accepted the command, not when the page has loaded. Sequences wait for the
-  result of each step, so they continue right away.
+- The user interface answers `open` and `reload` when it has accepted the command, not when the page has loaded.
+  `clear_cache` and `clear_data` are answered when the data has been cleared. Sequences wait for the result of each
+  step.
 - The Core returns the result of the user interface to the caller.
-- Error code `503` if no user interface that executes web view commands is connected, `408` if the user interface
-  doesn't answer within 5 seconds.
+- Error code `503` if no user interface that executes web view commands is connected, or if it can't show web pages.
+  `408` if the user interface doesn't answer within 5 seconds.
 - The user interface app declares the entity types it executes with the internal WS Core-API request `set_ui_info`,
   and receives the commands with the internal request `entity_command`. Both are only for the user interface session
   authenticated with the access token that the Core generates at startup for the locally installed user interface app.
@@ -733,9 +765,24 @@ on the remote entity endpoints:
   `uc_web.main.<uuid>`.
 - `POST /api/webviews` only creates user-defined web views. Web views from integration drivers are configured like any
   other entity of an integration.
+- At most 1000 user-defined web views can be created.
+- A new web view can be cloned from a user-defined web view with `clone_from`: it gets the options of that web view,
+  including the secret options. The name must be specified, the icon and the description are not copied. Options in
+  the request are applied to the copied options like in an update. Web views from integration drivers can't be cloned.
 - `DELETE /api/webviews` deletes all user-defined web views. Web views from integration drivers are not deleted.
+- Responses contain the read-only option `editable`: `true` for a user-defined web view, `false` for a web view from
+  an integration driver.
 - Changes are reported with the `entity_change` event, in the event channel `entity_webview`. The event never contains
   secret values, see [secret options](#secret-options).
+
+Updating the options of a user-defined web view:
+
+- An omitted option is not changed. `null` removes an option and its default applies. `url` can't be removed.
+- `auth`, `tls` and `cookies` replace the stored object or list. An empty `tls` object removes the certificate
+  exception, an empty `cookies` list removes all cookies.
+- An empty `background_color` restores the default white `#FFFFFF`.
+- `buttons` is merged button by button, see [buttons](#buttons).
+- Secret options: see [secret options](#secret-options).
 
 Create a web view:
 
@@ -813,9 +860,22 @@ A web view entity from an integration driver is configured like any other entity
 - The name, icon and description can be changed.
 - The options of the integration driver can't be changed. Only the [user overrides](#user-overrides) in `options.user`
   can be set, with `PATCH /api/webviews/{entityId}`, `PATCH /api/entities/{entityId}`, `update_webview` or
-  `update_entity`.
+  `update_entity`. `PATCH /api/webviews/{entityId}` and `update_webview` refuse any other option with error code `422`.
+- `DELETE /api/webviews/{entityId}` removes it from the configured entities, like `DELETE /api/entities/{entityId}`. It
+  can be configured again from its integration.
 
 ## Integration API
+
+### Entity definition
+
+The Remote checks the options of a web view entity from an integration driver with the same rules as the options of a
+user-defined web view.
+
+- A web view entity with invalid options, e.g. an invalid `url`, a cookie without `value`, or a button with a fixed
+  function or an unknown button, is ignored: it isn't offered as an available entity, and an `entity_available` event
+  with it doesn't change the configured web view.
+- Unknown options are removed.
+- The buttons which the Remote model doesn't have are removed, see [buttons](#buttons).
 
 ### Commands
 
@@ -831,7 +891,8 @@ other entity.
 |-----------|-----------------------------------|
 | state     | Optional entity [state](#states). |
 
-- If the state is never sent, the web view is considered available (`ON`).
+- If the state is never sent, the Core reports the web view as `ON` while a user interface that executes web view
+  commands is connected, see [states](#states).
 
 ### Updating the entity definition
 
@@ -963,23 +1024,3 @@ Status page with an API key header and a cookie for the page layout, reloaded ev
   }
 }
 ```
-
-## Open issues
-
-> [!NOTE]
-> Open issues for the draft review. This section will be removed once they have been resolved.
-
-1. The core needs to implement the `entity_available` and `entity_removed` events.
-2. **Secrets in backups.** A backup contains the entity definitions with their options, and it is not protected with a
-   user password. Stored secret values of web views, i.e. passwords, tokens, header values and cookie values, can be
-   extracted by anyone who has the backup file.
-
-   Option to consider: secrets provided by integration drivers are not stored by the Remote, the driver has to provide
-   them again.
-   - The Core retrieves the available entities whenever a driver connects, and a driver can update an entity
-     definition at any time with the `entity_available` event.
-   - Consequence: after a restart or a restore, a web view from an integration driver can only authenticate once its
-     driver has connected and provided the secrets again.
-
-   Secrets of user-defined web views have no other source: they would still be in the backup, unless they are excluded
-   and entered again after a restore.

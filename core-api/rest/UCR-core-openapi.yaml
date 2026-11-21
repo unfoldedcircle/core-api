@@ -2946,7 +2946,7 @@ paths:
       description: |
         Execute a command of the entity. See the `EntityCommand` object for details.
 
-        👷 The commands of a `webview` entity are executed by the user interface of the Remote. It answers when it has
+        The commands of a `webview` entity are executed by the user interface of the Remote. It answers when it has
         accepted the command, not when the page has loaded. Common error status codes for web view commands:
         - `408 Request Timeout`: the user interface didn't answer within 5 seconds.
         - `503 Service Unavailable`: no user interface that executes web view commands is connected.
@@ -3891,7 +3891,7 @@ paths:
         `PATCH /activities/{entityId}/ui/pages/{pageId}`. If `grid` is not specified, the default grid size is used from
         the screen metadata layout in `GET /cfg/device/screen_layout`
 
-        👷 A web view item is checked against the rules of `UserInterfaceItemWebview`, including the limit of one web
+        A web view item is checked against the rules of `UserInterfaceItemWebview`, including the limit of one web
         view item per activity over all pages.
       operationId: createActivityUiPage
       parameters:
@@ -4036,7 +4036,7 @@ paths:
         Update one or multiple properties of an activity user interface page. The omitted properties are ignored and not
         deleted. To clear an array simply provide an empty array.
 
-        👷 A web view item is checked against the rules of `UserInterfaceItemWebview`, including the limit of one web
+        A web view item is checked against the rules of `UserInterfaceItemWebview`, including the limit of one web
         view item per activity over all pages.
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -6860,7 +6860,7 @@ paths:
     head:
       tags:
         - webviews
-      summary: 👷 Get total number of web view entities.
+      summary: Get total number of web view entities.
       description: |
         The total number of web views of the specified kind is returned in the `Pagination-Count` header. This allows to
         prepare the retrieval of the web views with the `GET` operation and paging parameters.
@@ -6892,7 +6892,7 @@ paths:
     get:
       tags:
         - webviews
-      summary: 👷 Get web view entities overview with paging.
+      summary: Get web view entities overview with paging.
       description: |
         Returns an overview of the web views of the specified kind with the given paging parameters. Use the `HEAD`
         operation to retrieve the total number of web views.
@@ -6946,7 +6946,7 @@ paths:
     post:
       tags:
         - webviews
-      summary: 👷 Create a new user-defined web view entity.
+      summary: Create a new user-defined web view entity.
       description: |
         Create a new user-defined `webview` entity. Web views from integrations cannot be created, they must be provided
         by integration drivers. User-defined web views belong to the internal integration `uc_web.main`, their entity
@@ -7034,7 +7034,7 @@ paths:
     delete:
       tags:
         - webviews
-      summary: 👷 Delete all user-defined web view entities.
+      summary: Delete all user-defined web view entities.
       description: |
         ⚠️ All user-defined web views will be irrevocably deleted, including their secret options! Web views from
         integrations are not deleted.
@@ -7052,7 +7052,7 @@ paths:
     get:
       tags:
         - webviews
-      summary: 👷 Get a web view entity by its entity_id.
+      summary: Get a web view entity by its entity_id.
       description: |
         Returns all the information required to manage an existing web view. Secret option values are omitted, see
         `WebviewOptions`.
@@ -7077,7 +7077,7 @@ paths:
     patch:
       tags:
         - webviews
-      summary: 👷 Update a web view entity.
+      summary: Update a web view entity.
       operationId: updateWebview
       description: |
         Update one or multiple properties of a web view entity. The omitted properties are ignored and not deleted.
@@ -7141,7 +7141,7 @@ paths:
     delete:
       tags:
         - webviews
-      summary: 👷 Delete a web view entity.
+      summary: Delete a web view entity.
       description: |
         ⚠️ A user-defined web view is irrevocably deleted, including its secret options.
 
@@ -9151,7 +9151,7 @@ paths:
     get:
       tags:
         - cfg
-      summary: 👷 Get global web view settings.
+      summary: Get global web view settings.
       description: |
         Global settings for all web views on the Remote: user-defined web views and web views from integrations.
       operationId: getWebviewSettings
@@ -9175,7 +9175,7 @@ paths:
     patch:
       tags:
         - cfg
-      summary: 👷 Modify global web view settings.
+      summary: Modify global web view settings.
       description: |
         Change one or multiple global web view settings. See `CfgWebview` for the security implications of
         `allow_invalid_certificates`.
@@ -9230,7 +9230,7 @@ paths:
     get:
       tags:
         - cfg
-      summary: 👷 Get the web view button presets.
+      summary: Get the web view button presets.
       description: |
         Presets of button actions for the fullscreen web view, to set several buttons at once. Each preset only contains
         the buttons it covers, and only the buttons of the Remote model. See `WebviewButtonPreset` for the presets.
@@ -14589,7 +14589,7 @@ components:
 
             ### Web view commands
 
-            👷 The commands of a `webview` entity (`webview.open`, `webview.reload`, `webview.clear_cache`,
+            The commands of a `webview` entity (`webview.open`, `webview.reload`, `webview.clear_cache`,
             `webview.clear_data`) work like other entity commands, including activity and macro sequences. The Core
             routes them to the locally installed user interface app, which executes them, and never to an
             integration driver. The user interface answers when it has accepted the command, not when the page has
@@ -15351,7 +15351,7 @@ components:
         - `sensor`: show sensor value from the specified sensor entity specified in the `sensor` configuration object.
         - `slider`: show a slider bound to a numeric entity feature specified in the `slider` configuration object.
         - `number`: show a number entity as slider or stepper, specified in the `number` configuration object.
-        - `webview`: 👷 show the web page of a web view entity, specified in the `webview` configuration object.
+        - `webview`: show the web page of a web view entity, specified in the `webview` configuration object.
           The web view entity must be part of the included entities in the activity. At most one per activity, minimum
           size 3 x 3. Not supported in the user interface of a remote entity.
       type: string
@@ -15560,7 +15560,7 @@ components:
           step: 5
     UserInterfaceItemWebview:
       description: |
-        👷 Draft. Web view item configuration: shows the web page of a web view entity.
+        Web view item configuration: shows the web page of a web view entity.
 
         Rules, checked when a user interface page is created or updated. A violation is refused with error code `400`
         and `code: VALIDATION_ERROR`, with the field and field error code in `errors`:
@@ -17715,7 +17715,8 @@ components:
 
         The `value` is a secret, which is omitted in responses: they contain `has_value` instead. See `WebviewOptions`
         for the only exception. In an update request, a cookie without `value` keeps the stored value of the cookie with
-        the same `name`, `domain` and `path`.
+        the same `name`, `domain` and `path`. A new cookie without `value`, or a cookie with an empty `value`, is refused
+        with error code `400`.
       type: object
       properties:
         name:
@@ -17908,9 +17909,9 @@ components:
     WebviewButtons:
       description: |
         Function of single physical buttons in the fullscreen web view of this web view: a `WebviewButtonAction` per button
-        identifier (`WebviewButton`). It only contains the buttons which differ from the global web view setting `buttons`
-        (`CfgWebview`), e.g. to keep the button mapping of the activity for VOLUME up and down, or to send the CHANNEL
-        keys to a page which handles them itself.
+        identifier (`WebviewButton`). It only contains the buttons which this web view sets, the other buttons have the
+        action of the global web view setting `buttons` (`CfgWebview`), e.g. to keep the button mapping of the activity for
+        VOLUME up and down, or to send the CHANNEL keys to a page which handles them itself.
 
         The action of a button is taken from the first of:
         1. the user override in `user.buttons`, only for a web view from an integration driver,
@@ -18033,7 +18034,8 @@ components:
             - `default`: the user agent of the Remote, which identifies the Remote and its firmware version.
             - `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or
               the desktop layout of a page.
-            - Any other value: a custom user agent string.
+            - Any other value: a custom user agent string of visible ASCII characters and spaces. The web view uses the
+              `default` user agent instead of a custom value with other characters.
           type: string
           minLength: 1
           maxLength: 256
@@ -18120,7 +18122,7 @@ components:
         - name
     Webview:
       description: |
-        👷 Draft. A web view entity shows a web page on the Remote. It is either defined by the user, or provided by an
+        A web view entity shows a web page on the Remote. It is either defined by the user, or provided by an
         integration driver. The web page is rendered by the user interface of the Remote.
 
         The Core reports the state `UNAVAILABLE` while no user interface that executes web view commands is connected.
@@ -18879,7 +18881,7 @@ components:
         - voice_assistant
     CfgWebview:
       description: |
-        👷 Draft. Global settings for all web views on the Remote: user-defined web views and web views from
+        Global settings for all web views on the Remote: user-defined web views and web views from
         integrations. A change is reported with the `configuration_change` event.
 
         See the [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#global-web-view-settings)
@@ -18890,7 +18892,7 @@ components:
           description: |
             Allow invalid TLS certificates for all web views: self-signed certificates, expired certificates,
             certificates of an unknown certificate authority and certificates for another host name. Overrides the `tls`
-            options of every web view entity, user-defined and from integrations. Applies to the next page load.
+            options of every web view entity, user-defined and from integrations. Applies to new connections.
 
             ⚠️ This turns off the certificate check for every page and every resource loaded by any web view, including
             third-party hosts like content delivery networks, embedded pages and redirect targets. A man-in-the-middle
@@ -19598,7 +19600,7 @@ components:
               CHANNEL_UP: null
     WebviewButtonPreset:
       description: |
-        👷 Draft. A preset of button actions for the fullscreen web view, to set several buttons at once. A preset only
+        A preset of button actions for the fullscreen web view, to set several buttons at once. A preset only
         contains the buttons it covers, and only the buttons of the Remote model. `HOME`, `POWER` and `VOICE` are never
         part of a preset.
 

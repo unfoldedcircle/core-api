@@ -12,8 +12,10 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ## 0.58.0
 ### Added
-- 👷 Draft: Web View Entity support (`webview`): user-defined web views (`/webviews`), global web view settings
-  (`/cfg/webview`), the `webview` activity user interface widget, and web view commands routed to the user interface.
+- Web View Entity support (`webview`): user-defined web views (`/webviews`), global web view settings
+  (`/cfg/webview`) with the button mapping of the fullscreen web view, button presets
+  (`/cfg/webview/button_presets`), the `webview` activity user interface widget, and web view commands routed to the
+  user interface.
 
 ### Changed
 - Resetting all settings with `DELETE /cfg` requires an administrator account or an API key with the `admin` scope;

@@ -575,7 +575,7 @@ components:
         A driver must only provide entities of a supported entity type: a Remote rejects the complete
         `available_entities` response if it contains an unknown entity type.
 
-        👷 A firmware which supports web view entities lists `webview`. Whether a web view can be shown is reported by
+        A firmware which supports web view entities lists `webview`. Whether a web view can be shown is reported by
         the state of the web view entity: `UNAVAILABLE` while no user interface that executes web view commands is
         connected.
       tags:
@@ -2807,7 +2807,7 @@ components:
 
     webview:
       description: |
-        👷 Draft: not yet supported by the Remote.
+        ℹ️ Supported in Remote firmware 2.14.0 and newer.
 
         A web view entity shows a web page on the Remote, for example the dashboard of a home automation system or a
         monitoring website. The page is rendered by the user interface of the Remote and loaded directly from its web
@@ -2879,7 +2879,8 @@ components:
             - `default`: the user agent of the Remote, which identifies the Remote and its firmware version.
             - `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or
               the desktop layout of a page.
-            - Any other value: a custom user agent string.
+            - Any other value: a custom user agent string of visible ASCII characters and spaces. The web view uses
+              the `default` user agent instead of a custom value with other characters.
           type: string
           minLength: 1
           maxLength: 256
