@@ -2917,6 +2917,15 @@ components:
           default: 0
         buttons:
           $ref: '#/components/schemas/webviewButtons'
+        device_api:
+          description: |
+            Enable the device state API for all top-level pages of the web view: the battery state with
+            `navigator.getBattery()`, the `freeze` and `resume` events on `document`, and `window.deviceHost` with the
+            display state, the power source and the power profile. Only enable it for pages which use it. Can be
+            overridden by the user. See
+            [device state for web pages](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#device-state-for-web-pages).
+          type: boolean
+          default: false
       required:
         - url
       examples:

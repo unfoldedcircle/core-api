@@ -15,6 +15,7 @@
   - [User overrides](#user-overrides)
 - [Global web view settings](#global-web-view-settings)
 - [User interface](#user-interface)
+- [Device state for web pages](#device-state-for-web-pages)
 - [Commands](#commands)
 - [Core-API](#core-api)
 - [Integration API](#integration-api)
@@ -274,6 +275,17 @@ page. At most 20 cookies.
 - A reload ends open dialogs of the page.
 - The reload interval stops while the web view is hidden or the display is off, and starts again with the full
   interval when the page is shown again.
+- While the display is off, the page is hidden and throttled, see [hidden pages](#hidden-pages).
+
+#### Device state
+
+| Name       | Type    | Default | Description                                                                                                                                                                                                        |
+|------------|---------|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| device_api | boolean | false   | Enable the device state API for all top-level pages of the web view: `navigator.getBattery()`, the `freeze` and `resume` events on `document`, and `window.deviceHost`. See [device state for web pages](#device-state-for-web-pages). |
+
+- Every top-level page of the web view gets the API, also a page of another site which the web view navigates to. Every
+  such page can read the battery state of the Remote and when it goes into standby. Only enable the option for pages
+  which use it.
 
 #### Buttons
 
@@ -441,6 +453,7 @@ See [user overrides](README.md#user-overrides).
 | reload_interval | Reload interval in seconds.                         |
 | show_navigation | Navigation controls in the fullscreen web view.     |
 | buttons         | Function of single buttons, see [buttons](#buttons). |
+| device_api      | Device state API, see [device state](#device-state). |
 
 - The URL, authentication, TLS, cookie and user agent options can't be overridden: they belong to the integration
   driver. Any other option in `options.user` is refused with error code `400`.
@@ -658,6 +671,210 @@ again afterwards.
 The widget shows no dialogs: `alert`, `confirm` and `prompt` dialogs of the page are answered with cancel. An HTTP
 login request without configured credentials, or after rejected credentials, is answered without credentials: the
 widget shows the error page of the server. Open the web view fullscreen to log in.
+
+## Device state for web pages
+
+A page can react to the state of the Remote, e.g. a dashboard which stops its animations while the display is off,
+shows the battery level, or reconnects its WebSocket after a standby.
+
+- Every page is hidden while the display is off, and throttled while it's hidden. See [hidden pages](#hidden-pages).
+- The pages of a web view with the [`device_api` option](#device-state) also get the battery state, the display state,
+  the power source, the power profile and the standby of the Remote. See
+  [device state API](#device-state-api).
+
+### Hidden pages
+
+This applies to every page in a web view, with or without the `device_api` option.
+
+- A page is hidden while the display is off, and while the Remote is in standby: `document.visibilityState` is `hidden`,
+  and the page gets a `visibilitychange` event when this changes ([Page Visibility API](https://www.w3.org/TR/page-visibility/)).
+  A dimmed display doesn't hide the page.
+- While a page is hidden, it is throttled:
+  - Timers are batched to 1 second: e.g. a `setInterval` of 100 ms runs about once per second.
+  - CSS animations are paused.
+  - `requestAnimationFrame` callbacks are not called, and the page isn't painted.
+- Stop work which only updates the display while the page is hidden, e.g. polling, and update the page when it's
+  visible again.
+
+### Device state API
+
+The `device_api` option enables the device state API for all top-level pages of the web view: the start page and every
+page which the web view navigates to. Frames embedded in a page (`iframe`) don't get it.
+
+The API consists of:
+
+- [`navigator.getBattery()`](#battery-navigatorgetbattery): the battery state.
+- [`freeze` and `resume` on `document`](#standby-events-on-document): the standby of the Remote.
+- [`window.deviceHost`](#windowdevicehost): the display state, the power source, the power profile and the standby of
+  the Remote.
+- [Data attributes](#data-attributes-for-css) on `<html>` for CSS.
+
+The API is available as soon as the page starts, before its scripts run. Read the current state when the page starts:
+the events only report changes.
+
+Feature detection:
+
+```js
+if ('deviceHost' in window) {
+  // web view of a Remote with the device state API
+}
+```
+
+Without the `device_api` option, on a Remote firmware without the device state API and in other browsers,
+`window.deviceHost` doesn't exist. `navigator.getBattery()` doesn't exist either, except in browsers which have their
+own Battery Status API, e.g. Chrome.
+
+To develop a page on a desktop computer, use the [device API simulator](#developer-tools).
+
+#### Battery: `navigator.getBattery()`
+
+The web view of the Remote has no [Battery Status API](https://www.w3.org/TR/battery-status/). With the `device_api`
+option, `navigator.getBattery()` returns a promise of a `BatteryManager` object with the attributes and events of the
+specification. Every call returns the same object.
+
+| Attribute       | Type    | Description                                                                                                                       |
+|-----------------|---------|-----------------------------------------------------------------------------------------------------------------------------------|
+| charging        | boolean | `true` while the Remote is connected to power, e.g. on its charging dock, also with a full battery. `false` on battery power.        |
+| level           | number  | Battery level from `0.0` to `1.0`, in steps of `0.01`.                                                                            |
+| chargingTime    | number  | `0` while the Remote is connected to power with a full battery, otherwise `Infinity`.                                             |
+| dischargingTime | number  | Always `Infinity`.                                                                                                                |
+
+| Event                 | Handler                 | Fired                  |
+|-----------------------|-------------------------|------------------------|
+| chargingchange        | onchargingchange        | `charging` changed.    |
+| levelchange           | onlevelchange           | `level` changed.       |
+| chargingtimechange    | onchargingtimechange    | Never.                 |
+| dischargingtimechange | ondischargingtimechange | Never.                 |
+
+Limits compared to the Battery Status API of a browser:
+
+- The Remote has no estimates of the charging and the discharging time. `chargingTime` and `dischargingTime` have the
+  default values of the specification, and their change events are never fired.
+- `level` has steps of 1 %.
+- The battery state is also available to `http://` pages. Chrome only offers its Battery Status API to `https://`
+  pages.
+
+#### Standby events on `document`
+
+The page gets the `freeze` and `resume` events of the [Page Lifecycle API](https://wicg.github.io/page-lifecycle/) on
+`document`, at the standby of the Remote:
+
+| Event  | Handler           | Fired                             |
+|--------|-------------------|-----------------------------------|
+| freeze | document.onfreeze | The Remote goes into standby.     |
+| resume | document.onresume | The Remote woke up from standby.  |
+
+They are fired together with `suspend` and `resume` on [`window.deviceHost`](#windowdevicehost), whose `resume` event
+also reports the time in standby. See [standby](#standby). The page isn't frozen at other times: a hidden page keeps
+running, throttled, see [hidden pages](#hidden-pages).
+
+#### `window.deviceHost`
+
+`window.deviceHost` is an `EventTarget` with the current state of the Remote.
+
+| Attribute    | Type    | Values                                    | Description                                                                         |
+|--------------|---------|-------------------------------------------|-------------------------------------------------------------------------------------|
+| version      | number  | `1`                                       | Version of the device state API. Increased with incompatible changes.               |
+| screen       | string  | `on`, `dim`, `off`                        | State of the display: on, dimmed or off.                                            |
+| powerSource  | string  | `ac`, `battery`                           | `ac` while the Remote is connected to power, `battery` on battery power.            |
+| powerProfile | string  | `power-saver`, `balanced`, `performance`  | Power profile of the Remote, see [state of the Remote](#state-of-the-remote).       |
+
+The attributes are read-only. `deviceHost` has no thermal state.
+
+The events use the names of the power events of Electron's `powerMonitor`. They are only available with
+`addEventListener`: there are no `on…` handler attributes.
+
+| Event              | `detail`      | Fired                                                                                                      |
+|--------------------|---------------|------------------------------------------------------------------------------------------------------------|
+| suspend            | –             | The Remote goes into standby. Together with `freeze` on `document`.                                        |
+| resume             | `{ sleptMs }` | The Remote woke up from standby. Together with `resume` on `document`. `sleptMs`: time in standby in ms.   |
+| on-ac              | –             | The Remote is connected to power. Together with `chargingchange` of the battery.                           |
+| on-battery         | –             | The Remote runs on battery power. Together with `chargingchange` of the battery.                           |
+| screenchange       | `{ state }`   | `screen` changed. `state`: the new value.                                                                  |
+| powerprofilechange | `{ profile }` | `powerProfile` changed. `profile`: the new value.                                                          |
+
+- An event is only fired if the value changed. The attributes already have the new value when the event is fired.
+- Events with a `detail` are `CustomEvent` objects.
+
+```js
+const host = window.deviceHost;
+
+host.addEventListener('screenchange', (event) => {
+  if (event.detail.state === 'off') {
+    stopPolling();
+  } else {
+    startPolling();
+  }
+});
+
+host.addEventListener('resume', (event) => {
+  console.log(`Remote slept ${Math.round(event.detail.sleptMs / 1000)} s`);
+  reconnectWebSocket();
+});
+```
+
+#### Data attributes for CSS
+
+The API sets the state as data attributes on the `<html>` element, and updates them with every change:
+
+| Attribute            | Value                                         |
+|----------------------|-----------------------------------------------|
+| `data-screen`        | `deviceHost.screen`, e.g. `dim`               |
+| `data-power-profile` | `deviceHost.powerProfile`, e.g. `power-saver` |
+
+```css
+/* no decorative animations while the Remote saves power */
+html[data-power-profile="power-saver"] .spinner {
+  animation: none;
+}
+
+/* a less bright clock while the display is dimmed */
+html[data-screen="dim"] .clock {
+  opacity: 0.6;
+}
+```
+
+### State of the Remote
+
+The state follows the power mode of the Remote (`PowerMode` of the Core-API):
+
+| Power mode | Display | `screen` | `powerProfile` | Page    |
+|------------|---------|----------|----------------|---------|
+| NORMAL     | on      | `on`     | `balanced`     | visible |
+| IDLE       | dimmed  | `dim`    | `balanced`     | visible |
+| LOW_POWER  | off     | `off`    | `power-saver`  | hidden  |
+| SUSPEND    | standby | `off`    | `power-saver`  | hidden  |
+
+- `powerSource` is `ac` while the Remote is connected to power, otherwise `battery`.
+- The power profile names are the profiles of the Linux power-profiles-daemon: `power-saver`, `balanced` and
+  `performance`. The Remote reports `balanced` and `power-saver`, as in the table. Treat an unknown value like
+  `balanced`.
+
+### Standby
+
+The standby events are best effort: the Remote never delays its standby for a page.
+
+- When the Remote goes into standby, the page gets `freeze` on `document` and `suspend` on `deviceHost`. Usually the
+  display is already off and the page is hidden. The handlers may not run, or not finish, before the Remote sleeps, and
+  network requests started in them may not be sent. Don't rely on them to save data.
+- When the Remote wakes up, the page first gets `resume` on `document` and on `deviceHost`, then the events of the
+  current state, e.g. `screenchange` to `on` and `visibilitychange`.
+- `sleptMs` of the `resume` event is the time the Remote was in standby. Timers and `performance.now()` don't advance
+  in standby, while `Date.now()` jumps forward by the time slept.
+- The network connection may not be ready right after `resume`: retry the connections of the page, e.g. a WebSocket,
+  until they succeed.
+- Only a loaded page gets the events: the fullscreen web view while it's open, or the widget on the shown activity page.
+
+### Developer tools
+
+The [device API simulator](https://github.com/unfoldedcircle/core-api/tree/main/tools/device-api-simulator) provides the
+device state API in a desktop browser, to develop a page without a Remote:
+
+- A control panel and `window.deviceMock` to change the simulated state: display, battery, power source and standby.
+- TypeScript types of the API (`types/device-api.d.ts`).
+- A demo page and Playwright tests in Chromium and WebKit.
+
+The simulator doesn't throttle hidden pages and doesn't make `Date.now()` jump: test the page on the Remote as well.
 
 ## Commands
 

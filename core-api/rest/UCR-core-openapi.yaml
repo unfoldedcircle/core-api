@@ -14500,7 +14500,8 @@ components:
             - `sensor` entity: `decimals` (integer 0..6).
             - `number` entity: `decimals` (integer 0..6), `display_mode` (`auto`, `slider`, `stepper`).
             - `webview` entity from an integration driver: `zoom` (integer 25..400), `reload_interval` (integer 0 or
-              10..86400), `show_navigation` (boolean).
+              10..86400), `show_navigation` (boolean), `device_api` (boolean), `buttons` (merged button by button, see
+              `WebviewUserOptions`).
 
             Other options or entity types are refused with a validation error: error code `400` (`VALIDATION_ERROR`)
             with the field `options.user.<option>` and the code `INVALID`. An invalid value is refused the same way.
@@ -18000,6 +18001,10 @@ components:
             anyOf:
               - $ref: '#/components/schemas/WebviewButtonAction'
               - type: 'null'
+        device_api:
+          type:
+            - boolean
+            - 'null'
     WebviewOptions:
       description: |
         Options of a web view entity. See the [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md)
@@ -18078,6 +18083,14 @@ components:
           default: 0
         buttons:
           $ref: '#/components/schemas/WebviewButtons'
+        device_api:
+          description: |
+            Enable the device state API for all top-level pages of the web view: the battery state with
+            `navigator.getBattery()`, the `freeze` and `resume` events on `document`, and `window.deviceHost` with the
+            display state, the power source and the power profile. See
+            [device state for web pages](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#device-state-for-web-pages).
+          type: boolean
+          default: false
         user:
           $ref: '#/components/schemas/WebviewUserOptions'
       examples:

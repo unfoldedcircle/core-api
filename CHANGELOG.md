@@ -54,6 +54,10 @@ _Changes in the next release_
   - Web view commands (`open`, `reload`, `clear_cache`, `clear_data`) are executed by the user interface of the Remote,
     also in sequences, macros and button mappings. They are never sent to an integration driver.
   - The Remote now also supports the Integration-API `entity_available` and `entity_removed` events.
+  - Device state API for web pages with the `device_api` option: the battery state with `navigator.getBattery()`,
+    the `freeze` and `resume` events on `document`, and `window.deviceHost` with the display state, the power source,
+    the power profile and standby events. Hidden pages are throttled. The device API simulator for page development is in
+    [tools/device-api-simulator](tools/device-api-simulator).
 
 ### Changed
 - Core APIs: resetting all settings (`DELETE /cfg`, `reset_configuration`) requires the `admin` scope.
