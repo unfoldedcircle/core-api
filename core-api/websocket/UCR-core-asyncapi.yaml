@@ -4083,7 +4083,7 @@ components:
       summary: 👷 Create a user-defined web view entity.
       description: |
         Creates a user-defined web view, either with `options` including the `url`, or as a clone of an existing user-defined web view
-        with `clone_from`. Web views from integrations cannot be cloned. A maximum of 100 user-defined web views can be created. Web views from integrations cannot be created.
+        with `clone_from`. Web views from integrations cannot be cloned. A maximum of 1000 user-defined web views can be created. Web views from integrations cannot be created.
         The new entity identifier is `uc_web.main.<uuid>`.
 
         Secret option values are omitted in the response, which contains the `has_*` flags instead.
@@ -19766,7 +19766,7 @@ components:
     WebviewCreate:
       description: |
         Dedicated request object to create a new user-defined web view. Either `options` with `url`, or `clone_from`
-        must be specified. A maximum of 100 user-defined web views can be created.
+        must be specified. A maximum of 1000 user-defined web views can be created.
 
         With `clone_from`, the new web view starts with the options of the given user-defined web view, including the secret
         options. Only user-defined web views can be cloned, web views from integrations cannot be cloned. Only the options are copied,

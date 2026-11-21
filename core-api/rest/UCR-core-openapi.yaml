@@ -6952,7 +6952,7 @@ paths:
         by integration drivers. User-defined web views belong to the internal integration `uc_web.main`, their entity
         identifier is `uc_web.main.<uuid>`.
 
-        A maximum of 100 user-defined web views can be created.
+        A maximum of 1000 user-defined web views can be created.
 
         To create a new web view at least a name and the `url` option must be provided. The `icon` and `description`
         properties are optional and can be set later with the `PATCH` update operation.
@@ -18098,7 +18098,7 @@ components:
     WebviewCreate:
       description: |
         Dedicated request object to create a new user-defined web view. Either `options` with `url`, or `clone_from`
-        must be specified. A maximum of 100 user-defined web views can be created.
+        must be specified. A maximum of 1000 user-defined web views can be created.
 
         With `clone_from`, the new web view starts with the options of the given user-defined web view, including the secret
         options. Only user-defined web views can be cloned, web views from integrations cannot be cloned. Only the options are copied,
