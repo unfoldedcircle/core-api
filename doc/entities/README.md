@@ -27,6 +27,7 @@ Supported entities:
 - [Select](entity_select.md)
 - [Number](entity_number.md)
 - [Voice Assistant](entity_voice_assistant.md)
+- [Web View](entity_webview.md)
 
 The 🚧 icon within the entity descriptions indicates a planned feature.
 
@@ -217,6 +218,8 @@ to execute by the driver:
 - Once the value has been set or confirmed by the physical device, an `entity_change` event message must be sent by the
   integration driver with the new value(s). Of course, this only applies to stateful attributes and not to buttons or 
   "fire and forget" commands.
+- Exception: the commands of a [web view entity](entity_webview.md#commands) are executed by the user interface of the
+  Remote. They are never sent to the integration driver.
 
 ### Events
 

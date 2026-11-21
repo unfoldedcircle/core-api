@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.17.2-beta'
+  version: '0.18.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -517,6 +517,9 @@ components:
         
         If the `get_available_entities` request included a filter, it is returned in the message data with only the 
         matching entities.
+
+        ⚠️ A Remote rejects the complete message if it contains an entity type it doesn't know. A driver must only
+        include entity types which are listed in the `supported_entity_types` response, e.g. the `webview` entity type.
       tags:
         - name: entity
         - name: required
@@ -568,6 +571,13 @@ components:
 
         This is a metadata request for supported entities in the UC Remote and allows the client to check if it's still
         compatible. New releases can support new entities or entities might get renamed in major updates.
+
+        A driver must only provide entities of a supported entity type: a Remote rejects the complete
+        `available_entities` response if it contains an unknown entity type.
+
+        A firmware which supports web view entities lists `webview`. Whether a web view can be shown is reported by
+        the state of the web view entity: `UNAVAILABLE` while no user interface that executes web view commands is
+        connected.
       tags:
         - name: entity
         - name: metadata
@@ -695,6 +705,8 @@ components:
         
         After successfully executing a command, the UC Remote expects an `entity_change` event with the updated feature 
         value(s).
+
+        Web view commands are never sent to integration drivers: they are executed by the user interface of the Remote.
       tags:
         - name: entity
         - name: required
@@ -818,11 +830,20 @@ components:
     entity_available:
       summary: 🔍 New entity available event.
       description: |
-        Optional event to notify the UC Remote that new entities are available, or that the definition of an available
-        entity has changed. For example, the value range of a number entity.
+        Optional event to notify the UC Remote that a new entity is available, or that the definition of an available
+        entity has changed. For example, the value range of a number entity, or a rotated token of a web view entity.
+        The payload is the complete entity definition.
 
-        🚧 Not yet supported by the Remote. Until then, entity definitions are only updated when the Remote retrieves
-        the available entities with the `get_available_entities` request.
+        - The Remote adds a new entity to the available entities of the integration, or updates the definition of an
+          available entity.
+        - If the entity is configured on the Remote, the Remote updates the `device_class`, `features` and `options` of
+          the configured entity. The options changed by the user in `options.user` are kept. This is the same update
+          as when the Remote retrieves the available entities after the driver connected.
+        - The Remote informs its Core-API clients with an `entity_change` event, without secret option values.
+
+        ⚠️ Requires a Remote which supports the `webview` entity type, see `get_supported_entity_types`. An older
+        Remote ignores the event and applies definition changes only when it retrieves the available entities again,
+        e.g. after the driver reconnects.
       tags:
         - name: entity
         - name: event
@@ -832,9 +853,13 @@ components:
     entity_removed:
       summary: 🔍 Entity removed event.
       description: |
-        Optional event to notify the UC Remote that entities were removed and no longer available.
+        Optional event to notify the UC Remote that an entity was removed and is no longer available.
 
-        🚧 Not yet supported by the Remote.
+        - The Remote removes the entity from the available entities of the integration.
+        - A configured entity is not deleted: its state becomes `UNAVAILABLE`.
+
+        ⚠️ Requires a Remote which supports the `webview` entity type, see `get_supported_entity_types`. An older
+        Remote ignores the event.
       tags:
         - name: entity
         - name: event
@@ -1943,7 +1968,7 @@ components:
     entity:
       description: |
         Common definition of an entity. Concrete entities are: `button`, `switch`, `light`, `cover`, `media_player`,
-        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `number`, `voice_assistant`. 
+        `climate`, `sensor`, `remote`, `ir_emitter`, `select`, `number`, `voice_assistant`, `webview`. 
 
         See [entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/)
         for more information.
@@ -2780,6 +2805,402 @@ components:
                   type: boolean
                   default: true
 
+    webview:
+      description: |
+        ℹ️ Supported in Remote firmware 2.14.0 and newer.
+
+        A web view entity shows a web page on the Remote, for example the dashboard of a home automation system or a
+        monitoring website. The page is rendered by the user interface of the Remote and loaded directly from its web
+        server: the integration driver only provides the entity definition.
+
+        - On a profile page the entity is shown as a tile, which opens the page in a fullscreen web view.
+        - In an activity user interface, the web view widget shows the page in the page grid.
+        - Web view commands (`open`, `reload`, `clear_cache` and `clear_data`) are never sent to integration drivers:
+          they are executed by the user interface of the Remote.
+        - The only attribute is the optional `state`. A driver may report it like for any other entity, e.g.
+          `UNAVAILABLE` if the web server is unreachable. The Remote also reports a web view as `UNAVAILABLE` while no
+          user interface that executes web view commands is connected.
+
+        ⚠️ Only provide web view entities if the `supported_entity_types` response contains `webview`. A Remote
+        without web view support rejects the complete `available_entities` response.
+
+        Options marked as `writeOnly` are secrets: the Remote only hands them to its own user interface, never to other
+        API clients. A changed option, e.g. a rotated token, is sent with an updated entity definition in the
+        `entity_available` event.
+
+        The Remote ignores a web view entity with invalid options, e.g. `basic` authentication without `username` or
+        a cookie name which is not an RFC 6265 token: it isn't offered as an available entity.
+
+        All web views on the Remote share their website data: cookies, cache and logins.
+
+        See [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md)
+        for more information.
+      allOf:
+        - $ref: '#/components/schemas/entity'
+        - type: object
+          properties:
+            features:
+              description: The web view entity has no features.
+              type: array
+              maxItems: 0
+            options:
+              $ref: '#/components/schemas/webviewOptions'
+          required:
+            - options
+
+    webviewOptions:
+      description: |
+        Options of a web view entity. Only `url` is required.
+
+        The origin of the `url` option (scheme, host and port) is the scope of the authentication, the cookies and the
+        TLS certificate exception: they are never applied to another origin.
+      type: object
+      properties:
+        url:
+          description: |
+            Start page of the web view. Absolute `http://` or `https://` URL. User name and password in the URL are not
+            allowed, use `auth` instead. Don't put tokens in the query string: the URL is not a secret.
+          type: string
+          format: uri
+          minLength: 8
+          maxLength: 2048
+          pattern: '^[hH][tT][tT][pP][sS]?://'
+        auth:
+          $ref: '#/components/schemas/webviewAuth'
+        tls:
+          $ref: '#/components/schemas/webviewTls'
+        cookies:
+          description: |
+            Cookies set before the start page is loaded, each time the web view is opened.
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/webviewCookie'
+        user_agent:
+          description: |
+            User agent of the web view, sent in the `User-Agent` header and returned in `navigator.userAgent`:
+            - `default`: the user agent of the Remote, which identifies the Remote and its firmware version.
+            - `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or
+              the desktop layout of a page.
+            - Any other value: a custom user agent string of visible ASCII characters and spaces.
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: '^[ -~]+$'
+          default: default
+        zoom:
+          description: |
+            Page zoom in percent. Can be overridden by the user.
+          type: integer
+          minimum: 25
+          maximum: 400
+          default: 100
+        background_color:
+          description: |
+            Background color while the page is loading and behind transparent pages, as `#RRGGBB`. Default: white
+            `#FFFFFF`.
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+          default: '#FFFFFF'
+        show_navigation:
+          description: |
+            Show back, forward, reload and close controls in the fullscreen web view. Can be overridden by the user.
+          type: boolean
+          default: false
+        reload_interval:
+          description: |
+            Reload the page every n seconds while it is shown. 0 = off, otherwise 10..86400. Can be overridden by the
+            user.
+          type: integer
+          minimum: 0
+          maximum: 86400
+          default: 0
+        buttons:
+          $ref: '#/components/schemas/webviewButtons'
+      required:
+        - url
+      examples:
+        - url: https://dashboard.example.com/energy?kiosk=1
+          auth:
+            type: bearer
+            token: eyJhbGciOiJIUzI1NiJ9.example.token
+          user_agent: desktop
+          zoom: 70
+        - url: http://inverter.home.arpa/status
+          auth:
+            type: header
+            header_name: X-API-Key
+            header_value: 3b1f0c9e7a
+          cookies:
+            - name: layout
+              value: compact
+          reload_interval: 60
+          show_navigation: true
+          buttons:
+            CHANNEL_UP:
+              action: key
+              key: ChannelUp
+            CHANNEL_DOWN:
+              action: key
+              key: ChannelDown
+
+    webviewButtons:
+      description: |
+        Function of single physical buttons in the fullscreen web view: a `webviewButtonAction` per button identifier.
+        Only set the buttons which the page needs, e.g. to send the CHANNEL keys to a page which handles them itself.
+        The other buttons keep the global web view settings of the Remote, which also define the default actions. Can be
+        overridden by the user, button by button.
+
+        Buttons: `BACK`, `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`, `DPAD_MIDDLE`, `VOLUME_UP`, `VOLUME_DOWN`,
+        `CHANNEL_UP`, `CHANNEL_DOWN`, `MUTE`, `PREV`, `PLAY`, `NEXT`, `STOP`, `RECORD`, `MENU`, `RED`, `GREEN`,
+        `YELLOW` and `BLUE`. Not every Remote model has all buttons: the buttons which the Remote model doesn't have are
+        ignored, so the same definition can be used for all models. `HOME`, `POWER` and `VOICE` have a fixed function:
+        a web view entity with one of them, or with an unknown button, is refused.
+
+        The buttons only apply to the fullscreen web view, not to the web view widget of an activity.
+      type: object
+      propertyNames:
+        type: string
+        enum:
+          - BACK
+          - DPAD_UP
+          - DPAD_DOWN
+          - DPAD_LEFT
+          - DPAD_RIGHT
+          - DPAD_MIDDLE
+          - VOLUME_UP
+          - VOLUME_DOWN
+          - CHANNEL_UP
+          - CHANNEL_DOWN
+          - MUTE
+          - PREV
+          - PLAY
+          - NEXT
+          - STOP
+          - RECORD
+          - MENU
+          - RED
+          - GREEN
+          - YELLOW
+          - BLUE
+      additionalProperties:
+        $ref: '#/components/schemas/webviewButtonAction'
+
+    webviewButtonAction:
+      description: |
+        Action of a physical button in the fullscreen web view:
+        - `pass`: the button keeps its function in the layer below the web view, e.g. the button mapping of the
+          activity.
+        - `function`: the web view function in `function`, e.g. `zoom_in` or `page_down`.
+        - `key`: a real key event with the `key` in `key` is sent to the page: a `KeyboardEvent.key` value of the
+          [UI Events key values](https://www.w3.org/TR/uievents-key/). Its `code` is the UI Events code value of the
+          corresponding keyboard key where one exists, otherwise `Unidentified`, e.g. for `ChannelUp` and the color
+          keys.
+
+        `function` is required for the `function` action and not allowed otherwise. `key` is required for the `key`
+        action and not allowed otherwise. See the
+        [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#buttons)
+        for the functions and the keys.
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - pass
+            - function
+            - key
+        function:
+          type: string
+          enum:
+            - zoom_in
+            - zoom_out
+            - zoom_reset
+            - scroll_up
+            - scroll_down
+            - page_up
+            - page_down
+            - top
+            - bottom
+            - back
+            - forward
+            - back_or_close
+            - reload
+            - stop
+            - close
+            - toggle_navigation
+            - focus_next
+            - focus_previous
+            - none
+        key:
+          type: string
+          enum:
+            - ArrowUp
+            - ArrowDown
+            - ArrowLeft
+            - ArrowRight
+            - Enter
+            - Escape
+            - Backspace
+            - Tab
+            - PageUp
+            - PageDown
+            - Home
+            - End
+            - ContextMenu
+            - BrowserBack
+            - BrowserForward
+            - BrowserRefresh
+            - BrowserStop
+            - Exit
+            - AudioVolumeUp
+            - AudioVolumeDown
+            - AudioVolumeMute
+            - ChannelUp
+            - ChannelDown
+            - MediaPlayPause
+            - MediaPlay
+            - MediaPause
+            - MediaStop
+            - MediaRecord
+            - MediaRewind
+            - MediaFastForward
+            - MediaTrackPrevious
+            - MediaTrackNext
+            - ColorF0Red
+            - ColorF1Green
+            - ColorF2Yellow
+            - ColorF3Blue
+      required:
+        - action
+      examples:
+        - action: key
+          key: ChannelUp
+        - action: function
+          function: page_down
+        - action: pass
+
+    webviewAuth:
+      description: |
+        Credentials sent to the origin of the `url` option.
+        - `none`: no credentials.
+        - `basic`: `username` and `password`, sent as answer to an HTTP authentication request (status 401) of the
+          origin. Not sent preemptively.
+        - `bearer`: `token`, sent as `Authorization: Bearer <token>` header with every request to the origin.
+        - `header`: `header_name` and `header_value`, sent as header with every request to the origin, e.g. an API key.
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - none
+            - basic
+            - bearer
+            - header
+          default: none
+        username:
+          description: User name for `basic`. Required for `basic`.
+          type: string
+          maxLength: 256
+        password:
+          description: Password for `basic`. Secret, only handed to the user interface of the Remote.
+          type: string
+          maxLength: 256
+          writeOnly: true
+        token:
+          description: |
+            Token for `bearer`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start or the
+            end. Secret, only handed to the user interface of the Remote.
+          type: string
+          maxLength: 4096
+          writeOnly: true
+        header_name:
+          description: |
+            Header name for `header`, e.g. `X-API-Key`. Not allowed: `Host`, `Cookie`, `Cookie2`, `Content-Length`,
+            `Content-Type`, `Connection`, `Keep-Alive`, `Transfer-Encoding`, `Upgrade`, `TE`, `Trailer`, `Expect`,
+            `Origin`, `Referer`, `User-Agent`, and names starting with `Proxy-` or `Sec-`.
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
+        header_value:
+          description: |
+            Header value for `header`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start
+            or the end. Secret, only handed to the user interface of the Remote.
+          type: string
+          maxLength: 4096
+          writeOnly: true
+      required:
+        - type
+
+    webviewTls:
+      description: |
+        Exception for an invalid TLS certificate of the host of the `url` option, e.g. a self-signed certificate.
+        Without this object, a page with an invalid certificate is not loaded. The exception only applies to page loads
+        from this host.
+
+        An administrator of the Remote can allow invalid certificates of all hosts for all web views with a global web
+        view setting, which overrides this object.
+      type: object
+      properties:
+        certificate_sha256:
+          description: |
+            SHA-256 fingerprint of the expected DER-encoded server certificate: 64 hexadecimal digits, optionally
+            separated by `:`. An invalid certificate is only accepted if its fingerprint matches.
+          type: string
+          pattern: '^[0-9a-fA-F]{2}(:?[0-9a-fA-F]{2}){31}$'
+        allow_invalid_certificate:
+          description: |
+            Accept any invalid certificate of the host. Only used if `certificate_sha256` is not set. Prefer
+            `certificate_sha256`.
+          type: boolean
+          default: false
+
+    webviewCookie:
+      description: |
+        Cookie set before the start page is loaded. Without `domain`, the cookie is only sent to the host of the `url`
+        option.
+      type: object
+      properties:
+        name:
+          description: Cookie name, an RFC 6265 token.
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
+        value:
+          description: |
+            Cookie value according to RFC 6265: visible ASCII characters without `"`, `,`, `;` and `\`, optionally in
+            double quotes. Secret, only handed to the user interface of the Remote.
+          type: string
+          maxLength: 4096
+          writeOnly: true
+        domain:
+          description: |
+            The host of the `url` option or a parent domain of it, but not a public suffix: a top-level domain like
+            `com` is refused, and with a public suffix like `co.uk` the web view sets none of the cookies.
+          type: string
+          maxLength: 255
+        path:
+          description: Path of the cookie. Starts with `/`, ASCII characters without `;` and control characters.
+          type: string
+          maxLength: 1024
+          pattern: '^(/[ -:<-~]*)?$'
+          default: /
+        secure:
+          description: Only send the cookie over HTTPS. Default `true` for an `https://` URL, `false` otherwise.
+          type: boolean
+        http_only:
+          description: Hide the cookie from scripts of the page.
+          type: boolean
+          default: false
+        expires:
+          description: Expiry date. If not set, the cookie is a session cookie.
+          type: string
+          format: date-time
+      required:
+        - name
+        - value
+
     voice_assistant:
       description: |
         A voice assistant entity can be used to receive a microphone input stream suitable to send voice commands
@@ -3038,6 +3459,7 @@ components:
             - select
             - number
             - voice_assistant
+            - webview
         - {}  # extensible enum: there might be more supported entity types in a newer implementation than defined above
 
     SimpleCommand:

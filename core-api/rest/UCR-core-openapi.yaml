@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.57.5
+  version: 0.58.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -107,6 +107,10 @@ tags:
     description: |
       🎮 Create BT- and IR-remote-entities. Customize user interface and button mappings for all remote-entities types
       including external remote-entities from integrations.
+  - name: webviews
+    description: |
+      🌐 Web view entities: create and edit user-defined web views. Web views from integrations are listed as well,
+      and their user overrides can be changed.
   - name: profiles
     description: 👤 User profile configuration with profiles, groups, pages
   - name: cfg
@@ -2939,6 +2943,14 @@ paths:
       tags:
         - entities
       summary: Execute an entity command.
+      description: |
+        Execute a command of the entity. See the `EntityCommand` object for details.
+
+        The commands of a `webview` entity are executed by the user interface of the Remote. It answers when it has
+        accepted the command, not when the page has loaded. Common error status codes for web view commands:
+        - `408 Request Timeout`: the user interface didn't answer within 5 seconds.
+        - `503 Service Unavailable`: no user interface that executes web view commands is connected, or the user
+          interface can't show a web view, e.g. `webview.open` during the onboarding of the Remote.
       operationId: executeEntityCommand
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -2964,8 +2976,12 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+        '408':
+          $ref: '#/components/responses/Err408RequestTimeout'
         '422':
           $ref: '#/components/responses/Err422UnprocessableEntity'
+        '503':
+          $ref: '#/components/responses/Err503ServiceUnavailable'
   /entities/{entityId}/state:
     put:
       tags:
@@ -3875,6 +3891,9 @@ paths:
         The payload fields are optional. A page name and the items of the page can be specified, or later be added with 
         `PATCH /activities/{entityId}/ui/pages/{pageId}`. If `grid` is not specified, the default grid size is used from
         the screen metadata layout in `GET /cfg/device/screen_layout`
+
+        A web view item is checked against the rules of `UserInterfaceItemWebview`, including the limit of one web
+        view item per activity over all pages.
       operationId: createActivityUiPage
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -4017,6 +4036,9 @@ paths:
       description: |
         Update one or multiple properties of an activity user interface page. The omitted properties are ignored and not
         deleted. To clear an array simply provide an empty array.
+
+        A web view item is checked against the rules of `UserInterfaceItemWebview`, including the limit of one web
+        view item per activity over all pages.
       parameters:
         - $ref: '#/components/parameters/entity_id'
         - $ref: '#/components/parameters/page_id'
@@ -6835,6 +6857,311 @@ paths:
           $ref: '#/components/responses/Err403Forbidden'
         '404':
           $ref: '#/components/responses/Err404NotFound'
+  /webviews:
+    head:
+      tags:
+        - webviews
+      summary: Get total number of web view entities.
+      description: |
+        The total number of web views of the specified kind is returned in the `Pagination-Count` header. This allows to
+        prepare the retrieval of the web views with the `GET` operation and paging parameters.
+
+        Without the `kind` query parameter, user-defined web views and web views from integrations are counted.
+
+        The optional `q` text search filters the counted web views, see the `GET` operation.
+      operationId: getWebviewCount
+      parameters:
+        - name: kind
+          in: query
+          description: Web view kind
+          required: false
+          schema:
+            $ref: '#/components/schemas/WebviewKind'
+        - $ref: '#/components/parameters/query'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    get:
+      tags:
+        - webviews
+      summary: Get web view entities overview with paging.
+      description: |
+        Returns an overview of the web views of the specified kind with the given paging parameters. Use the `HEAD`
+        operation to retrieve the total number of web views.
+
+        The overview information doesn't include all details of a web view. The full web view information is retrievable
+        with `/webviews/{entityId}`.
+
+        Without the `kind` query parameter, user-defined web views and web views from integrations are returned.
+
+        The optional `q` text search searches case-insensitive in the web view name, entity identifier and integration
+        name. All language variants of the name are searched. It is combined with the `kind` filter and applied before
+        paging, i.e. the `Pagination-Count` header contains the number of matching web views.
+      operationId: getWebviews
+      parameters:
+        - name: kind
+          in: query
+          description: Web view kind
+          required: false
+          schema:
+            $ref: '#/components/schemas/WebviewKind'
+        - $ref: '#/components/parameters/query'
+        - $ref: '#/components/parameters/page'
+        - $ref: '#/components/parameters/limit'
+        - $ref: '#/components/parameters/sort'
+        - $ref: '#/components/parameters/order'
+        - $ref: '#/components/parameters/lang'
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            Pagination-Count:
+              description: Total number of items.
+              schema:
+                type: integer
+            Pagination-Limit:
+              description: Number of returned items.
+              schema:
+                type: integer
+            Pagination-Page:
+              description: Current page number. 1-based.
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webviews'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    post:
+      tags:
+        - webviews
+      summary: Create a new user-defined web view entity.
+      description: |
+        Create a new user-defined `webview` entity. Web views from integrations cannot be created, they must be provided
+        by integration drivers. User-defined web views belong to the internal integration `uc_web.main`, their entity
+        identifier is `uc_web.main.<uuid>`.
+
+        A maximum of 1000 user-defined web views can be created.
+
+        To create a new web view at least a name and the `url` option must be provided. The `icon` and `description`
+        properties are optional and can be set later with the `PATCH` update operation.
+
+        When setting a text in a multilingual field, like name or description, the default `en` identifier should always
+        be included.
+
+        The values of the secret options `auth.password`, `auth.token`, `auth.header_value` and `cookies[].value` are
+        omitted in the response, which contains the `has_*` flags instead. See `WebviewOptions`.
+
+        The new web view can be cloned from another user-defined web view entity identifier in `clone_from`: it gets the
+        options of that web view, including its secret options. Web views from integrations cannot be cloned. A new name must be
+        specified. The `icon` and `description` are not copied and can be specified. Specified `options` are applied to
+        the copied options like in an update, see `WebviewCreate`.
+      operationId: createWebview
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebviewCreate'
+            examples:
+              simple web page:
+                value:
+                  name:
+                    en: Weather
+                  options:
+                    url: https://weather.example.com/kiosk
+                    user_agent: mobile
+                    zoom: 80
+                    reload_interval: 900
+              basic authentication and self-signed certificate:
+                value:
+                  name:
+                    en: NAS status
+                  options:
+                    url: https://nas.home.arpa:5001/status
+                    auth:
+                      type: basic
+                      username: viewer
+                      password: my-secret
+                    tls:
+                      certificate_sha256: 3F:A9:12:5C:77:0B:E4:21:9D:6A:C8:0F:41:B2:93:EE:58:17:0C:D4:2A:9B:61:F0:7E:3C:88:15:A6:D2:4B:C9
+              API key header and cookie:
+                value:
+                  name:
+                    en: Solar inverter
+                  options:
+                    url: http://inverter.home.arpa/status
+                    auth:
+                      type: header
+                      header_name: X-API-Key
+                      header_value: 3b1f0c9e7a
+                    cookies:
+                      - name: layout
+                        value: compact
+              clone:
+                value:
+                  name:
+                    en: NAS disks
+                  clone_from: uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11
+        required: true
+      responses:
+        '201':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webview'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - webviews
+      summary: Delete all user-defined web view entities.
+      description: |
+        ⚠️ All user-defined web views will be irrevocably deleted, including their secret options! Web views from
+        integrations are not deleted.
+
+        All references to the deleted web views are removed from profile pages and groups.
+      operationId: deleteAllWebviews
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /webviews/{entityId}:
+    get:
+      tags:
+        - webviews
+      summary: Get a web view entity by its entity_id.
+      description: |
+        Returns all the information required to manage an existing web view. Secret option values are omitted, see
+        `WebviewOptions`.
+      operationId: getWebview
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webview'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - webviews
+      summary: Update a web view entity.
+      operationId: updateWebview
+      description: |
+        Update one or multiple properties of a web view entity. The omitted properties are ignored and not deleted.
+
+        - User-defined web views: the name, icon, description and options can be changed. See `WebviewUpdate` for how
+          options and secret options are updated. A user-defined web view has no user overrides: an option in
+          `options.user` is refused with error code `400`.
+        - Web views from integrations: the name, icon, description and the user overrides in `options.user` can be
+          changed. Any other option is refused with error code `422`.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Properties to update in the existing web view entity.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebviewUpdate'
+            examples:
+              Name and icon:
+                value:
+                  name:
+                    en: New web view name
+                  icon: uc:tv
+              Change the zoom and the user name, keep the password:
+                value:
+                  options:
+                    zoom: 70
+                    auth:
+                      type: basic
+                      username: kiosk
+              Replace the token:
+                value:
+                  options:
+                    auth:
+                      type: bearer
+                      token: eyJhbGciOiJIUzI1NiJ9.new.token
+              User overrides of a web view from an integration:
+                value:
+                  options:
+                    user:
+                      zoom: 60
+                      reload_interval: null
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Webview'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+        '422':
+          $ref: '#/components/responses/Err422UnprocessableEntity'
+    delete:
+      tags:
+        - webviews
+      summary: Delete a web view entity.
+      description: |
+        ⚠️ A user-defined web view is irrevocably deleted, including its secret options.
+
+        A web view from an integration is removed from the configured entities, like `DELETE /entities/{entityId}`. It
+        can be configured again from its integration.
+
+        All references to the web view are removed from profile pages and groups.
+      operationId: deleteWebview
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          $ref: '#/components/responses/SuccessMessage'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
   /profiles:
     post:
       tags:
@@ -7418,6 +7745,9 @@ paths:
       summary: Reset all settings to default values.
       description: |
         This resets all system configuration settings to factory defaults. Integration & profile settings are not affected.
+
+        Error codes:
+        - `403`: forbidden, only an administrator account or an API key with the `admin` scope may reset the settings.
       operationId: resetAllSettings
       responses:
         '200':
@@ -8814,6 +9144,203 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/VoiceAssistants'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/webview:
+    get:
+      tags:
+        - cfg
+      summary: Get global web view settings.
+      description: |
+        Global settings for all web views on the Remote: user-defined web views and web views from integrations.
+      operationId: getWebviewSettings
+      parameters:
+        - name: default
+          in: query
+          description: Get default values instead of configured values.
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgWebview'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+    patch:
+      tags:
+        - cfg
+      summary: Modify global web view settings.
+      description: |
+        Change one or multiple global web view settings. See `CfgWebview` for the security implications of
+        `allow_invalid_certificates`.
+
+        - Access: requires the `admin` scope; other API keys are refused with error code `403`.
+        - A change is reported with the WS `configuration_change` event.
+      operationId: updateWebviewSettings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CfgWebviewUpdate'
+            examples:
+              allow invalid certificates:
+                value:
+                  allow_invalid_certificates: true
+              light color scheme:
+                value:
+                  color_scheme: light
+              clear all website data on close:
+                value:
+                  website_data: clear_all_on_close
+              VOLUME keeps the button mapping of the activity:
+                value:
+                  buttons:
+                    VOLUME_UP:
+                      action: pass
+                    VOLUME_DOWN:
+                      action: pass
+              BACK goes back in the history, CHANNEL up is reset to its default:
+                value:
+                  buttons:
+                    BACK:
+                      action: function
+                      function: back_or_close
+                    CHANNEL_UP: null
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CfgWebview'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+  /cfg/webview/button_presets:
+    get:
+      tags:
+        - cfg
+      summary: Get the web view button presets.
+      description: |
+        Presets of button actions for the fullscreen web view, to set several buttons at once. Each preset only contains
+        the buttons it covers, and only the buttons of the Remote model. See `WebviewButtonPreset` for the presets.
+
+        A client applies a preset with an existing button update, e.g. `PATCH /cfg/webview` with the `buttons` of the
+        preset: only these buttons change, every other button keeps its action. There is no operation to apply a preset.
+
+        - Access: like `GET /cfg/webview`, the presets can be read without the `admin` scope.
+      operationId: getWebviewButtonPresets
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WebviewButtonPreset'
+              examples:
+                Remote 3:
+                  value:
+                    - id: web_view_functions
+                      buttons:
+                        BACK:
+                          action: function
+                          function: back_or_close
+                        VOLUME_UP:
+                          action: function
+                          function: zoom_in
+                        VOLUME_DOWN:
+                          action: function
+                          function: zoom_out
+                        MUTE:
+                          action: function
+                          function: zoom_reset
+                        CHANNEL_UP:
+                          action: function
+                          function: page_up
+                        CHANNEL_DOWN:
+                          action: function
+                          function: page_down
+                        PREV:
+                          action: function
+                          function: back
+                        NEXT:
+                          action: function
+                          function: forward
+                        PLAY:
+                          action: function
+                          function: reload
+                        STOP:
+                          action: function
+                          function: stop
+                        MENU:
+                          action: function
+                          function: toggle_navigation
+                    - id: page_keys
+                      buttons:
+                        DPAD_UP:
+                          action: key
+                          key: ArrowUp
+                        DPAD_DOWN:
+                          action: key
+                          key: ArrowDown
+                        DPAD_LEFT:
+                          action: key
+                          key: ArrowLeft
+                        DPAD_RIGHT:
+                          action: key
+                          key: ArrowRight
+                        DPAD_MIDDLE:
+                          action: key
+                          key: Enter
+                        BACK:
+                          action: key
+                          key: Escape
+                        VOLUME_UP:
+                          action: key
+                          key: AudioVolumeUp
+                        VOLUME_DOWN:
+                          action: key
+                          key: AudioVolumeDown
+                        MUTE:
+                          action: key
+                          key: AudioVolumeMute
+                        CHANNEL_UP:
+                          action: key
+                          key: ChannelUp
+                        CHANNEL_DOWN:
+                          action: key
+                          key: ChannelDown
+                        PREV:
+                          action: key
+                          key: MediaTrackPrevious
+                        NEXT:
+                          action: key
+                          key: MediaTrackNext
+                        PLAY:
+                          action: key
+                          key: MediaPlayPause
+                        STOP:
+                          action: key
+                          key: MediaStop
+                        RECORD:
+                          action: key
+                          key: MediaRecord
+                        MENU:
+                          action: key
+                          key: ContextMenu
         '401':
           $ref: '#/components/responses/Err401Unauthorized'
         '403':
@@ -13897,6 +14424,7 @@ components:
         - select
         - number
         - voice_assistant
+        - webview
     AvailableEntity:
       description: |
         Provided entity from an integration which can be configured to be used in the remote.
@@ -13935,6 +14463,8 @@ components:
         options:
           description: |
             Feature options. See entity documentation for available options.
+
+            The secret options of a `webview` entity are never returned. See `WebviewOptions`.
           type: object
         area:
           description: Optional area if supported by the integration. E.g. `Living room`.
@@ -13969,8 +14499,15 @@ components:
             Options which can be overridden:
             - `sensor` entity: `decimals` (integer 0..6).
             - `number` entity: `decimals` (integer 0..6), `display_mode` (`auto`, `slider`, `stepper`).
+            - `webview` entity from an integration driver: `zoom` (integer 25..400), `reload_interval` (integer 0 or
+              10..86400), `show_navigation` (boolean).
 
-            Other options or entity types are ignored.
+            Other options or entity types are refused with a validation error: error code `400` (`VALIDATION_ERROR`)
+            with the field `options.user.<option>` and the code `INVALID`. An invalid value is refused the same way.
+            For an entity type without options which can be overridden, `user` can only be an empty object or `null`.
+
+            A user-defined web view has no user overrides, like an entity type without options which can be
+            overridden: its options are changed directly with `PATCH /webviews/{entityId}`.
           type:
             - object
             - 'null'
@@ -14050,6 +14587,14 @@ components:
             The request is answered once the stopped sequence has fully wound down, so that a
             follow-up command cannot overlap with it at a shared device. Aborting a step that is
             already in flight can therefore delay the response by a few seconds.
+
+            ### Web view commands
+
+            The commands of a `webview` entity (`webview.open`, `webview.reload`, `webview.clear_cache`,
+            `webview.clear_data`) work like other entity commands, including activity and macro sequences. The Core
+            routes them to the locally installed user interface app, which executes them, and never to an
+            integration driver. The user interface answers when it has accepted the command, not when the page has
+            loaded. `webview.open` wakes the display.
           type: string
         params:
           description: |
@@ -14269,6 +14814,9 @@ components:
             The `user` object holds the user overrides of options, with the same option names. An override takes precedence
             over the option of the integration driver. It is kept if the driver provides an updated entity definition.
             See [user overrides](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/README.md#user-overrides).
+
+            The secret option values of a `webview` entity are omitted in responses and events. See `WebviewOptions` for
+            the only exception.
           type: object
         description:
           $ref: '#/components/schemas/LanguageText'
@@ -14804,6 +15352,9 @@ components:
         - `sensor`: show sensor value from the specified sensor entity specified in the `sensor` configuration object.
         - `slider`: show a slider bound to a numeric entity feature specified in the `slider` configuration object.
         - `number`: show a number entity as slider or stepper, specified in the `number` configuration object.
+        - `webview`: show the web page of a web view entity, specified in the `webview` configuration object.
+          The web view entity must be part of the included entities in the activity. At most one per activity, minimum
+          size 3 x 3. Not supported in the user interface of a remote entity.
       type: string
       enum:
         - icon
@@ -14814,6 +15365,7 @@ components:
         - sensor
         - slider
         - number
+        - webview
     UserInterfaceItemSelect:
       description: |
         Select item configuration.
@@ -15007,6 +15559,45 @@ components:
         - number_id: bedroom.sleep_timer
           display_mode: stepper
           step: 5
+    UserInterfaceItemWebview:
+      description: |
+        Web view item configuration: shows the web page of a web view entity.
+
+        Rules, checked when a user interface page is created or updated. A violation is refused with error code `400`
+        and `code: VALIDATION_ERROR`, with the field and field error code in `errors`:
+        - `webview_id` must be a configured web view entity (`items[{pos}].webview.webview_id`: `NOT_FOUND`,
+          `INVALID`), and an included entity of the activity (`NOT_INCLUDED`).
+        - At most one web view item per activity, over all pages (`items[{pos}].type`: `LIMIT`).
+        - Minimum item size 3 x 3 grid fields. The item `size` is required, since the default size is 1 x 1
+          (`items[{pos}].size`: `RANGE`).
+        - Not supported in the user interface of a remote entity (`items[{pos}].type`: `NOT_SUPPORTED`).
+
+        See [user interface widgets](https://github.com/unfoldedcircle/core-api/blob/main/doc/ui-widgets.md#web-view)
+        for more information.
+      type: object
+      properties:
+        webview_id:
+          $ref: '#/components/schemas/EntityId'
+        interactive:
+          description: |
+            `true`: touch input is sent to the page. `false`: the page is only shown, and a tap opens the fullscreen web
+            view.
+          type: boolean
+          default: true
+        zoom:
+          description: |
+            Page zoom of the widget in percent. If not set, the effective `zoom` option of the web view entity is used:
+            the user override, otherwise the option of the entity.
+          type: integer
+          minimum: 25
+          maximum: 400
+      required:
+        - webview_id
+      examples:
+        - webview_id: uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11
+        - webview_id: uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11
+          interactive: false
+          zoom: 60
     GridLocation:
       description: Button placement in the grid with 0-based coordinates.
       type: object
@@ -15034,8 +15625,8 @@ components:
           default: 1
     UserInterfaceItem:
       description: |
-        A user interface item is either an icon, text, sensor value, select box, slider, number entity or media information
-        from a media-player entity.
+        A user interface item is either an icon, text, sensor value, select box, slider, number entity, web page of a web
+        view entity or media information from a media-player entity.
         - Icon and text items can be static or linked to a command specified in the `command` field.
         - The command object can only be used for `icon` and `text` items.
         - Default size is 1x1 if not specified.
@@ -15059,6 +15650,8 @@ components:
           $ref: '#/components/schemas/UserInterfaceItemSlider'
         number:
           $ref: '#/components/schemas/UserInterfaceItemNumber'
+        webview:
+          $ref: '#/components/schemas/UserInterfaceItemWebview'
         command:
           $ref: '#/components/schemas/EntityCommand'
         location:
@@ -16989,6 +17582,612 @@ components:
                   type: boolean
               required:
                 - confirm
+    WebviewKind:
+      description: |
+        Kind of web view entity:
+        - `USER`: created on the Remote by the user. Belongs to the internal integration `uc_web.main`.
+        - `EXTERNAL`: provided by an integration driver.
+      type: string
+      enum:
+        - USER
+        - EXTERNAL
+    WebviewOverview:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - webview
+            options:
+              type: object
+              properties:
+                editable:
+                  description: |
+                    - `true`: user-defined web view.
+                    - `false`: web view from an integration driver.
+                  type: boolean
+                url:
+                  description: Start page of the web view.
+                  type: string
+    Webviews:
+      type: array
+      items:
+        $ref: '#/components/schemas/WebviewOverview'
+    WebviewAuthType:
+      description: |
+        Authentication method of a web view. The credentials are only sent to the origin (scheme, host and port) of the
+        `url` option, never to another origin.
+        - `none`: no credentials.
+        - `basic`: `username` and `password`, sent as answer to an HTTP authentication request (status 401) of the
+          origin. Not sent preemptively.
+        - `bearer`: `token`, sent as `Authorization: Bearer <token>` header with every request to the origin.
+        - `header`: `header_name` and `header_value`, sent as header with every request to the origin, e.g. an API key.
+      type: string
+      enum:
+        - none
+        - basic
+        - bearer
+        - header
+      default: none
+    WebviewAuth:
+      description: |
+        Credentials of a web view. The values of the secrets `password`, `token` and `header_value` are omitted in
+        responses, which contain the `has_password`, `has_token` and `has_header_value` flags instead. See
+        `WebviewOptions` for the only exception.
+
+        In an update request:
+        - A missing secret keeps the stored secret.
+        - An empty string removes the stored secret.
+        - If `type` changes, the secrets of the previous type are removed.
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/WebviewAuthType'
+        username:
+          description: User name for `basic`. Required for `basic`.
+          type: string
+          maxLength: 256
+        password:
+          description: Password for `basic`. Secret, see `WebviewOptions`.
+          type: string
+          maxLength: 256
+          writeOnly: true
+        has_password:
+          description: A password is set.
+          type: boolean
+          readOnly: true
+        token:
+          description: |
+            Token for `bearer`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start or the
+            end. Secret, see `WebviewOptions`.
+          type: string
+          maxLength: 4096
+          writeOnly: true
+        has_token:
+          description: A token is set.
+          type: boolean
+          readOnly: true
+        header_name:
+          description: |
+            Header name for `header`, e.g. `X-API-Key`. Not allowed: `Host`, `Cookie`, `Cookie2`, `Content-Length`,
+            `Content-Type`, `Connection`, `Keep-Alive`, `Transfer-Encoding`, `Upgrade`, `TE`, `Trailer`, `Expect`,
+            `Origin`, `Referer`, `User-Agent`, and names starting with `Proxy-` or `Sec-`.
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: ^[!#$%&'*+.^_`|~0-9A-Za-z-]+$
+        header_value:
+          description: |
+            Header value for `header`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start
+            or the end. Secret, see `WebviewOptions`.
+          type: string
+          maxLength: 4096
+          writeOnly: true
+        has_header_value:
+          description: A header value is set.
+          type: boolean
+          readOnly: true
+      required:
+        - type
+    WebviewTls:
+      description: |
+        Exception for an invalid TLS certificate, e.g. a self-signed certificate, of the host of the `url` option.
+        Without an exception, a page with an invalid certificate is not loaded. The exception only applies to page loads
+        from this host.
+
+        The global web view setting `allow_invalid_certificates` (`CfgWebview`) overrides this object: if it is
+        enabled, every web view accepts invalid certificates of all hosts.
+      type: object
+      properties:
+        certificate_sha256:
+          description: |
+            SHA-256 fingerprint of the expected DER-encoded server certificate: 64 hexadecimal digits, optionally
+            separated by `:`, case-insensitive. An invalid certificate is only accepted if its fingerprint matches.
+          type: string
+          pattern: ^[0-9a-fA-F]{2}(:?[0-9a-fA-F]{2}){31}$
+        allow_invalid_certificate:
+          description: |
+            Accept any invalid certificate of the host. Only used if `certificate_sha256` is not set. Prefer
+            `certificate_sha256`.
+          type: boolean
+          default: false
+    WebviewCookie:
+      description: |
+        Cookie set before the start page is loaded, each time the web view is opened. Without `domain`, the cookie is
+        only sent to the host of the `url` option.
+
+        The `value` is a secret, which is omitted in responses: they contain `has_value` instead. See `WebviewOptions`
+        for the only exception. In an update request, a cookie without `value` keeps the stored value of the cookie with
+        the same `name`, `domain` and `path`. A new cookie without `value`, or a cookie with an empty `value`, is refused
+        with error code `400`.
+      type: object
+      properties:
+        name:
+          description: Cookie name, an RFC 6265 token.
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: ^[!#$%&'*+.^_`|~0-9A-Za-z-]+$
+        value:
+          description: |
+            Cookie value according to RFC 6265: visible ASCII characters without `"`, `,`, `;` and `\`, optionally in
+            double quotes. Secret, see `WebviewOptions`.
+          type: string
+          maxLength: 4096
+          writeOnly: true
+        has_value:
+          description: A value is set.
+          type: boolean
+          readOnly: true
+        domain:
+          description: |
+            The host of the `url` option or a parent domain of it, but not a public suffix: a top-level domain like
+            `com` is refused, and with a public suffix like `co.uk` the web view sets none of the cookies.
+          type: string
+          maxLength: 255
+        path:
+          description: Path of the cookie. Starts with `/`, ASCII characters without `;` and control characters.
+          type: string
+          maxLength: 1024
+          pattern: ^(/[ -:<-~]*)?$
+          default: /
+        secure:
+          description: Only send the cookie over HTTPS. Default `true` for an `https://` URL, `false` otherwise.
+          type: boolean
+        http_only:
+          description: Hide the cookie from scripts of the page.
+          type: boolean
+          default: false
+        expires:
+          description: Expiry date. If not set, the cookie is a session cookie.
+          type: string
+          format: date-time
+      required:
+        - name
+    WebviewButton:
+      description: |
+        Physical button of the Remote which can be changed in the fullscreen web view, with the same identifier as in the
+        button mapping of an activity. Not every Remote model has all buttons: `RED`, `GREEN`, `YELLOW` and `BLUE` are
+        only on the Remote Two, `RECORD`, `STOP` and `MENU` only on the Remote 3.
+
+        The other buttons have a fixed function in the web view and can't be changed: `HOME` always closes the web view
+        and shows the home screen, `POWER` and `VOICE` keep their normal function.
+      type: string
+      enum:
+        - BACK
+        - DPAD_UP
+        - DPAD_DOWN
+        - DPAD_LEFT
+        - DPAD_RIGHT
+        - DPAD_MIDDLE
+        - VOLUME_UP
+        - VOLUME_DOWN
+        - CHANNEL_UP
+        - CHANNEL_DOWN
+        - MUTE
+        - PREV
+        - PLAY
+        - NEXT
+        - STOP
+        - RECORD
+        - MENU
+        - RED
+        - GREEN
+        - YELLOW
+        - BLUE
+    WebviewButtonFunction:
+      description: |
+        Web view function of a physical button:
+        - `zoom_in`, `zoom_out`: zoom the page in or out by one step: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200,
+          250 and 300 %. The zoom starts at the effective `zoom` option of the web view. The changed zoom only applies
+          until the web view is closed: it isn't saved to the entity. No effect while a dialog or the on-screen keyboard
+          is open.
+        - `zoom_reset`: zoom back to the effective `zoom` option of the web view.
+        - `scroll_up`, `scroll_down`: scroll the page up or down by a small step.
+        - `page_up`, `page_down`: scroll the page up or down by one screen.
+        - `top`, `bottom`: scroll to the top or the bottom of the page.
+        - `back`, `forward`: go back or forward in the history of the web view.
+        - `back_or_close`: go back in the history, or close the web view on its first page.
+        - `reload`: reload the page.
+        - `stop`: stop loading the page.
+        - `close`: close the web view and return to the previous screen.
+        - `toggle_navigation`: show or hide the navigation controls, see the `show_navigation` option. The change isn't
+          saved to the entity.
+        - `focus_next`, `focus_previous`: move the focus to the next or the previous element of the page, like `Tab` and
+          `Shift+Tab` on a keyboard.
+        - `none`: the button does nothing.
+      type: string
+      enum:
+        - zoom_in
+        - zoom_out
+        - zoom_reset
+        - scroll_up
+        - scroll_down
+        - page_up
+        - page_down
+        - top
+        - bottom
+        - back
+        - forward
+        - back_or_close
+        - reload
+        - stop
+        - close
+        - toggle_navigation
+        - focus_next
+        - focus_previous
+        - none
+    WebviewButtonKey:
+      description: |
+        Key event of a physical button, sent to the page: a `KeyboardEvent.key` value of the
+        [UI Events key values](https://www.w3.org/TR/uievents-key/). The page receives a real key event with this `key`.
+        Its `code` is the [UI Events code value](https://www.w3.org/TR/uievents-code/) of the corresponding keyboard key
+        where one exists, otherwise `Unidentified`: for `Exit`, `ChannelUp`, `ChannelDown`, `MediaPlay`, `MediaPause`,
+        `MediaRecord`, `MediaRewind`, `MediaFastForward` and the color keys `ColorF0Red` to `ColorF3Blue`. Any button can
+        send any of these keys.
+      type: string
+      enum:
+        - ArrowUp
+        - ArrowDown
+        - ArrowLeft
+        - ArrowRight
+        - Enter
+        - Escape
+        - Backspace
+        - Tab
+        - PageUp
+        - PageDown
+        - Home
+        - End
+        - ContextMenu
+        - BrowserBack
+        - BrowserForward
+        - BrowserRefresh
+        - BrowserStop
+        - Exit
+        - AudioVolumeUp
+        - AudioVolumeDown
+        - AudioVolumeMute
+        - ChannelUp
+        - ChannelDown
+        - MediaPlayPause
+        - MediaPlay
+        - MediaPause
+        - MediaStop
+        - MediaRecord
+        - MediaRewind
+        - MediaFastForward
+        - MediaTrackPrevious
+        - MediaTrackNext
+        - ColorF0Red
+        - ColorF1Green
+        - ColorF2Yellow
+        - ColorF3Blue
+    WebviewButtonAction:
+      description: |
+        Action of a physical button in the fullscreen web view:
+        - `pass`: the button keeps its function in the layer below the web view: the button mapping of the activity if the
+          web view is shown on top of an activity, otherwise the function of the button on the screen below, e.g. the
+          normal volume handling of the Remote on a profile page.
+        - `function`: the web view function in `function`, see `WebviewButtonFunction`.
+        - `key`: the key event in `key` is sent to the page, see `WebviewButtonKey`.
+
+        `function` is required for the `function` action and not allowed otherwise. `key` is required for the `key` action
+        and not allowed otherwise.
+
+        A held button repeats key events and the functions `scroll_up`, `scroll_down`, `page_up` and `page_down`. All other
+        functions act once per press. A `pass` button behaves like in the layer below.
+      type: object
+      properties:
+        action:
+          type: string
+          enum:
+            - pass
+            - function
+            - key
+        function:
+          $ref: '#/components/schemas/WebviewButtonFunction'
+        key:
+          $ref: '#/components/schemas/WebviewButtonKey'
+      required:
+        - action
+      examples:
+        - action: function
+          function: zoom_in
+        - action: key
+          key: ChannelUp
+        - action: pass
+    WebviewButtons:
+      description: |
+        Function of single physical buttons in the fullscreen web view of this web view: a `WebviewButtonAction` per button
+        identifier (`WebviewButton`). It only contains the buttons which this web view sets, the other buttons have the
+        action of the global web view setting `buttons` (`CfgWebview`), e.g. to keep the button mapping of the activity for
+        VOLUME up and down, or to send the CHANNEL keys to a page which handles them itself.
+
+        The action of a button is taken from the first of:
+        1. the user override in `user.buttons`, only for a web view from an integration driver,
+        2. this option,
+        3. the global web view setting `buttons`, which contains the default actions.
+
+        The buttons only apply to the fullscreen web view. In the web view widget of an activity, the buttons keep the
+        button mapping of the activity.
+
+        Only the buttons of the Remote model can be set. A button which the model doesn't have, an unknown button or a button
+        with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with error code `400` (`VALIDATION_ERROR`) with the
+        field `options.buttons.<button>` and the code `INVALID`.
+        - In the entity definition of an integration driver, the buttons which the Remote model doesn't have are ignored: a
+          driver can use the same definition for all models.
+        - A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+          activities: the buttons which the model doesn't have are removed, also from the user overrides.
+      type: object
+      propertyNames:
+        $ref: '#/components/schemas/WebviewButton'
+      additionalProperties:
+        $ref: '#/components/schemas/WebviewButtonAction'
+      examples:
+        - BACK:
+            action: function
+            function: back_or_close
+          VOLUME_UP:
+            action: pass
+          VOLUME_DOWN:
+            action: pass
+          CHANNEL_UP:
+            action: key
+            key: ChannelUp
+          CHANNEL_DOWN:
+            action: key
+            key: ChannelDown
+    WebviewUserOptions:
+      description: |
+        User overrides of the options of a web view from an integration driver. In an update request they are merged key
+        by key with the existing overrides: a value sets the override, `null` removes it. `null` instead of an object
+        removes all overrides. `buttons` is merged button by button in the same way.
+
+        A user-defined web view has no user overrides, see `WebviewUpdate`.
+      type: object
+      properties:
+        zoom:
+          type:
+            - integer
+            - 'null'
+          minimum: 25
+          maximum: 400
+        reload_interval:
+          type:
+            - integer
+            - 'null'
+          minimum: 0
+          maximum: 86400
+        show_navigation:
+          type:
+            - boolean
+            - 'null'
+        buttons:
+          description: |
+            User overrides of single buttons, see `WebviewButtons`. A button with an action sets its override, `null`
+            removes it. A button which the Remote model doesn't have, an unknown button or a button with a fixed function
+            is refused with error code `400` (`VALIDATION_ERROR`) with the field `options.user.buttons.<button>` and the
+            code `INVALID`.
+          type:
+            - object
+            - 'null'
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            anyOf:
+              - $ref: '#/components/schemas/WebviewButtonAction'
+              - type: 'null'
+    WebviewOptions:
+      description: |
+        Options of a web view entity. See the [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md)
+        for details.
+
+        The origin (scheme, host and port) of the `url` option is the scope of `auth`, `cookies` and `tls`: they are
+        never applied to another origin.
+
+        All web views on the Remote share their website data: cookies, cache and logins.
+
+        Secret options (`auth.password`, `auth.token`, `auth.header_value` and `cookies[].value`) are part of the
+        options, but every response omits their values and contains the `has_*` flags instead. The only exception is
+        the WebSocket session authenticated with the access token that the Core generates at startup for the locally
+        installed user interface app: it receives the secret values in the `get_entity` and `get_entities` responses.
+        Events never contain secret values, for any session.
+      type: object
+      properties:
+        editable:
+          description: |
+            - `true`: user-defined web view, the options can be changed.
+            - `false`: web view from an integration driver. Only the user overrides in `user` can be changed.
+          type: boolean
+          readOnly: true
+        url:
+          description: |
+            Start page of the web view, required when creating a web view. Absolute `http://` or `https://` URL. User
+            name and password in the URL are not allowed, use `auth` instead.
+          type: string
+          format: uri
+          minLength: 8
+          maxLength: 2048
+          pattern: ^[hH][tT][tT][pP][sS]?://
+        auth:
+          $ref: '#/components/schemas/WebviewAuth'
+        tls:
+          $ref: '#/components/schemas/WebviewTls'
+        cookies:
+          type: array
+          maxItems: 20
+          items:
+            $ref: '#/components/schemas/WebviewCookie'
+        user_agent:
+          description: |
+            User agent of the web view, sent in the `User-Agent` header and returned in `navigator.userAgent`:
+            - `default`: the user agent of the Remote, which identifies the Remote and its firmware version.
+            - `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or
+              the desktop layout of a page.
+            - Any other value: a custom user agent string of visible ASCII characters and spaces.
+          type: string
+          minLength: 1
+          maxLength: 256
+          pattern: ^[ -~]+$
+          default: default
+        zoom:
+          description: Page zoom in percent.
+          type: integer
+          minimum: 25
+          maximum: 400
+          default: 100
+        background_color:
+          description: |
+            Background color while the page is loading and behind transparent pages, as `#RRGGBB`. Empty or not set:
+            white `#FFFFFF`.
+          type: string
+          pattern: ^(#[0-9a-fA-F]{6})?$
+          default: '#FFFFFF'
+        show_navigation:
+          description: Show back, forward, reload and close controls in the fullscreen web view.
+          type: boolean
+          default: false
+        reload_interval:
+          description: Reload the page every n seconds while it is shown. 0 = off, otherwise 10..86400.
+          type: integer
+          minimum: 0
+          maximum: 86400
+          default: 0
+        buttons:
+          $ref: '#/components/schemas/WebviewButtons'
+        user:
+          $ref: '#/components/schemas/WebviewUserOptions'
+      examples:
+        - editable: true
+          url: https://dashboard.example.com/energy?kiosk=1
+          auth:
+            type: bearer
+            has_token: true
+          user_agent: desktop
+          zoom: 70
+        - editable: false
+          url: http://inverter.home.arpa/status
+          auth:
+            type: header
+            header_name: X-API-Key
+            has_header_value: true
+          cookies:
+            - name: layout
+              has_value: true
+          reload_interval: 60
+          show_navigation: true
+          buttons:
+            CHANNEL_UP:
+              action: function
+              function: reload
+          user:
+            zoom: 60
+            buttons:
+              VOLUME_UP:
+                action: pass
+              VOLUME_DOWN:
+                action: pass
+    WebviewCreate:
+      description: |
+        Dedicated request object to create a new user-defined web view. Either `options` with `url`, or `clone_from`
+        must be specified. A maximum of 1000 user-defined web views can be created.
+
+        With `clone_from`, the new web view starts with the options of the given user-defined web view, including the secret
+        options. Only user-defined web views can be cloned, web views from integrations cannot be cloned. Only the options are copied,
+        not the `icon` and the `description`. Specified `options` are applied to the copied options like in an update, see `WebviewUpdate`:
+        an omitted option keeps the copied value, a specified option replaces it, `null` removes it.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        clone_from:
+          $ref: '#/components/schemas/EntityId'
+        options:
+          $ref: '#/components/schemas/WebviewOptions'
+      required:
+        - name
+    Webview:
+      description: |
+        A web view entity shows a web page on the Remote. It is either defined by the user, or provided by an
+        integration driver. The web page is rendered by the user interface of the Remote.
+
+        The Core reports the state `UNAVAILABLE` while no user interface that executes web view commands is connected.
+        An integration driver may also report the state of its web views.
+
+        Secret option values are omitted in responses and events, see `WebviewOptions`.
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Entity'
+        - properties:
+            entity_type:
+              type: string
+              enum:
+                - webview
+            features:
+              description: The web view entity has no features.
+              type: array
+              maxItems: 0
+            options:
+              $ref: '#/components/schemas/WebviewOptions'
+          required:
+            - options
+    WebviewUpdate:
+      description: |
+        Dedicated request object to update an existing web view. Omitted properties are not changed.
+
+        Options of a user-defined web view (`editable: true`):
+        - An omitted option is not changed.
+        - `null` removes the option: its default applies. `url` is required and can't be removed.
+        - `auth`, `tls` and `cookies` replace the stored object or list. Secrets: see `WebviewAuth` and
+          `WebviewCookie`. An empty `tls` object removes the certificate exception, an empty `cookies` list removes all
+          cookies, `auth.type: none` removes the credentials.
+        - An empty `background_color` restores the default white `#FFFFFF`.
+        - `buttons` is merged button by button with the stored buttons: a button with an action sets it, `null` removes
+          it and the global web view setting applies again. `null` instead of the object removes all buttons. See
+          `WebviewButtons`.
+        - A user-defined web view has no user overrides: `user` can only be an empty object or `null`. An option in
+          `user` is refused with a validation error: error code `400` (`VALIDATION_ERROR`) with the field
+          `options.user.<option>` and the code `INVALID`.
+
+        Options of a web view from an integration driver (`editable: false`): only the user overrides in `user` can be
+        changed, see `WebviewUserOptions`. Any other option is refused with error code `422`.
+      type: object
+      properties:
+        name:
+          $ref: '#/components/schemas/LanguageText'
+        icon:
+          $ref: '#/components/schemas/IconIdentifier'
+        description:
+          $ref: '#/components/schemas/LanguageText'
+        options:
+          $ref: '#/components/schemas/WebviewOptions'
     Name:
       type: string
       minLength: 1
@@ -17693,6 +18892,136 @@ components:
       required:
         - microphone
         - voice_assistant
+    CfgWebview:
+      description: |
+        Global settings for all web views on the Remote: user-defined web views and web views from
+        integrations. A change is reported with the `configuration_change` event.
+
+        See the [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#global-web-view-settings)
+        for more information.
+      type: object
+      properties:
+        allow_invalid_certificates:
+          description: |
+            Allow invalid TLS certificates for all web views: self-signed certificates, expired certificates,
+            certificates of an unknown certificate authority and certificates for another host name. Overrides the `tls`
+            options of every web view entity, user-defined and from integrations. Applies to new connections.
+
+            ⚠️ This turns off the certificate check for every page and every resource loaded by any web view, including
+            third-party hosts like content delivery networks, embedded pages and redirect targets. A man-in-the-middle
+            attack on any of these connections is not detected. The setting applies to the whole Remote: prefer the
+            `tls` option of a web view entity, which only applies to the host of its `url` option.
+          type: boolean
+          default: false
+        color_scheme:
+          description: |
+            Sets the CSS media feature `prefers-color-scheme` for all web views. A page can query it, e.g. to show the
+            matching theme of a dashboard. Only pages which support `prefers-color-scheme` react to it: it doesn't force
+            a theme onto other pages, and it's not sent as an HTTP header.
+          type: string
+          enum:
+            - light
+            - dark
+          default: dark
+        website_data:
+          description: |
+            What happens with the website data when a web view is closed: when the fullscreen web view is closed, or
+            when the activity user interface page with the web view widget is left. All web views share their website
+            data, so a clear affects all of them.
+            - `keep`: the website data is kept, also across restarts of the user interface and the Remote.
+            - `clear_cache_on_close`: the HTTP cache is cleared.
+            - `clear_all_on_close`: all website data is cleared: cookies, cache, local storage, IndexedDB and service
+              workers. Pages which rely on a cookie login ask to log in again. The configured credentials and cookies of
+              a web view entity are sent again automatically.
+
+            Credentials entered in a login dialog are kept until the user interface restarts.
+          type: string
+          enum:
+            - keep
+            - clear_cache_on_close
+            - clear_all_on_close
+          default: keep
+        buttons:
+          description: |
+            Function of the physical buttons in the fullscreen web view, for all web views: a `WebviewButtonAction` per
+            button identifier (`WebviewButton`). A web view entity can change single buttons with its `buttons` option.
+
+            The response contains every button of the Remote model which can be changed, with its configured action or
+            its default action:
+
+            | Button                                               | Default action                                      |
+            |------------------------------------------------------|-----------------------------------------------------|
+            | `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT`    | key `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight` |
+            | `DPAD_MIDDLE`                                        | key `Enter`                                         |
+            | `BACK`                                               | function `close`                                    |
+            | `VOLUME_UP`, `VOLUME_DOWN`                           | function `zoom_in`, `zoom_out`                      |
+            | `CHANNEL_UP`, `CHANNEL_DOWN`                         | function `page_up`, `page_down`                     |
+            | `MENU`                                               | key `ContextMenu`                                   |
+            | All other buttons                                    | `pass`                                              |
+
+            `HOME`, `POWER` and `VOICE` have a fixed function and are not part of the settings, see `WebviewButton`.
+
+            A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+            activities: the buttons which the model doesn't have are removed.
+
+            Presets to set several buttons at once: `GET /cfg/webview/button_presets` and `get_webview_button_presets`, see
+            `WebviewButtonPreset`.
+          type: object
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            $ref: '#/components/schemas/WebviewButtonAction'
+          examples:
+            - BACK:
+                action: function
+                function: close
+              DPAD_UP:
+                action: key
+                key: ArrowUp
+              DPAD_DOWN:
+                action: key
+                key: ArrowDown
+              DPAD_LEFT:
+                action: key
+                key: ArrowLeft
+              DPAD_RIGHT:
+                action: key
+                key: ArrowRight
+              DPAD_MIDDLE:
+                action: key
+                key: Enter
+              VOLUME_UP:
+                action: function
+                function: zoom_in
+              VOLUME_DOWN:
+                action: function
+                function: zoom_out
+              CHANNEL_UP:
+                action: function
+                function: page_up
+              CHANNEL_DOWN:
+                action: function
+                function: page_down
+              MUTE:
+                action: pass
+              PREV:
+                action: pass
+              PLAY:
+                action: pass
+              NEXT:
+                action: pass
+              STOP:
+                action: pass
+              RECORD:
+                action: pass
+              MENU:
+                action: key
+                key: ContextMenu
+      required:
+        - allow_invalid_certificates
+        - color_scheme
+        - website_data
+        - buttons
     CfgAll:
       type: object
       properties:
@@ -17722,6 +19051,8 @@ components:
           $ref: '#/components/schemas/CfgSound'
         voice:
           $ref: '#/components/schemas/CfgVoiceControl'
+        webview:
+          $ref: '#/components/schemas/CfgWebview'
         restart_required:
           description: |
             A configuration change requires a restart to take effect. Set after a change of the BT
@@ -18233,6 +19564,106 @@ components:
       type: array
       items:
         $ref: '#/components/schemas/VoiceAssistant'
+    CfgWebviewUpdate:
+      description: |
+        Update object for the global web view settings. A missing field keeps the old value.
+      type: object
+      properties:
+        allow_invalid_certificates:
+          description: |
+            Allow invalid TLS certificates for all web views. See `CfgWebview` for the security implications.
+          type: boolean
+        color_scheme:
+          description: Color scheme for all web views. See `CfgWebview`.
+          type: string
+          enum:
+            - light
+            - dark
+        website_data:
+          description: What happens with the website data when a web view is closed. See `CfgWebview`.
+          type: string
+          enum:
+            - keep
+            - clear_cache_on_close
+            - clear_all_on_close
+        buttons:
+          description: |
+            Changes of single buttons, merged with the configured buttons: a button which is not in the object keeps its
+            action, an action replaces the action of the button, `null` resets the button to its default action. See
+            `CfgWebview`.
+
+            Only the buttons of the Remote model can be changed. A button which the model doesn't have, e.g. `MENU` on a
+            Remote Two, an unknown button or a button with a fixed function (`HOME`, `POWER`, `VOICE`) is refused with
+            error code `400` (`VALIDATION_ERROR`) with the field `buttons.<button>` and the code `INVALID`.
+          type: object
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            anyOf:
+              - $ref: '#/components/schemas/WebviewButtonAction'
+              - type: 'null'
+          examples:
+            - VOLUME_UP:
+                action: pass
+              VOLUME_DOWN:
+                action: pass
+            - BACK:
+                action: function
+                function: back_or_close
+              CHANNEL_UP: null
+    WebviewButtonPreset:
+      description: |
+        A preset of button actions for the fullscreen web view, to set several buttons at once. A preset only
+        contains the buttons it covers, and only the buttons of the Remote model. `HOME`, `POWER` and `VOICE` are never
+        part of a preset.
+
+        The Core-API has no operation to apply a preset: a client sends the `buttons` of the preset with an existing button
+        update, which only changes these buttons, every other button keeps its action:
+        - the global web view setting `buttons` (`CfgWebviewUpdate`),
+        - the `buttons` option of a user-defined web view (`WebviewButtons`),
+        - the user override `options.user.buttons` of a web view from an integration driver (`WebviewUserOptions`).
+
+        | Button                                            | `web_view_functions`            | `page_keys`                                                      |
+        |---------------------------------------------------|---------------------------------|------------------------------------------------------------------|
+        | `DPAD_UP`, `DPAD_DOWN`, `DPAD_LEFT`, `DPAD_RIGHT` | –                               | key `ArrowUp`, `ArrowDown`, `ArrowLeft`, `ArrowRight`            |
+        | `DPAD_MIDDLE`                                     | –                               | key `Enter`                                                      |
+        | `BACK`                                            | function `back_or_close`        | key `Escape`                                                     |
+        | `VOLUME_UP`, `VOLUME_DOWN`                        | function `zoom_in`, `zoom_out`  | key `AudioVolumeUp`, `AudioVolumeDown`                           |
+        | `MUTE`                                            | function `zoom_reset`           | key `AudioVolumeMute`                                            |
+        | `CHANNEL_UP`, `CHANNEL_DOWN`                      | function `page_up`, `page_down` | key `ChannelUp`, `ChannelDown`                                   |
+        | `PREV`, `NEXT`                                    | function `back`, `forward`      | key `MediaTrackPrevious`, `MediaTrackNext`                       |
+        | `PLAY`                                            | function `reload`               | key `MediaPlayPause`                                             |
+        | `STOP`                                            | function `stop`                 | key `MediaStop`                                                  |
+        | `RECORD`                                          | –                               | key `MediaRecord`                                                |
+        | `MENU`                                            | function `toggle_navigation`    | key `ContextMenu`                                                |
+        | `RED`, `GREEN`, `YELLOW`, `BLUE`                  | –                               | key `ColorF0Red`, `ColorF1Green`, `ColorF2Yellow`, `ColorF3Blue` |
+
+        –: the button is not part of the preset and keeps its action.
+      type: object
+      properties:
+        id:
+          description: |
+            Identifier of the preset:
+            - `web_view_functions`: the web view functions, e.g. VOLUME zooms the page, PREV and NEXT go back and forward
+              in the history.
+            - `page_keys`: key events for a page which handles the buttons of the Remote itself.
+
+            A client must ignore a preset with an unknown identifier: more presets can be added. The Core-API has no names
+            for the presets: a client names them itself.
+          type: string
+          examples:
+            - web_view_functions
+            - page_keys
+        buttons:
+          description: The action of every button of the preset.
+          type: object
+          propertyNames:
+            $ref: '#/components/schemas/WebviewButton'
+          additionalProperties:
+            $ref: '#/components/schemas/WebviewButtonAction'
+      required:
+        - id
+        - buttons
     DockId:
       type: string
       format: ^[a-zA-Z0-9\-\.]+$
@@ -18881,9 +20312,9 @@ components:
           description: |
             Name of the current phase. `PREPARE` is the first phase of every job.
             - Export and snapshot: `PREPARE`, `DATABASE`, `INTEGRATIONS`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`,
-              `REMOTES`, `BLUETOOTH`, `PROFILES`, `DOCKS`, `RESOURCES`, `SETTINGS`, `FINALIZE`.
-            - Restore: `PREPARE`, `INTEGRATIONS`, `REMOTES`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`, `DOCKS`,
-              `SETTINGS`, `RESOURCES`, `PROFILES`, `BLUETOOTH`.
+              `REMOTES`, `WEBVIEWS`, `BLUETOOTH`, `PROFILES`, `DOCKS`, `RESOURCES`, `SETTINGS`, `FINALIZE`.
+            - Restore: `PREPARE`, `INTEGRATIONS`, `REMOTES`, `WEBVIEWS`, `ACTIVITIES`, `ACTIVITY_GROUPS`, `MACROS`,
+              `DOCKS`, `SETTINGS`, `RESOURCES`, `PROFILES`, `BLUETOOTH`.
 
             The set of phases may change in a future release. Use `current_step` and `total_steps` for a progress display
             and the name for information only.
@@ -19054,6 +20485,9 @@ components:
       type: string
       description: |
         Type of the items in a report group. More types may be added: a client should show an unknown type as is.
+
+        `webview` counts the user-defined web views. A web view from an integration is counted with the configured
+        entities of its integration (`integration`).
       enum:
         - db
         - integration_driver
@@ -19067,6 +20501,7 @@ components:
         - resource
         - setting
         - bt
+        - webview
         - other
     BackupReportItemMessages:
       type: object

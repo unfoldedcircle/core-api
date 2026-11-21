@@ -47,6 +47,16 @@ _Changes in the next release_
 - Media browsing and searching ([feature-and-bug-tracker#70](https://github.com/unfoldedcircle/feature-and-bug-tracker/issues/70)).
 - Asynchronous backup export and restore jobs.
 - Custom integrations support in backup export and restore operations.
+- [Web View Entity](doc/entities/entity_webview.md) support (`webview`) to show a web page on the Remote, provided by
+  an integration driver or defined by the user. Supported in Remote firmware 2.14.0 and newer.
+  - Core APIs: user-defined web views (at most 1000), global web view settings with the button mapping of the
+    fullscreen web view and button presets, and the `webview` activity user interface widget.
+  - Web view commands (`open`, `reload`, `clear_cache`, `clear_data`) are executed by the user interface of the Remote,
+    also in sequences, macros and button mappings. They are never sent to an integration driver.
+  - The Remote now also supports the Integration-API `entity_available` and `entity_removed` events.
+
+### Changed
+- Core APIs: resetting all settings (`DELETE /cfg`, `reset_configuration`) requires the `admin` scope.
 
 ### Fixed
 - Core APIs: document how the `limits` of a number parameter and the `items` of a selection parameter in the entity
