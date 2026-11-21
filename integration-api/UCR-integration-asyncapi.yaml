@@ -2828,6 +2828,9 @@ components:
         API clients. A changed option, e.g. a rotated token, is sent with an updated entity definition in the
         `entity_available` event.
 
+        The Remote ignores a web view entity with invalid options, e.g. `basic` authentication without `username` or
+        a cookie name which is not an RFC 6265 token: it isn't offered as an available entity.
+
         All web views on the Remote share their website data: cookies, cache and logins.
 
         See [web view entity documentation](https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md)
@@ -2879,11 +2882,11 @@ components:
             - `default`: the user agent of the Remote, which identifies the Remote and its firmware version.
             - `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or
               the desktop layout of a page.
-            - Any other value: a custom user agent string of visible ASCII characters and spaces. The web view uses
-              the `default` user agent instead of a custom value with other characters.
+            - Any other value: a custom user agent string of visible ASCII characters and spaces.
           type: string
           minLength: 1
           maxLength: 256
+          pattern: '^[ -~]+$'
           default: default
         zoom:
           description: |
@@ -3095,7 +3098,7 @@ components:
             - header
           default: none
         username:
-          description: User name for `basic`.
+          description: User name for `basic`. Required for `basic`.
           type: string
           maxLength: 256
         password:
@@ -3104,21 +3107,25 @@ components:
           maxLength: 256
           writeOnly: true
         token:
-          description: Token for `bearer`. Secret, only handed to the user interface of the Remote.
+          description: |
+            Token for `bearer`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start or the
+            end. Secret, only handed to the user interface of the Remote.
           type: string
           maxLength: 4096
           writeOnly: true
         header_name:
           description: |
-            Header name for `header`, e.g. `X-API-Key`. Not allowed: `Host`, `Cookie`, `Content-Length`,
-            `Content-Type`, `Connection`, `Transfer-Encoding`, `Upgrade`, `Origin`, `Referer`, and names starting with
-            `Proxy-` or `Sec-`.
+            Header name for `header`, e.g. `X-API-Key`. Not allowed: `Host`, `Cookie`, `Cookie2`, `Content-Length`,
+            `Content-Type`, `Connection`, `Keep-Alive`, `Transfer-Encoding`, `Upgrade`, `TE`, `Trailer`, `Expect`,
+            `Origin`, `Referer`, `User-Agent`, and names starting with `Proxy-` or `Sec-`.
           type: string
           minLength: 1
           maxLength: 64
           pattern: "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
         header_value:
-          description: Header value for `header`. Secret, only handed to the user interface of the Remote.
+          description: |
+            Header value for `header`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start
+            or the end. Secret, only handed to the user interface of the Remote.
           type: string
           maxLength: 4096
           writeOnly: true
@@ -3155,21 +3162,29 @@ components:
       type: object
       properties:
         name:
+          description: Cookie name, an RFC 6265 token.
           type: string
           minLength: 1
           maxLength: 256
+          pattern: "^[!#$%&'*+.^_`|~0-9A-Za-z-]+$"
         value:
-          description: Cookie value. Secret, only handed to the user interface of the Remote.
+          description: |
+            Cookie value according to RFC 6265: visible ASCII characters without `"`, `,`, `;` and `\`, optionally in
+            double quotes. Secret, only handed to the user interface of the Remote.
           type: string
           maxLength: 4096
           writeOnly: true
         domain:
-          description: The host of the `url` option or a parent domain of it.
+          description: |
+            The host of the `url` option or a parent domain of it, but not a public suffix: a top-level domain like
+            `com` is refused, and with a public suffix like `co.uk` the web view sets none of the cookies.
           type: string
           maxLength: 255
         path:
+          description: Path of the cookie. Starts with `/`, ASCII characters without `;` and control characters.
           type: string
           maxLength: 1024
+          pattern: '^(/[ -:<-~]*)?$'
           default: /
         secure:
           description: Only send the cookie over HTTPS. Default `true` for an `https://` URL, `false` otherwise.

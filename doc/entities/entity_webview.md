@@ -163,7 +163,7 @@ The `auth` object defines the credentials which the web view sends to the origin
 | Name              | Type                 | Default | Description                                                                                     |
 |-------------------|----------------------|---------|-------------------------------------------------------------------------------------------------|
 | auth.type         | enum                 | none    | Authentication method: `none`, `basic`, `bearer` or `header`.                                   |
-| auth.username     | string               |         | `basic`: user name, at most 256 characters.                                                     |
+| auth.username     | string               |         | `basic`: user name, at most 256 characters. Required for `basic`.                               |
 | auth.password     | string, write-only   |         | `basic`: password, at most 256 characters.                                                      |
 | auth.token        | string, write-only   |         | `bearer`: token, sent as `Authorization: Bearer <token>`. At most 4096 characters.              |
 | auth.header_name  | string               |         | `header`: name of the HTTP request header, e.g. `X-API-Key`.                                    |
@@ -174,6 +174,7 @@ The `auth` object defines the credentials which the web view sends to the origin
 - `basic`: the user name and password are sent as answer to an HTTP authentication request (status `401`) of the origin.
   They are not sent preemptively: the first request is sent without credentials. The same credentials answer a Digest
   authentication request. The configured credentials never answer a proxy authentication request.
+  - `basic` without a user name is refused with error code `400`.
   - If the server rejects the credentials, the fullscreen web view shows its login dialog. The
     [web view widget](#activity-widget) shows no login dialog.
 - `bearer` and `header`: the header is added to every HTTP request to the origin while the web view shows a page of the
@@ -181,11 +182,10 @@ The `auth` object defines the credentials which the web view sends to the origin
   if a request is redirected to another origin.
   - WebSocket connections and requests of service workers don't receive the header.
   - `header_name` must be a valid HTTP header name of at most 64 characters. The following headers can't be set: `Host`,
-    `Cookie`, `Content-Length`, `Content-Type`, `Connection`, `Transfer-Encoding`, `Upgrade`, `Origin`, `Referer`, and
-    all headers starting with `Proxy-` or `Sec-`.
+    `Cookie`, `Cookie2`, `Content-Length`, `Content-Type`, `Connection`, `Keep-Alive`, `Transfer-Encoding`, `Upgrade`,
+    `TE`, `Trailer`, `Expect`, `Origin`, `Referer`, `User-Agent`, and all headers starting with `Proxy-` or `Sec-`.
   - The token and the header value must only contain visible ASCII characters, spaces and tabs, without a space or a
-    tab at the start or the end. The web view doesn't send a header with another value, and it doesn't send the headers
-    `Cookie2`, `Expect`, `Keep-Alive`, `TE`, `Trailer` and `User-Agent`.
+    tab at the start or the end. Other values are refused with error code `400`.
 - With an `http://` URL the page and the credentials are sent unencrypted. The web-configurator shows a note at an
   `http://` URL.
 - If `auth.type` changes, the secret options of the previous type are removed.
@@ -226,10 +226,10 @@ page. At most 20 cookies.
 
 | Name                 | Type               | Default                    | Description                                                                                                     |
 |----------------------|--------------------|----------------------------|-----------------------------------------------------------------------------------------------------------------|
-| cookies[].name       | string             | required                   | Cookie name, at most 256 characters.                                                                            |
-| cookies[].value      | string, write-only | required                   | Cookie value, at most 4096 characters. A valid cookie value according to RFC 6265.                              |
+| cookies[].name       | string             | required                   | Cookie name, an RFC 6265 token of at most 256 characters.                                                       |
+| cookies[].value      | string, write-only | required                   | Cookie value, at most 4096 characters. A valid cookie value according to RFC 6265: visible ASCII characters without `"`, `,`, `;` and `\`, optionally in double quotes. |
 | cookies[].domain     | string             | host of `url`              | Domain of the cookie: the host of the `url` option or a parent domain of it, at most 255 characters. If not set, the cookie is only sent to the host of `url` (host-only cookie). |
-| cookies[].path       | string             | `/`                        | Path of the cookie, at most 1024 characters.                                                                    |
+| cookies[].path       | string             | `/`                        | Path of the cookie, at most 1024 characters. Starts with `/`, ASCII characters without `;` and control characters. |
 | cookies[].secure     | boolean            | true for an `https://` URL | Only send the cookie over HTTPS.                                                                                |
 | cookies[].http_only  | boolean            | false                      | Hide the cookie from scripts of the page.                                                                       |
 | cookies[].expires    | string             |                            | Expiry date in [RFC 3339](https://www.rfc-editor.org/rfc/rfc3339) format, e.g. `2027-01-01T00:00:00Z`. If not set, the cookie is a session cookie. |
@@ -237,9 +237,9 @@ page. At most 20 cookies.
 - The cookies are set each time the web view is opened, before the start page is loaded. A cookie which has been
   changed or deleted by the page is set to the configured value again the next time the web view is opened.
 - A cookie with a `domain` outside of the host of the `url` option, or a top-level domain like `com`, is refused with
-  error code `400`.
-- The web view doesn't set any of the configured cookies if one of them is invalid, e.g. a cookie name which is not an
-  RFC 6265 token, or a `domain` which is a public suffix like `co.uk`. The page is then loaded without them.
+  error code `400`, like a cookie with an invalid name, value or path.
+- A `domain` which is a public suffix with more than one label, like `co.uk`, is not refused, but the web view then
+  doesn't set any of the configured cookies. The page is then loaded without them.
 - Cookies set by the page, e.g. after a login, are kept like the other [website data](#website-data).
 
 #### Display
@@ -252,8 +252,7 @@ page. At most 20 cookies.
 
 - `user_agent` is sent in the `User-Agent` header of every request of the web view, and returned to scripts of the page
   in `navigator.userAgent`.
-- The web view uses the `default` user agent instead of a custom user agent with other characters, e.g. non-ASCII
-  characters.
+- A custom user agent with other characters, e.g. non-ASCII characters, is refused with error code `400`.
 - A change of the `url`, `auth`, `tls`, `cookies` or `user_agent` option loads the start page of a shown web view
   again.
 
@@ -696,7 +695,8 @@ to web views from integration drivers: web view commands are never sent to an in
   `clear_cache` and `clear_data` are answered when the data has been cleared. Sequences wait for the result of each
   step.
 - The Core returns the result of the user interface to the caller.
-- Error code `503` if no user interface that executes web view commands is connected, or if it can't show web pages.
+- Error code `503` if no user interface that executes web view commands is connected, or if it can't show web pages,
+  e.g. `open` during the onboarding of the Remote.
   `408` if the user interface doesn't answer within 5 seconds.
 - The user interface app declares the entity types it executes with the internal WS Core-API request `set_ui_info`,
   and receives the commands with the internal request `entity_command`. Both are only for the user interface session
@@ -871,9 +871,9 @@ A web view entity from an integration driver is configured like any other entity
 The Remote checks the options of a web view entity from an integration driver with the same rules as the options of a
 user-defined web view.
 
-- A web view entity with invalid options, e.g. an invalid `url`, a cookie without `value`, or a button with a fixed
-  function or an unknown button, is ignored: it isn't offered as an available entity, and an `entity_available` event
-  with it doesn't change the configured web view.
+- A web view entity with invalid options, e.g. an invalid `url`, `basic` authentication without `username`, a cookie
+  without `value`, or a button with a fixed function or an unknown button, is ignored: it isn't offered as an available
+  entity, and an `entity_available` event with it doesn't change the configured web view.
 - Unknown options are removed.
 - The buttons which the Remote model doesn't have are removed, see [buttons](#buttons).
 

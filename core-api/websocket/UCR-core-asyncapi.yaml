@@ -1916,8 +1916,9 @@ components:
         The commands of a `webview` entity are executed by the user interface of the Remote: the Core sends them
         with the internal `entity_command` request to the locally installed user interface app and returns its result.
         It answers when it has accepted the command, not when the page has loaded. Error code `503` if no user
-        interface that executes web view commands is connected, `408` if it doesn't answer within 5 seconds. Web view
-        commands are never sent to an integration driver.
+        interface that executes web view commands is connected, or if it can't show a web view, e.g. `webview.open`
+        during the onboarding of the Remote. `408` if it doesn't answer within 5 seconds. Web view commands are never
+        sent to an integration driver.
       tags:
         - name: entity
       payload:
@@ -19211,7 +19212,7 @@ components:
         type:
           $ref: '#/components/schemas/WebviewAuthType'
         username:
-          description: User name for `basic`.
+          description: User name for `basic`. Required for `basic`.
           type: string
           maxLength: 256
         password:
@@ -19224,7 +19225,9 @@ components:
           type: boolean
           readOnly: true
         token:
-          description: Token for `bearer`. Secret, see `WebviewOptions`.
+          description: |
+            Token for `bearer`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start or the
+            end. Secret, see `WebviewOptions`.
           type: string
           maxLength: 4096
           writeOnly: true
@@ -19234,15 +19237,17 @@ components:
           readOnly: true
         header_name:
           description: |
-            Header name for `header`, e.g. `X-API-Key`. Not allowed: `Host`, `Cookie`, `Content-Length`,
-            `Content-Type`, `Connection`, `Transfer-Encoding`, `Upgrade`, `Origin`, `Referer`, and names starting with
-            `Proxy-` or `Sec-`.
+            Header name for `header`, e.g. `X-API-Key`. Not allowed: `Host`, `Cookie`, `Cookie2`, `Content-Length`,
+            `Content-Type`, `Connection`, `Keep-Alive`, `Transfer-Encoding`, `Upgrade`, `TE`, `Trailer`, `Expect`,
+            `Origin`, `Referer`, `User-Agent`, and names starting with `Proxy-` or `Sec-`.
           type: string
           minLength: 1
           maxLength: 64
           pattern: ^[!#$%&'*+.^_`|~0-9A-Za-z-]+$
         header_value:
-          description: Header value for `header`. Secret, see `WebviewOptions`.
+          description: |
+            Header value for `header`. Visible ASCII characters, spaces and tabs, without a space or a tab at the start
+            or the end. Secret, see `WebviewOptions`.
           type: string
           maxLength: 4096
           writeOnly: true
@@ -19286,11 +19291,15 @@ components:
       type: object
       properties:
         name:
+          description: Cookie name, an RFC 6265 token.
           type: string
           minLength: 1
           maxLength: 256
+          pattern: ^[!#$%&'*+.^_`|~0-9A-Za-z-]+$
         value:
-          description: Cookie value. Secret, see `WebviewOptions`.
+          description: |
+            Cookie value according to RFC 6265: visible ASCII characters without `"`, `,`, `;` and `\`, optionally in
+            double quotes. Secret, see `WebviewOptions`.
           type: string
           maxLength: 4096
           writeOnly: true
@@ -19299,12 +19308,16 @@ components:
           type: boolean
           readOnly: true
         domain:
-          description: The host of the `url` option or a parent domain of it.
+          description: |
+            The host of the `url` option or a parent domain of it, but not a public suffix: a top-level domain like
+            `com` is refused, and with a public suffix like `co.uk` the web view sets none of the cookies.
           type: string
           maxLength: 255
         path:
+          description: Path of the cookie. Starts with `/`, ASCII characters without `;` and control characters.
           type: string
           maxLength: 1024
+          pattern: ^(/[ -:<-~]*)?$
           default: /
         secure:
           description: Only send the cookie over HTTPS. Default `true` for an `https://` URL, `false` otherwise.
@@ -19653,11 +19666,11 @@ components:
             - `default`: the user agent of the Remote, which identifies the Remote and its firmware version.
             - `mobile` or `desktop`: the user agent of a common mobile or desktop browser, e.g. to get the mobile or
               the desktop layout of a page.
-            - Any other value: a custom user agent string of visible ASCII characters and spaces. The web view uses the
-              `default` user agent instead of a custom value with other characters.
+            - Any other value: a custom user agent string of visible ASCII characters and spaces.
           type: string
           minLength: 1
           maxLength: 256
+          pattern: ^[ -~]+$
           default: default
         zoom:
           description: Page zoom in percent.
