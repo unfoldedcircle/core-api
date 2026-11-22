@@ -1,5 +1,8 @@
 # Number Entity
 
+> [!NOTE]
+> The number entity is supported in Remote firmware 2.13.0 and newer.
+
 The number entity holds a single numeric value which can be read and set. It is the writable counterpart of the
 [sensor entity](entity_sensor.md) and the numeric counterpart of the [select entity](entity_select.md).
 
