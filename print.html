@@ -36,10 +36,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ee495ce9.js";
+            window.path_to_searchindex_js = "searchindex-65263666.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-0bd7c578.js"></script>
+        <script src="toc-bfb1b444.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -271,6 +271,722 @@ before opening a pull request.</p>
 <h2 id="license"><a class="header" href="#license">License</a></h2>
 <p>We have published the API specifications and documentations under the <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC-BY-AS-4.0</a>
 (Creative Commons Attribution-ShareAlike 4.0 International) license.<br>All code examples in this repository are licensed under the <a href="https://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.<br>All graphics copyright © Unfolded Circle ApS 2022.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="user-guide"><a class="header" href="#user-guide">User guide</a></h1>
+<p>Articles for users of the Remote: how to use a feature in the web-configurator and on the Remote, without API details.
+They complement the developer documentation and explain what users see of the features described there.</p>
+<p>These files are the main version of the articles in the
+<a href="https://support.unfoldedcircle.com/">Unfolded Circle support center</a>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Article</th><th>Support center</th></tr>
+</thead>
+<tbody>
+<tr><td><a href="#supported-icon-and-image-formats">Supported icon and image formats</a></td><td><a href="https://support.unfoldedcircle.com/hc/en-us/articles/31693328340124">Supported icon and image formats</a></td></tr>
+<tr><td><a href="#web-views-overview-and-first-steps">Web views: overview and first steps</a></td><td>not published yet</td></tr>
+<tr><td><a href="#setting-up-a-web-view-in-the-web-configurator">Setting up a web view in the web-configurator</a></td><td>not published yet</td></tr>
+<tr><td><a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a></td><td>not published yet</td></tr>
+<tr><td><a href="#using-web-views-on-the-remote">Using web views on the Remote</a></td><td>not published yet</td></tr>
+</tbody>
+</table>
+</div>
+<!--
+Change an article here first, then copy it to the support center:
+
+- Upload the images of the article and use their support center addresses instead of the relative `images/…` paths.
+- Replace the links between the articles with the support center links from the table above.
+-->
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="supported-icon-and-image-formats"><a class="header" href="#supported-icon-and-image-formats">Supported icon and image formats</a></h1>
+<p>This article describes which image formats the Remote supports for icons and background images, the exact sizes
+and file size limits, how many images you can upload, and how to prepare your images so they look their best.</p>
+<p>It applies to images that you upload in the web-configurator (Resources) or that an integration driver provides.</p>
+<h2 id="at-a-glance"><a class="header" href="#at-a-glance">At a glance</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Image type</th><th>Formats</th><th>Size</th><th>Maximum file size</th><th>Maximum number of images</th></tr>
+</thead>
+<tbody>
+<tr><td>Icon</td><td>PNG, JPG, SVG</td><td>PNG and JPG: exactly 90 x 90 pixels. SVG: see below</td><td>32 KB</td><td>1000</td></tr>
+<tr><td>TV channel icon</td><td>PNG, JPG, SVG</td><td>PNG and JPG: exactly 90 x 90 pixels. SVG: see below</td><td>32 KB</td><td>1000</td></tr>
+<tr><td>Background image</td><td>PNG, JPG</td><td>exactly 480 x 275 pixels</td><td>1 MB</td><td>50</td></tr>
+</tbody>
+</table>
+</div>
+<blockquote>
+<p>💡 SVG icons are supported from beta firmware 2.13.0.</p>
+</blockquote>
+<ul>
+<li>Icons and TV channel icons are counted separately: you can upload 1000 of each.</li>
+<li>SVG icons have no pixel size. They scale to any size without losing sharpness. See <a href="#svg-icons">SVG icons</a> below.</li>
+</ul>
+<h2 id="png-and-jpg-icons"><a class="header" href="#png-and-jpg-icons">PNG and JPG icons</a></h2>
+<ul>
+<li>The image must be exactly <strong>90 x 90 pixels</strong>. Images with another size are rejected.</li>
+<li>The file extension must be <code>.png</code>, <code>.jpg</code> or <code>.jpeg</code>.</li>
+<li>The Remote lists a maximum file size of <strong>32 KB</strong>. A 90 x 90 pixel image is normally far smaller than that. Note
+that the 32 KB limit is only enforced for SVG files. For PNG and JPG files, the Remote rejects files larger than 1 MB.</li>
+<li>Use PNG for graphics with sharp edges or transparency, for example logos. Use JPG for photos.</li>
+<li>PNG and JPG icons are square. On a larger or wider button the icon keeps its square shape.</li>
+</ul>
+<h2 id="background-images"><a class="header" href="#background-images">Background images</a></h2>
+<ul>
+<li>The image must be exactly <strong>480 x 275 pixels</strong> and in PNG or JPG format.</li>
+<li>The file must not be larger than <strong>1 MB</strong>.</li>
+<li>SVG is not supported for background images.</li>
+</ul>
+<h2 id="scaling-and-cropping-in-the-web-configurator"><a class="header" href="#scaling-and-cropping-in-the-web-configurator">Scaling and cropping in the web-configurator</a></h2>
+<p>If you upload a PNG or JPG image with a different size, the web-configurator opens an editor to scale and crop the
+image to the required size.</p>
+<p><strong>We recommend preparing the image in a graphic tool instead and uploading an image with the exact size.</strong> Automatic
+scaling and cropping can make an image blurry or cut off parts of it. With a graphic tool you control the result:</p>
+<ol>
+<li>Create a new image with the exact size from the table above, for example 90 x 90 pixels for an icon.</li>
+<li>Place and scale your artwork inside the image.</li>
+<li>Export it as PNG or JPG.</li>
+<li>Upload the exported image. If the size matches, no scaling or cropping is necessary.</li>
+</ol>
+<blockquote>
+<p>💡 If your icon is a logo or a drawing, consider using an SVG icon instead. It is sharp on every button size.</p>
+</blockquote>
+<h2 id="svg-icons"><a class="header" href="#svg-icons">SVG icons</a></h2>
+<p>SVG is a vector format: the icon is drawn from shapes instead of pixels, so it stays sharp on small and large buttons.
+SVG is supported for icons and TV channel icons, from beta firmware 2.13.0.</p>
+<h3 id="requirements"><a class="header" href="#requirements">Requirements</a></h3>
+<ul>
+<li>Plain SVG file with the <code>.svg</code> extension. Compressed SVG files (<code>.svgz</code>) are not supported.</li>
+<li>The file must not be larger than <strong>32 KB</strong>.</li>
+<li>The SVG must define a <strong><code>viewBox</code></strong>. SVG files without a <code>viewBox</code> are rejected.</li>
+<li>The aspect ratio of the <code>viewBox</code> (width : height) can be anything <strong>from 1:4 up to 4:1</strong>. Square, wide and tall
+icons are all possible, for example a 2:1 flag or a 4:1 logo. Icons that are wider than 4:1 or taller than 1:4 are
+rejected.</li>
+<li>The SVG can contain at most <strong>500 elements</strong>. The root <code>svg</code> element counts as one element.</li>
+<li>Elements can be nested at most <strong>16 levels</strong> deep. The root <code>svg</code> element is the first level.</li>
+<li>If the root <code>svg</code> element has a <code>width</code> or <code>height</code>, it must be a positive number without a unit or with one of
+the units <code>px</code>, <code>pt</code>, <code>mm</code>, <code>cm</code>, <code>in</code>, <code>%</code>, <code>em</code> or <code>ex</code>. A fixed size (not <code>%</code>, <code>em</code> or <code>ex</code>) must not be larger
+than 1024 pixels (1 inch = 96 pixels).</li>
+<li>The SVG must be self-contained: it cannot link to other files or web addresses. Only references to elements of
+the same file, like <code>#gradient1</code>, are allowed.</li>
+</ul>
+<h3 id="icon-shape-on-buttons"><a class="header" href="#icon-shape-on-buttons">Icon shape on buttons</a></h3>
+<p>An SVG icon always keeps its own aspect ratio. It is never stretched or squashed.</p>
+<ul>
+<li>On a button page of an activity or remote, a wide icon fills the whole button width if the button is wide enough,
+for example a 2:1 flag on a 2 x 1 button.</li>
+<li>A square SVG icon on a wide button stays square and is centered.</li>
+<li>On entity tiles and in lists the icon is shown inside a square box. A wide icon is fitted to the width of the box.</li>
+</ul>
+<p>The aspect ratio is taken from the <code>viewBox</code>. The <code>width</code> and <code>height</code> attributes of the SVG are not used for the
+shape of the icon.</p>
+<h3 id="supported-svg-features"><a class="header" href="#supported-svg-features">Supported SVG features</a></h3>
+<p>The Remote draws SVG with a basic renderer. These features work well:</p>
+<ul>
+<li>Basic shapes and paths: rectangles, circles, ellipses, lines, polygons and paths</li>
+<li>Fill and stroke colors, opacity, dashed lines</li>
+<li>Linear and radial gradients</li>
+<li>Groups, transformations (move, rotate, scale), and reusing shapes (<code>use</code>)</li>
+<li>Simple styles, either in <code>style</code> attributes or in a <code>&lt;style&gt;</code> element with simple class, id and element selectors</li>
+</ul>
+<h3 id="features-that-are-not-supported"><a class="header" href="#features-that-are-not-supported">Features that are not supported</a></h3>
+<p>Some SVG features are rejected when you upload the file, because the Remote cannot draw them correctly or because
+they are not safe. The web-configurator shows the reason.</p>
+<ul>
+<li>Text: convert text to outlines or paths in your graphic tool</li>
+<li>Embedded or linked images</li>
+<li>Masks, patterns and symbols</li>
+<li>Animations</li>
+<li>Scripts, and links to other files or web addresses</li>
+<li>Complex CSS in a <code>&lt;style&gt;</code> element: at-rules like <code>@media</code> or <code>@import</code>, selectors with <code>:</code> (like <code>:hover</code>) or <code>[</code>
+(attribute selectors), <code>!important</code>, <code>var()</code>, and backslash escape sequences</li>
+</ul>
+<h3 id="features-that-are-accepted-but-ignored"><a class="header" href="#features-that-are-accepted-but-ignored">Features that are accepted, but ignored</a></h3>
+<p>Some features are accepted, but the Remote does not draw them. The icon is shown without the effect, so it might look
+different than in the web-configurator preview:</p>
+<ul>
+<li>Filter effects such as blur and drop shadows</li>
+<li>Clipping paths: the icon is shown without clipping</li>
+<li>Markers on lines, for example arrowheads: the line is drawn without them</li>
+</ul>
+<p>Clipping paths and markers must be defined inside the <code>defs</code> section of the SVG, which graphic tools do by default.</p>
+<p>If the SVG uses a <code>switch</code> element, the Remote shows the first alternative that matches. When an alternative
+depends on the language, the result can depend on the language set on the Remote.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The icon preview in the web-configurator is drawn by your web browser, which supports all SVG features.
+The Remote supports fewer features, so the icon might look different on the Remote. Simple shapes, paths, gradients
+and basic styles work best. Always check your icon on the Remote after uploading it.</p>
+</blockquote>
+<h3 id="tips-for-exporting-svg-files"><a class="header" href="#tips-for-exporting-svg-files">Tips for exporting SVG files</a></h3>
+<ul>
+<li>Convert text to outlines or paths before exporting.</li>
+<li>Use a simple export, this is sometimes called <em>Plain SVG</em>. Remove hidden layers, unused definitions and embedded images.</li>
+<li>Do not use effects like shadows or blur. Draw the effect with shapes and gradients instead.</li>
+<li>Keep the file small: simplify paths and reduce the number of points.</li>
+</ul>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Message or problem</th><th>What to do</th></tr>
+</thead>
+<tbody>
+<tr><td>“Invalid image size! Expected 90x90 …”</td><td>Resize the PNG or JPG icon to exactly 90 x 90 pixels, or use the editor.</td></tr>
+<tr><td>“Invalid image size! Expected 480x275 …”</td><td>Resize the background image to exactly 480 x 275 pixels, or use the editor.</td></tr>
+<tr><td>“File too large …”</td><td>Reduce the file size. The general limit is 1 MB, SVG icons are limited to 32 KB.</td></tr>
+<tr><td>“Maximum number of … resources reached”</td><td>Delete icons or background images you no longer use. See the limits above.</td></tr>
+<tr><td>“Insufficient storage to upload file!”</td><td>The Remote is low on free storage. Delete unused resources and try again.</td></tr>
+<tr><td>The upload fails because the resource already exists</td><td>A resource with the same file name exists. Rename the file or delete the old one.</td></tr>
+<tr><td>“Compressed SVG files (.svgz) are not supported”</td><td>Save the icon as a plain <code>.svg</code> file.</td></tr>
+<tr><td>“This SVG … has no viewBox”</td><td>Add a <code>viewBox</code> in your graphic tool, or export the SVG again.</td></tr>
+<tr><td>“This SVG … its aspect ratio … is outside 1:4 to 4:1”</td><td>Change the drawing area so it is at most 4 times wider or taller.</td></tr>
+<tr><td>“The Remote rejected this SVG: …”</td><td>The reason names the element or feature that is not supported. Remove it and export again.</td></tr>
+<tr><td>The icon looks different on the Remote than in the web-configurator</td><td>The SVG uses a feature that is ignored by the Remote. Simplify it, see above.</td></tr>
+<tr><td>The icon is blurry</td><td>Use an SVG icon, or prepare the PNG with exactly 90 x 90 pixels yourself.</td></tr>
+</tbody>
+</table>
+</div>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="web-views-overview-and-first-steps"><a class="header" href="#web-views-overview-and-first-steps">Web views: overview and first steps</a></h1>
+<blockquote>
+<p>Applies to firmware 2.14.0 and newer, on the Remote Two and the Remote 3.</p>
+</blockquote>
+<p>A web view shows a web page on your Remote. Use it for the dashboard of your home automation system, the status page of a device, or a simple web app made for the Remote.</p>
+<p><img src="user-guide/web-views/images/remote-01-webview-open.png" alt="A web view open on the Remote"></p>
+<h2 id="what-web-views-are-good-for"><a class="header" href="#what-web-views-are-good-for">What web views are good for</a></h2>
+<p>Web views work best with small, lightweight pages that are made for the Remote:</p>
+<ul>
+<li><strong>Dashboards</strong>, for example the dashboard of your home automation system.</li>
+<li><strong>Status pages</strong>, for example of a NAS, a solar inverter or a network device.</li>
+<li><strong>Simple web apps</strong> and control pages with large buttons.</li>
+</ul>
+<p>A web view is not a full web browser. There is no address bar and there are no tabs. Only one web page is shown at a time.</p>
+<blockquote class="blockquote-tag blockquote-tag-warning">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p>
+<p>Web views are made for pages you trust and that are made for the Remote, such as the dashboard of your home automation system. They are not meant for browsing the internet. Don’t use a web view for online banking, payments or online shopping, and don’t enter sensitive personal information in it, such as credit card numbers, identity documents or health data. The Remote doesn’t show the address of the page or whether the connection is secure, so you can’t check which website you’re on.</p>
+</blockquote>
+<p>The Remote has limited memory, processing power and battery. Large websites with lots of scripts, images or animations load slowly, react sluggishly and drain the battery.</p>
+<blockquote class="blockquote-tag blockquote-tag-tip">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p>
+<p>For the best result, use pages that are designed for a small portrait touch screen: large buttons, no horizontal scrolling, and updates at reasonable intervals.</p>
+</blockquote>
+<h3 id="what-a-web-view-cant-do"><a class="header" href="#what-a-web-view-cant-do">What a web view can’t do</a></h3>
+<ul>
+<li>Play audio or video, including camera streams.</li>
+<li>Use the microphone, your location or notifications.</li>
+<li>Download files or show PDF documents.</li>
+<li>Open several pages at once. A link that opens a new window opens in the same web view.</li>
+<li>Use the full-screen mode of a page.</li>
+<li>Save passwords or fill in forms automatically.</li>
+<li>Use client certificates.</li>
+<li>Run browser extensions, for example ad blockers.</li>
+</ul>
+<h2 id="requirements-1"><a class="header" href="#requirements-1">Requirements</a></h2>
+<ul>
+<li><strong>Firmware 2.14.0 or newer.</strong></li>
+<li><strong>Remote Two</strong> or <strong>Remote 3</strong>.</li>
+<li>The web page must be reachable from the Remote, for example on your home network. Only addresses that start with <code>http://</code> or <code>https://</code> work.</li>
+</ul>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Pinch-to-zoom might not be available on all Remote models. You can always zoom with the buttons of the Remote or set a fixed zoom in the web view settings.</p>
+</blockquote>
+<h2 id="your-own-web-views-and-web-views-from-integrations"><a class="header" href="#your-own-web-views-and-web-views-from-integrations">Your own web views and web views from integrations</a></h2>
+<p>There are two kinds of web views:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Kind</th><th>Where it comes from</th><th>What you can change</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Own web views</strong></td><td>You create them in the web-configurator.</td><td>Everything: address, login, cookies, zoom, buttons and more.</td></tr>
+<tr><td><strong>Web views from integrations</strong></td><td>An integration offers them, for example a ready-made dashboard of the connected system.</td><td>Name, icon and description. You can also override the zoom, the reload interval, the navigation controls, the device state API and the buttons. The address and the login belong to the integration.</td></tr>
+</tbody>
+</table>
+</div>
+<p>You add a web view from an integration like any other entity of that integration.</p>
+<h2 id="quick-start"><a class="header" href="#quick-start">Quick start</a></h2>
+<h3 id="1-add-a-web-view-in-the-web-configurator"><a class="header" href="#1-add-a-web-view-in-the-web-configurator">1. Add a web view in the web-configurator</a></h3>
+<ol>
+<li>Open the web-configurator and go to <strong>Entities</strong>.</li>
+<li>Select the <strong>Web views</strong> tab.</li>
+<li>Click <strong>Add web view</strong>.</li>
+<li>Enter a <strong>Name</strong> and the <strong>URL</strong> of the page, for example <code>https://dashboard.example.com/energy</code>.</li>
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<p>The editor of the new web view opens. You can change its settings right away, or later. See <a href="#setting-up-a-web-view-in-the-web-configurator">Setting up a web view in the web-configurator</a>.</p>
+<p><img src="user-guide/web-views/images/wc-03-add-dialog.png" alt="The Add web view dialog"></p>
+<h3 id="2-put-it-on-a-page-or-in-an-activity"><a class="header" href="#2-put-it-on-a-page-or-in-an-activity">2. Put it on a page or in an activity</a></h3>
+<p>You have three options:</p>
+<ul>
+<li><strong>On a page of the Remote:</strong> add the web view to a page like any other entity. In the web-configurator, go to <strong>Customize your remote</strong> &gt; <strong>Pages</strong>, choose a page, select <strong>Edit contents</strong> and add the web view. On the Remote, you can also add it to a page directly; use the <strong>Web view</strong> filter in the entity list to find it. The web view appears as a tile.</li>
+<li><strong>In an activity:</strong> add the web view to the activity’s included entities. In the activity’s <strong>User interface</strong>, you can then add a <strong>Web view</strong> widget that shows the page right on an activity page.</li>
+<li><strong>With a command:</strong> like other entities, a web view can be opened by a button, an icon or text on an activity page, a macro, or a step of an activity sequence.</li>
+</ul>
+<p><img src="user-guide/web-views/images/wc-11-add-to-page.png" alt="Adding a web view to a page of the Remote"></p>
+<p>See <a href="#using-web-views-on-the-remote">Using web views on the Remote</a> for details.</p>
+<h3 id="3-open-it-on-the-remote"><a class="header" href="#3-open-it-on-the-remote">3. Open it on the Remote</a></h3>
+<ol>
+<li>Go to the page with the web view tile.</li>
+<li>Tap the tile.</li>
+</ol>
+<p>The page opens in full screen. Press <strong>BACK</strong> or <strong>HOME</strong> to close it.</p>
+<blockquote>
+<p><strong>Tip:</strong> If the page asks you to log in, or uses a self-signed certificate (common on home servers), see <a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a>.</p>
+</blockquote>
+<h2 id="related-articles"><a class="header" href="#related-articles">Related articles</a></h2>
+<ul>
+<li><a href="#setting-up-a-web-view-in-the-web-configurator">Setting up a web view in the web-configurator</a></li>
+<li><a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a></li>
+<li><a href="#using-web-views-on-the-remote">Using web views on the Remote</a></li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="setting-up-a-web-view-in-the-web-configurator"><a class="header" href="#setting-up-a-web-view-in-the-web-configurator">Setting up a web view in the web-configurator</a></h1>
+<blockquote>
+<p>Applies to firmware 2.14.0 and newer, on the Remote Two and the Remote 3.</p>
+</blockquote>
+<p>You create and change web views in the web-configurator, under <strong>Entities</strong> &gt; <strong>Web views</strong>. This article explains every setting.</p>
+<h2 id="the-web-views-tab"><a class="header" href="#the-web-views-tab">The Web views tab</a></h2>
+<p>Go to <strong>Entities</strong> and select the <strong>Web views</strong> tab. It lists your own web views and the web views from your integrations.</p>
+<p><img src="user-guide/web-views/images/wc-01-webviews-tab.png" alt="The Web views tab with the toolbar"></p>
+<ul>
+<li><strong>Search:</strong> type in the search field to find a web view by name.</li>
+<li><strong>Show:</strong> choose <strong>All web views</strong>, <strong>Own web views</strong> or <strong>From integrations</strong>.</li>
+<li><strong>Sort:</strong> sort by <strong>Name</strong> or <strong>Created</strong>, in <strong>Ascending</strong> or <strong>Descending</strong> order.</li>
+<li><strong>Add web view:</strong> create a new web view.</li>
+<li><strong>Delete:</strong> select one or more web views in the list, then click the delete (trash) button.</li>
+</ul>
+<p><img src="user-guide/web-views/images/wc-02-show-filter.png" alt="The Show filter"></p>
+<p>Click a web view to open its editor. The editor has two tabs: <strong>Settings</strong> and <strong>Button mapping</strong>.</p>
+<h2 id="add-a-web-view"><a class="header" href="#add-a-web-view">Add a web view</a></h2>
+<ol>
+<li>On the <strong>Web views</strong> tab, click <strong>Add web view</strong>.</li>
+<li>Enter a <strong>Name</strong>.</li>
+<li>Enter the <strong>URL</strong> of the page. It must start with <code>http://</code> or <code>https://</code>.</li>
+<li>Optional: choose another of your own web views in <strong>Copy settings from</strong>.</li>
+<li>Click <strong>Create</strong>.</li>
+</ol>
+<p><img src="user-guide/web-views/images/wc-03-add-dialog.png" alt="The Add web view dialog"></p>
+<blockquote class="blockquote-tag blockquote-tag-warning">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p>
+<p>Add only pages you trust that are made for the Remote, such as dashboards and status pages. Don’t use web views for online banking, payments, online shopping or to enter sensitive personal information. See <a href="#web-views-overview-and-first-steps">Web views: overview and first steps</a>.</p>
+</blockquote>
+<h3 id="copy-settings-from"><a class="header" href="#copy-settings-from">Copy settings from</a></h3>
+<p><strong>Copy settings from</strong> copies all settings of one of your own web views, including its login and cookies. The icon and the description are not copied. If you leave the <strong>URL</strong> empty, the new web view keeps the address of the copy.</p>
+<p>You can do the same from the editor of a web view: click <strong>Clone</strong>.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Web views from integrations can’t be copied or cloned.</p>
+</blockquote>
+<h2 id="name-icon-and-description"><a class="header" href="#name-icon-and-description">Name, icon and description</a></h2>
+<p>At the top of the editor, change the icon, the <strong>Name</strong> and the <strong>Description</strong>. This works for your own web views and for web views from integrations.</p>
+<h2 id="main-settings"><a class="header" href="#main-settings">Main settings</a></h2>
+<p><img src="user-guide/web-views/images/wc-04-editor-general.png" alt="The main settings of a web view"></p>
+<h3 id="url"><a class="header" href="#url">URL</a></h3>
+<p>The start page of the web view. It opens every time you open the web view.</p>
+<ul>
+<li>Don’t put a user name and password in the address (<code>https://user:password@...</code>). Use <strong>Authentication</strong> instead. See <a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a>.</li>
+<li>Don’t put tokens or passwords in the address either. The address is not stored as a secret.</li>
+<li>An <code>http://</code> address is not encrypted: the page and any login details are sent as plain text.</li>
+</ul>
+<blockquote class="blockquote-tag blockquote-tag-tip">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M8 1.5c-2.363 0-4 1.69-4 3.75 0 .984.424 1.625.984 2.304l.214.253c.223.264.47.556.673.848.284.411.537.896.621 1.49a.75.75 0 0 1-1.484.211c-.04-.282-.163-.547-.37-.847a8.456 8.456 0 0 0-.542-.68c-.084-.1-.173-.205-.268-.32C3.201 7.75 2.5 6.766 2.5 5.25 2.5 2.31 4.863 0 8 0s5.5 2.31 5.5 5.25c0 1.516-.701 2.5-1.328 3.259-.095.115-.184.22-.268.319-.207.245-.383.453-.541.681-.208.3-.33.565-.37.847a.751.751 0 0 1-1.485-.212c.084-.593.337-1.078.621-1.489.203-.292.45-.584.673-.848.075-.088.147-.173.213-.253.561-.679.985-1.32.985-2.304 0-2.06-1.637-3.75-4-3.75ZM5.75 12h4.5a.75.75 0 0 1 0 1.5h-4.5a.75.75 0 0 1 0-1.5ZM6 15.25a.75.75 0 0 1 .75-.75h2.5a.75.75 0 0 1 0 1.5h-2.5a.75.75 0 0 1-.75-.75Z"></path></svg>Tip</p>
+<p>The button next to the URL opens the page in your computer’s browser. Authentication and cookies aren’t applied there.</p>
+</blockquote>
+<h3 id="zoom"><a class="header" href="#zoom">Zoom</a></h3>
+<p>The page zoom in percent, from 25 to 400. The default is 100. The page is laid out for the zoomed size. For example, a zoom of 60 shows a dashboard that was made for a tablet.</p>
+<h3 id="background-color"><a class="header" href="#background-color">Background color</a></h3>
+<p>The color shown while the page loads and behind transparent pages. The default is white. Use the reset button to go back to white.</p>
+<h3 id="user-agent"><a class="header" href="#user-agent">User agent</a></h3>
+<p>How the web view identifies itself to the page:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Option</th><th>When to use it</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Default (Remote)</strong></td><td>Identifies the Remote and its firmware version.</td></tr>
+<tr><td><strong>Mobile browser</strong></td><td>Get the mobile layout of a page.</td></tr>
+<tr><td><strong>Desktop browser</strong></td><td>Get the desktop layout of a page.</td></tr>
+<tr><td><strong>Custom text</strong></td><td>Enter your own text, at most 256 characters.</td></tr>
+</tbody>
+</table>
+</div>
+<p><img src="user-guide/web-views/images/wc-05-editor-advanced.png" alt="User agent and Page API settings"></p>
+<h3 id="navigation-and-reload"><a class="header" href="#navigation-and-reload">Navigation and reload</a></h3>
+<ul>
+<li><strong>Show navigation controls:</strong> shows back, forward, reload and close buttons at the bottom of the full-screen web view. They are not shown in an activity widget.</li>
+<li><strong>Reload interval:</strong> reloads the page every few seconds while it is shown: from 10 to 86400 seconds (one day), or <strong>Never</strong>. The timer pauses while the page is hidden or the display is off.</li>
+</ul>
+<h3 id="page-api-device-state-api-for-pages"><a class="header" href="#page-api-device-state-api-for-pages">Page API: Device state API for pages</a></h3>
+<p>Turn on <strong>Device state API for pages</strong> only if your page is made to use it. Pages in this web view can then read the Remote’s display, battery and power state and react to standby, for example to stop updates while the display is off.</p>
+<p>The state is shared with every page the web view opens, also with pages of other sites.</p>
+<p>Developers can find the details in the <a href="https://github.com/unfoldedcircle/core-api/blob/main/doc/entities/entity_webview.md#device-state-for-web-pages">device state documentation</a>.</p>
+<h3 id="authentication-certificate-and-cookies"><a class="header" href="#authentication-certificate-and-cookies">Authentication, Certificate and Cookies</a></h3>
+<p>These sections are explained in <a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a>. Each section has its own <strong>Save</strong> and <strong>Cancel</strong> buttons.</p>
+<h2 id="button-mapping"><a class="header" href="#button-mapping">Button mapping</a></h2>
+<p>The <strong>Button mapping</strong> tab sets what the buttons of the Remote do while this web view is open in full screen. Choose a button in the list or on the picture of the Remote.</p>
+<p><img src="user-guide/web-views/images/wc-06-editor-buttons.png" alt="The Button mapping tab"></p>
+<p>For each button, choose:</p>
+<ul>
+<li><strong>As in the settings:</strong> the button does what is set for all web views in <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Buttons</strong>. For a web view from an integration, this choice is <strong>As the integration sets it</strong>.</li>
+<li><strong>Normal function:</strong> the button keeps its normal function, for example the button mapping of the activity.</li>
+<li><strong>Web view function:</strong> for example <strong>Zoom in</strong>, <strong>Page down</strong>, <strong>Back</strong>, <strong>Reload</strong>, <strong>Close</strong> or <strong>Show or hide navigation</strong>.</li>
+<li><strong>Send key to page:</strong> the button sends a key to the page, for example an arrow key. Use this for pages that handle the Remote’s buttons themselves.</li>
+</ul>
+<p><strong>Button presets</strong> change several buttons at once:</p>
+<ul>
+<li><strong>Default mapping:</strong> removes all own settings of this web view.</li>
+<li><strong>Web view functions:</strong> zoom, scroll, back, forward and reload.</li>
+<li><strong>Page keys:</strong> arrow, media and color keys for the page itself.</li>
+</ul>
+<p>HOME, POWER and the voice button can’t be changed. The button mapping only applies to the full-screen web view. In an activity widget, the buttons keep the activity’s button mapping.</p>
+<p>The default functions of the buttons are listed in <a href="#using-web-views-on-the-remote">Using web views on the Remote</a>.</p>
+<h2 id="web-views-from-integrations"><a class="header" href="#web-views-from-integrations">Web views from integrations</a></h2>
+<p>An integration sets the address, the login, the certificate, the cookies, the user agent and the background color of its web views. The editor shows them under <strong>Set by the integration</strong>. You can’t change them.</p>
+<p><img src="user-guide/web-views/images/wc-10-integration-overrides.png" alt="A web view from an integration with the override settings"></p>
+<p>You can override these settings:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Setting</th><th>How to return to the integration’s value</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Zoom</strong></td><td>Click the reset button (<strong>Use the zoom of the integration</strong>).</td></tr>
+<tr><td><strong>Show navigation controls</strong></td><td>Choose <strong>As the integration sets it</strong>.</td></tr>
+<tr><td><strong>Reload interval</strong></td><td>Click the reset button (<strong>Use the reload interval of the integration</strong>).</td></tr>
+<tr><td><strong>Device state API for pages</strong></td><td>Choose <strong>As the integration sets it</strong>.</td></tr>
+<tr><td>Buttons (<strong>Button mapping</strong> tab)</td><td>Choose <strong>As the integration sets it</strong> for a button, or apply <strong>Default mapping</strong> in <strong>Button presets</strong>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The text below each setting shows what the integration sets.</p>
+<h2 id="delete-or-remove-a-web-view"><a class="header" href="#delete-or-remove-a-web-view">Delete or remove a web view</a></h2>
+<ul>
+<li><strong>Own web view:</strong> click <strong>Delete</strong> in the editor. The web view is deleted for good, with its stored credentials and cookies.</li>
+<li><strong>Web view from an integration:</strong> click <strong>Remove</strong>. You can add it again from its integration.</li>
+</ul>
+<h2 id="settings-for-all-web-views"><a class="header" href="#settings-for-all-web-views">Settings for all web views</a></h2>
+<p>Some settings apply to all web views. Find them in the web-configurator under <strong>Settings</strong> &gt; <strong>Web view</strong>, or on the Remote under <strong>Settings</strong> &gt; <strong>Web view</strong>:</p>
+<ul>
+<li><strong>Color scheme:</strong> <strong>Dark</strong> or <strong>Light</strong>. Only pages that offer a dark design follow this setting.</li>
+<li><strong>Website data on close:</strong> what is deleted when a web page is closed: <strong>Keep</strong>, <strong>Clear cache</strong> or <strong>Clear all website data</strong>.</li>
+<li><strong>Allow invalid certificates:</strong> see <a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a>.</li>
+<li><strong>Buttons:</strong> what the buttons of the Remote do in a full-screen web page, for all web views. A web view can change single buttons.</li>
+</ul>
+<p><img src="user-guide/web-views/images/wc-09-settings-webview.png" alt="Settings &gt; Web view in the web-configurator"></p>
+<h2 id="limit"><a class="header" href="#limit">Limit</a></h2>
+<p>You can create up to <strong>1000</strong> of your own web views. When you reach the limit, <strong>Add web view</strong> is disabled and the web-configurator shows “You have 1000 own web views, the most the Remote can have.” Delete a web view you no longer need to add a new one. Web views from integrations don’t count toward this limit.</p>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="logins-cookies-and-certificates"><a class="header" href="#logins-cookies-and-certificates">Logins, cookies and certificates</a></h1>
+<blockquote>
+<p>Applies to firmware 2.14.0 and newer, on the Remote Two and the Remote 3.</p>
+</blockquote>
+<p>Many dashboards and status pages need a login, and home servers often use a self-signed certificate. This article shows how to set up a web view for these pages, and what the Remote stores.</p>
+<h2 id="pages-that-need-a-login"><a class="header" href="#pages-that-need-a-login">Pages that need a login</a></h2>
+<p>There are two ways to log in to a page.</p>
+<h3 id="option-1-save-the-login-in-the-web-view"><a class="header" href="#option-1-save-the-login-in-the-web-view">Option 1: Save the login in the web view</a></h3>
+<p>In the web-configurator, open the web view and go to the <strong>Authentication</strong> section. Choose a <strong>Method</strong>:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Method</th><th>When to use it</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>No authentication</strong></td><td>The page needs no login, or you log in on the Remote.</td></tr>
+<tr><td><strong>User name and password</strong></td><td>The server asks for a user name and password in a browser login window (HTTP login).</td></tr>
+<tr><td><strong>Bearer token</strong></td><td>The server accepts an access token, for example a long-lived token of your home automation system.</td></tr>
+<tr><td><strong>Request header</strong></td><td>The server expects an API key in a request header. Enter the <strong>Header name</strong> (for example <code>X-API-Key</code>) and the <strong>Header value</strong>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Click <strong>Save</strong> when you’re done.</p>
+<p><img src="user-guide/web-views/images/wc-07-editor-login.png" alt="The Authentication and Cookies sections"></p>
+<p>Good to know:</p>
+<ul>
+<li>The login details are only sent to the host of the URL, never to other sites.</li>
+<li>Passwords, tokens and header values are never shown again. The field says <strong>Stored. Type a new one to replace it.</strong> Click <strong>Remove</strong> to delete a stored value.</li>
+<li>If you change the method and save, the stored login details of the old method are deleted.</li>
+<li>With an <code>http://</code> address, the login details are sent unencrypted.</li>
+</ul>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p><strong>User name and password</strong> only works with the server’s own login window. It doesn’t fill in a login form on the web page. For a login form, use option 2 or a cookie.</p>
+</blockquote>
+<h3 id="option-2-log-in-on-the-remote"><a class="header" href="#option-2-log-in-on-the-remote">Option 2: Log in on the Remote</a></h3>
+<p>If the web view has no saved login, you log in on the Remote:</p>
+<ul>
+<li><strong>Login window of the server:</strong> the Remote shows a sign-in screen, <strong>Sign in to</strong> followed by the site address. Enter your <strong>User name</strong> and <strong>Password</strong> and tap <strong>Sign in</strong>. If the details are wrong, the screen opens again with <strong>Wrong user name or password</strong>. <strong>Cancel</strong> continues without logging in.</li>
+<li><strong>Login form on the page:</strong> tap the fields of the form and type with the on-screen keyboard.</li>
+</ul>
+<p><img src="user-guide/web-views/images/remote-03-login-dialog.png" alt="The sign-in screen on the Remote"></p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The sign-in screen is only shown when the web view is open in full screen. An activity widget shows the server’s error page instead. Open the web view in full screen to log in.</p>
+</blockquote>
+<p>If a sign-in screen shows <strong>Not secure: this connection is not encrypted</strong>, the site uses <code>http://</code> and your password is sent as plain text.</p>
+<h3 id="typing-with-the-on-screen-keyboard"><a class="header" href="#typing-with-the-on-screen-keyboard">Typing with the on-screen keyboard</a></h3>
+<ul>
+<li>Tap a text field on the page to open the keyboard. Its layout matches the field, for example digits or an e-mail address.</li>
+<li>The D-pad and <strong>OK</strong> go to the text field while the keyboard is open.</li>
+<li>The keyboard has no Enter key. To send a form, press <strong>OK</strong> on the Remote, or tap the page’s own button (for example “Log in”).</li>
+<li>To close the keyboard, use its hide key. Tap the field again to open it again.</li>
+</ul>
+<p><img src="user-guide/web-views/images/remote-04-keyboard.png" alt="The on-screen keyboard in a page"></p>
+<h2 id="saved-logins-and-cookies"><a class="header" href="#saved-logins-and-cookies">Saved logins and cookies</a></h2>
+<p>All web views on the Remote share their website data: cookies, the cache and the data pages store. This means:</p>
+<ul>
+<li>When you log in to a site in one web view, the other web views of the same site are logged in too.</li>
+<li>A login that the site keeps in a cookie stays valid after a restart of the Remote, as long as the server accepts it.</li>
+<li>A user name and password typed in the sign-in screen are kept only until the Remote restarts.</li>
+<li>The Remote never saves passwords that you type into a page’s own login form, and doesn’t fill in forms automatically.</li>
+</ul>
+<h3 id="set-cookies-for-a-page"><a class="header" href="#set-cookies-for-a-page">Set cookies for a page</a></h3>
+<p>Some pages need a cookie, for example a session cookie or a layout preference. In the <strong>Cookies</strong> section of the editor, click <strong>Add cookie</strong> and enter:</p>
+<ul>
+<li><strong>Name</strong> and <strong>Value</strong> (required).</li>
+<li><strong>Domain</strong> and <strong>Path</strong> (optional). Without a domain, the cookie is only sent to the host of the URL.</li>
+<li><strong>Expires</strong> (optional). Without a date, the cookie is a session cookie.</li>
+<li><strong>HTTPS only</strong> and <strong>Hide from scripts</strong> (optional).</li>
+</ul>
+<p>Click <strong>Save</strong>. A web view can have up to 20 cookies.</p>
+<p>The cookies are set every time the web view opens, before the page loads. If the page changes or deletes a cookie, it’s set back to your value the next time the web view opens.</p>
+<h2 id="self-signed-certificates-home-servers"><a class="header" href="#self-signed-certificates-home-servers">Self-signed certificates (home servers)</a></h2>
+<p>By default, a page with an invalid certificate doesn’t load. This includes self-signed certificates, expired certificates and certificates of an unknown authority. The Remote shows <strong>The page could not be loaded</strong> and says that the certificate isn’t trusted.</p>
+<p>To allow the certificate of your server:</p>
+<ol>
+<li>In the web-configurator, open the web view and go to the <strong>Certificate</strong> section.</li>
+<li>Choose one option:
+<ul>
+<li><strong>SHA-256 fingerprint</strong> (recommended): enter the fingerprint of your server’s certificate, 64 hexadecimal digits, with or without colons. The page loads only with exactly this certificate.</li>
+<li><strong>Accept any invalid certificate of the host</strong>: accepts any certificate the server presents. Only use this if you can’t use the fingerprint.</li>
+</ul>
+</li>
+<li>Click <strong>Save</strong>.</li>
+</ol>
+<p><img src="user-guide/web-views/images/wc-08-editor-certificate.png" alt="The Certificate section"></p>
+<h3 id="find-the-sha-256-fingerprint"><a class="header" href="#find-the-sha-256-fingerprint">Find the SHA-256 fingerprint</a></h3>
+<p>Open the same address that the web view uses in a desktop browser, then view the certificate:</p>
+<ul>
+<li><strong>Chrome or Edge:</strong> click <strong>Not secure</strong> (or the padlock) next to the address, open the certificate details, and look for the <strong>SHA-256</strong> fingerprint of the certificate.</li>
+<li><strong>Firefox:</strong> click the padlock, then <strong>Connection not secure</strong> &gt; <strong>More information</strong> &gt; <strong>View Certificate</strong>. Copy the value of <strong>SHA-256</strong> under <strong>Fingerprints</strong>.</li>
+<li><strong>Safari:</strong> open <strong>Show Certificate</strong>, expand <strong>Details</strong>, and copy the <strong>SHA-256</strong> fingerprint.</li>
+</ul>
+<p>Or, on a computer with OpenSSL, read the fingerprint of the certificate file:</p>
+<p><code>openssl x509 -in cert.pem -noout -fingerprint -sha256</code></p>
+<p>The web-configurator accepts the 64 hexadecimal digits without separators or separated by colons, for example <code>3F:A9:12:…</code>. Upper and lower case both work. Spaces are not accepted: if your browser shows the value with spaces, replace them with colons or remove them.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Use the certificate of exactly the address the web view opens. Another host name or port can present a different certificate.</p>
+</blockquote>
+<p>Good to know:</p>
+<ul>
+<li>The exception only applies to the host of the URL. Images or scripts from other hosts with an invalid certificate don’t load.</li>
+<li>A renewed self-signed certificate has a new fingerprint. Update the fingerprint, or the page won’t load.</li>
+<li>An accepted certificate is accepted by all web views, and it stays accepted until the Remote restarts, even if you remove the exception.</li>
+</ul>
+<h3 id="allow-invalid-certificates-for-all-web-views"><a class="header" href="#allow-invalid-certificates-for-all-web-views">Allow invalid certificates for all web views</a></h3>
+<p><strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Allow invalid certificates</strong> (in the web-configurator or on the Remote) accepts invalid certificates on all web pages.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>This turns off the certificate check for every page, including other sites the pages load content from. These connections are then not protected against attackers. Prefer the <strong>Certificate</strong> setting of a single web view.</p>
+</blockquote>
+<h2 id="clearing-website-data"><a class="header" href="#clearing-website-data">Clearing website data</a></h2>
+<p>You clear website data on the Remote, not in the web-configurator. Clearing always affects all web views, because they share their data.</p>
+<ol>
+<li>On the Remote, open <strong>Settings</strong> &gt; <strong>Web view</strong>.</li>
+<li>Under <strong>Cache and website data</strong>, choose:
+<ul>
+<li><strong>Clear cache:</strong> deletes cached files. You stay logged in.</li>
+<li><strong>Clear website data:</strong> deletes the cookies, the cache and the stored data of all web pages. Confirm with <strong>Clear</strong>.</li>
+</ul>
+</li>
+</ol>
+<p>What <strong>Clear website data</strong> removes, and what it keeps:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Removed</th><th>Kept</th></tr>
+</thead>
+<tbody>
+<tr><td>Cookies, including logins that a site keeps in a cookie. These pages ask you to log in again.</td><td>The user name and password typed in a sign-in screen, until the Remote restarts.</td></tr>
+<tr><td>The cache and the data pages store.</td><td>The login details and cookies saved in the web view settings. They are sent again automatically.</td></tr>
+<tr><td></td><td>Certificates you accepted, until the Remote restarts.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Open pages reload after clearing.</p>
+<p><img src="user-guide/web-views/images/remote-07-clear-website-data.png" alt="The Clear website data confirmation on the Remote"></p>
+<p>You can also clear data automatically: <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Website data on close</strong> sets what is deleted each time a web page closes: <strong>Keep</strong> (default), <strong>Clear cache</strong> or <strong>Clear all website data</strong>. On the Remote, the settings row shows <strong>Clear all data</strong> as the short form of <strong>Clear all website data</strong>.</p>
+<h2 id="privacy-notes"><a class="header" href="#privacy-notes">Privacy notes</a></h2>
+<ul>
+<li>The Remote never shows saved passwords, tokens, header values or cookie values again, in the web-configurator or anywhere else, and never writes them to its log.</li>
+<li><strong>Backups of the Remote contain the saved login details and cookie values of your web views.</strong> Keep your backup files private.</li>
+<li>The URL of a web view is not a secret. Don’t put passwords or tokens in it.</li>
+<li>Deleting one of your own web views deletes its saved login details and cookies. Cookies and data that the page stored itself are shared with the other web views. To remove them, use <strong>Clear website data</strong>.</li>
+<li>If you turn on <strong>Device state API for pages</strong>, every page the web view opens can read the battery and display state of the Remote and see when it goes into standby. Only turn it on for pages that use it.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div>
+<h1 id="using-web-views-on-the-remote"><a class="header" href="#using-web-views-on-the-remote">Using web views on the Remote</a></h1>
+<blockquote>
+<p>Applies to firmware 2.14.0 and newer, on the Remote Two and the Remote 3.</p>
+</blockquote>
+<p>This article explains how to open a web view on the Remote, how to use the page with touch and buttons, and what to do when something doesn’t work.</p>
+<h2 id="opening-a-web-view"><a class="header" href="#opening-a-web-view">Opening a web view</a></h2>
+<ul>
+<li><strong>From a page:</strong> tap the web view tile. The page opens in full screen. It isn’t loaded until you tap the tile.</li>
+<li><strong>In an activity:</strong> a <strong>Web view</strong> widget shows the page right on the activity page. If the widget isn’t interactive, tap it to open the page in full screen. You can also open the web view from the list of entities in the activity.</li>
+<li><strong>With a command:</strong> a button, an icon or text on an activity page, a macro or a step of an activity sequence can open the web view. It opens in full screen on top of the current screen, and the display wakes up.</li>
+</ul>
+<p>To add a web view to a page on the Remote, use the entity list and its <strong>Web view</strong> filter.</p>
+<p><img src="user-guide/web-views/images/remote-06-entity-filter.png" alt="The entity type filter with Web view"></p>
+<p>Press <strong>BACK</strong> to close the full-screen web view and return to the previous screen. <strong>HOME</strong> closes it and shows the home screen.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Only one web page is shown at a time. While a web view is open in full screen, an activity widget unloads its page and loads it again afterwards.</p>
+</blockquote>
+<h3 id="activity-widget"><a class="header" href="#activity-widget">Activity widget</a></h3>
+<p>In the web-configurator, add the web view to the activity’s included entities, then add a <strong>Web view</strong> widget in the activity’s <strong>User interface</strong>:</p>
+<ul>
+<li>One web view widget per activity, at least 3 × 3 grid fields.</li>
+<li><strong>Interactive:</strong> when on, touch goes to the page. When off, a tap opens the web view in full screen.</li>
+<li>The widget can have its own zoom. Without it, it uses the zoom of the web view.</li>
+<li>The buttons of the Remote keep the activity’s button mapping.</li>
+</ul>
+<p><img src="user-guide/web-views/images/wc-12-add-to-activity.png" alt="A web view widget in an activity’s user interface"></p>
+<h2 id="touch-scrolling-and-zoom"><a class="header" href="#touch-scrolling-and-zoom">Touch, scrolling and zoom</a></h2>
+<ul>
+<li><strong>Tap</strong> to click a link or a button.</li>
+<li><strong>Drag</strong> to scroll.</li>
+<li><strong>Pinch</strong> with two fingers to enlarge the page, from 1× to 4×. Pinch-to-zoom might not be available on all Remote models.</li>
+<li>A long press counts as a tap. Double tap doesn’t zoom.</li>
+</ul>
+<p><strong>Zoom with buttons:</strong> press <strong>VOLUME +</strong> and <strong>VOLUME −</strong> to zoom in steps from 50 % to 300 %. A label at the top shows the zoom level. The zoom lasts until you close the web view. To change the zoom permanently, set <strong>Zoom</strong> in the web view settings in the web-configurator.</p>
+<h2 id="navigation-bar"><a class="header" href="#navigation-bar">Navigation bar</a></h2>
+<p>If <strong>Show navigation controls</strong> is on for the web view, a bar at the bottom of the full-screen web view has four buttons: back, forward, reload and close.</p>
+<p><img src="user-guide/web-views/images/remote-02-navigation-bar.png" alt="The navigation bar of a web view"></p>
+<h2 id="on-screen-keyboard"><a class="header" href="#on-screen-keyboard">On-screen keyboard</a></h2>
+<p>Tap a text field on the page to open the keyboard. While it’s open, the D-pad and <strong>OK</strong> go to the text field. The keyboard has no Enter key: press <strong>OK</strong> on the Remote to send a form. See <a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a> for more.</p>
+<h2 id="how-the-buttons-work-in-a-page"><a class="header" href="#how-the-buttons-work-in-a-page">How the buttons work in a page</a></h2>
+<p>In the full-screen web view, the buttons have these functions by default:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Button</th><th>Default function</th></tr>
+</thead>
+<tbody>
+<tr><td>D-pad</td><td>Sends the arrow keys to the page</td></tr>
+<tr><td>OK</td><td>Sends Enter to the page</td></tr>
+<tr><td>BACK</td><td>Closes the web view</td></tr>
+<tr><td>VOLUME + / −</td><td>Zoom in / out</td></tr>
+<tr><td>CHANNEL up / down</td><td>Scroll up / down one screen</td></tr>
+<tr><td>MENU (Remote 3)</td><td>Sends the menu key to the page</td></tr>
+<tr><td>HOME</td><td>Closes the web view and shows the home screen (can’t be changed)</td></tr>
+<tr><td>POWER, voice button</td><td>Keep their normal function (can’t be changed)</td></tr>
+<tr><td>All other buttons</td><td>Keep their normal function, for example the button mapping of the activity</td></tr>
+</tbody>
+</table>
+</div>
+<p>You can change the buttons for all web views in <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Buttons</strong>, and for a single web view on its <strong>Button mapping</strong> tab in the web-configurator. See <a href="#setting-up-a-web-view-in-the-web-configurator">Setting up a web view in the web-configurator</a>.</p>
+<p>While the on-screen keyboard or a dialog of the page is open, the zoom buttons do nothing.</p>
+<h3 id="dialogs-of-the-page"><a class="header" href="#dialogs-of-the-page">Dialogs of the page</a></h3>
+<p>Messages and questions of the page appear as dialogs on the Remote. If you leave a page with unsaved changes, the Remote may ask <strong>Leave this page?</strong> Choose <strong>Stay</strong> or <strong>Leave</strong>.</p>
+<h2 id="settings--web-view-on-the-remote"><a class="header" href="#settings--web-view-on-the-remote">Settings &gt; Web view on the Remote</a></h2>
+<p>On the Remote, open <strong>Settings</strong> &gt; <strong>Web view</strong>. These settings apply to all web views:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Setting</th><th>What it does</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Color scheme</strong></td><td><strong>Dark</strong> or <strong>Light</strong>. Only pages that offer a dark design follow this setting.</td></tr>
+<tr><td><strong>Website data on close</strong></td><td>What closing a page deletes: <strong>Keep</strong>, <strong>Clear cache</strong> or <strong>Clear all website data</strong> (shown as <strong>Clear all data</strong> in the row).</td></tr>
+<tr><td><strong>Buttons</strong></td><td>What the buttons do in a full-screen web page. A web view can change single buttons.</td></tr>
+<tr><td><strong>Allow invalid certificates</strong></td><td>Accepts invalid certificates on all web pages. Not recommended.</td></tr>
+<tr><td><strong>Cache and website data</strong></td><td><strong>Clear cache</strong> and <strong>Clear website data</strong> for all web views.</td></tr>
+<tr><td><strong>Web view test</strong></td><td>Load any web address to try it.</td></tr>
+</tbody>
+</table>
+</div>
+<p><img src="user-guide/web-views/images/remote-05-settings-webview.png" alt="Settings &gt; Web view on the Remote"></p>
+<h3 id="web-view-test"><a class="header" href="#web-view-test">Web view test</a></h3>
+<p><strong>Web view test</strong> opens a test page with an address field. Use it to check that web views work on your Remote, or to try a page before you set up a web view for it:</p>
+<ol>
+<li>Open <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Web view test</strong>.</li>
+<li>Tap the <strong>Web address</strong> field and type the address. An address without <code>http://</code> or <code>https://</code> gets <code>http://</code> added.</li>
+<li>Tap <strong>Load</strong>, or press <strong>OK</strong>.</li>
+</ol>
+<p>The buttons below the address go back, forward, and stop or reload the page. A status line shows the page title, the load progress, or why the page couldn’t be loaded. Press <strong>BACK</strong> to close the test page.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The test page doesn’t use the settings of your web views, such as their login, cookies or certificate exception. A page that needs these may not load in the test, but work in its web view.</p>
+</blockquote>
+<h2 id="when-the-display-turns-off-and-in-standby"><a class="header" href="#when-the-display-turns-off-and-in-standby">When the display turns off and in standby</a></h2>
+<ul>
+<li>When the display turns off, the page is hidden and paused. It stops drawing and uses less power. A dimmed display doesn’t pause the page.</li>
+<li>The automatic reload stops while the display is off. When the page shows again, the full interval starts again.</li>
+<li>The page stays open and keeps its state, for example what you entered or where you scrolled to. It isn’t reloaded automatically when the display turns on again or the Remote wakes up from standby.</li>
+<li>Right after waking up, the network may need a moment. Some pages show old data until they reconnect.</li>
+</ul>
+<p>Pages that use the <strong>Device state API for pages</strong> can react to the display state and to standby, for example to update their data after waking up.</p>
+<h2 id="troubleshooting-1"><a class="header" href="#troubleshooting-1">Troubleshooting</a></h2>
+<h3 id="the-page-doesnt-load-or-a-certificate-error-appears"><a class="header" href="#the-page-doesnt-load-or-a-certificate-error-appears">The page doesn’t load, or a certificate error appears</a></h3>
+<p>The web view shows <strong>The page could not be loaded</strong>. Below it, the Remote says why, if it knows the reason:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Message on the Remote</th><th>What to check</th></tr>
+</thead>
+<tbody>
+<tr><td>The server … wasn’t found.</td><td>The address in the web view’s <strong>URL</strong>, and that the Remote is connected to Wi-Fi. A name that ends in <code>.local</code> only works in your home network.</td></tr>
+<tr><td>The Remote isn’t connected to a network.</td><td>The Wi-Fi connection of the Remote.</td></tr>
+<tr><td>… refused the connection.</td><td>That the server is running and that the port in the URL is correct.</td></tr>
+<tr><td>… didn’t respond in time.</td><td>That the server is switched on and reachable from the Remote’s network, for example not blocked by a firewall or in another network.</td></tr>
+<tr><td>The certificate of … isn’t trusted.</td><td>For a home server with a self-signed certificate, allow the certificate in the web view’s <strong>Certificate</strong> settings. See <a href="#logins-cookies-and-certificates">Logins, cookies and certificates</a>.</td></tr>
+<tr><td>Only http:// and https:// addresses can be opened.</td><td>The <strong>URL</strong> must start with <code>http://</code> or <code>https://</code>.</td></tr>
+<tr><td>The page stopped working.</td><td>Try again. If it happens again, the page may not work on the Remote.</td></tr>
+<tr><td>The page needs more memory than the Remote has.</td><td>The page is too large for the Remote. Use a smaller page, for example a simpler dashboard view.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Select <strong>Try again</strong> or press <strong>OK</strong> to load the page again.</li>
+<li>Select <strong>Details</strong> to see the technical error, for example to send it to our support or to the maker of the page. It shows only the server’s address, not the rest of the URL.</li>
+<li>An activity widget shows the reason only if there’s room for it, and has no buttons. Tap an interactive widget to try again. Tap a widget that isn’t interactive to open the web view in full screen, where <strong>Details</strong> is available.</li>
+<li>If the web view of an integration is unavailable, check the integration and the connected system.</li>
+<li>PDF documents and downloads aren’t supported. The Remote shows <strong>PDF documents cannot be shown here</strong> or <strong>Downloads are not supported</strong>.</li>
+</ul>
+<h3 id="im-asked-to-log-in-again"><a class="header" href="#im-asked-to-log-in-again">I’m asked to log in again</a></h3>
+<ul>
+<li>A user name and password typed in the sign-in screen are kept only until the Remote restarts. Save the login in the web view’s <strong>Authentication</strong> settings instead.</li>
+<li><strong>Clear website data</strong>, or <strong>Website data on close</strong> set to clear all data, logs you out of pages that use a cookie login.</li>
+<li>The site may have ended your session. Log in again.</li>
+<li>If a sign-in fails after the sign-in screen was open for a long time, reload the page and try again.</li>
+</ul>
+<h3 id="the-page-is-too-small-or-too-large"><a class="header" href="#the-page-is-too-small-or-too-large">The page is too small or too large</a></h3>
+<ul>
+<li>Press <strong>VOLUME +</strong> or <strong>VOLUME −</strong> to zoom for this visit.</li>
+<li>Set <strong>Zoom</strong> in the web view settings to keep a zoom level.</li>
+<li>Try <strong>Mobile browser</strong> or <strong>Desktop browser</strong> in <strong>User agent</strong> to get another layout of the page.</li>
+<li>For an activity widget, set the zoom of the widget.</li>
+</ul>
+<h3 id="a-button-does-nothing"><a class="header" href="#a-button-does-nothing">A button does nothing</a></h3>
+<ul>
+<li><strong>HOME</strong>, <strong>POWER</strong> and the voice button have fixed functions.</li>
+<li>Check the web view’s <strong>Button mapping</strong> tab and <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Buttons</strong>. A button set to <strong>Nothing</strong> does nothing, and a key sent to the page only works if the page handles it.</li>
+<li>In an activity widget, the buttons use the activity’s button mapping.</li>
+<li>The zoom buttons do nothing while the keyboard or a dialog is open.</li>
+</ul>
+<h3 id="the-page-isnt-updated-after-standby"><a class="header" href="#the-page-isnt-updated-after-standby">The page isn’t updated after standby</a></h3>
+<p>The page is paused while the display is off and isn’t reloaded after waking up.</p>
+<ul>
+<li>Reload the page: use the reload button of the navigation bar, or a button set to <strong>Reload</strong>.</li>
+<li>Set a <strong>Reload interval</strong> in the web view settings.</li>
+<li>If you made the page yourself, use the <strong>Device state API for pages</strong> to update it after standby.</li>
+</ul>
+<h3 id="i-cant-add-another-web-view"><a class="header" href="#i-cant-add-another-web-view">I can’t add another web view</a></h3>
+<p>The web-configurator shows “You have 1000 own web views, the most the Remote can have.” Delete web views you no longer need. Web views from integrations don’t count toward this limit.</p>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="remote-two-user-interface"><a class="header" href="#remote-two-user-interface">Remote Two User Interface</a></h1>
 <p>The user interface was designed to be easy to use by anyone, who can use a smart home app. Similar principles were
@@ -2982,7 +3698,7 @@ grouping of similar commands.</p>
 <li><code>DIGIT_</code>: additional input digits besides the pre-defined numpad digits, e.g. <code>DIGIT_10</code>, <code>DIGIT_10+</code></li>
 <li><code>ZONE_</code>: multi-room functions, e.g. <code>ZONE_A</code>, <code>ZONE_MULTIROOM</code></li>
 </ul>
-<h4 id="button-mapping"><a class="header" href="#button-mapping">Button mapping</a></h4>
+<h4 id="button-mapping-1"><a class="header" href="#button-mapping-1">Button mapping</a></h4>
 <p>A default button mapping can be provided in <code>options.button_mapping</code>.</p>
 <p>The <code>DeviceButtonMapping</code> object is defined in the <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a> and is based on the same
 definition in the Core-API.</p>
@@ -4166,6 +4882,10 @@ around to the last option if the first option is currently selected.</p>
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div>
 <h1 id="number-entity"><a class="header" href="#number-entity">Number Entity</a></h1>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The number entity is supported in Remote firmware 2.13.0 and newer.</p>
+</blockquote>
 <p>The number entity holds a single numeric value which can be read and set. It is the writable counterpart of the
 <a href="#sensor-entity">sensor entity</a> and the numeric counterpart of the <a href="#select-entity">select entity</a>.</p>
 <p>The value range, step size, and unit are defined by the integration driver in the entity options. The Remote renders a
@@ -5821,6 +6541,8 @@ the icon identifier in lowercase.</p>
 <li>Supported image formats: PNG and JPG.</li>
 <li>Maximum size: 16 KB.</li>
 </ul>
+<p>See <a href="#supported-icon-and-image-formats">Supported icon and image formats</a> for the icon and image formats of
+the Remote.</p>
 <h3 id="installation-archive-example"><a class="header" href="#installation-archive-example">Installation archive example</a></h3>
 <p>Example of a Node.js based integration driver archive (contents of bin/node_modules are not shown for a clearer overview):</p>
 <pre><code>.
