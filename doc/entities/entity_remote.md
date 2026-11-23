@@ -298,6 +298,18 @@ Screen grid sizes for Remote Two:
 
 The screen layout grid definition can be retrieved with the Core-API: `GET /api/cfg/device/screen_layout`.
 
+##### Page background
+
+A page can have an optional `background` image that covers the whole screen behind the page items, see
+`UserInterfacePageBackground` in the [Integration-API](https://unfoldedcircle.github.io/core-api/integration/). The image
+must be a background image resource that the user uploaded to the Remote. Full-screen images are 480x800 pixels on the
+Remote 3 and 480x854 pixels on the Remote Two; `scale`, `align` and `dim` adapt the image to the screen. An invalid
+background is removed by the Remote with a warning in its log, the rest of the entity is kept.
+
+```json
+"background": { "image": "custom:living_room.jpg", "scale": "fill", "align": "center", "dim": 40 }
+```
+
 ## Integration API
 
 ### Commands
