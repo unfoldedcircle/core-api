@@ -58,6 +58,8 @@ _Changes in the next release_
     the `freeze` and `resume` events on `document`, and `window.deviceHost` with the display state, the power source,
     the power profile and standby events. Hidden pages are throttled. The device API simulator for page development is in
     [tools/device-api-simulator](tools/device-api-simulator).
+  - Web view test pages for the keys of the Remote and the device state API, with an event log, in
+    [tools/webview-test-pages](tools/webview-test-pages), also published with the API documentation.
 
 ### Changed
 - Core APIs: resetting all settings (`DELETE /cfg`, `reset_configuration`) requires the `admin` scope.

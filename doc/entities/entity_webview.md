@@ -876,6 +876,15 @@ device state API in a desktop browser, to develop a page without a Remote:
 
 The simulator doesn't throttle hidden pages and doesn't make `Date.now()` jump: test the page on the Remote as well.
 
+The [web view test pages](https://github.com/unfoldedcircle/core-api/tree/main/tools/webview-test-pages) show what a
+page receives on the Remote. Use their address in a web view:
+
+- [Key input](https://unfoldedcircle.github.io/core-api/tools/webview-test-pages/key-input.html): the key events of the
+  buttons of the Remote, compared with the [keys](#buttons) the Remote sends.
+- [Device state](https://unfoldedcircle.github.io/core-api/tools/webview-test-pages/device-api.html): the state of the
+  device state API, Page Visibility, the network state and the timer rate, with a log of every event. Needs the
+  `device_api` option.
+
 ## Commands
 
 The commands of a web view entity are executed by the user interface of the Remote. They work like the commands of

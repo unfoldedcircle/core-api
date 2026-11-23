@@ -1,0 +1,223 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2026 Unfolded Circle ApS -->
+<!--
+  Key input test page for a web view of the Unfolded Circle Remote.
+  Shows the KeyboardEvent values a page receives for the buttons of the Remote, compares them with the values the
+  Remote sends, and logs every key event. Self-contained: no external resources, nothing is sent anywhere.
+  See doc/entities/entity_webview.md#buttons in the core-api repository.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Key input test</title>
+<style>
+  :root {
+    --bg: #111418; --panel: #1b2027; --line: #2d343e; --text: #e8ecf1; --muted: #9aa5b1;
+    --ok: #2f9e5b; --ok-text: #fff; --bad: #c94a4a; --bad-text: #fff; --seen: #3b6fb6; --accent: #f0b429;
+    --mono: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f5f6f8; --panel: #fff; --line: #d5d9df; --text: #14181d; --muted: #5d6773; --accent: #b7791f; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; flex-direction: column; background: var(--bg); color: var(--text);
+    font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { flex: 1 1 auto; overflow: auto; padding: 10px 12px; min-height: 0; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  p.hint { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+  #last {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; margin-bottom: 10px;
+    display: grid; grid-template-columns: auto 1fr; gap: 0 12px; font-family: var(--mono);
+  }
+  #last dt { color: var(--muted); }
+  #last dd { margin: 0; font-weight: 700; font-size: 18px; overflow-wrap: anywhere; }
+  #last dd.match-ok { color: var(--ok); }
+  #last dd.match-bad { color: var(--bad); }
+  h2 { font-size: 14px; margin: 12px 0 6px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+  #keys { display: flex; flex-wrap: wrap; gap: 4px; }
+  #keys span {
+    font: 12px var(--mono); padding: 3px 6px; border-radius: 6px; border: 1px solid var(--line); background: var(--panel);
+  }
+  #keys span.ok { background: var(--ok); color: var(--ok-text); border-color: var(--ok); }
+  #keys span.bad { background: var(--bad); color: var(--bad-text); border-color: var(--bad); }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+  button, input[type=text] {
+    font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px 10px;
+  }
+  input[type=text] { flex: 1 1 140px; min-width: 0; }
+  button:focus-visible, input:focus-visible, #log:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+  label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+  footer {
+    flex: 0 0 38%; display: flex; flex-direction: column; min-height: 120px; border-top: 2px solid var(--line);
+    background: var(--panel);
+  }
+  footer header { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+  footer header strong { flex: 1; font-size: 13px; }
+  footer header button { padding: 2px 10px; font-size: 13px; }
+  #log { flex: 1; overflow: auto; margin: 0; padding: 4px 8px; list-style: none; font: 12px/1.45 var(--mono); }
+  #log li { white-space: pre-wrap; overflow-wrap: anywhere; border-bottom: 1px solid var(--line); padding: 1px 0; }
+  #log .t { color: var(--muted); }
+  #log .down { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Key input test</h1>
+  <p class="hint">
+    Press the buttons of the Remote. By default only the D-pad, OK and MENU send keys; use the
+    <code>page_keys</code> button preset to test all keys. Green: the values of the Remote, red: other values.
+  </p>
+
+  <dl id="last" aria-live="polite">
+    <dt>key</dt><dd id="last-key">–</dd>
+    <dt>code</dt><dd id="last-code">–</dd>
+    <dt>keyCode</dt><dd id="last-keycode">–</dd>
+    <dt>flags</dt><dd id="last-flags">–</dd>
+  </dl>
+
+  <h2>Keys of the Remote</h2>
+  <div id="keys"></div>
+
+  <h2>Focus and text input</h2>
+  <div class="row">
+    <button id="b1">Button 1</button><button id="b2">Button 2</button><button id="b3">Button 3</button>
+  </div>
+  <div class="row">
+    <input id="text" type="text" placeholder="Text field: on-screen keyboard" autocomplete="off">
+  </div>
+  <div class="row">
+    <label><input id="prevent" type="checkbox" checked> preventDefault() for arrows, page and space keys
+      (no scrolling)</label>
+  </div>
+  <p class="hint">
+    Tab and Shift+Tab (the <code>focus_next</code> and <code>focus_previous</code> functions) move the focus between
+    the buttons; OK on a focused button logs a <code>click</code>.
+  </p>
+</main>
+
+<footer>
+  <header>
+    <strong id="log-title">Events</strong>
+    <button id="clear" type="button">Clear</button>
+  </header>
+  <ol id="log" tabindex="0" aria-label="Event log, newest first"></ol>
+</footer>
+
+<script>
+'use strict';
+// KeyboardEvent.key → [code, keyCode] as a page in a web view of the Remote receives them
+// (firmware 2.14.0 or newer; older firmware gives ChannelUp, ChannelDown, MediaPlayPause and Exit other values).
+// See "Buttons" in doc/entities/entity_webview.md.
+const EXPECTED = {
+  ArrowUp: ['ArrowUp', 38], ArrowDown: ['ArrowDown', 40], ArrowLeft: ['ArrowLeft', 37], ArrowRight: ['ArrowRight', 39],
+  Enter: ['Enter', 13], Escape: ['Escape', 27], Backspace: ['Backspace', 8], Tab: ['Tab', 9],
+  PageUp: ['PageUp', 33], PageDown: ['PageDown', 34], Home: ['Home', 36], End: ['End', 35],
+  ContextMenu: ['ContextMenu', 93],
+  BrowserBack: ['BrowserBack', 166], BrowserForward: ['BrowserForward', 167],
+  BrowserRefresh: ['BrowserRefresh', 168], BrowserStop: ['BrowserStop', 169], Exit: ['Unidentified', 0],
+  AudioVolumeUp: ['AudioVolumeUp', 175], AudioVolumeDown: ['AudioVolumeDown', 174], AudioVolumeMute: ['AudioVolumeMute', 173],
+  ChannelUp: ['Unidentified', 427], ChannelDown: ['Unidentified', 428],
+  MediaPlayPause: ['MediaPlayPause', 179], MediaPlay: ['Unidentified', 250], MediaPause: ['Unidentified', 19],
+  MediaStop: ['MediaStop', 178], MediaRecord: ['Unidentified', 416], MediaRewind: ['Unidentified', 227],
+  MediaFastForward: ['Unidentified', 228], MediaTrackPrevious: ['MediaTrackPrevious', 177],
+  MediaTrackNext: ['MediaTrackNext', 176],
+  ColorF0Red: ['Unidentified', 403], ColorF1Green: ['Unidentified', 404],
+  ColorF2Yellow: ['Unidentified', 405], ColorF3Blue: ['Unidentified', 406],
+};
+const NO_SCROLL = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'PageUp', 'PageDown', 'Home', 'End', ' ']);
+const MAX_LOG = 300;
+
+const $ = id => document.getElementById(id);
+const tags = {};
+for (const key of Object.keys(EXPECTED)) {
+  const s = document.createElement('span');
+  s.textContent = key;
+  s.title = `expected code ${EXPECTED[key][0]}, keyCode ${EXPECTED[key][1]}`;
+  $('keys').appendChild(s);
+  tags[key] = s;
+}
+
+let count = 0;
+function time() {
+  const d = new Date();
+  return d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0');
+}
+function log(text, cls) {
+  const li = document.createElement('li');
+  const t = document.createElement('span');
+  t.className = 't';
+  t.textContent = time() + ' ';
+  const m = document.createElement('span');
+  if (cls) m.className = cls;
+  m.textContent = text;
+  li.append(t, m);
+  $('log').prepend(li);
+  while ($('log').children.length > MAX_LOG) $('log').lastChild.remove();
+  $('log-title').textContent = `Events (${++count})`;
+}
+
+function target(e) {
+  const el = e.target;
+  return el && el.id ? '#' + el.id : (el && el.tagName ? el.tagName.toLowerCase() : String(el));
+}
+function flags(e) {
+  const f = [];
+  if (e.shiftKey) f.push('Shift');
+  if (e.ctrlKey) f.push('Ctrl');
+  if (e.altKey) f.push('Alt');
+  if (e.metaKey) f.push('Meta');
+  if (e.repeat) f.push('repeat');
+  if (e.isComposing) f.push('composing');
+  return f;
+}
+
+function onKey(e) {
+  const f = flags(e);
+  log(`${e.type.padEnd(8)} key=${JSON.stringify(e.key)} code=${JSON.stringify(e.code)} keyCode=${e.keyCode}` +
+      ` which=${e.which}${f.length ? ' ' + f.join('+') : ''} → ${target(e)}`, e.type === 'keydown' ? 'down' : '');
+  if (e.type !== 'keydown') return;
+
+  const x = EXPECTED[e.key];
+  $('last-key').textContent = JSON.stringify(e.key);
+  $('last-code').textContent = JSON.stringify(e.code);
+  $('last-keycode').textContent = String(e.keyCode);
+  $('last-flags').textContent = f.length ? f.join(' + ') : '–';
+  for (const id of ['last-code', 'last-keycode']) $(id).className = '';
+  if (x) {
+    $('last-code').className = x[0] === e.code ? 'match-ok' : 'match-bad';
+    $('last-keycode').className = x[1] === e.keyCode ? 'match-ok' : 'match-bad';
+    const ok = x[0] === e.code && x[1] === e.keyCode;
+    tags[e.key].className = ok ? 'ok' : 'bad';
+    if (!ok) tags[e.key].title = `expected code ${x[0]}, keyCode ${x[1]}; got code ${e.code}, keyCode ${e.keyCode}`;
+  }
+
+  const inText = e.target && e.target.id === 'text';
+  if (!inText && $('prevent').checked && NO_SCROLL.has(e.key)) e.preventDefault();
+}
+
+for (const type of ['keydown', 'keypress', 'keyup']) document.addEventListener(type, onKey, true);
+$('text').addEventListener('input', e => log(`input    value=${JSON.stringify(e.target.value)} inputType=${e.inputType}`));
+for (const id of ['b1', 'b2', 'b3']) {
+  $(id).addEventListener('click', () => log(`click    #${id}`));
+  $(id).addEventListener('focus', () => log(`focus    #${id}`));
+}
+$('text').addEventListener('focus', () => log('focus    #text'));
+$('clear').addEventListener('click', () => {
+  $('log').replaceChildren();
+  count = 0;
+  $('log-title').textContent = 'Events';
+  for (const s of Object.values(tags)) s.className = '';
+});
+window.addEventListener('focus', () => log('window   focus'));
+window.addEventListener('blur', () => log('window   blur'));
+log(`page loaded, ${navigator.userAgent}`);
+</script>
+</body>
+</html>
