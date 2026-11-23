@@ -1480,8 +1480,10 @@ components:
         - `entity_id` is the entity identifier of the Core, `cmd_id` the command without the entity type prefix, e.g.
           `open` for `webview.open`.
         - The user interface answers with the `result` response as soon as it has accepted the command, not when the
-          page has loaded. Result codes as for the `entity_command` of the Integration-API: `200` accepted, `400`
-          invalid command or parameters, `404` unknown entity, `503` the command can't be executed at the moment.
+          page has loaded. The most common result codes, as for the `entity_command` of the Integration-API: `200`
+          accepted, `400` invalid command or parameters, `404` unknown entity, `500` the command failed, `501` the
+          command isn't supported (e.g. by the installed web view library), `503` the command can't be executed at
+          the moment. These are not the only codes: any other `4xx` or `5xx` code can be returned.
         - Timeout: 5 seconds. Without an answer, the Core returns error code `408` to the caller.
       tags:
         - name: entity
