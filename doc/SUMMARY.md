@@ -23,6 +23,7 @@
   - [Select](entities/entity_select.md)
   - [Number](entities/entity_number.md)
   - [Voice Assistant](entities/entity_voice_assistant.md)
+  - [Web View](entities/entity_webview.md)
 
 # Integration Drivers
 

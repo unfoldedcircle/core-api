@@ -103,8 +103,8 @@ Notes:
 - The options are static and are read when the entity is configured in the Remote. If the value range of a device
   changes, the integration driver has to send an updated entity definition with the `entity_available` event. Dynamic
   ranges in the entity attributes are not supported.
-  - 🚧 The `entity_available` event is not yet supported by the Remote. Until then, an updated entity definition is
-    only applied when the Remote retrieves the available entities with the `get_available_entities` request.
+  - An older Remote firmware ignores the `entity_available` event. It applies an updated entity definition only when
+    it retrieves the available entities with the `get_available_entities` request, e.g. after the driver reconnects.
 - The `step` size should be compatible with `decimals`. A step size of 0.5 requires at least 1 decimal place to show
   every possible value.
 - With `readable: false` the Remote does not expect an `entity_change` event after a command and shows the last value

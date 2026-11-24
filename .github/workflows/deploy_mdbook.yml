@@ -6,6 +6,8 @@ on:
    paths:
      - 'book.toml'
      - 'doc/**'
+     - 'tools/webview-test-pages/**'
+     - 'tools/device-api-simulator/src/**'
      - '.github/workflows/deploy_mdbook.yml'
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
@@ -57,6 +59,13 @@ jobs:
           mdbook --version
           mdbook-mermaid install .
           mdbook build
+
+      - name: Add the web view test pages
+        # served at tools/webview-test-pages/; the device state page loads the simulator from ../device-api-simulator/src/
+        run: |
+          mkdir -p book/tools/webview-test-pages book/tools/device-api-simulator/src
+          cp tools/webview-test-pages/*.html book/tools/webview-test-pages/
+          cp tools/device-api-simulator/src/*.js book/tools/device-api-simulator/src/
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0

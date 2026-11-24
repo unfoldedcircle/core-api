@@ -1,0 +1,57 @@
+/* SPDX-License-Identifier: MIT */
+/* demo/demo.css */
+:root {
+  color-scheme: light dark;
+  --bg: #f4f5f7; --card: #fff; --fg: #1d1f24; --muted: #6b7280;
+  --accent: #2f6fde; --warn: #f59e0b; --bad: #dc2626; --ok: #16a34a;
+  font: 15px/1.5 system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #14161a; --card: #1e2127; --fg: #e5e7eb; --muted: #9ca3af; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; padding: 16px 16px 340px; background: var(--bg); color: var(--fg); }
+
+.top h1 { margin: 0 0 4px; font-size: 1.4rem; }
+.top p  { margin: 0 0 16px; color: var(--muted); max-width: 70ch; }
+kbd { border: 1px solid var(--muted); border-radius: 4px; padding: 0 4px; font-size: .85em; }
+
+.banner { padding: 10px 14px; border-radius: 8px; margin-bottom: 12px; font-weight: 600; color: #fff; }
+.banner.warn { background: var(--warn); }
+.banner[hidden] { display: none; }
+
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.card { background: var(--card); border-radius: 10px; padding: 12px 16px; box-shadow: 0 1px 3px #0002; }
+.card.wide { grid-column: 1 / -1; }
+.card h2 { margin: 0 0 8px; font-size: 1rem; }
+
+dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; margin: 0; }
+dt { color: var(--muted); }
+dd { margin: 0; font-variant-numeric: tabular-nums; }
+
+#connection[data-state="connected"]    { color: var(--ok); font-weight: 600; }
+#connection[data-state="disconnected"] { color: var(--bad); font-weight: 600; }
+
+/* Battery bar */
+.meter { margin-top: 10px; height: 10px; border-radius: 5px; background: #8883; overflow: hidden; }
+#battery-bar { height: 100%; width: 0; background: var(--ok); transition: width .3s, background .3s; }
+#battery-bar[data-level="mid"] { background: var(--warn); }
+#battery-bar[data-level="low"] { background: var(--bad); }
+
+/* An animation as a stand-in for an "expensive" user interface */
+.spinner {
+  width: 36px; height: 36px; margin-top: 10px; border-radius: 50%;
+  border: 4px solid #8884; border-top-color: var(--accent);
+  animation: spin 1s linear infinite;
+}
+.spinner.paused { animation-play-state: paused; opacity: .4; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Power saving with CSS only: the shim sets the attributes on <html> */
+:root[data-power-profile="power-saver"] .spinner { animation: none; }
+:root[data-power-profile="power-saver"] * { transition: none !important; }
+:root[data-screen="dim"] .card { box-shadow: none; }
+
+.log { margin: 0; padding: 6px 10px; list-style: none; max-height: 220px; overflow: auto;
+  font: 12px/1.5 ui-monospace, monospace; background: #8881; border-radius: 6px; }
+.log:empty::before { content: 'Nothing happened yet'; color: var(--muted); }

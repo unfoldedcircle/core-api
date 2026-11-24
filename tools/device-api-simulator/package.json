@@ -1,0 +1,22 @@
+{
+  "name": "device-api-simulator",
+  "version": "1.0.0",
+  "private": true,
+  "license": "MIT",
+  "description": "Desktop simulator of the device state API for web pages in a web view of the Unfolded Circle Remote (deviceHost, getBattery, standby)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "playwright test",
+    "test:install": "playwright install chromium webkit"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0",
+    "vite": "^5.4.0"
+  }
+}

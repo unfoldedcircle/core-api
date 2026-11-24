@@ -1,0 +1,62 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>device-api-simulator – demo</title>
+  <link rel="stylesheet" href="/demo/demo.css">
+  <script type="module" src="/demo/main.js"></script>
+</head>
+<body>
+  <header class="top">
+    <h1>Device state API demo</h1>
+    <p>A small sample page which only uses the device state API of a web view
+      (<code>navigator.getBattery()</code>, <code>window.deviceHost</code>, <code>freeze</code> and
+      <code>resume</code> on <code>document</code>), Page Visibility and the <code>online</code> and
+      <code>offline</code> events. Control it with the simulator panel at the bottom right
+      (<kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>D</kbd>).</p>
+  </header>
+
+  <div id="low-battery" class="banner warn" data-testid="low-battery" hidden>
+    Battery low – please put the Remote on its charger
+  </div>
+
+  <main class="grid">
+    <section class="card">
+      <h2>Power</h2>
+      <dl>
+        <dt>Source</dt>        <dd id="power-source" data-testid="power-source">–</dd>
+        <dt>Battery</dt>       <dd id="battery-level" data-testid="battery-level">–</dd>
+      </dl>
+      <div class="meter"><div id="battery-bar"></div></div>
+    </section>
+
+    <section class="card">
+      <h2>Display &amp; page</h2>
+      <dl>
+        <dt>Display</dt>       <dd id="screen" data-testid="screen">–</dd>
+        <dt>Visibility</dt>    <dd id="visibility" data-testid="visibility">–</dd>
+        <dt>Animation</dt>     <dd id="anim-state" data-testid="anim-state">–</dd>
+        <dt>Power profile</dt> <dd id="profile" data-testid="profile">–</dd>
+      </dl>
+      <div id="spinner" class="spinner" aria-hidden="true"></div>
+    </section>
+
+    <section class="card">
+      <h2>Connection</h2>
+      <dl>
+        <dt>Status</dt>        <dd id="connection" data-testid="connection">–</dd>
+        <dt>Reconnects</dt>    <dd id="reconnects" data-testid="reconnects">0</dd>
+        <dt>Network</dt>       <dd id="online" data-testid="online">–</dd>
+        <dt>Last standby</dt>  <dd id="slept" data-testid="slept">–</dd>
+      </dl>
+    </section>
+
+    <section class="card wide">
+      <h2>What the page has seen</h2>
+      <ol id="log" class="log" data-testid="app-log"></ol>
+    </section>
+  </main>
+</body>
+</html>
