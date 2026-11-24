@@ -11,7 +11,7 @@ It applies to images that you upload in the web-configurator (Resources) or that
 |------------------|---------------|-----------------------------------------------------|-------------------|--------------------------|
 | Icon             | PNG, JPG, SVG | PNG and JPG: exactly 90 x 90 pixels. SVG: see below | 32 KB             | 1000                     |
 | TV channel icon  | PNG, JPG, SVG | PNG and JPG: exactly 90 x 90 pixels. SVG: see below | 32 KB             | 1000                     |
-| Background image | PNG, JPG      | exactly 480 x 275 pixels                            | 1 MB              | 50                       |
+| Background image | PNG, JPG      | exactly 480 x 275, 480 x 800 or 480 x 854 pixels    | 1 MB              | 100                      |
 
 > 💡 SVG icons are supported from beta firmware 2.13.0.
 
@@ -29,9 +29,42 @@ It applies to images that you upload in the web-configurator (Resources) or that
 
 ## Background images
 
-- The image must be exactly **480 x 275 pixels** and in PNG or JPG format.
-- The file must not be larger than **1 MB**.
+- The image must have exactly one of these sizes, in PNG or JPG format:
+
+  | Size             | Used for                                                      |
+  |------------------|---------------------------------------------------------------|
+  | 480 x 275 pixels | The header of a profile page                                  |
+  | 480 x 800 pixels | The full screen of an activity or remote page on a Remote 3   |
+  | 480 x 854 pixels | The full screen of an activity or remote page on a Remote Two |
+
+- The file must not be larger than **1 MB**. You can upload up to **100** background images.
 - SVG is not supported for background images.
+- A profile page shows the top 480 x 275 part of a taller image.
+
+### Background of activity and remote pages
+
+> 💡 Background images in activity and remote pages are supported from beta firmware 2.14.0.
+
+Each page of an activity or a remote can have its own background image. It covers the whole screen behind the buttons
+of the page. Use the same image on several pages if the whole activity should have one background. For each page you
+can set:
+
+- **Scaling**: the image always keeps its aspect ratio.
+  - *Fill the screen* (default): the image covers the whole screen. Parts outside the screen are cut off.
+  - *Fit the whole image*: the whole image is visible. The remaining area is black.
+  - *Original size*: the image is shown in its original size. Parts outside the screen are cut off, a remaining area
+    is black.
+- **Alignment**: *Top*, *Center* (default) or *Bottom*. Decides which part of the image is kept when it's cut off, or
+  where a black area remains.
+- **Darken**: from 0 % to 80 %, default 40 %. Darkens the image so that the buttons stay readable. Use a higher value
+  for bright images.
+
+An image made for the other model also works: for example, a 480 x 854 image on a Remote 3 with *Fill the screen*
+loses 27 pixels at the top and at the bottom.
+
+> 💡 The web-configurator shows the background in its page preview, but the preview is only an approximation. The
+> Remote can show the image a little differently, for example slightly brighter or darker, or with a slightly
+> different part cut off. Check the result on your Remote.
 
 ## Scaling and cropping in the web-configurator
 
@@ -41,7 +74,8 @@ image to the required size.
 **We recommend preparing the image in a graphic tool instead and uploading an image with the exact size.** Automatic
 scaling and cropping can make an image blurry or cut off parts of it. With a graphic tool you control the result:
 
-1. Create a new image with the exact size from the table above, for example 90 x 90 pixels for an icon.
+1. Create a new image with the exact size from the table above, for example 90 x 90 pixels for an icon, or 480 x 800
+   pixels for a full-screen background on a Remote 3.
 2. Place and scale your artwork inside the image.
 3. Export it as PNG or JPG.
 4. Upload the exported image. If the size matches, no scaling or cropping is necessary.
@@ -135,7 +169,7 @@ depends on the language, the result can depend on the language set on the Remote
 | Message or problem                                                   | What to do                                                                       |
 |----------------------------------------------------------------------|----------------------------------------------------------------------------------|
 | "Invalid image size! Expected 90x90 ..."                             | Resize the PNG or JPG icon to exactly 90 x 90 pixels, or use the editor.         |
-| "Invalid image size! Expected 480x275 ..."                           | Resize the background image to exactly 480 x 275 pixels, or use the editor.      |
+| "Invalid image size! Expected 480x275, 480x800 or 480x854 ..."       | Resize the background image to one of these sizes, or use the editor.            |
 | "File too large ..."                                                 | Reduce the file size. The general limit is 1 MB, SVG icons are limited to 32 KB. |
 | "Maximum number of ... resources reached"                            | Delete icons or background images you no longer use. See the limits above.       |
 | "Insufficient storage to upload file!"                               | The Remote is low on free storage. Delete unused resources and try again.        |
