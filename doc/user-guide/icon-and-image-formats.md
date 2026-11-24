@@ -43,6 +43,8 @@ It applies to images that you upload in the web-configurator (Resources) or that
 
 ### Background of activity and remote pages
 
+> 💡 Background images in activity and remote pages are supported from beta firmware 2.14.0.
+
 Each page of an activity or a remote can have its own background image. It covers the whole screen behind the buttons
 of the page. Use the same image on several pages if the whole activity should have one background. For each page you
 can set:
@@ -58,6 +60,10 @@ can set:
 
 An image made for the other model also works: for example, a 480 x 854 image on a Remote 3 with *Fill* loses 27 pixels
 at the top and at the bottom.
+
+> 💡 The web-configurator shows the background in its page preview, but the preview is only an approximation. The
+> Remote can show the image a little differently, for example slightly brighter or darker, or with a slightly
+> different part cut off. Check the result on your Remote.
 
 ## Scaling and cropping in the web-configurator
 
