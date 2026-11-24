@@ -35,10 +35,10 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-ee495ce9.js";
+            window.path_to_searchindex_js = "searchindex-afc36ef0.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="toc-0bd7c578.js"></script>
+        <script src="toc-8a948746.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -197,6 +197,7 @@ web-configurator, or provided as default user interface by a <a href="entities/e
 <tr><td>select</td><td>select entity</td><td>Option selection of a <a href="entities/entity_select.html">select entity</a>.</td></tr>
 <tr><td>slider</td><td><a href="#entity-feature-target">entity feature</a></td><td>Slider to read and set a numeric entity feature. See <a href="#slider">slider widget</a>.</td></tr>
 <tr><td>number</td><td>number entity</td><td>Value of a <a href="entities/entity_number.html">number entity</a> as slider or stepper. See <a href="#number">number widget</a>.</td></tr>
+<tr><td>webview</td><td>web view entity</td><td>Web page of a <a href="entities/entity_webview.html">web view entity</a>. See <a href="#web-view">web view widget</a>.</td></tr>
 </tbody>
 </table>
 </div>
@@ -523,6 +524,120 @@ buttons (up and down for a vertical slider) send the <code>decrement</code> and 
 as for the stepper.</li>
 </ul>
 <p>The value updates and feedback are the same as for the <a href="#value-updates-and-feedback">slider widget</a>.</p>
+<h2 id="web-view"><a class="header" href="#web-view">Web view</a></h2>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The web view widget is supported in Remote firmware 2.14.0 and newer.</p>
+</blockquote>
+<p>The web view widget shows the web page of a <a href="entities/entity_webview.html">web view entity</a> in an activity user interface
+page, e.g. a dashboard next to the media player controls.</p>
+<h3 id="configuration-2"><a class="header" href="#configuration-2">Configuration</a></h3>
+<p>The web view widget configuration is set in the <code>webview</code> property of the user interface item:</p>
+<pre><code class="language-json">{
+  "type": "webview",
+  "webview": {
+    "webview_id": "uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11",
+    "interactive": true,
+    "zoom": 60
+  },
+  "location": { "x": 0, "y": 0 },
+  "size": { "width": 4, "height": 4 }
+}
+</code></pre>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Property</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>webview_id</td><td>string</td><td>required</td><td>Web view entity to show. Must be an included entity of the activity.</td></tr>
+<tr><td>interactive</td><td>boolean</td><td>true</td><td><code>true</code>: touch input is sent to the page. <code>false</code>: the page is only shown, and a tap opens the <a href="entities/entity_webview.html#fullscreen-web-view">fullscreen web view</a>.</td></tr>
+<tr><td>zoom</td><td>integer</td><td>entity zoom</td><td>Page zoom of the widget in percent: 25..400. If not set, the effective <code>zoom</code> option of the entity is used: the user override, otherwise the option of the entity.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The widget has no label: the item’s <code>text</code> field is not used.</p>
+<h3 id="rules"><a class="header" href="#rules">Rules</a></h3>
+<p>The Remote checks the following rules when a user interface page is created or updated:</p>
+<ul>
+<li>The <code>webview</code> configuration with <code>webview_id</code> is required.</li>
+<li>The web view entity must be an included entity of the activity, like the media-player entity of a media widget.</li>
+<li>An activity can contain at most one web view widget, over all its pages.</li>
+<li>Minimum size: 3 × 3 grid fields. The item <code>size</code> is required, since the default size of an item is 1 × 1.</li>
+<li>The widget is not available in the user interface of a remote entity.</li>
+</ul>
+<p>A rule violation is refused with error code <code>400</code> and <code>code: VALIDATION_ERROR</code>. The <code>errors</code> array contains the invalid
+field and a field error code:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Field</th><th>Code</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td><code>items[{pos}].webview</code></td><td>REQUIRED</td><td>The <code>webview</code> configuration is missing.</td></tr>
+<tr><td><code>items[{pos}].webview.webview_id</code></td><td>NOT_FOUND</td><td>There is no configured entity with this identifier.</td></tr>
+<tr><td><code>items[{pos}].webview.webview_id</code></td><td>INVALID</td><td>The entity is not a web view entity.</td></tr>
+<tr><td><code>items[{pos}].webview.webview_id</code></td><td>NOT_INCLUDED</td><td>The web view entity is not an included entity of the activity.</td></tr>
+<tr><td><code>items[{pos}].webview.zoom</code></td><td>RANGE</td><td>The zoom is outside of 25..400. Parameters <code>min</code> and <code>max</code>.</td></tr>
+<tr><td><code>items[{pos}].size</code></td><td>RANGE</td><td>The item is smaller than the minimum size. Parameters <code>min_width</code> and <code>min_height</code>.</td></tr>
+<tr><td><code>items[{pos}].type</code></td><td>LIMIT</td><td>The activity already has a web view widget, on this or another page. Parameter <code>max</code>.</td></tr>
+<tr><td><code>items[{pos}].type</code></td><td>NOT_SUPPORTED</td><td>Web view widgets are not supported in the user interface of a remote entity.</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>{pos}</code> is the 0-based position of the item in the <code>items</code> array of the page.</p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  "code": "VALIDATION_ERROR",
+  "message": "Invalid web view widget",
+  "errors": [
+    {
+      "field": "items[2].size",
+      "field_errors": [
+        {
+          "code": "RANGE",
+          "message": "A web view widget needs at least 3 x 3 grid fields",
+          "params": { "min_width": 3, "min_height": 3 }
+        }
+      ]
+    }
+  ]
+}
+</code></pre>
+<h3 id="behaviour"><a class="header" href="#behaviour">Behaviour</a></h3>
+<ul>
+<li>The page is loaded when the activity user interface page with the widget is shown, and unloaded when the page is
+left. A loaded page needs a lot of memory, which is the reason for the limit of one web view widget per activity.</li>
+<li>The UI shows one web page at a time: while a fullscreen web view is open, the page of the widget is unloaded and
+loaded again afterwards.</li>
+<li>An interactive widget receives the touch input: swiping on the widget scrolls the page and doesn’t switch the user
+interface page. Make sure that a part of the page grid stays free for swiping, or use a non-interactive widget.</li>
+<li>The physical buttons keep the button mapping of the activity, e.g. the volume buttons. The
+<a href="entities/entity_webview.html#commands">commands</a> of the web view entity, e.g. <code>webview.reload</code>, can be mapped to a
+button or placed as an icon or text item on a page.</li>
+<li>The widget shows no dialogs of the page and no login dialog, see the
+<a href="entities/entity_webview.html#activity-widget">activity widget</a> of the web view entity.</li>
+<li>If the web view entity is deleted or unavailable, or the Remote has no web view support, the widget shows a
+placeholder with an icon. The widget is only removed automatically when the web view entity is removed from the
+included entities of the activity.</li>
+</ul>
+<h3 id="opening-the-web-view-fullscreen"><a class="header" href="#opening-the-web-view-fullscreen">Opening the web view fullscreen</a></h3>
+<p>An icon or text item with the command <code>webview.open</code> opens the web view fullscreen, on top of the activity screen.
+Closing it returns to the activity. The web view entity must be an included entity of the activity. A page doesn’t
+need a web view widget for this. In the fullscreen web view, the physical buttons have the actions of the web view
+<a href="entities/entity_webview.html#buttons">buttons</a>, e.g. VOLUME up and down zoom the page by default, or keep the button
+mapping of the activity with the action <code>pass</code>.</p>
+<pre><code class="language-json">{
+  "type": "text",
+  "text": "Dashboard",
+  "command": {
+    "entity_id": "uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11",
+    "cmd_id": "webview.open"
+  },
+  "location": { "x": 0, "y": 5 },
+  "size": { "width": 2, "height": 1 }
+}
+</code></pre>
 <h2 id="remote-3-touch-slider"><a class="header" href="#remote-3-touch-slider">Remote 3 touch slider</a></h2>
 <p>The Remote 3 touch slider is configured per activity in the <code>touch_slider</code> option with an
 <a href="#entity-feature-target">entity feature target</a>. If no target is specified, the default touch slider feature is

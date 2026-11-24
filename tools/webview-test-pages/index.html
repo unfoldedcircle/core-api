@@ -1,0 +1,39 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2026 Unfolded Circle ApS -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Web view test pages</title>
+<style>
+  :root { --bg: #111418; --panel: #1b2027; --line: #2d343e; --text: #e8ecf1; --muted: #9aa5b1; --accent: #f0b429; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f5f6f8; --panel: #fff; --line: #d5d9df; --text: #14181d; --muted: #5d6773; --accent: #b7791f; }
+  }
+  body { margin: 0; padding: 12px; background: var(--bg); color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  h1 { font-size: 20px; margin: 0 0 10px; }
+  a.card { display: block; padding: 12px 14px; margin: 0 0 10px; border-radius: 10px; background: var(--panel);
+    border: 1px solid var(--line); color: inherit; text-decoration: none; }
+  a.card strong { display: block; font-size: 17px; margin-bottom: 2px; }
+  a.card span { color: var(--muted); font-size: 14px; }
+  a.card:focus-visible, a.card:hover { outline: 3px solid var(--accent); outline-offset: 1px; }
+  p { color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+  <h1>Web view test pages</h1>
+  <a class="card" href="key-input.html">
+    <strong>Key input</strong>
+    <span>The key events a page receives for the buttons of the Remote, compared with the expected values.</span>
+  </a>
+  <a class="card" href="device-api.html">
+    <strong>Device state</strong>
+    <span>Display, power source, battery and standby of the Remote with the device state API, and an event log.</span>
+  </a>
+  <p>For developers of pages for a web view of the Unfolded Circle Remote. The pages load nothing from other servers
+    and send nothing.</p>
+</body>
+</html>

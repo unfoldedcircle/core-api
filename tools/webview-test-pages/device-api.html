@@ -1,0 +1,316 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: MIT -->
+<!-- Copyright (c) 2026 Unfolded Circle ApS -->
+<!--
+  Device state test page for a web view of the Unfolded Circle Remote.
+  Shows the state of the device state API (window.deviceHost, navigator.getBattery(), the data attributes on <html>),
+  Page Visibility, the network state and the timer rate, and logs every event of these APIs.
+  Needs a web view with the device_api option. In a desktop browser, "Load simulator" (or ?simulator in the URL) loads
+  the device API simulator from ../device-api-simulator/src/.
+  See doc/entities/entity_webview.md#device-state-for-web-pages in the core-api repository.
+  Self-contained: no external resources, nothing is sent anywhere.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark light">
+<title>Device state test</title>
+<style>
+  :root {
+    --bg: #111418; --panel: #1b2027; --line: #2d343e; --text: #e8ecf1; --muted: #9aa5b1; --accent: #f0b429;
+    --ok: #2f9e5b; --warn: #d9822b; --bad: #c94a4a; --info: #3b6fb6;
+    --mono: ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --bg: #f5f6f8; --panel: #fff; --line: #d5d9df; --text: #14181d; --muted: #5d6773; --accent: #b7791f; }
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: flex; flex-direction: column; background: var(--bg); color: var(--text);
+    font: 15px/1.35 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { flex: 1 1 auto; overflow: auto; padding: 10px 12px; min-height: 0; }
+  h1 { font-size: 18px; margin: 0 0 6px; display: flex; align-items: center; gap: 8px; }
+  #api-badge { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--line); font-weight: 600; }
+  #api-badge.on { background: var(--ok); color: #fff; }
+  #api-badge.sim { background: var(--info); color: #fff; }
+  #api-badge.off { background: var(--bad); color: #fff; }
+  .banner { border-radius: 10px; padding: 8px 12px; margin: 0 0 10px; font-size: 13px; background: var(--panel);
+    border: 1px solid var(--bad); }
+  .banner button { margin-top: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; }
+  h2 { font-size: 13px; margin: 0 0 6px; color: var(--muted); font-weight: 600; text-transform: uppercase;
+    letter-spacing: .04em; }
+  dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0; }
+  dt { color: var(--muted); font-size: 13px; }
+  dd { margin: 0; font: 600 14px var(--mono); overflow-wrap: anywhere; }
+  .meter { height: 8px; border-radius: 4px; background: var(--line); margin-top: 6px; overflow: hidden; }
+  #battery-bar { height: 100%; width: 0; background: var(--ok); transition: width .3s; }
+  /* CSS hooks of the API: <html data-screen data-power-profile> */
+  #css-demo { margin-top: 6px; padding: 6px 8px; border-radius: 8px; font-size: 13px; background: var(--line); }
+  html[data-screen="dim"] #css-demo { background: var(--warn); color: #fff; }
+  html[data-screen="off"] #css-demo { background: var(--bad); color: #fff; }
+  html[data-power-profile="power-saver"] #css-demo::after { content: " · power saver"; }
+  button {
+    font: inherit; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px 10px;
+  }
+  button:focus-visible, #log:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; }
+  footer {
+    flex: 0 0 40%; display: flex; flex-direction: column; min-height: 130px; border-top: 2px solid var(--line);
+    background: var(--panel);
+  }
+  footer header { display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-bottom: 1px solid var(--line); }
+  footer header strong { flex: 1; font-size: 13px; }
+  footer header button { padding: 2px 10px; font-size: 13px; }
+  #log { flex: 1; overflow: auto; margin: 0; padding: 4px 8px; list-style: none; font: 12px/1.45 var(--mono); }
+  #log li { white-space: pre-wrap; overflow-wrap: anywhere; border-bottom: 1px solid var(--line); padding: 1px 0; }
+  #log .t { color: var(--muted); }
+  #log .src { display: inline-block; min-width: 9ch; font-weight: 700; }
+  #log .deviceHost { color: var(--accent); }
+  #log .battery { color: var(--ok); }
+  #log .document { color: #6ea8fe; }
+  #log .window { color: #c58af9; }
+  #log .timer { color: var(--warn); }
+  #log .page { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <h1>Device state test <span id="api-badge">checking…</span></h1>
+
+  <div id="no-api" class="banner" hidden>
+    The device state API is not available. On the Remote, enable the <code>device_api</code> option of the web view
+    (Web configurator: web view settings, or <code>options.user.device_api</code> for a web view of an integration),
+    then reload the page. Page Visibility, the network state and the timers are still shown and logged.
+    <div><button id="load-sim" type="button">Load simulator</button> (desktop browser)</div>
+  </div>
+
+  <div class="grid">
+    <section>
+      <h2>deviceHost</h2>
+      <dl>
+        <dt>version</dt><dd id="dh-version">–</dd>
+        <dt>screen</dt><dd id="dh-screen">–</dd>
+        <dt>powerSource</dt><dd id="dh-source">–</dd>
+        <dt>powerProfile</dt><dd id="dh-profile">–</dd>
+        <dt>last standby</dt><dd id="dh-slept">–</dd>
+      </dl>
+      <div id="css-demo">CSS: <span id="css-attrs">–</span></div>
+    </section>
+
+    <section>
+      <h2>Battery</h2>
+      <dl>
+        <dt>level</dt><dd id="bat-level">–</dd>
+        <dt>charging</dt><dd id="bat-charging">–</dd>
+        <dt>chargingTime</dt><dd id="bat-ctime">–</dd>
+        <dt>dischargingTime</dt><dd id="bat-dtime">–</dd>
+      </dl>
+      <div class="meter"><div id="battery-bar"></div></div>
+    </section>
+
+    <section>
+      <h2>Page</h2>
+      <dl>
+        <dt>visibility</dt><dd id="pg-visibility">–</dd>
+        <dt>focus</dt><dd id="pg-focus">–</dd>
+        <dt>network</dt><dd id="pg-online">–</dd>
+        <dt>timer 100 ms</dt><dd id="pg-timer">–</dd>
+        <dt>uptime</dt><dd id="pg-uptime">–</dd>
+      </dl>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <header>
+    <strong id="log-title">Events</strong>
+    <button id="clear" type="button">Clear</button>
+  </header>
+  <ol id="log" tabindex="0" aria-label="Event log, newest first"></ol>
+</footer>
+
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const MAX_LOG = 500;
+const TICK_MS = 100;          // timer that shows the throttling of hidden pages
+const GAP_MS = 3000;          // a timer gap longer than this is logged
+let count = 0;
+
+// ── Log ───────────────────────────────────────────────────────────────────
+function time() {
+  const d = new Date();
+  return d.toTimeString().slice(0, 8) + '.' + String(d.getMilliseconds()).padStart(3, '0');
+}
+function log(source, text) {
+  const li = document.createElement('li');
+  const t = document.createElement('span');
+  t.className = 't';
+  t.textContent = time() + ' ';
+  const s = document.createElement('span');
+  s.className = 'src ' + source;
+  s.textContent = source;
+  li.append(t, s, document.createTextNode(' ' + text));
+  $('log').prepend(li);
+  while ($('log').children.length > MAX_LOG) $('log').lastChild.remove();
+  $('log-title').textContent = `Events (${++count})`;
+}
+$('clear').addEventListener('click', () => {
+  $('log').replaceChildren();
+  count = 0;
+  $('log-title').textContent = 'Events';
+});
+
+function duration(ms) {
+  if (!isFinite(ms)) return String(ms);
+  const s = Math.round(ms / 1000);
+  if (s < 120) return `${(ms / 1000).toFixed(1)} s`;
+  const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+  return h ? `${h} h ${m} min` : `${m} min ${s % 60} s`;
+}
+function detail(e) {
+  return e.detail !== undefined && e.detail !== null ? ' detail=' + JSON.stringify(e.detail) : '';
+}
+
+// ── Page Visibility, focus, network, lifecycle: available in every browser ──
+function showPage() {
+  $('pg-visibility').textContent = document.visibilityState;
+  $('pg-focus').textContent = document.hasFocus() ? 'focused' : 'not focused';
+  $('pg-online').textContent = navigator.onLine ? 'online' : 'offline';
+}
+document.addEventListener('visibilitychange', () => { log('document', `visibilitychange → ${document.visibilityState}`); showPage(); });
+window.addEventListener('focus', () => { log('window', 'focus'); showPage(); });
+window.addEventListener('blur', () => { log('window', 'blur'); showPage(); });
+window.addEventListener('online', () => { log('window', 'online'); showPage(); });
+window.addEventListener('offline', () => { log('window', 'offline'); showPage(); });
+window.addEventListener('pageshow', e => log('window', `pageshow persisted=${e.persisted}`));
+window.addEventListener('pagehide', e => log('window', `pagehide persisted=${e.persisted}`));
+// freeze and resume on document: the Remote's standby events (Page Lifecycle names)
+document.addEventListener('freeze', () => log('document', 'freeze'));
+document.addEventListener('resume', () => log('document', 'resume'));
+
+// ── Timer: rate and gaps ──────────────────────────────────────────────────
+// A hidden page's timers run at most once per second; in standby, timers and performance.now() stop while Date.now()
+// keeps going, so the difference of the two shows the time slept even without the device state API.
+let lastPerf = performance.now(), lastWall = Date.now(), ticks = [], startPerf = lastPerf;
+setInterval(() => {
+  const perf = performance.now(), wall = Date.now();
+  const dPerf = perf - lastPerf, dWall = wall - lastWall;
+  if (dWall > GAP_MS) {
+    const slept = dWall - dPerf;
+    log('timer', `gap ${duration(dWall)}` + (slept > 1000 ? `, Date.now() jumped ${duration(slept)} ahead of performance.now()` : ''));
+  }
+  lastPerf = perf; lastWall = wall;
+  ticks.push(dPerf);
+  if (ticks.length > 10) ticks.shift();
+  const avg = ticks.reduce((a, b) => a + b, 0) / ticks.length;
+  $('pg-timer').textContent = `every ${Math.round(avg)} ms` + (avg > 5 * TICK_MS ? ' (throttled)' : '');
+  $('pg-uptime').textContent = duration(perf - startPerf);
+}, TICK_MS);
+
+// ── Device state API ──────────────────────────────────────────────────────
+function showHost(host) {
+  $('dh-version').textContent = String(host.version);
+  $('dh-screen').textContent = host.screen;
+  $('dh-source').textContent = host.powerSource;
+  $('dh-profile').textContent = host.powerProfile;
+}
+function showBattery(b) {
+  $('bat-level').textContent = `${Math.round(b.level * 100)} %`;
+  $('bat-charging').textContent = String(b.charging);
+  $('bat-ctime').textContent = String(b.chargingTime);
+  $('bat-dtime').textContent = String(b.dischargingTime);
+  $('battery-bar').style.width = `${Math.round(b.level * 100)}%`;
+  $('battery-bar').style.background = b.level <= 0.15 && !b.charging ? 'var(--bad)' : 'var(--ok)';
+}
+function showAttrs() {
+  const d = document.documentElement.dataset;
+  $('css-attrs').textContent = `data-screen=${d.screen ?? '–'} data-power-profile=${d.powerProfile ?? '–'}`;
+}
+
+let started = false;
+async function startApi(simulated) {
+  if (started) return;
+  started = true;
+  const host = window.deviceHost;
+  $('no-api').hidden = true;
+  $('api-badge').textContent = simulated ? 'simulator' : 'available';
+  $('api-badge').className = simulated ? 'sim' : 'on';
+
+  showHost(host);
+  for (const type of ['screenchange', 'powerprofilechange', 'on-ac', 'on-battery', 'suspend']) {
+    host.addEventListener(type, e => { log('deviceHost', type + detail(e)); showHost(host); });
+  }
+  host.addEventListener('resume', e => {
+    log('deviceHost', 'resume' + detail(e));
+    if (e.detail && typeof e.detail.sleptMs === 'number') {
+      $('dh-slept').textContent = duration(e.detail.sleptMs);
+      $('dh-slept').title = `woke up at ${new Date().toLocaleTimeString()}`;
+    }
+    showHost(host);
+  });
+  log('deviceHost', `state screen=${host.screen} powerSource=${host.powerSource} powerProfile=${host.powerProfile} version=${host.version}`);
+
+  new MutationObserver(records => {
+    for (const r of records) log('page', `<html ${r.attributeName}="${document.documentElement.getAttribute(r.attributeName)}">`);
+    showAttrs();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-screen', 'data-power-profile'] });
+  showAttrs();
+
+  if (typeof navigator.getBattery === 'function') {
+    const b = await navigator.getBattery();
+    showBattery(b);
+    log('battery', `state level=${b.level} charging=${b.charging} chargingTime=${b.chargingTime} dischargingTime=${b.dischargingTime}`);
+    for (const type of ['levelchange', 'chargingchange', 'chargingtimechange', 'dischargingtimechange']) {
+      b.addEventListener(type, () => {
+        log('battery', `${type} level=${b.level} charging=${b.charging} chargingTime=${b.chargingTime}`);
+        showBattery(b);
+      });
+    }
+  } else {
+    log('battery', 'navigator.getBattery() not available');
+  }
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error(`cannot load ${src}`));
+    document.head.appendChild(s);
+  });
+}
+async function loadSimulator() {
+  try {
+    const base = new URL('../device-api-simulator/src/', location.href);
+    await loadScript(new URL('device-api-shim.js', base).href);
+    await loadScript(new URL('device-api-simulator.js', base).href);
+    log('page', 'device API simulator loaded (panel: Alt+Shift+D)');
+    await startApi(true);
+  } catch (err) {
+    log('page', `${err.message}: serve the core-api tools directory, see tools/webview-test-pages/README.md`);
+  }
+}
+$('load-sim').addEventListener('click', loadSimulator);
+
+showPage();
+log('page', `loaded, ${navigator.userAgent}`);
+if ('deviceHost' in window) {
+  startApi(false);
+} else if (new URLSearchParams(location.search).has('simulator')) {
+  loadSimulator();
+} else {
+  $('api-badge').textContent = 'not available';
+  $('api-badge').className = 'off';
+  $('no-api').hidden = false;
+  log('page', 'device state API not available (window.deviceHost is missing)');
+}
+</script>
+</body>
+</html>

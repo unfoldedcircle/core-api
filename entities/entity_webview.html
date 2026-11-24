@@ -1,0 +1,1574 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Web View - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../css/general-2459343d.css">
+        <link rel="stylesheet" href="../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../searchindex-afc36ef0.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../toc-8a948746.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="web-view-entity"><a class="header" href="#web-view-entity">Web View Entity</a></h1>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The web view entity is supported in Remote firmware 2.14.0 and newer.</p>
+</blockquote>
+<!-- TOC -->
+<ul>
+<li><a href="#availability">Availability</a></li>
+<li><a href="#not-supported">Not supported</a></li>
+<li><a href="#features">Features</a>
+<ul>
+<li><a href="#attributes">Attributes</a></li>
+<li><a href="#states">States</a></li>
+<li><a href="#device-classes">Device Classes</a></li>
+<li><a href="#options">Options</a></li>
+<li><a href="#secret-options">Secret options</a></li>
+<li><a href="#user-overrides">User overrides</a></li>
+</ul>
+</li>
+<li><a href="#global-web-view-settings">Global web view settings</a></li>
+<li><a href="#user-interface">User interface</a></li>
+<li><a href="#device-state-for-web-pages">Device state for web pages</a></li>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#core-api">Core-API</a></li>
+<li><a href="#integration-api">Integration API</a></li>
+</ul>
+<!-- TOC -->
+<hr>
+<p>A web view entity shows a web page on the Remote, for example the dashboard of a home automation system, a monitoring
+website or the status page of a device.</p>
+<p>Web view entities are either provided by an integration driver, e.g. a pre-configured dashboard of the integrated
+system, or defined by the user in the web-configurator. Both kinds use the same options.</p>
+<ul>
+<li>On a profile page the entity is shown as a tile. Tapping the tile opens the web page in a fullscreen web view. See
+<a href="#profile-page-tile">profile page tile</a>.</li>
+<li>In an activity user interface, the <a href="../ui-widgets.html#web-view">web view widget</a> shows the web page in the page grid.
+An activity can contain at most one web view widget, with a minimum size of 3 × 3 grid fields.</li>
+<li>The <a href="#commands">commands</a> of a web view entity work like the commands of other entities: in activity sequences,
+macros, button mappings, activity user interface items and from other systems with the Core-API, e.g. to open a
+dashboard with a button.</li>
+</ul>
+<p>The web page is rendered by the user interface of the Remote. The integration driver only provides the entity
+definition: the page is loaded directly from its web server, and the driver doesn’t receive any commands for a web view
+entity.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p><strong>Intended use: lightweight pages made for the Remote.</strong>
+The web view is not a replacement for a web browser. It is intended for simple, lightweight pages that are tailored
+to the Remote, e.g. a custom dashboard, a status or control page of a device, or a page made by an integration for
+the Remote.</p>
+<ul>
+<li>Design the page for the small portrait touch screen of the Remote: large touch targets, no hover effects, no
+horizontal scrolling.</li>
+<li>Keep it light: little JavaScript, few and small images, no ads or trackers. Prefer pages that are rendered on the
+server over large single-page applications.</li>
+<li>Update the page in reasonable intervals instead of polling or animating continuously.</li>
+</ul>
+<p>Memory, processing power and battery of the Remote are limited. Resource-intensive websites with heavy JavaScript
+frameworks, large media or many animations load slowly, react sluggishly, drain the battery and may be reloaded or
+stopped when the Remote runs low on memory. There is no address bar, no tabs, and only one web page is shown at a
+time. See <a href="#not-supported">not supported</a> for the features the web view doesn’t offer.</p>
+</blockquote>
+<h2 id="availability"><a class="header" href="#availability">Availability</a></h2>
+<p>A web view entity requires a Remote whose user interface can show web views. Not every user interface has a web view.</p>
+<ul>
+<li>The Core reports a web view entity as <code>UNAVAILABLE</code> while no user interface that executes web view commands is
+connected. See <a href="#states">states</a>.</li>
+<li>A Remote firmware which supports web view entities lists the <code>webview</code> entity type in the supported entity types
+(Integration-API <code>get_supported_entity_types</code>, WS Core-API <code>get_entity_types</code>).</li>
+</ul>
+<blockquote class="blockquote-tag blockquote-tag-warning">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p>
+<p><strong>Integration drivers must check the supported entity types before providing web view entities.</strong>
+A Remote with an older firmware doesn’t know the <code>webview</code> entity type and rejects the complete <code>available_entities</code>
+response if it contains a web view entity: none of the driver’s entities can then be configured.</p>
+<p>Only include web view entities in <code>available_entities</code> if the <code>supported_entity_types</code> response of the
+<code>get_supported_entity_types</code> request contains <code>webview</code>.</p>
+</blockquote>
+<h2 id="not-supported"><a class="header" href="#not-supported">Not supported</a></h2>
+<p>The following features are not supported by the web view of the Remote.</p>
+<p>Media:</p>
+<ul>
+<li>Audio and video: no playback of <code>audio</code> and <code>video</code> elements, Web Audio, streaming media (Media Source Extensions)
+and WebCodecs. This includes video streams, e.g. of cameras, and autoplay.</li>
+<li>WebRTC, and access to the camera and the microphone.</li>
+</ul>
+<p>Permissions:</p>
+<ul>
+<li>Location, notifications, camera and microphone: permission requests of a page are denied.</li>
+</ul>
+<p>Content and navigation:</p>
+<ul>
+<li>Downloads: files are not saved.</li>
+<li>PDF documents are not shown.</li>
+<li>Only <code>http</code> and <code>https</code> pages are loaded. Links with other schemes, e.g. <code>mailto:</code>, <code>tel:</code> or <code>file:</code>, are not
+opened.</li>
+<li>Pop-up windows: a link or a script which opens a new window opens the page in the same web view.</li>
+<li>The fullscreen mode of a page (Fullscreen API).</li>
+<li>Several pages at the same time: there are no tabs, and an activity contains at most one web view widget.</li>
+<li>Browser extensions and plugins, e.g. ad blockers.</li>
+</ul>
+<p>Logins and security:</p>
+<ul>
+<li>Client certificates (mutual TLS).</li>
+<li>Saving passwords and filling in forms automatically.</li>
+</ul>
+<p>Input:</p>
+<ul>
+<li>Pinch-to-zoom might not be available on all Remote models. Use the <code>zoom</code> option, or the <code>zoom_in</code> and <code>zoom_out</code>
+button functions, to scale a page.</li>
+</ul>
+<h2 id="features"><a class="header" href="#features">Features</a></h2>
+<p>The web view entity has no features.</p>
+<h3 id="attributes"><a class="header" href="#attributes">Attributes</a></h3>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Type</th><th>Values</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>state</td><td>enum</td><td><a href="#states">States</a></td><td>Optional state of the web view.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The URL and the title of the currently shown page are not entity attributes. They change with every navigation, can
+contain tokens in the query string and are only of interest to the user interface which shows the page.</p>
+<h3 id="states"><a class="header" href="#states">States</a></h3>
+<p>The web view entity only supports the <code>ON</code> state and the <a href="index.html#states">common entity states</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>ON</td><td>The web view can be shown.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>An integration driver may report the state of its web view entities like for any other entity, e.g. <code>UNAVAILABLE</code>
+if it knows that the web server of the integrated system is unreachable.</li>
+<li>The Core reports a web view as <code>UNAVAILABLE</code> while no user interface that executes web view commands is connected,
+e.g. while the user interface restarts. Commands are then refused with error code <code>503</code>.</li>
+<li>A web view from an integration driver doesn’t depend on the connection of the integration driver: the page is loaded
+directly from its web server.</li>
+</ul>
+<p>See <a href="index.html#states">common entity states</a>.</p>
+<h3 id="device-classes"><a class="header" href="#device-classes">Device Classes</a></h3>
+<p>None.</p>
+<h3 id="options"><a class="header" href="#options">Options</a></h3>
+<p>The options are grouped by topic. All options except <code>url</code> are optional.</p>
+<ul>
+<li>Origin: the scheme, host and port of the <code>url</code> option. Authentication, cookies and certificate exceptions only apply
+to this origin.</li>
+<li>Write-only: a secret option. Responses omit its value. See <a href="#secret-options">secret options</a>.</li>
+</ul>
+<h4 id="page"><a class="header" href="#page">Page</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>url</td><td>string</td><td>required</td><td>Start page of the web view. Absolute <code>http://</code> or <code>https://</code> URL, at most 2048 characters. User name and password in the URL (<code>https://user:password@host/</code>) are not allowed, use <code>auth</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Other URL schemes like <code>file:</code>, <code>data:</code> or <code>javascript:</code> are refused.</li>
+<li>Don’t put tokens or passwords in the query string of the URL. The URL is not a secret option: it is returned by the
+Core-API and included in backups. Use <code>auth</code> or <code>cookies</code> instead.</li>
+</ul>
+<h4 id="authentication"><a class="header" href="#authentication">Authentication</a></h4>
+<p>The <code>auth</code> object defines the credentials which the web view sends to the origin of the <code>url</code> option.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>auth.type</td><td>enum</td><td>none</td><td>Authentication method: <code>none</code>, <code>basic</code>, <code>bearer</code> or <code>header</code>.</td></tr>
+<tr><td>auth.username</td><td>string</td><td></td><td><code>basic</code>: user name, at most 256 characters. Required for <code>basic</code>.</td></tr>
+<tr><td>auth.password</td><td>string, write-only</td><td></td><td><code>basic</code>: password, at most 256 characters.</td></tr>
+<tr><td>auth.token</td><td>string, write-only</td><td></td><td><code>bearer</code>: token, sent as <code>Authorization: Bearer &lt;token&gt;</code>. At most 4096 characters.</td></tr>
+<tr><td>auth.header_name</td><td>string</td><td></td><td><code>header</code>: name of the HTTP request header, e.g. <code>X-API-Key</code>.</td></tr>
+<tr><td>auth.header_value</td><td>string, write-only</td><td></td><td><code>header</code>: value of the HTTP request header, e.g. an API key. At most 4096 characters.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The credentials are only sent to the origin of the <code>url</code> option. Requests to other origins, e.g. a CDN, an embedded
+page of another site or a redirect target on another host, never receive them.</li>
+<li><code>basic</code>: the user name and password are sent as answer to an HTTP authentication request (status <code>401</code>) of the origin.
+They are not sent with the first request: the first request is sent without credentials. After the server has
+accepted them, the web view keeps them for the session and sends them with the following requests to the same server
+and authentication realm without waiting for a <code>401</code>, like a browser does. The same credentials answer a Digest
+authentication request. The configured credentials never answer a proxy authentication request.
+<ul>
+<li>A changed user name or password isn’t used while the web view still sends credentials that the server accepted in
+this session. It is used at the latest after the user interface restarted.</li>
+<li><code>basic</code> without a user name is refused with error code <code>400</code>.</li>
+<li>If the server rejects the credentials, the fullscreen web view shows its login dialog. The
+<a href="#activity-widget">web view widget</a> shows no login dialog.</li>
+</ul>
+</li>
+<li><code>bearer</code> and <code>header</code>: the header is added to every HTTP request to the origin while the web view shows a page of the
+origin: the page, its resources like scripts, styles and images, and <code>fetch</code> / <code>XMLHttpRequest</code> calls. It is removed
+if a request is redirected to another origin.
+<ul>
+<li>WebSocket connections and requests of service workers don’t receive the header.</li>
+<li><code>header_name</code> must be a valid HTTP header name of at most 64 characters. The following headers can’t be set: <code>Host</code>,
+<code>Cookie</code>, <code>Cookie2</code>, <code>Content-Length</code>, <code>Content-Type</code>, <code>Connection</code>, <code>Keep-Alive</code>, <code>Transfer-Encoding</code>, <code>Upgrade</code>,
+<code>TE</code>, <code>Trailer</code>, <code>Expect</code>, <code>Origin</code>, <code>Referer</code>, <code>User-Agent</code>, and all headers starting with <code>Proxy-</code> or <code>Sec-</code>.</li>
+<li>The token and the header value must only contain visible ASCII characters, spaces and tabs, without a space or a
+tab at the start or the end. Other values are refused with error code <code>400</code>.</li>
+</ul>
+</li>
+<li>With an <code>http://</code> URL the page and the credentials are sent unencrypted. The web-configurator shows a note at an
+<code>http://</code> URL.</li>
+<li>If <code>auth.type</code> changes, the secret options of the previous type are removed.</li>
+</ul>
+<h4 id="tls-certificates"><a class="header" href="#tls-certificates">TLS certificates</a></h4>
+<p>By default, a page with an invalid TLS certificate, e.g. a self-signed certificate, an expired certificate or a
+certificate of an unknown certificate authority, isn’t loaded: the web view shows an error message. The <code>tls</code> object
+allows an exception for the host of the <code>url</code> option. Certificate errors of all hosts can only be ignored with the
+global setting <a href="#allow-invalid-tls-certificates-for-all-web-views">allow invalid TLS certificates for all web views</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>tls.certificate_sha256</td><td>string</td><td></td><td>SHA-256 fingerprint of the expected server certificate: 64 hexadecimal digits, optionally separated by <code>:</code>, case-insensitive. An invalid certificate is accepted if its fingerprint matches.</td></tr>
+<tr><td>tls.allow_invalid_certificate</td><td>boolean</td><td>false</td><td>Accept any invalid certificate of the host. Only used if <code>certificate_sha256</code> is not set.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The exception only applies to page loads from the host of the <code>url</code> option. Resources and embedded pages from other
+hosts with an invalid certificate are not loaded.</li>
+<li>The fingerprint is calculated over the DER-encoded leaf certificate, e.g. with
+<code>openssl x509 -in cert.pem -noout -fingerprint -sha256</code>.</li>
+<li>The fingerprint is only checked if the certificate is invalid. A valid certificate is always accepted.</li>
+<li><code>certificate_sha256</code> is the recommended option: it only accepts the expected certificate. With
+<code>allow_invalid_certificate</code>, any certificate presented for the host is accepted, which allows a man-in-the-middle
+attack on that host.</li>
+<li>A renewed self-signed certificate has a new fingerprint. The web view then shows an error message until the
+fingerprint is updated.</li>
+<li>All web views share their <a href="#website-data">website data</a>: a certificate accepted for one web view is also accepted by
+the other web views.</li>
+<li>An accepted certificate stays accepted until the user interface restarts, also if the <code>tls</code> option is changed or
+removed, or the website data is cleared.</li>
+<li>The global setting <a href="#allow-invalid-tls-certificates-for-all-web-views">allow invalid TLS certificates for all web views</a>
+overrides the <code>tls</code> options: if it is enabled, every web view accepts invalid certificates of all hosts.</li>
+</ul>
+<h4 id="cookies"><a class="header" href="#cookies">Cookies</a></h4>
+<p>The <code>cookies</code> list sets cookies before the start page is loaded, e.g. a session cookie or a layout preference of the
+page. At most 20 cookies.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>cookies[].name</td><td>string</td><td>required</td><td>Cookie name, an RFC 6265 token of at most 256 characters.</td></tr>
+<tr><td>cookies[].value</td><td>string, write-only</td><td>required</td><td>Cookie value, at most 4096 characters. A valid cookie value according to RFC 6265: visible ASCII characters without <code>"</code>, <code>,</code>, <code>;</code> and <code>\</code>, optionally in double quotes.</td></tr>
+<tr><td>cookies[].domain</td><td>string</td><td>host of <code>url</code></td><td>Domain of the cookie: the host of the <code>url</code> option or a parent domain of it, at most 255 characters. If not set, the cookie is only sent to the host of <code>url</code> (host-only cookie).</td></tr>
+<tr><td>cookies[].path</td><td>string</td><td><code>/</code></td><td>Path of the cookie, at most 1024 characters. Starts with <code>/</code>, ASCII characters without <code>;</code> and control characters.</td></tr>
+<tr><td>cookies[].secure</td><td>boolean</td><td>true for an <code>https://</code> URL</td><td>Only send the cookie over HTTPS.</td></tr>
+<tr><td>cookies[].http_only</td><td>boolean</td><td>false</td><td>Hide the cookie from scripts of the page.</td></tr>
+<tr><td>cookies[].expires</td><td>string</td><td></td><td>Expiry date in <a href="https://www.rfc-editor.org/rfc/rfc3339">RFC 3339</a> format, e.g. <code>2027-01-01T00:00:00Z</code>. If not set, the cookie is a session cookie.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The cookies are set each time the web view is opened, before the start page is loaded. A cookie which has been
+changed or deleted by the page is set to the configured value again the next time the web view is opened.</li>
+<li>A cookie with a <code>domain</code> outside of the host of the <code>url</code> option, or a top-level domain like <code>com</code>, is refused with
+error code <code>400</code>, like a cookie with an invalid name, value or path.</li>
+<li>A <code>domain</code> which is a public suffix with more than one label, like <code>co.uk</code>, is not refused, but the web view then
+doesn’t set any of the configured cookies. The page is then loaded without them.</li>
+<li>Cookies set by the page, e.g. after a login, are kept like the other <a href="#website-data">website data</a>.</li>
+</ul>
+<h4 id="display"><a class="header" href="#display">Display</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>zoom</td><td>integer</td><td>100</td><td>Page zoom in percent: 25..400. The page is laid out for the zoomed size, e.g. 60 to show a dashboard made for tablets.</td></tr>
+<tr><td>background_color</td><td>string</td><td><code>#FFFFFF</code></td><td>Background color while the page is loading and behind transparent pages, as <code>#RRGGBB</code>. If not set, white <code>#FFFFFF</code> is used.</td></tr>
+<tr><td>user_agent</td><td>string</td><td>default</td><td><code>default</code>: the user agent of the Remote, which identifies the Remote and its firmware version. <code>mobile</code> or <code>desktop</code>: the user agent of a common mobile or desktop browser, e.g. to get the mobile or the desktop layout of a page. Any other value: a custom user agent string, at most 256 visible ASCII characters and spaces.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><code>user_agent</code> is sent in the <code>User-Agent</code> header of every request of the web view, and returned to scripts of the page
+in <code>navigator.userAgent</code>.</li>
+<li>A custom user agent with other characters, e.g. non-ASCII characters, is refused with error code <code>400</code>.</li>
+<li>A change of the <code>url</code>, <code>auth</code>, <code>tls</code>, <code>cookies</code> or <code>user_agent</code> option loads the start page of a shown web view
+again.</li>
+</ul>
+<h4 id="navigation"><a class="header" href="#navigation">Navigation</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>show_navigation</td><td>boolean</td><td>false</td><td>Show back, forward, reload and close controls in the fullscreen web view. Not shown in a widget.</td></tr>
+</tbody>
+</table>
+</div>
+<h4 id="lifecycle"><a class="header" href="#lifecycle">Lifecycle</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>reload_interval</td><td>integer</td><td>0</td><td>Reload the page every n seconds while it is shown: 0 = off, otherwise 10..86400.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The page is loaded when the web view is shown and unloaded when it’s closed: the fullscreen web view when it’s
+closed, a widget when its activity user interface page is left.</li>
+<li>A reload ends open dialogs of the page.</li>
+<li>The reload interval stops while the web view is hidden or the display is off, and starts again with the full
+interval when the page is shown again.</li>
+<li>While the display is off, the page is hidden and throttled, see <a href="#hidden-pages">hidden pages</a>.</li>
+</ul>
+<h4 id="device-state"><a class="header" href="#device-state">Device state</a></h4>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>device_api</td><td>boolean</td><td>false</td><td>Enable the device state API for all top-level pages of the web view: <code>navigator.getBattery()</code>, the <code>freeze</code> and <code>resume</code> events on <code>document</code>, and <code>window.deviceHost</code>. See <a href="#device-state-for-web-pages">device state for web pages</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Every top-level page of the web view gets the API, also a page of another site which the web view navigates to. Every
+such page can read the battery state of the Remote and when it goes into standby. Only enable the option for pages
+which use it.</li>
+</ul>
+<h4 id="buttons"><a class="header" href="#buttons">Buttons</a></h4>
+<p>The <code>buttons</code> object changes the function of single physical buttons in the <a href="#fullscreen-web-view">fullscreen web view</a>,
+e.g. to send the CHANNEL buttons as key events to a page which handles them itself, or to keep the button mapping of
+the activity for VOLUME up and down.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>buttons</td><td>object</td><td></td><td>An action per button identifier, for the buttons which this web view sets. The other buttons have the action of the <a href="#global-web-view-settings">global setting</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-json">{
+  "buttons": {
+    "BACK": { "action": "function", "function": "back_or_close" },
+    "VOLUME_UP": { "action": "pass" },
+    "VOLUME_DOWN": { "action": "pass" },
+    "CHANNEL_UP": { "action": "key", "key": "ChannelUp" },
+    "CHANNEL_DOWN": { "action": "key", "key": "ChannelDown" }
+  }
+}
+</code></pre>
+<p>The key is the identifier of the physical button, the same as in the button mapping of an activity:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Buttons</th><th>Remote model</th></tr>
+</thead>
+<tbody>
+<tr><td><code>BACK</code>, <code>DPAD_UP</code>, <code>DPAD_DOWN</code>, <code>DPAD_LEFT</code>, <code>DPAD_RIGHT</code>, <code>DPAD_MIDDLE</code>, <code>VOLUME_UP</code>, <code>VOLUME_DOWN</code>, <code>CHANNEL_UP</code>, <code>CHANNEL_DOWN</code>, <code>MUTE</code>, <code>PREV</code>, <code>PLAY</code>, <code>NEXT</code></td><td>All</td></tr>
+<tr><td><code>STOP</code>, <code>RECORD</code>, <code>MENU</code></td><td>Remote 3</td></tr>
+<tr><td><code>RED</code>, <code>GREEN</code>, <code>YELLOW</code>, <code>BLUE</code></td><td>Remote Two</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><code>HOME</code>, <code>POWER</code> and <code>VOICE</code> have a fixed function and can’t be changed: HOME always closes the web view, together
+with the activity or other screen it was opened on top of, and returns to the current profile page. POWER and VOICE
+keep their normal function.</li>
+<li>Only the buttons of the Remote model can be set, like in the button mapping of an activity. A button which the model
+doesn’t have, e.g. <code>MENU</code> on a Remote Two, a button with a fixed function or an unknown button is refused with error
+code <code>400</code> (<code>VALIDATION_ERROR</code>) with the field <code>options.buttons.&lt;button&gt;</code> and the code <code>INVALID</code>.</li>
+<li>In the entity definition of an integration driver, the buttons which the Remote model doesn’t have are ignored: a
+driver can use the same definition for all models.</li>
+<li>A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+activities: the buttons which the model doesn’t have are removed, also from the user overrides.</li>
+<li>The buttons only apply to the fullscreen web view. In the <a href="#activity-widget">web view widget</a>, the buttons keep the
+button mapping of the activity.</li>
+</ul>
+<p>The value is an object with the <code>action</code> of the button:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>action</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>pass</td><td>The button keeps its function in the layer below the web view: the button mapping of the activity if the web view is shown on top of an activity, otherwise the function of the button on the screen below, e.g. the normal volume handling of the Remote on a profile page.</td></tr>
+<tr><td>function</td><td>The web view function in <code>function</code>, see below.</td></tr>
+<tr><td>key</td><td>The key event in <code>key</code> is sent to the page, see below.</td></tr>
+</tbody>
+</table>
+</div>
+<p><code>function</code> is required for the <code>function</code> action and not allowed otherwise. <code>key</code> is required for the <code>key</code> action
+and not allowed otherwise.</p>
+<p>Web view functions:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>function</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>zoom_in, zoom_out</td><td>Zoom the page in or out by one step: 50, 67, 75, 80, 90, 100, 110, 125, 150, 175, 200, 250 and 300 %. The zoom starts at the effective <code>zoom</code> option of the entity. The changed zoom only applies until the web view is closed: it isn’t saved to the entity. No effect while a dialog or the on-screen keyboard is open.</td></tr>
+<tr><td>zoom_reset</td><td>Zoom back to the effective <code>zoom</code> option of the entity.</td></tr>
+<tr><td>scroll_up, scroll_down</td><td>Scroll the page up or down by a small step.</td></tr>
+<tr><td>page_up, page_down</td><td>Scroll the page up or down by one screen, like the <code>PageUp</code> and <code>PageDown</code> keys. In a focused text field, they move the cursor.</td></tr>
+<tr><td>top, bottom</td><td>Scroll to the top or the bottom of the page, like the <code>Home</code> and <code>End</code> keys. In a focused text field, they move the cursor.</td></tr>
+<tr><td>back, forward</td><td>Go back or forward in the history of the web view.</td></tr>
+<tr><td>back_or_close</td><td>Go back in the history, or close the web view on its first page.</td></tr>
+<tr><td>reload</td><td>Reload the page.</td></tr>
+<tr><td>stop</td><td>Stop loading the page.</td></tr>
+<tr><td>close</td><td>Close the web view and return to the previous screen.</td></tr>
+<tr><td>toggle_navigation</td><td>Show or hide the navigation controls, see <code>show_navigation</code>. The change isn’t saved to the entity.</td></tr>
+<tr><td>focus_next, focus_previous</td><td>Move the focus to the next or the previous element of the page, like <code>Tab</code> and <code>Shift+Tab</code> on a keyboard.</td></tr>
+<tr><td>none</td><td>The button does nothing.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Keys: the <code>KeyboardEvent.key</code> values of the <a href="https://www.w3.org/TR/uievents-key/">UI Events key values</a> <code>ArrowUp</code>,
+<code>ArrowDown</code>, <code>ArrowLeft</code>, <code>ArrowRight</code>, <code>Enter</code>, <code>Escape</code>, <code>Backspace</code>, <code>Tab</code>, <code>PageUp</code>, <code>PageDown</code>, <code>Home</code>, <code>End</code>,
+<code>ContextMenu</code>, <code>BrowserBack</code>, <code>BrowserForward</code>, <code>BrowserRefresh</code>, <code>BrowserStop</code>, <code>Exit</code>, <code>AudioVolumeUp</code>,
+<code>AudioVolumeDown</code>, <code>AudioVolumeMute</code>, <code>ChannelUp</code>, <code>ChannelDown</code>, <code>MediaPlayPause</code>, <code>MediaPlay</code>, <code>MediaPause</code>,
+<code>MediaStop</code>, <code>MediaRecord</code>, <code>MediaRewind</code>, <code>MediaFastForward</code>, <code>MediaTrackPrevious</code>, <code>MediaTrackNext</code>, <code>ColorF0Red</code>,
+<code>ColorF1Green</code>, <code>ColorF2Yellow</code> and <code>ColorF3Blue</code>.</p>
+<ul>
+<li>The page receives a real key event with this <code>key</code>, like from a keyboard. Its <code>code</code> is the
+<a href="https://www.w3.org/TR/uievents-code/">UI Events code value</a> of the corresponding keyboard key where one exists,
+otherwise <code>Unidentified</code>: for <code>Exit</code>, <code>ChannelUp</code>, <code>ChannelDown</code>, <code>MediaPlay</code>, <code>MediaPause</code>, <code>MediaRecord</code>,
+<code>MediaRewind</code>, <code>MediaFastForward</code> and the color keys <code>ColorF0Red</code> to <code>ColorF3Blue</code>.</li>
+<li>Any button can send any of these keys, e.g. <code>ColorF0Red</code> from the PLAY button.</li>
+</ul>
+<p>Held buttons:</p>
+<ul>
+<li>A held button repeats key events and the functions <code>scroll_up</code>, <code>scroll_down</code>, <code>page_up</code> and <code>page_down</code>.</li>
+<li>All other functions act once per press, e.g. a held VOLUME up zooms in by one step.</li>
+<li>A <code>pass</code> button behaves like in the layer below.</li>
+</ul>
+<p>The action of a button is taken from the first of:</p>
+<ol>
+<li>the <a href="#user-overrides">user override</a> in <code>options.user.buttons</code>, only for a web view from an integration driver,</li>
+<li>the <code>buttons</code> option of the web view,</li>
+<li>the <a href="#global-web-view-settings">global web view setting</a> <code>buttons</code>, which contains the default actions.</li>
+</ol>
+<p>Default actions, if neither the global setting nor the web view changes a button:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Button</th><th>Default action</th></tr>
+</thead>
+<tbody>
+<tr><td><code>DPAD_UP</code>, <code>DPAD_DOWN</code>, <code>DPAD_LEFT</code>, <code>DPAD_RIGHT</code></td><td>key <code>ArrowUp</code>, <code>ArrowDown</code>, <code>ArrowLeft</code>, <code>ArrowRight</code></td></tr>
+<tr><td><code>DPAD_MIDDLE</code></td><td>key <code>Enter</code></td></tr>
+<tr><td><code>BACK</code></td><td>function <code>close</code></td></tr>
+<tr><td><code>VOLUME_UP</code>, <code>VOLUME_DOWN</code></td><td>function <code>zoom_in</code>, <code>zoom_out</code></td></tr>
+<tr><td><code>CHANNEL_UP</code>, <code>CHANNEL_DOWN</code></td><td>function <code>page_up</code>, <code>page_down</code></td></tr>
+<tr><td><code>MENU</code></td><td>key <code>ContextMenu</code></td></tr>
+<tr><td>All other buttons</td><td><code>pass</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>Updating the buttons of a user-defined web view with the Core-API: <code>buttons</code> is merged button by button with the
+stored buttons. An action sets a button, <code>null</code> removes it and the global setting applies again. <code>null</code> instead of the
+object removes all buttons.</p>
+<p>To set several buttons at once, a client can apply a <a href="#button-presets">button preset</a>.</p>
+<h3 id="secret-options"><a class="header" href="#secret-options">Secret options</a></h3>
+<p>The following options are secrets. They are part of the entity options: an integration driver sets them in the entity
+definition, the user with the Core-API.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Option</th><th>Flag in responses</th></tr>
+</thead>
+<tbody>
+<tr><td>auth.password</td><td>auth.has_password</td></tr>
+<tr><td>auth.token</td><td>auth.has_token</td></tr>
+<tr><td>auth.header_value</td><td>auth.has_header_value</td></tr>
+<tr><td>cookies[].value</td><td>cookies[].has_value</td></tr>
+</tbody>
+</table>
+</div>
+<p>The Remote protects the secret values with one central rule:</p>
+<ul>
+<li><strong>Responses:</strong> every Core-API response omits the secret values and contains the flag instead, which tells whether
+the secret is set. This applies to all responses with entity data, e.g. <code>GET /api/entities</code>,
+<code>GET /api/entities/{entityId}</code>, <code>GET /api/webviews</code>, the available entities of an integration, and the WS messages
+<code>get_entity</code>, <code>get_entities</code> and <code>get_webviews</code>. It applies to every session, including <code>admin</code> sessions like the
+web-configurator, and API keys with the <code>remote-ui</code> scope, which is a regular scope that can be assigned to any API
+key.</li>
+<li><strong>Only exception:</strong> the WebSocket session authenticated with the access token that the Core generates at startup for
+the locally installed user interface app. This session receives the secret values in the <code>get_entity</code> and
+<code>get_entities</code> responses, since the user interface needs them to load the page.</li>
+<li><strong>Events:</strong> <code>entity_change</code> and all other events never contain secret values, for any session. If the options of a
+web view change, the <code>entity_change</code> event contains the entity without the secret values. The user interface then
+reloads the entity with <code>get_entity</code>.</li>
+<li>The Remote never writes secret values to its log.</li>
+</ul>
+<p>Updating a user-defined web view with the Core-API:</p>
+<ul>
+<li>A missing <code>auth</code> secret keeps the stored value, as long as <code>auth.type</code> doesn’t change.</li>
+<li>An empty string removes the stored <code>auth</code> secret.</li>
+<li>If <code>auth.type</code> changes, the secrets of the previous type are removed. <code>auth.type: none</code> removes all credentials.</li>
+<li>The <code>cookies</code> list replaces the stored list. A cookie without <code>value</code> keeps the stored value of the cookie with the
+same <code>name</code>, <code>domain</code> and <code>path</code>. A new cookie without <code>value</code>, or a cookie with an empty <code>value</code>, is refused with
+error code <code>400</code>.</li>
+</ul>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>A backup of the Remote contains the stored secret values of the web views: passwords, tokens, header values and
+cookie values. Keep backup files private.</p>
+</blockquote>
+<h3 id="user-overrides"><a class="header" href="#user-overrides">User overrides</a></h3>
+<p>The following options of a web view from an integration driver can be overridden by the user in the web-configurator.
+See <a href="README.html#user-overrides">user overrides</a>.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>zoom</td><td>Page zoom in percent.</td></tr>
+<tr><td>reload_interval</td><td>Reload interval in seconds.</td></tr>
+<tr><td>show_navigation</td><td>Navigation controls in the fullscreen web view.</td></tr>
+<tr><td>buttons</td><td>Function of single buttons, see <a href="#buttons">buttons</a>.</td></tr>
+<tr><td>device_api</td><td>Device state API, see <a href="#device-state">device state</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The URL, authentication, TLS, cookie and user agent options can’t be overridden: they belong to the integration
+driver. Any other option in <code>options.user</code> is refused with error code <code>400</code>.</li>
+<li><code>null</code> removes an override: the option of the integration driver applies again.</li>
+<li><code>buttons</code> is merged button by button: an override of a button replaces the action of the driver for this button,
+<code>null</code> removes the override. <code>null</code> instead of the object removes all button overrides. A button which the Remote
+model doesn’t have, a button with a fixed function or an unknown button is refused with error code <code>400</code> with the
+field <code>options.user.buttons.&lt;button&gt;</code>.</li>
+<li>A user-defined web view has no user overrides: its options are changed directly. An option in <code>options.user</code> is
+refused with error code <code>400</code>.</li>
+</ul>
+<h2 id="global-web-view-settings"><a class="header" href="#global-web-view-settings">Global web view settings</a></h2>
+<p>The global web view settings apply to all web views on the Remote: user-defined web views and web views from
+integration drivers. They are system settings, not entity options. They are changed on the Remote in Settings → Web
+view, or by an administrator in the web-configurator or with the Core-API. The settings page on the Remote also has
+buttons to clear the cache and the website data.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Default</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>allow_invalid_certificates</td><td>boolean</td><td>false</td><td>Allow invalid TLS certificates for all web views. See <a href="#allow-invalid-tls-certificates-for-all-web-views">below</a>.</td></tr>
+<tr><td>color_scheme</td><td>enum</td><td>dark</td><td>Color scheme for the pages: <code>light</code> or <code>dark</code>. See <a href="#color-scheme">color scheme</a>.</td></tr>
+<tr><td>website_data</td><td>enum</td><td>keep</td><td>What happens with the website data when a web view is closed: <code>keep</code>, <code>clear_cache_on_close</code> or <code>clear_all_on_close</code>. See <a href="#website-data">website data</a>.</td></tr>
+<tr><td>buttons</td><td>object</td><td></td><td>Function of the physical buttons in the fullscreen web view. See <a href="#button-settings">button settings</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Core-API:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>REST Core-API</th><th>WebSocket Core-API</th></tr>
+</thead>
+<tbody>
+<tr><td>Get the settings</td><td><code>GET /api/cfg/webview</code></td><td><code>get_webview_cfg</code></td></tr>
+<tr><td>Change one or more settings</td><td><code>PATCH /api/cfg/webview</code></td><td><code>set_webview_cfg</code></td></tr>
+<tr><td>Get the button presets</td><td><code>GET /api/cfg/webview/button_presets</code></td><td><code>get_webview_button_presets</code></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The settings are part of all system settings in <code>GET /api/cfg</code> and <code>get_configuration</code>, and are reset to the default
+values with <code>DELETE /api/cfg</code> and <code>reset_configuration</code>.</li>
+<li>A change is reported with the <code>configuration_change</code> event.</li>
+<li>Changing the settings requires the <code>admin</code> scope. Other API keys are refused with error code <code>403</code>.</li>
+</ul>
+<h3 id="button-settings"><a class="header" href="#button-settings">Button settings</a></h3>
+<p><code>buttons</code> defines the function of the physical buttons in the <a href="#fullscreen-web-view">fullscreen web view</a> for all web
+views: an action per button identifier, in the same format as the <a href="#buttons">buttons</a> option of a web view. A web view
+can change single buttons with its <code>buttons</code> option.</p>
+<ul>
+<li>The settings contain every button of the Remote model which can be changed, with its configured action or its
+<a href="#buttons">default action</a>.</li>
+<li>A change is merged button by button: a button which is not in the request keeps its action, an action replaces the
+action of the button, <code>null</code> resets the button to its default action.</li>
+<li>Only the buttons of the Remote model can be changed. A button which the model doesn’t have, e.g. <code>MENU</code> on a Remote
+Two, a button with a fixed function (<code>HOME</code>, <code>POWER</code>, <code>VOICE</code>) or an unknown button is refused with error code <code>400</code>
+(<code>VALIDATION_ERROR</code>) with the field <code>buttons.&lt;button&gt;</code> and the code <code>INVALID</code>.</li>
+<li>A backup of another Remote model only restores the buttons of the Remote model, like the button mappings of
+activities: the buttons which the model doesn’t have are removed.</li>
+</ul>
+<p>Keep the button mapping of the activity for VOLUME up and down, and reset BACK to its default action
+(<code>PATCH /api/cfg/webview</code>):</p>
+<pre><code class="language-json">{
+  "buttons": {
+    "VOLUME_UP": { "action": "pass" },
+    "VOLUME_DOWN": { "action": "pass" },
+    "BACK": null
+  }
+}
+</code></pre>
+<h3 id="button-presets"><a class="header" href="#button-presets">Button presets</a></h3>
+<p>A button preset sets several buttons at once, e.g. all buttons for a page which handles the buttons of the Remote
+itself. The presets of the Remote model are read with <code>GET /api/cfg/webview/button_presets</code> or
+<code>get_webview_button_presets</code>, also without the <code>admin</code> scope.</p>
+<ul>
+<li>A preset has an <code>id</code> and the <code>buttons</code> it covers, in the format of the <a href="#buttons">buttons</a> option. It only contains
+the buttons of the Remote model, e.g. <code>STOP</code> only on a Remote 3 and the color buttons only on a Remote Two. <code>HOME</code>,
+<code>POWER</code> and <code>VOICE</code> are never part of a preset.</li>
+<li>There is no operation to apply a preset. A client sends the <code>buttons</code> of the preset with an existing button update:
+the <a href="#button-settings">global setting</a> <code>buttons</code>, the <code>buttons</code> option of a user-defined web view or the
+<a href="#user-overrides">user override</a> <code>options.user.buttons</code> of a web view from an integration driver. Only the buttons of
+the preset change, every other button keeps its action.</li>
+<li>A client must ignore a preset with an unknown <code>id</code>: more presets can be added. The Core-API has no names for the
+presets: a client names them itself.</li>
+</ul>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Button</th><th><code>web_view_functions</code></th><th><code>page_keys</code></th></tr>
+</thead>
+<tbody>
+<tr><td><code>DPAD_UP</code>, <code>DPAD_DOWN</code>, <code>DPAD_LEFT</code>, <code>DPAD_RIGHT</code></td><td>–</td><td>key <code>ArrowUp</code>, <code>ArrowDown</code>, <code>ArrowLeft</code>, <code>ArrowRight</code></td></tr>
+<tr><td><code>DPAD_MIDDLE</code></td><td>–</td><td>key <code>Enter</code></td></tr>
+<tr><td><code>BACK</code></td><td>function <code>back_or_close</code></td><td>key <code>Escape</code></td></tr>
+<tr><td><code>VOLUME_UP</code>, <code>VOLUME_DOWN</code></td><td>function <code>zoom_in</code>, <code>zoom_out</code></td><td>key <code>AudioVolumeUp</code>, <code>AudioVolumeDown</code></td></tr>
+<tr><td><code>MUTE</code></td><td>function <code>zoom_reset</code></td><td>key <code>AudioVolumeMute</code></td></tr>
+<tr><td><code>CHANNEL_UP</code>, <code>CHANNEL_DOWN</code></td><td>function <code>page_up</code>, <code>page_down</code></td><td>key <code>ChannelUp</code>, <code>ChannelDown</code></td></tr>
+<tr><td><code>PREV</code>, <code>NEXT</code></td><td>function <code>back</code>, <code>forward</code></td><td>key <code>MediaTrackPrevious</code>, <code>MediaTrackNext</code></td></tr>
+<tr><td><code>PLAY</code></td><td>function <code>reload</code></td><td>key <code>MediaPlayPause</code></td></tr>
+<tr><td><code>STOP</code></td><td>function <code>stop</code></td><td>key <code>MediaStop</code></td></tr>
+<tr><td><code>RECORD</code></td><td>–</td><td>key <code>MediaRecord</code></td></tr>
+<tr><td><code>MENU</code></td><td>function <code>toggle_navigation</code></td><td>key <code>ContextMenu</code></td></tr>
+<tr><td><code>RED</code>, <code>GREEN</code>, <code>YELLOW</code>, <code>BLUE</code></td><td>–</td><td>key <code>ColorF0Red</code>, <code>ColorF1Green</code>, <code>ColorF2Yellow</code>, <code>ColorF3Blue</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>–: the button is not part of the preset and keeps its action.</p>
+<p>Presets on a Remote Two, shortened:</p>
+<pre><code class="language-json">[
+  {
+    "id": "web_view_functions",
+    "buttons": {
+      "BACK": { "action": "function", "function": "back_or_close" },
+      "VOLUME_UP": { "action": "function", "function": "zoom_in" },
+      "VOLUME_DOWN": { "action": "function", "function": "zoom_out" }
+    }
+  },
+  {
+    "id": "page_keys",
+    "buttons": {
+      "DPAD_MIDDLE": { "action": "key", "key": "Enter" },
+      "BACK": { "action": "key", "key": "Escape" },
+      "RED": { "action": "key", "key": "ColorF0Red" }
+    }
+  }
+]
+</code></pre>
+<h3 id="allow-invalid-tls-certificates-for-all-web-views"><a class="header" href="#allow-invalid-tls-certificates-for-all-web-views">Allow invalid TLS certificates for all web views</a></h3>
+<p>With <code>allow_invalid_certificates</code> enabled, every web view accepts invalid TLS certificates of all hosts: self-signed
+certificates, expired certificates, certificates of an unknown certificate authority and certificates for another host
+name. It overrides the <a href="#tls-certificates"><code>tls</code> options</a> of every web view entity, user-defined and from integration
+drivers.</p>
+<blockquote class="blockquote-tag blockquote-tag-warning">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M6.457 1.047c.659-1.234 2.427-1.234 3.086 0l6.082 11.378A1.75 1.75 0 0 1 14.082 15H1.918a1.75 1.75 0 0 1-1.543-2.575Zm1.763.707a.25.25 0 0 0-.44 0L1.698 13.132a.25.25 0 0 0 .22.368h12.164a.25.25 0 0 0 .22-.368Zm.53 3.996v2.5a.75.75 0 0 1-1.5 0v-2.5a.75.75 0 0 1 1.5 0ZM9 11a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"></path></svg>Warning</p>
+<p>This turns off the certificate check for every page and every resource loaded by any web view, including third-party
+hosts like content delivery networks, embedded pages and redirect targets. A man-in-the-middle attack on any of these
+connections is not detected, and the credentials and cookies of the web views can be intercepted.</p>
+<p>The setting applies to the whole Remote. Prefer the <code>tls</code> option of a web view entity: it only applies to the host
+of its <code>url</code> option, and with <code>certificate_sha256</code> only to the expected certificate.</p>
+</blockquote>
+<ul>
+<li>The setting applies to new connections. Shown pages are not reloaded.</li>
+</ul>
+<h3 id="color-scheme"><a class="header" href="#color-scheme">Color scheme</a></h3>
+<p><code>color_scheme</code> sets the CSS media feature <code>prefers-color-scheme</code> for all web views: <code>light</code> or <code>dark</code>. Default: <code>dark</code>.</p>
+<ul>
+<li>A page can query it, e.g. a dashboard with a light and a dark theme shows the matching theme.</li>
+<li>Only pages which support <code>prefers-color-scheme</code>, or declare the CSS property <code>color-scheme</code>, react to it. It doesn’t
+force a theme onto other pages, and it’s not sent as an HTTP header.</li>
+</ul>
+<h3 id="website-data"><a class="header" href="#website-data">Website data</a></h3>
+<p>All web views on the Remote share their website data: cookies, the HTTP cache, local storage, IndexedDB and service
+workers.</p>
+<ul>
+<li>A login in one web view also applies to the other web views of the same site.</li>
+<li>With <code>website_data: keep</code>, the website data is kept across restarts of the user interface and the Remote. A cookie
+login made by the user in a web view stays valid, as long as the web server accepts it. Session cookies, i.e.
+cookies without an expiry date, end when the user interface restarts.</li>
+<li>Credentials entered in a login dialog of a web view are kept until the user interface restarts. Credentials
+configured in the <code>auth</code> option of a web view entity are sent again automatically.</li>
+<li>Clearing website data, with the <code>website_data</code> setting, the clear buttons in the web view settings of the Remote, or
+the <code>clear_cache</code> and <code>clear_data</code> <a href="#commands">commands</a>, affects all web views.</li>
+</ul>
+<p><code>website_data</code> defines what happens with the website data when a web view is closed: when the fullscreen web view is
+closed, or when the activity user interface page with the web view widget is left.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Value</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>keep</td><td>Default. The website data is kept, also across restarts of the user interface and the Remote.</td></tr>
+<tr><td>clear_cache_on_close</td><td>The HTTP cache is cleared whenever a web view is closed.</td></tr>
+<tr><td>clear_all_on_close</td><td>All website data is cleared whenever a web view is closed. Pages which rely on a cookie login ask to log in again. Credentials entered in a login dialog are kept until the user interface restarts. The configured credentials and cookies of a web view entity are sent again automatically.</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="user-interface"><a class="header" href="#user-interface">User interface</a></h2>
+<h3 id="profile-page-tile"><a class="header" href="#profile-page-tile">Profile page tile</a></h3>
+<p>A web view entity can be added to a profile page like any other entity. The tile shows the icon and the name of the
+entity. Tapping the tile opens the <a href="#fullscreen-web-view">fullscreen web view</a>. The page is not loaded until the tile is
+tapped.</p>
+<h3 id="fullscreen-web-view"><a class="header" href="#fullscreen-web-view">Fullscreen web view</a></h3>
+<p>The fullscreen web view covers the whole screen. It is opened by tapping a profile page tile, by the <code>open</code>
+<a href="#commands">command</a>, e.g. from an icon on an activity user interface page, by tapping a web view widget which is not
+interactive, or from the list of included entities of an activity.</p>
+<ul>
+<li>With the <code>show_navigation</code> option, the web view shows controls to go back, go forward, reload the page and close the
+web view.</li>
+<li>Button handling, also on top of an activity screen:
+<ul>
+<li>HOME closes the web view, together with the activity screen or other screen below it, and returns to the current
+profile page.</li>
+<li>POWER and VOICE keep their normal function.</li>
+<li>All other buttons have the action of the <a href="#buttons">buttons</a> option of the web view and the
+<a href="#button-settings">global button settings</a>. By default, BACK closes the web view, the D-pad sends the arrow keys
+and OK the <code>Enter</code> key to the page, VOLUME up and down zoom the page in and out, CHANNEL up and down scroll the
+page by one screen, and MENU sends the <code>ContextMenu</code> key. The other buttons keep their function, e.g. MUTE, PREV,
+PLAY, NEXT and the color buttons keep the button mapping of the active activity.</li>
+<li>While the on-screen keyboard is shown, the D-pad and OK are sent to the text field of the page.</li>
+<li>While a page couldn’t be loaded, OK loads it again.</li>
+</ul>
+</li>
+<li>HTTP login requests of the page without configured credentials, and <code>alert</code>, <code>confirm</code> and <code>prompt</code> dialogs of the
+page, are shown as dialogs of the UI. While a dialog is shown, BACK and HOME close the dialog, and the other buttons
+have no effect.</li>
+<li>While the web view entity is unavailable, the web view shows a message instead of the page. Its tile doesn’t open it.</li>
+</ul>
+<h3 id="activity-widget"><a class="header" href="#activity-widget">Activity widget</a></h3>
+<p>The <a href="../ui-widgets.html#web-view">web view widget</a> shows the web page in an activity user interface page:</p>
+<ul>
+<li>The web view entity must be an included entity of the activity.</li>
+<li>At most one web view widget per activity, over all pages.</li>
+<li>Minimum size: 3 × 3 grid fields.</li>
+<li>Not available in the user interface of a remote entity.</li>
+</ul>
+<p>The UI shows one web page at a time: while a fullscreen web view is open, the page of a widget is unloaded and loaded
+again afterwards.</p>
+<p>The widget shows no dialogs: <code>alert</code>, <code>confirm</code> and <code>prompt</code> dialogs of the page are answered with cancel. An HTTP
+login request without configured credentials, or after rejected credentials, is answered without credentials: the
+widget shows the error page of the server. Open the web view fullscreen to log in.</p>
+<h2 id="device-state-for-web-pages"><a class="header" href="#device-state-for-web-pages">Device state for web pages</a></h2>
+<p>A page can react to the state of the Remote, e.g. a dashboard which stops its animations while the display is off,
+shows the battery level, or reconnects its WebSocket after a standby.</p>
+<ul>
+<li>Every page is hidden while the display is off, and throttled while it’s hidden. See <a href="#hidden-pages">hidden pages</a>.</li>
+<li>The pages of a web view with the <a href="#device-state"><code>device_api</code> option</a> also get the battery state, the display state,
+the power source, the power profile and the standby of the Remote. See
+<a href="#device-state-api">device state API</a>.</li>
+</ul>
+<h3 id="hidden-pages"><a class="header" href="#hidden-pages">Hidden pages</a></h3>
+<p>This applies to every page in a web view, with or without the <code>device_api</code> option.</p>
+<ul>
+<li>A page is hidden while the display is off, and while the Remote is in standby: <code>document.visibilityState</code> is <code>hidden</code>,
+and the page gets a <code>visibilitychange</code> event when this changes (<a href="https://www.w3.org/TR/page-visibility/">Page Visibility API</a>).
+A dimmed display doesn’t hide the page.</li>
+<li>While a page is hidden, it is throttled:
+<ul>
+<li>Timers are batched to 1 second: e.g. a <code>setInterval</code> of 100 ms runs about once per second.</li>
+<li>CSS animations are paused.</li>
+<li><code>requestAnimationFrame</code> callbacks are not called, and the page isn’t painted.</li>
+</ul>
+</li>
+<li>Stop work which only updates the display while the page is hidden, e.g. polling, and update the page when it’s
+visible again.</li>
+</ul>
+<h3 id="device-state-api"><a class="header" href="#device-state-api">Device state API</a></h3>
+<p>The <code>device_api</code> option enables the device state API for all top-level pages of the web view: the start page and every
+page which the web view navigates to. Frames embedded in a page (<code>iframe</code>) don’t get it.</p>
+<p>The API consists of:</p>
+<ul>
+<li><a href="#battery-navigatorgetbattery"><code>navigator.getBattery()</code></a>: the battery state.</li>
+<li><a href="#standby-events-on-document"><code>freeze</code> and <code>resume</code> on <code>document</code></a>: the standby of the Remote.</li>
+<li><a href="#windowdevicehost"><code>window.deviceHost</code></a>: the display state, the power source, the power profile and the standby of
+the Remote.</li>
+<li><a href="#data-attributes-for-css">Data attributes</a> on <code>&lt;html&gt;</code> for CSS.</li>
+</ul>
+<p>The API is available as soon as the page starts, before its scripts run. Read the current state when the page starts:
+the events only report changes.</p>
+<p>Feature detection:</p>
+<pre><code class="language-js">if ('deviceHost' in window) {
+  // web view of a Remote with the device state API
+}
+</code></pre>
+<p>Without the <code>device_api</code> option, on a Remote firmware without the device state API and in other browsers,
+<code>window.deviceHost</code> doesn’t exist. <code>navigator.getBattery()</code> doesn’t exist either, except in browsers which have their
+own Battery Status API, e.g. Chrome.</p>
+<p>To develop a page on a desktop computer, use the <a href="#developer-tools">device API simulator</a>.</p>
+<h4 id="battery-navigatorgetbattery"><a class="header" href="#battery-navigatorgetbattery">Battery: <code>navigator.getBattery()</code></a></h4>
+<p>The web view of the Remote has no <a href="https://www.w3.org/TR/battery-status/">Battery Status API</a>. With the <code>device_api</code>
+option, <code>navigator.getBattery()</code> returns a promise of a <code>BatteryManager</code> object with the attributes and events of the
+specification. Every call returns the same object.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Type</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>charging</td><td>boolean</td><td><code>true</code> while the Remote is connected to power, e.g. on its charging dock, also with a full battery. <code>false</code> on battery power.</td></tr>
+<tr><td>level</td><td>number</td><td>Battery level from <code>0.0</code> to <code>1.0</code>, in steps of <code>0.01</code>.</td></tr>
+<tr><td>chargingTime</td><td>number</td><td><code>0</code> while the Remote is connected to power with a full battery, otherwise <code>Infinity</code>.</td></tr>
+<tr><td>dischargingTime</td><td>number</td><td>Always <code>Infinity</code>.</td></tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Event</th><th>Handler</th><th>Fired</th></tr>
+</thead>
+<tbody>
+<tr><td>chargingchange</td><td>onchargingchange</td><td><code>charging</code> changed.</td></tr>
+<tr><td>levelchange</td><td>onlevelchange</td><td><code>level</code> changed.</td></tr>
+<tr><td>chargingtimechange</td><td>onchargingtimechange</td><td>Never.</td></tr>
+<tr><td>dischargingtimechange</td><td>ondischargingtimechange</td><td>Never.</td></tr>
+</tbody>
+</table>
+</div>
+<p>Limits compared to the Battery Status API of a browser:</p>
+<ul>
+<li>The Remote has no estimates of the charging and the discharging time. <code>chargingTime</code> and <code>dischargingTime</code> have the
+default values of the specification, and their change events are never fired.</li>
+<li><code>level</code> has steps of 1 %.</li>
+<li>The battery state is also available to <code>http://</code> pages. Chrome only offers its Battery Status API to <code>https://</code>
+pages.</li>
+</ul>
+<h4 id="standby-events-on-document"><a class="header" href="#standby-events-on-document">Standby events on <code>document</code></a></h4>
+<p>The page gets the <code>freeze</code> and <code>resume</code> events of the <a href="https://wicg.github.io/page-lifecycle/">Page Lifecycle API</a> on
+<code>document</code>, at the standby of the Remote:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Event</th><th>Handler</th><th>Fired</th></tr>
+</thead>
+<tbody>
+<tr><td>freeze</td><td>document.onfreeze</td><td>The Remote goes into standby.</td></tr>
+<tr><td>resume</td><td>document.onresume</td><td>The Remote woke up from standby.</td></tr>
+</tbody>
+</table>
+</div>
+<p>They are fired together with <code>suspend</code> and <code>resume</code> on <a href="#windowdevicehost"><code>window.deviceHost</code></a>, whose <code>resume</code> event
+also reports the time in standby. See <a href="#standby">standby</a>. The page isn’t frozen at other times: a hidden page keeps
+running, throttled, see <a href="#hidden-pages">hidden pages</a>.</p>
+<h4 id="windowdevicehost"><a class="header" href="#windowdevicehost"><code>window.deviceHost</code></a></h4>
+<p><code>window.deviceHost</code> is an <code>EventTarget</code> with the current state of the Remote.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Type</th><th>Values</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>version</td><td>number</td><td><code>1</code></td><td>Version of the device state API. Increased with incompatible changes.</td></tr>
+<tr><td>screen</td><td>string</td><td><code>on</code>, <code>dim</code>, <code>off</code></td><td>State of the display: on, dimmed or off.</td></tr>
+<tr><td>powerSource</td><td>string</td><td><code>ac</code>, <code>battery</code></td><td><code>ac</code> while the Remote is connected to power, <code>battery</code> on battery power.</td></tr>
+<tr><td>powerProfile</td><td>string</td><td><code>power-saver</code>, <code>balanced</code>, <code>performance</code></td><td>Power profile of the Remote, see <a href="#state-of-the-remote">state of the Remote</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<p>The attributes are read-only. <code>deviceHost</code> has no thermal state.</p>
+<p>The events use the names of the power events of Electron’s <code>powerMonitor</code>. They are only available with
+<code>addEventListener</code>: there are no <code>on…</code> handler attributes.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Event</th><th><code>detail</code></th><th>Fired</th></tr>
+</thead>
+<tbody>
+<tr><td>suspend</td><td>–</td><td>The Remote goes into standby. Together with <code>freeze</code> on <code>document</code>.</td></tr>
+<tr><td>resume</td><td><code>{ sleptMs }</code></td><td>The Remote woke up from standby. Together with <code>resume</code> on <code>document</code>. <code>sleptMs</code>: time in standby in ms.</td></tr>
+<tr><td>on-ac</td><td>–</td><td>The Remote is connected to power. Together with <code>chargingchange</code> of the battery.</td></tr>
+<tr><td>on-battery</td><td>–</td><td>The Remote runs on battery power. Together with <code>chargingchange</code> of the battery.</td></tr>
+<tr><td>screenchange</td><td><code>{ state }</code></td><td><code>screen</code> changed. <code>state</code>: the new value.</td></tr>
+<tr><td>powerprofilechange</td><td><code>{ profile }</code></td><td><code>powerProfile</code> changed. <code>profile</code>: the new value.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>An event is only fired if the value changed. The attributes already have the new value when the event is fired.</li>
+<li>Events with a <code>detail</code> are <code>CustomEvent</code> objects.</li>
+</ul>
+<pre><code class="language-js">const host = window.deviceHost;
+
+host.addEventListener('screenchange', (event) =&gt; {
+  if (event.detail.state === 'off') {
+    stopPolling();
+  } else {
+    startPolling();
+  }
+});
+
+host.addEventListener('resume', (event) =&gt; {
+  console.log(`Remote slept ${Math.round(event.detail.sleptMs / 1000)} s`);
+  reconnectWebSocket();
+});
+</code></pre>
+<h4 id="data-attributes-for-css"><a class="header" href="#data-attributes-for-css">Data attributes for CSS</a></h4>
+<p>The API sets the state as data attributes on the <code>&lt;html&gt;</code> element, and updates them with every change:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Value</th></tr>
+</thead>
+<tbody>
+<tr><td><code>data-screen</code></td><td><code>deviceHost.screen</code>, e.g. <code>dim</code></td></tr>
+<tr><td><code>data-power-profile</code></td><td><code>deviceHost.powerProfile</code>, e.g. <code>power-saver</code></td></tr>
+</tbody>
+</table>
+</div>
+<pre><code class="language-css">/* no decorative animations while the Remote saves power */
+html[data-power-profile="power-saver"] .spinner {
+  animation: none;
+}
+
+/* a less bright clock while the display is dimmed */
+html[data-screen="dim"] .clock {
+  opacity: 0.6;
+}
+</code></pre>
+<h3 id="state-of-the-remote"><a class="header" href="#state-of-the-remote">State of the Remote</a></h3>
+<p>The state follows the power mode of the Remote (<code>PowerMode</code> of the Core-API):</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Power mode</th><th>Display</th><th><code>screen</code></th><th><code>powerProfile</code></th><th>Page</th></tr>
+</thead>
+<tbody>
+<tr><td>NORMAL</td><td>on</td><td><code>on</code></td><td><code>balanced</code></td><td>visible</td></tr>
+<tr><td>IDLE</td><td>dimmed</td><td><code>dim</code></td><td><code>balanced</code></td><td>visible</td></tr>
+<tr><td>LOW_POWER</td><td>off</td><td><code>off</code></td><td><code>power-saver</code></td><td>hidden</td></tr>
+<tr><td>SUSPEND</td><td>standby</td><td><code>off</code></td><td><code>power-saver</code></td><td>hidden</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li><code>powerSource</code> is <code>ac</code> while the Remote is connected to power, otherwise <code>battery</code>.</li>
+<li>The power profile names are the profiles of the Linux power-profiles-daemon: <code>power-saver</code>, <code>balanced</code> and
+<code>performance</code>. The Remote reports <code>balanced</code> and <code>power-saver</code>, as in the table. Treat an unknown value like
+<code>balanced</code>.</li>
+</ul>
+<h3 id="standby"><a class="header" href="#standby">Standby</a></h3>
+<p>The standby events are best effort: the Remote never delays its standby for a page.</p>
+<ul>
+<li>When the Remote goes into standby, the page gets <code>freeze</code> on <code>document</code> and <code>suspend</code> on <code>deviceHost</code>. Usually the
+display is already off and the page is hidden. The handlers may not run, or not finish, before the Remote sleeps, and
+network requests started in them may not be sent. Don’t rely on them to save data.</li>
+<li>When the Remote wakes up, the page first gets <code>resume</code> on <code>document</code> and on <code>deviceHost</code>, then the events of the
+current state, e.g. <code>screenchange</code> to <code>on</code> and <code>visibilitychange</code>.</li>
+<li><code>sleptMs</code> of the <code>resume</code> event is the time the Remote was in standby. Timers and <code>performance.now()</code> don’t advance
+in standby, while <code>Date.now()</code> jumps forward by the time slept.</li>
+<li>The network connection may not be ready right after <code>resume</code>: retry the connections of the page, e.g. a WebSocket,
+until they succeed.</li>
+<li>Only a loaded page gets the events: the fullscreen web view while it’s open, or the widget on the shown activity page.</li>
+</ul>
+<h3 id="developer-tools"><a class="header" href="#developer-tools">Developer tools</a></h3>
+<p>The <a href="https://github.com/unfoldedcircle/core-api/tree/main/tools/device-api-simulator">device API simulator</a> provides the
+device state API in a desktop browser, to develop a page without a Remote:</p>
+<ul>
+<li>A control panel and <code>window.deviceMock</code> to change the simulated state: display, battery, power source and standby.</li>
+<li>TypeScript types of the API (<code>types/device-api.d.ts</code>).</li>
+<li>A demo page and Playwright tests in Chromium and WebKit.</li>
+</ul>
+<p>The simulator doesn’t throttle hidden pages and doesn’t make <code>Date.now()</code> jump: test the page on the Remote as well.</p>
+<p>The <a href="https://github.com/unfoldedcircle/core-api/tree/main/tools/webview-test-pages">web view test pages</a> show what a
+page receives on the Remote. Use their address in a web view:</p>
+<ul>
+<li><a href="https://unfoldedcircle.github.io/core-api/tools/webview-test-pages/key-input.html">Key input</a>: the key events of the
+buttons of the Remote, compared with the <a href="#buttons">keys</a> the Remote sends.</li>
+<li><a href="https://unfoldedcircle.github.io/core-api/tools/webview-test-pages/device-api.html">Device state</a>: the state of the
+device state API, Page Visibility, the network state and the timer rate, with a log of every event. Needs the
+<code>device_api</code> option.</li>
+</ul>
+<h2 id="commands"><a class="header" href="#commands">Commands</a></h2>
+<p>The commands of a web view entity are executed by the user interface of the Remote. They work like the commands of
+other entities: in activity on- and off-sequences, macros, button mappings, activity user interface items, and with
+<code>PUT /api/entities/{entityId}/command</code> or <code>execute_entity_command</code> from any Core-API client. Tapping a tile opens the
+web view.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>cmd_id</th><th>Core-API cmd_id</th><th>Parameters</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>open</td><td>webview.open</td><td>-</td><td>Wake the display and show the web view fullscreen with its start page. See <a href="#open">open</a>.</td></tr>
+<tr><td>reload</td><td>webview.reload</td><td>-</td><td>Reload the shown page: in the fullscreen web view or in the widget. No effect if the web view isn’t shown.</td></tr>
+<tr><td>clear_cache</td><td>webview.clear_cache</td><td>-</td><td>Clear the HTTP cache of all web views and reload the shown page.</td></tr>
+<tr><td>clear_data</td><td>webview.clear_data</td><td>-</td><td>Clear all website data of all web views. Pages which rely on a cookie login ask to log in again. Credentials entered in a login dialog are kept until the user interface restarts. The shown page is reloaded.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>All web views share their <a href="#website-data">website data</a>: <code>clear_cache</code> and <code>clear_data</code> clear the data of all web
+views.</li>
+</ul>
+<h3 id="open"><a class="header" href="#open">Open</a></h3>
+<ul>
+<li><code>open</code> always wakes the display.</li>
+<li>The web view is shown fullscreen on top of the current screen. Closing it returns to the previous screen. An entity
+screen which is open on top of an activity is closed first: closing the web view returns to the activity.</li>
+<li>If an activity is being started, e.g. if <code>open</code> is a step of its on-sequence, the web view opens after the loading
+screen of the activity, on top of the activity screen.</li>
+<li>If the web view is already open, it stays as is. Another open web view is replaced.</li>
+</ul>
+<h3 id="command-routing"><a class="header" href="#command-routing">Command routing</a></h3>
+<p>The Core routes the commands of entity types which the user interface executes, currently only <code>webview</code>, to the
+locally installed user interface app, not to the integration of the entity. This applies to user-defined web views and
+to web views from integration drivers: web view commands are never sent to an integration driver.</p>
+<ul>
+<li>The user interface answers <code>open</code> and <code>reload</code> when it has accepted the command, not when the page has loaded.
+<code>clear_cache</code> and <code>clear_data</code> are answered when the data has been cleared. Sequences wait for the result of each
+step.</li>
+<li>The Core returns the result of the user interface to the caller.</li>
+<li>Error code <code>503</code> if no user interface that executes web view commands is connected, or if it can’t show web pages,
+e.g. <code>open</code> during the onboarding of the Remote.
+<code>408</code> if the user interface doesn’t answer within 5 seconds.</li>
+<li>The user interface app declares the entity types it executes with the internal WS Core-API request <code>set_ui_info</code>,
+and receives the commands with the internal request <code>entity_command</code>. Both are only for the user interface session
+authenticated with the access token that the Core generates at startup for the locally installed user interface app.
+Other clients must not use them.</li>
+</ul>
+<h3 id="command-examples"><a class="header" href="#command-examples">Command examples</a></h3>
+<p>Activity user interface item which opens the web view fullscreen. The web view entity must be an included entity of
+the activity:</p>
+<pre><code class="language-json">{
+  "type": "text",
+  "text": "Dashboard",
+  "command": {
+    "entity_id": "uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11",
+    "cmd_id": "webview.open"
+  },
+  "location": { "x": 0, "y": 5 },
+  "size": { "width": 2, "height": 1 }
+}
+</code></pre>
+<p>Step of an activity on-sequence, which shows the dashboard after the activity has started:</p>
+<pre><code class="language-json">{
+  "type": "command",
+  "command": {
+    "entity_id": "uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11",
+    "cmd_id": "webview.open"
+  }
+}
+</code></pre>
+<p>Another system opens the web view with the REST Core-API
+<code>PUT /api/entities/uc_web.main.7c2d5e1a-0b4f-4c5e-9a61-3d8f2b7e9c40/command</code>:</p>
+<pre><code class="language-json">{
+  "cmd_id": "webview.open"
+}
+</code></pre>
+<h2 id="core-api"><a class="header" href="#core-api">Core-API</a></h2>
+<h3 id="user-defined-web-views"><a class="header" href="#user-defined-web-views">User-defined web views</a></h3>
+<p>The user creates and edits web views in the web-configurator. The Core-API has a dedicated resource for them, modelled
+on the remote entity endpoints:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Operation</th><th>REST Core-API</th><th>WebSocket Core-API</th></tr>
+</thead>
+<tbody>
+<tr><td>Number of web views</td><td><code>HEAD /api/webviews</code></td><td><code>get_webview_count</code></td></tr>
+<tr><td>List web views, with paging</td><td><code>GET /api/webviews</code></td><td><code>get_webviews</code></td></tr>
+<tr><td>Create a web view</td><td><code>POST /api/webviews</code></td><td><code>create_webview</code></td></tr>
+<tr><td>Get a web view</td><td><code>GET /api/webviews/{entityId}</code></td><td><code>get_webview</code></td></tr>
+<tr><td>Update a web view</td><td><code>PATCH /api/webviews/{entityId}</code></td><td><code>update_webview</code></td></tr>
+<tr><td>Delete a web view</td><td><code>DELETE /api/webviews/{entityId}</code></td><td><code>delete_webview</code></td></tr>
+<tr><td>Delete all user web views</td><td><code>DELETE /api/webviews</code></td><td><code>delete_all_webviews</code></td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>The list contains user-defined web views and web views from integration drivers. The <code>kind</code> filter selects one of
+them: <code>USER</code> or <code>EXTERNAL</code>.</li>
+<li>Web views created on the Remote belong to the internal integration <code>uc_web.main</code>. Their entity identifier is
+<code>uc_web.main.&lt;uuid&gt;</code>.</li>
+<li><code>POST /api/webviews</code> only creates user-defined web views. Web views from integration drivers are configured like any
+other entity of an integration.</li>
+<li>At most 1000 user-defined web views can be created.</li>
+<li>A new web view can be cloned from a user-defined web view with <code>clone_from</code>: it gets the options of that web view,
+including the secret options. The name must be specified, the icon and the description are not copied. Options in
+the request are applied to the copied options like in an update. Web views from integration drivers can’t be cloned.</li>
+<li><code>DELETE /api/webviews</code> deletes all user-defined web views. Web views from integration drivers are not deleted.</li>
+<li>Responses contain the read-only option <code>editable</code>: <code>true</code> for a user-defined web view, <code>false</code> for a web view from
+an integration driver.</li>
+<li>Changes are reported with the <code>entity_change</code> event, in the event channel <code>entity_webview</code>. The event never contains
+secret values, see <a href="#secret-options">secret options</a>.</li>
+</ul>
+<p>Updating the options of a user-defined web view:</p>
+<ul>
+<li>An omitted option is not changed. <code>null</code> removes an option and its default applies. <code>url</code> can’t be removed.</li>
+<li><code>auth</code>, <code>tls</code> and <code>cookies</code> replace the stored object or list. An empty <code>tls</code> object removes the certificate
+exception, an empty <code>cookies</code> list removes all cookies.</li>
+<li>An empty <code>background_color</code> restores the default white <code>#FFFFFF</code>.</li>
+<li><code>buttons</code> is merged button by button, see <a href="#buttons">buttons</a>.</li>
+<li>Secret options: see <a href="#secret-options">secret options</a>.</li>
+</ul>
+<p>Create a web view:</p>
+<pre><code class="language-json">{
+  "name": {
+    "en": "NAS status"
+  },
+  "options": {
+    "url": "https://nas.home.arpa:5001/status",
+    "auth": {
+      "type": "basic",
+      "username": "viewer",
+      "password": "my-secret"
+    },
+    "tls": {
+      "certificate_sha256": "3F:A9:12:5C:77:0B:E4:21:9D:6A:C8:0F:41:B2:93:EE:58:17:0C:D4:2A:9B:61:F0:7E:3C:88:15:A6:D2:4B:C9"
+    },
+    "zoom": 80,
+    "reload_interval": 300
+  }
+}
+</code></pre>
+<p>Response, the password is replaced by <code>has_password</code>:</p>
+<pre><code class="language-json">{
+  "entity_id": "uc_web.main.0f3b6f0e-6b8c-4a43-9d38-2b1e8a3f0c11",
+  "entity_type": "webview",
+  "integration_id": "uc_web.main",
+  "name": {
+    "en": "NAS status"
+  },
+  "features": [],
+  "options": {
+    "editable": true,
+    "url": "https://nas.home.arpa:5001/status",
+    "auth": {
+      "type": "basic",
+      "username": "viewer",
+      "has_password": true
+    },
+    "tls": {
+      "certificate_sha256": "3F:A9:12:5C:77:0B:E4:21:9D:6A:C8:0F:41:B2:93:EE:58:17:0C:D4:2A:9B:61:F0:7E:3C:88:15:A6:D2:4B:C9"
+    },
+    "zoom": 80,
+    "reload_interval": 300
+  },
+  "attributes": {
+    "state": "ON"
+  }
+}
+</code></pre>
+<p>Update the zoom and the user name, and keep the password:</p>
+<pre><code class="language-json">{
+  "options": {
+    "zoom": 70,
+    "auth": {
+      "type": "basic",
+      "username": "kiosk"
+    }
+  }
+}
+</code></pre>
+<h3 id="web-views-from-integration-drivers"><a class="header" href="#web-views-from-integration-drivers">Web views from integration drivers</a></h3>
+<p>A web view entity from an integration driver is configured like any other entity of the integration. The
+<code>/api/webviews</code> endpoints also return it, with <code>options.editable: false</code>.</p>
+<ul>
+<li>The name, icon and description can be changed.</li>
+<li>The options of the integration driver can’t be changed. Only the <a href="#user-overrides">user overrides</a> in <code>options.user</code>
+can be set, with <code>PATCH /api/webviews/{entityId}</code>, <code>PATCH /api/entities/{entityId}</code>, <code>update_webview</code> or
+<code>update_entity</code>. <code>PATCH /api/webviews/{entityId}</code> and <code>update_webview</code> refuse any other option with error code <code>422</code>.</li>
+<li><code>DELETE /api/webviews/{entityId}</code> removes it from the configured entities, like <code>DELETE /api/entities/{entityId}</code>. It
+can be configured again from its integration.</li>
+</ul>
+<h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
+<h3 id="entity-definition"><a class="header" href="#entity-definition">Entity definition</a></h3>
+<p>The Remote checks the options of a web view entity from an integration driver with the same rules as the options of a
+user-defined web view.</p>
+<ul>
+<li>A web view entity with invalid options, e.g. an invalid <code>url</code>, <code>basic</code> authentication without <code>username</code>, a cookie
+without <code>value</code>, or a button with a fixed function or an unknown button, is ignored: it isn’t offered as an available
+entity, and an <code>entity_available</code> event with it doesn’t change the configured web view.</li>
+<li>Unknown options are removed.</li>
+<li>The buttons which the Remote model doesn’t have are removed, see <a href="#buttons">buttons</a>.</li>
+</ul>
+<h3 id="commands-1"><a class="header" href="#commands-1">Commands</a></h3>
+<p>Web view commands are never sent to integration drivers: they are executed by the user interface of the Remote, see
+<a href="#commands">commands</a>.</p>
+<h3 id="events"><a class="header" href="#events">Events</a></h3>
+<p>The <code>entity_change</code> event can be emitted by the integration driver if the state of the web view changes, like for any
+other entity.</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Attribute</th><th>Description</th></tr>
+</thead>
+<tbody>
+<tr><td>state</td><td>Optional entity <a href="#states">state</a>.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>If the state is never sent, the Core reports the web view as <code>ON</code> while a user interface that executes web view
+commands is connected, see <a href="#states">states</a>.</li>
+</ul>
+<h3 id="updating-the-entity-definition"><a class="header" href="#updating-the-entity-definition">Updating the entity definition</a></h3>
+<p>The options are part of the entity definition. If an option changes, e.g. a new URL, a rotated token or new cookies,
+the integration driver sends the updated entity definition with the <code>entity_available</code> event.</p>
+<ul>
+<li>The event contains the complete entity definition, not only the changed options.</li>
+<li>If the web view is configured on the Remote, the Core updates its <code>device_class</code>, <code>features</code> and <code>options</code>. The
+<a href="#user-overrides">user overrides</a> in <code>options.user</code> are kept.</li>
+<li>The Core informs its clients with an <code>entity_change</code> event, without secret values.</li>
+<li>The Core also retrieves the available entities whenever the integration driver connects.</li>
+<li>A driver removes a web view with the <code>entity_removed</code> event. A configured web view isn’t deleted, it becomes
+<code>UNAVAILABLE</code>.</li>
+<li>The <code>entity_change</code> event can’t change options: it only contains attributes.</li>
+<li>An older Remote firmware ignores <code>entity_available</code> and <code>entity_removed</code>. It applies an updated entity definition only
+when it retrieves the available entities again, e.g. after the driver reconnects.</li>
+</ul>
+<p>Rotated bearer token of a dashboard:</p>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_available",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_id": "dashboard-energy",
+    "entity_type": "webview",
+    "name": {
+      "en": "Energy dashboard",
+      "de": "Energie-Dashboard"
+    },
+    "options": {
+      "url": "https://dashboard.example.com/energy?kiosk=1",
+      "auth": {
+        "type": "bearer",
+        "token": "eyJhbGciOiJIUzI1NiJ9.rotated.token"
+      },
+      "user_agent": "desktop",
+      "zoom": 70
+    }
+  }
+}
+</code></pre>
+<h3 id="entity-definition-examples"><a class="header" href="#entity-definition-examples">Entity definition examples</a></h3>
+<p>Dashboard with a bearer token, with the desktop layout of the page zoomed out for the small screen:</p>
+<pre><code class="language-json">{
+  "entity_id": "dashboard-energy",
+  "entity_type": "webview",
+  "name": {
+    "en": "Energy dashboard",
+    "de": "Energie-Dashboard"
+  },
+  "options": {
+    "url": "https://dashboard.example.com/energy?kiosk=1",
+    "auth": {
+      "type": "bearer",
+      "token": "eyJhbGciOiJIUzI1NiJ9.example.token"
+    },
+    "user_agent": "desktop",
+    "zoom": 70
+  }
+}
+</code></pre>
+<p>Status page with an API key header and a cookie for the page layout, reloaded every minute:</p>
+<pre><code class="language-json">{
+  "entity_id": "inverter-status",
+  "entity_type": "webview",
+  "name": {
+    "en": "Solar inverter"
+  },
+  "options": {
+    "url": "http://inverter.home.arpa/status",
+    "auth": {
+      "type": "header",
+      "header_name": "X-API-Key",
+      "header_value": "3b1f0c9e7a"
+    },
+    "cookies": [
+      {
+        "name": "layout",
+        "value": "compact"
+      }
+    ],
+    "reload_interval": 60,
+    "show_navigation": true
+  }
+}
+</code></pre>
+<h3 id="event-examples"><a class="header" href="#event-examples">Event examples</a></h3>
+<h4 id="web-server-of-the-integrated-system-unreachable"><a class="header" href="#web-server-of-the-integrated-system-unreachable">Web server of the integrated system unreachable</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "webview",
+    "entity_id": "dashboard-energy",
+    "attributes": {
+      "state": "UNAVAILABLE"
+    }
+  }
+}
+</code></pre>
+<h4 id="web-server-reachable-again"><a class="header" href="#web-server-reachable-again">Web server reachable again</a></h4>
+<pre><code class="language-json">{
+  "kind": "event",
+  "msg": "entity_change",
+  "cat": "ENTITY",
+  "msg_data": {
+    "entity_type": "webview",
+    "entity_id": "dashboard-energy",
+    "attributes": {
+      "state": "ON"
+    }
+  }
+}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../entities/entity_voice_assistant.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../integration-driver/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../entities/entity_voice_assistant.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../integration-driver/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../mark-09e88c2c.min.js"></script>
+        <script src="../searcher-c2a407aa.js"></script>
+
+        <script src="../clipboard-1626706a.min.js"></script>
+        <script src="../highlight-abc7f01d.js"></script>
+        <script src="../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../mermaid-eefea253.min.js"></script>
+        <script src="../mermaid-init-ccf746f1.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

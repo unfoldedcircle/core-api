@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-ee495ce9.js";
+            window.path_to_searchindex_js = "../searchindex-afc36ef0.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-0bd7c578.js"></script>
+        <script src="../toc-8a948746.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -198,6 +198,7 @@ message back to the remote to notify it about the updated state or attribute(s).
 <li><a href="entity_select.html">Select</a></li>
 <li><a href="entity_number.html">Number</a></li>
 <li><a href="entity_voice_assistant.html">Voice Assistant</a></li>
+<li><a href="entity_webview.html">Web View</a></li>
 </ul>
 <p>The 🚧 icon within the entity descriptions indicates a planned feature.</p>
 <h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
@@ -373,6 +374,8 @@ back an error to notify that the command execution is not possible.<br>Otherwise
 <li>Once the value has been set or confirmed by the physical device, an <code>entity_change</code> event message must be sent by the
 integration driver with the new value(s). Of course, this only applies to stateful attributes and not to buttons or
 “fire and forget” commands.</li>
+<li>Exception: the commands of a <a href="entity_webview.html#commands">web view entity</a> are executed by the user interface of the
+Remote. They are never sent to the integration driver.</li>
 </ul>
 <h3 id="events"><a class="header" href="#events">Events</a></h3>
 <p>The <code>entity_change</code> event must be emitted by the integration driver if the state of the entity changes. Either after an
