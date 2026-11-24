@@ -10,6 +10,12 @@ This section contains unreleased changes which will be part of an upcoming relea
 
 ---
 
+## 0.52.0
+### Added
+- Optional `background` of activity and remote-entity user interface pages (`UiPageBackground`: `image`, `scale`,
+  `align`, `dim`) in the activity and remote page messages. Updating a page without `background` keeps it, `null` or
+  an empty `image` removes it.
+
 ## 0.51.0
 ### Added
 - Web View Entity support (`webview`): user-defined web views, global web view settings with the button mapping of the

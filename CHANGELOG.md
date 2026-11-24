@@ -60,6 +60,10 @@ _Changes in the next release_
     [tools/device-api-simulator](tools/device-api-simulator).
   - Web view test pages for the keys of the Remote and the device state API, with an event log, in
     [tools/webview-test-pages](tools/webview-test-pages), also published with the API documentation.
+- Background image for activity and remote user interface pages (`background` with `image`, `scale`, `align` and
+  `dim`), in the Core APIs and in the remote entity of the Integration-API.
+  - Background images can have the profile page header size 480x275 or the full-screen sizes 480x800 (Remote 3) and
+    480x854 (Remote Two) pixels. Up to 100 background images can be stored instead of 50.
 
 ### Changed
 - Core APIs: resetting all settings (`DELETE /cfg`, `reset_configuration`) requires the `admin` scope.

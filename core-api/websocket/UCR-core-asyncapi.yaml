@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.51.0
+  version: 0.52.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -18790,10 +18790,77 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfaceItem'
+        background:
+          $ref: '#/components/schemas/UiPageBackground'
       required:
         - page_id
         - grid
         - items
+    UiPageBackground:
+      description: |
+        Background image of an activity or remote-entity user interface page. The image covers the whole screen of the
+        Remote, behind the page title, the user interface items and the page indicator. A page without background has
+        no `background` property.
+
+        The image must be a `BackgroundImage` resource. A full-screen image has the size of the display: 480x800 pixels
+        on the Remote 3 and 480x854 pixels on the Remote Two. A page stores one image for every model, and `scale`
+        adapts it to the display, e.g. after a configuration is restored on the other model. The Remote doesn't check
+        that the image resource exists; a missing image isn't shown.
+
+        `scale`, `align` and `dim` are always returned, with their default value if they weren't set.
+
+        A client must treat an unknown `scale` or `align` value like the default value, so that new values can be
+        added later. The Remote rejects unknown values.
+      type: object
+      properties:
+        image:
+          $ref: '#/components/schemas/ImageIdentifier'
+        scale:
+          $ref: '#/components/schemas/UiPageBackgroundScale'
+        align:
+          $ref: '#/components/schemas/UiPageBackgroundAlign'
+        dim:
+          description: |
+            Darkening of the image in percent, so that the items of the page stay readable: a black layer with this
+            opacity is drawn over the image. `0` shows the image unchanged.
+          type: integer
+          minimum: 0
+          maximum: 80
+          default: 40
+      required:
+        - image
+      examples:
+        - image: custom:living_room.jpg
+          scale: fill
+          align: center
+          dim: 40
+    UiPageBackgroundScale:
+      description: |
+        How the background image is fitted to the screen. The aspect ratio of the image is always kept, and the image is
+        always centered horizontally.
+        - `fill`: the image is scaled to cover the whole screen. The parts outside the screen are cut off.
+        - `fit`: the image is scaled to fit completely on the screen. The remaining area is black.
+        - `none`: the image is shown in its original size. The parts outside the screen are cut off, a remaining area is
+          black.
+      type: string
+      enum:
+        - fill
+        - fit
+        - none
+      default: fill
+    UiPageBackgroundAlign:
+      description: |
+        Vertical position of the background image: which part is kept when the image is cut off, or where a black area
+        remains.
+        - `top`: the top edge of the image is at the top of the screen.
+        - `center`: the image is centered vertically.
+        - `bottom`: the bottom edge of the image is at the bottom of the screen.
+      type: string
+      enum:
+        - top
+        - center
+        - bottom
+      default: center
     ActivityUserInterfacePageUpdate:
       type: object
       properties:
@@ -18809,6 +18876,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfaceItem'
+        background:
+          description: |
+            Page background. If the property is omitted, the existing background is not changed. An object replaces the
+            whole background: properties that are not set get their default value. `null`, or a background with an empty
+            `image`, removes the background. A page that is created without this property has no background.
+          oneOf:
+            - $ref: '#/components/schemas/UiPageBackground'
+            - type: 'null'
     ButtonId:
       type: string
       format: ^[A-Z0-9_]+$
