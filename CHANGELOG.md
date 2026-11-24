@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 _Changes in the next release_
 
 ### Added
+- User guide with the support center articles about web views and the supported icon and image formats
+  (`doc/user-guide`).
 - Integration-API driver setup flow:
   - The setup process is no longer bounded by fixed timeouts. The Remote keeps a session alive while a client renews
     it and, while running on battery, caps it with a budget derived from the battery charge level.
@@ -60,6 +62,10 @@ _Changes in the next release_
     [tools/device-api-simulator](tools/device-api-simulator).
   - Web view test pages for the keys of the Remote and the device state API, with an event log, in
     [tools/webview-test-pages](tools/webview-test-pages), also published with the API documentation.
+- Background image for activity and remote user interface pages (`background` with `image`, `scale`, `align` and
+  `dim`), in the Core APIs and in the remote entity of the Integration-API.
+  - Background images can have the profile page header size 480x275 or the full-screen sizes 480x800 (Remote 3) and
+    480x854 (Remote Two) pixels. Up to 100 background images can be stored instead of 50.
 
 ### Changed
 - Core APIs: resetting all settings (`DELETE /cfg`, `reset_configuration`) requires the `admin` scope.

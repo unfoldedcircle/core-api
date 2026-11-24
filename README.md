@@ -84,6 +84,8 @@ See [core-api](./core-api) directory for more information.
 
 ## Other resources
 
+- [User guide](doc/user-guide/README.md): articles for users of the Remote, the main version of the support center
+  articles
 - [remote-core simulator](https://github.com/unfoldedcircle/core-simulator) to start developing integrations without a UC Remote device
 - Open Source [remote-ui application](https://github.com/unfoldedcircle/remote-ui)
 

@@ -2,6 +2,15 @@
 
 [Introduction](README.md)
 
+# User Guide
+
+- [User guide](user-guide/README.md)
+  - [Supported icon and image formats](user-guide/icon-and-image-formats.md)
+  - [Web views](user-guide/web-views/overview.md)
+    - [Setting up a web view](user-guide/web-views/set-up.md)
+    - [Logins, cookies and certificates](user-guide/web-views/logins-cookies-certificates.md)
+    - [Using web views on the Remote](user-guide/web-views/using-on-the-remote.md)
+
 # Developer Guide
 
 - [Remote Two user interface](remote-ui.md)
