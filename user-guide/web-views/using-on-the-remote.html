@@ -1,0 +1,395 @@
+<!DOCTYPE HTML>
+<html lang="en" class="light sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Using web views on the Remote - Unfolded Circle API Documentation</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon-de23e50b.svg">
+        <link rel="shortcut icon" href="../../favicon-8114d1fc.png">
+        <link rel="stylesheet" href="../../css/variables-8adf115d.css">
+        <link rel="stylesheet" href="../../css/general-2459343d.css">
+        <link rel="stylesheet" href="../../css/chrome-ae938929.css">
+        <link rel="stylesheet" href="../../css/print-9e4910d8.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../fonts/fonts-9644e21d.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" id="mdbook-highlight-css" href="../../highlight-493f70e1.css">
+        <link rel="stylesheet" id="mdbook-tomorrow-night-css" href="../../tomorrow-night-4c0ae647.css">
+        <link rel="stylesheet" id="mdbook-ayu-highlight-css" href="../../ayu-highlight-3fdfc3ac.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root and default themes to javascript -->
+        <script>
+            const path_to_root = "../../";
+            const default_light_theme = "light";
+            const default_dark_theme = "navy";
+            window.path_to_searchindex_js = "../../searchindex-e976dddc.js";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc-2384133e.js"></script>
+    </head>
+    <body>
+    <div id="mdbook-help-container">
+        <div id="mdbook-help-popup">
+            <h2 class="mdbook-help-title">Keyboard shortcuts</h2>
+            <div>
+                <p>Press <kbd>←</kbd> or <kbd>→</kbd> to navigate between chapters</p>
+                <p>Press <kbd>S</kbd> or <kbd>/</kbd> to search in the book</p>
+                <p>Press <kbd>?</kbd> to show this help</p>
+                <p>Press <kbd>Esc</kbd> to hide this help</p>
+            </div>
+        </div>
+    </div>
+    <div id="mdbook-body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                let theme = localStorage.getItem('mdbook-theme');
+                let sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            const default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? default_dark_theme : default_light_theme;
+            let theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="mdbook-sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            let sidebar = null;
+            const sidebar_toggle = document.getElementById("mdbook-sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+                sidebar_toggle.checked = false;
+            }
+            if (sidebar === 'visible') {
+                sidebar_toggle.checked = true;
+            } else {
+                html.classList.remove('sidebar-visible');
+            }
+        </script>
+
+        <nav id="mdbook-sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="mdbook-sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="mdbook-page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="mdbook-menu-bar-hover-placeholder"></div>
+                <div id="mdbook-menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="mdbook-sidebar-toggle" class="icon-button" for="mdbook-sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="mdbook-sidebar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M0 96C0 78.3 14.3 64 32 64H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32C14.3 128 0 113.7 0 96zM0 256c0-17.7 14.3-32 32-32H416c17.7 0 32 14.3 32 32s-14.3 32-32 32H32c-17.7 0-32-14.3-32-32zM448 416c0 17.7-14.3 32-32 32H32c-17.7 0-32-14.3-32-32s14.3-32 32-32H416c17.7 0 32 14.3 32 32z"/></svg></span>
+                        </label>
+                        <button id="mdbook-theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="mdbook-theme-list">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M371.3 367.1c27.3-3.9 51.9-19.4 67.2-42.9L600.2 74.1c12.6-19.5 9.4-45.3-7.6-61.2S549.7-4.4 531.1 9.6L294.4 187.2c-24 18-38.2 46.1-38.4 76.1L371.3 367.1zm-19.6 25.4l-116-104.4C175.9 290.3 128 339.6 128 400c0 3.9 .2 7.8 .6 11.6c1.8 17.5-10.2 36.4-27.8 36.4H96c-17.7 0-32 14.3-32 32s14.3 32 32 32H240c61.9 0 112-50.1 112-112c0-2.5-.1-5-.2-7.5z"/></svg></span>
+                        </button>
+                        <ul id="mdbook-theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-default_theme">Auto</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="mdbook-theme-ayu">Ayu</button></li>
+                        </ul>
+                        <button id="mdbook-search-toggle" class="icon-button" type="button" title="Search (`/`)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="/ s" aria-controls="mdbook-searchbar">
+                            <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352c79.5 0 144-64.5 144-144s-64.5-144-144-144S64 128.5 64 208s64.5 144 144 144z"/></svg></span>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Unfolded Circle API Documentation</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <span class=fa-svg id="print-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M128 0C92.7 0 64 28.7 64 64v96h64V64H354.7L384 93.3V160h64V93.3c0-17-6.7-33.3-18.7-45.3L400 18.7C388 6.7 371.7 0 354.7 0H128zM384 352v32 64H128V384 368 352H384zm64 32h32c17.7 0 32-14.3 32-32V256c0-35.3-28.7-64-64-64H64c-35.3 0-64 28.7-64 64v96c0 17.7 14.3 32 32 32H64v64c0 35.3 28.7 64 64 64H384c35.3 0 64-28.7 64-64V384zm-16-88c-13.3 0-24-10.7-24-24s10.7-24 24-24s24 10.7 24 24s-10.7 24-24 24z"/></svg></span>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="mdbook-search-wrapper" class="hidden">
+                    <form id="mdbook-searchbar-outer" class="searchbar-outer">
+                        <div class="search-wrapper">
+                            <input type="search" id="mdbook-searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="mdbook-searchresults-outer" aria-describedby="searchresults-header">
+                            <div class="spinner-wrapper">
+                                <span class=fa-svg id="fa-spin"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M304 48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zm0 416c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM48 304c26.5 0 48-21.5 48-48s-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48zm464-48c0-26.5-21.5-48-48-48s-48 21.5-48 48s21.5 48 48 48s48-21.5 48-48zM142.9 437c18.7-18.7 18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zm0-294.2c18.7-18.7 18.7-49.1 0-67.9S93.7 56.2 75 75s-18.7 49.1 0 67.9s49.1 18.7 67.9 0zM369.1 437c18.7 18.7 49.1 18.7 67.9 0s18.7-49.1 0-67.9s-49.1-18.7-67.9 0s-18.7 49.1 0 67.9z"/></svg></span>
+                            </div>
+                        </div>
+                    </form>
+                    <div id="mdbook-searchresults-outer" class="searchresults-outer hidden">
+                        <div id="mdbook-searchresults-header" class="searchresults-header"></div>
+                        <ul id="mdbook-searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('mdbook-sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('mdbook-sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#mdbook-sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="mdbook-content" class="content">
+                    <main>
+                        <h1 id="using-web-views-on-the-remote"><a class="header" href="#using-web-views-on-the-remote">Using web views on the Remote</a></h1>
+<blockquote>
+<p>Applies to firmware 2.14.0 and newer, on the Remote Two and the Remote 3.</p>
+</blockquote>
+<p>This article explains how to open a web view on the Remote, how to use the page with touch and buttons, and what to do when something doesn’t work.</p>
+<h2 id="opening-a-web-view"><a class="header" href="#opening-a-web-view">Opening a web view</a></h2>
+<ul>
+<li><strong>From a page:</strong> tap the web view tile. The page opens in full screen. It isn’t loaded until you tap the tile.</li>
+<li><strong>In an activity:</strong> a <strong>Web view</strong> widget shows the page right on the activity page. If the widget isn’t interactive, tap it to open the page in full screen. You can also open the web view from the list of entities in the activity.</li>
+<li><strong>With a command:</strong> a button, an icon or text on an activity page, a macro or a step of an activity sequence can open the web view. It opens in full screen on top of the current screen, and the display wakes up.</li>
+</ul>
+<p>To add a web view to a page on the Remote, use the entity list and its <strong>Web view</strong> filter.</p>
+<p><img src="images/remote-06-entity-filter.png" alt="The entity type filter with Web view"></p>
+<p>Press <strong>BACK</strong> to close the full-screen web view and return to the previous screen. <strong>HOME</strong> closes it and shows the home screen.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>Only one web page is shown at a time. While a web view is open in full screen, an activity widget unloads its page and loads it again afterwards.</p>
+</blockquote>
+<h3 id="activity-widget"><a class="header" href="#activity-widget">Activity widget</a></h3>
+<p>In the web-configurator, add the web view to the activity’s included entities, then add a <strong>Web view</strong> widget in the activity’s <strong>User interface</strong>:</p>
+<ul>
+<li>One web view widget per activity, at least 3 × 3 grid fields.</li>
+<li><strong>Interactive:</strong> when on, touch goes to the page. When off, a tap opens the web view in full screen.</li>
+<li>The widget can have its own zoom. Without it, it uses the zoom of the web view.</li>
+<li>The buttons of the Remote keep the activity’s button mapping.</li>
+</ul>
+<p><img src="images/wc-12-add-to-activity.png" alt="A web view widget in an activity’s user interface"></p>
+<h2 id="touch-scrolling-and-zoom"><a class="header" href="#touch-scrolling-and-zoom">Touch, scrolling and zoom</a></h2>
+<ul>
+<li><strong>Tap</strong> to click a link or a button.</li>
+<li><strong>Drag</strong> to scroll.</li>
+<li><strong>Pinch</strong> with two fingers to enlarge the page, from 1× to 4×. Pinch-to-zoom might not be available on all Remote models.</li>
+<li>A long press counts as a tap. Double tap doesn’t zoom.</li>
+</ul>
+<p><strong>Zoom with buttons:</strong> press <strong>VOLUME +</strong> and <strong>VOLUME −</strong> to zoom in steps from 50 % to 300 %. A label at the top shows the zoom level. The zoom lasts until you close the web view. To change the zoom permanently, set <strong>Zoom</strong> in the web view settings in the web-configurator.</p>
+<h2 id="navigation-bar"><a class="header" href="#navigation-bar">Navigation bar</a></h2>
+<p>If <strong>Show navigation controls</strong> is on for the web view, a bar at the bottom of the full-screen web view has four buttons: back, forward, reload and close.</p>
+<p><img src="images/remote-02-navigation-bar.png" alt="The navigation bar of a web view"></p>
+<h2 id="on-screen-keyboard"><a class="header" href="#on-screen-keyboard">On-screen keyboard</a></h2>
+<p>Tap a text field on the page to open the keyboard. While it’s open, the D-pad and <strong>OK</strong> go to the text field. The keyboard has no Enter key: press <strong>OK</strong> on the Remote to send a form. See <a href="logins-cookies-certificates.html">Logins, cookies and certificates</a> for more.</p>
+<h2 id="how-the-buttons-work-in-a-page"><a class="header" href="#how-the-buttons-work-in-a-page">How the buttons work in a page</a></h2>
+<p>In the full-screen web view, the buttons have these functions by default:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Button</th><th>Default function</th></tr>
+</thead>
+<tbody>
+<tr><td>D-pad</td><td>Sends the arrow keys to the page</td></tr>
+<tr><td>OK</td><td>Sends Enter to the page</td></tr>
+<tr><td>BACK</td><td>Closes the web view</td></tr>
+<tr><td>VOLUME + / −</td><td>Zoom in / out</td></tr>
+<tr><td>CHANNEL up / down</td><td>Scroll up / down one screen</td></tr>
+<tr><td>MENU (Remote 3)</td><td>Sends the menu key to the page</td></tr>
+<tr><td>HOME</td><td>Closes the web view and shows the home screen (can’t be changed)</td></tr>
+<tr><td>POWER, voice button</td><td>Keep their normal function (can’t be changed)</td></tr>
+<tr><td>All other buttons</td><td>Keep their normal function, for example the button mapping of the activity</td></tr>
+</tbody>
+</table>
+</div>
+<p>You can change the buttons for all web views in <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Buttons</strong>, and for a single web view on its <strong>Button mapping</strong> tab in the web-configurator. See <a href="set-up.html">Setting up a web view in the web-configurator</a>.</p>
+<p>While the on-screen keyboard or a dialog of the page is open, the zoom buttons do nothing.</p>
+<h3 id="dialogs-of-the-page"><a class="header" href="#dialogs-of-the-page">Dialogs of the page</a></h3>
+<p>Messages and questions of the page appear as dialogs on the Remote. If you leave a page with unsaved changes, the Remote may ask <strong>Leave this page?</strong> Choose <strong>Stay</strong> or <strong>Leave</strong>.</p>
+<h2 id="settings--web-view-on-the-remote"><a class="header" href="#settings--web-view-on-the-remote">Settings &gt; Web view on the Remote</a></h2>
+<p>On the Remote, open <strong>Settings</strong> &gt; <strong>Web view</strong>. These settings apply to all web views:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Setting</th><th>What it does</th></tr>
+</thead>
+<tbody>
+<tr><td><strong>Color scheme</strong></td><td><strong>Dark</strong> or <strong>Light</strong>. Only pages that offer a dark design follow this setting.</td></tr>
+<tr><td><strong>Website data on close</strong></td><td>What closing a page deletes: <strong>Keep</strong>, <strong>Clear cache</strong> or <strong>Clear all website data</strong> (shown as <strong>Clear all data</strong> in the row).</td></tr>
+<tr><td><strong>Buttons</strong></td><td>What the buttons do in a full-screen web page. A web view can change single buttons.</td></tr>
+<tr><td><strong>Allow invalid certificates</strong></td><td>Accepts invalid certificates on all web pages. Not recommended.</td></tr>
+<tr><td><strong>Cache and website data</strong></td><td><strong>Clear cache</strong> and <strong>Clear website data</strong> for all web views.</td></tr>
+<tr><td><strong>Web view test</strong></td><td>Load any web address to try it.</td></tr>
+</tbody>
+</table>
+</div>
+<p><img src="images/remote-05-settings-webview.png" alt="Settings &gt; Web view on the Remote"></p>
+<h3 id="web-view-test"><a class="header" href="#web-view-test">Web view test</a></h3>
+<p><strong>Web view test</strong> opens a test page with an address field. Use it to check that web views work on your Remote, or to try a page before you set up a web view for it:</p>
+<ol>
+<li>Open <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Web view test</strong>.</li>
+<li>Tap the <strong>Web address</strong> field and type the address. An address without <code>http://</code> or <code>https://</code> gets <code>http://</code> added.</li>
+<li>Tap <strong>Load</strong>, or press <strong>OK</strong>.</li>
+</ol>
+<p>The buttons below the address go back, forward, and stop or reload the page. A status line shows the page title, the load progress, or why the page couldn’t be loaded. Press <strong>BACK</strong> to close the test page.</p>
+<blockquote class="blockquote-tag blockquote-tag-note">
+<p class="blockquote-tag-title"><svg viewbox="0 0 16 16" width="18" height="18"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm8-6.5a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM6.5 7.75A.75.75 0 0 1 7.25 7h1a.75.75 0 0 1 .75.75v2.75h.25a.75.75 0 0 1 0 1.5h-2a.75.75 0 0 1 0-1.5h.25v-2h-.25a.75.75 0 0 1-.75-.75ZM8 6a1 1 0 1 1 0-2 1 1 0 0 1 0 2Z"></path></svg>Note</p>
+<p>The test page doesn’t use the settings of your web views, such as their login, cookies or certificate exception. A page that needs these may not load in the test, but work in its web view.</p>
+</blockquote>
+<h2 id="when-the-display-turns-off-and-in-standby"><a class="header" href="#when-the-display-turns-off-and-in-standby">When the display turns off and in standby</a></h2>
+<ul>
+<li>When the display turns off, the page is hidden and paused. It stops drawing and uses less power. A dimmed display doesn’t pause the page.</li>
+<li>The automatic reload stops while the display is off. When the page shows again, the full interval starts again.</li>
+<li>The page stays open and keeps its state, for example what you entered or where you scrolled to. It isn’t reloaded automatically when the display turns on again or the Remote wakes up from standby.</li>
+<li>Right after waking up, the network may need a moment. Some pages show old data until they reconnect.</li>
+</ul>
+<p>Pages that use the <strong>Device state API for pages</strong> can react to the display state and to standby, for example to update their data after waking up.</p>
+<h2 id="troubleshooting"><a class="header" href="#troubleshooting">Troubleshooting</a></h2>
+<h3 id="the-page-doesnt-load-or-a-certificate-error-appears"><a class="header" href="#the-page-doesnt-load-or-a-certificate-error-appears">The page doesn’t load, or a certificate error appears</a></h3>
+<p>The web view shows <strong>The page could not be loaded</strong>. Below it, the Remote says why, if it knows the reason:</p>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr><th>Message on the Remote</th><th>What to check</th></tr>
+</thead>
+<tbody>
+<tr><td>The server … wasn’t found.</td><td>The address in the web view’s <strong>URL</strong>, and that the Remote is connected to Wi-Fi. A name that ends in <code>.local</code> only works in your home network.</td></tr>
+<tr><td>The Remote isn’t connected to a network.</td><td>The Wi-Fi connection of the Remote.</td></tr>
+<tr><td>… refused the connection.</td><td>That the server is running and that the port in the URL is correct.</td></tr>
+<tr><td>… didn’t respond in time.</td><td>That the server is switched on and reachable from the Remote’s network, for example not blocked by a firewall or in another network.</td></tr>
+<tr><td>The certificate of … isn’t trusted.</td><td>For a home server with a self-signed certificate, allow the certificate in the web view’s <strong>Certificate</strong> settings. See <a href="logins-cookies-certificates.html">Logins, cookies and certificates</a>.</td></tr>
+<tr><td>Only http:// and https:// addresses can be opened.</td><td>The <strong>URL</strong> must start with <code>http://</code> or <code>https://</code>.</td></tr>
+<tr><td>The page stopped working.</td><td>Try again. If it happens again, the page may not work on the Remote.</td></tr>
+<tr><td>The page needs more memory than the Remote has.</td><td>The page is too large for the Remote. Use a smaller page, for example a simpler dashboard view.</td></tr>
+</tbody>
+</table>
+</div>
+<ul>
+<li>Select <strong>Try again</strong> or press <strong>OK</strong> to load the page again.</li>
+<li>Select <strong>Details</strong> to see the technical error, for example to send it to our support or to the maker of the page. It shows only the server’s address, not the rest of the URL.</li>
+<li>An activity widget shows the reason only if there’s room for it, and has no buttons. Tap an interactive widget to try again. Tap a widget that isn’t interactive to open the web view in full screen, where <strong>Details</strong> is available.</li>
+<li>If the web view of an integration is unavailable, check the integration and the connected system.</li>
+<li>PDF documents and downloads aren’t supported. The Remote shows <strong>PDF documents cannot be shown here</strong> or <strong>Downloads are not supported</strong>.</li>
+</ul>
+<h3 id="im-asked-to-log-in-again"><a class="header" href="#im-asked-to-log-in-again">I’m asked to log in again</a></h3>
+<ul>
+<li>A user name and password typed in the sign-in screen are kept only until the Remote restarts. Save the login in the web view’s <strong>Authentication</strong> settings instead.</li>
+<li><strong>Clear website data</strong>, or <strong>Website data on close</strong> set to clear all data, logs you out of pages that use a cookie login.</li>
+<li>The site may have ended your session. Log in again.</li>
+<li>If a sign-in fails after the sign-in screen was open for a long time, reload the page and try again.</li>
+</ul>
+<h3 id="the-page-is-too-small-or-too-large"><a class="header" href="#the-page-is-too-small-or-too-large">The page is too small or too large</a></h3>
+<ul>
+<li>Press <strong>VOLUME +</strong> or <strong>VOLUME −</strong> to zoom for this visit.</li>
+<li>Set <strong>Zoom</strong> in the web view settings to keep a zoom level.</li>
+<li>Try <strong>Mobile browser</strong> or <strong>Desktop browser</strong> in <strong>User agent</strong> to get another layout of the page.</li>
+<li>For an activity widget, set the zoom of the widget.</li>
+</ul>
+<h3 id="a-button-does-nothing"><a class="header" href="#a-button-does-nothing">A button does nothing</a></h3>
+<ul>
+<li><strong>HOME</strong>, <strong>POWER</strong> and the voice button have fixed functions.</li>
+<li>Check the web view’s <strong>Button mapping</strong> tab and <strong>Settings</strong> &gt; <strong>Web view</strong> &gt; <strong>Buttons</strong>. A button set to <strong>Nothing</strong> does nothing, and a key sent to the page only works if the page handles it.</li>
+<li>In an activity widget, the buttons use the activity’s button mapping.</li>
+<li>The zoom buttons do nothing while the keyboard or a dialog is open.</li>
+</ul>
+<h3 id="the-page-isnt-updated-after-standby"><a class="header" href="#the-page-isnt-updated-after-standby">The page isn’t updated after standby</a></h3>
+<p>The page is paused while the display is off and isn’t reloaded after waking up.</p>
+<ul>
+<li>Reload the page: use the reload button of the navigation bar, or a button set to <strong>Reload</strong>.</li>
+<li>Set a <strong>Reload interval</strong> in the web view settings.</li>
+<li>If you made the page yourself, use the <strong>Device state API for pages</strong> to update it after standby.</li>
+</ul>
+<h3 id="i-cant-add-another-web-view"><a class="header" href="#i-cant-add-another-web-view">I can’t add another web view</a></h3>
+<p>The web-configurator shows “You have 1000 own web views, the most the Remote can have.” Delete web views you no longer need. Web views from integrations don’t count toward this limit.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../user-guide/web-views/logins-cookies-certificates.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                            </a>
+
+                            <a rel="next prefetch" href="../../remote-ui.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../user-guide/web-views/logins-cookies-certificates.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M41.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></span>
+                    </a>
+
+                    <a rel="next prefetch" href="../../remote-ui.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></span>
+                    </a>
+            </nav>
+
+        </div>
+
+        <template id=fa-eye><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M288 32c-80.8 0-145.5 36.8-192.6 80.6C48.6 156 17.3 208 2.5 243.7c-3.3 7.9-3.3 16.7 0 24.6C17.3 304 48.6 356 95.4 399.4C142.5 443.2 207.2 480 288 480s145.5-36.8 192.6-80.6c46.8-43.5 78.1-95.4 93-131.1c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C433.5 68.8 368.8 32 288 32zM432 256c0 79.5-64.5 144-144 144s-144-64.5-144-144s64.5-144 144-144s144 64.5 144 144zM288 192c0 35.3-28.7 64-64 64c-11.5 0-22.3-3-31.6-8.4c-.2 2.8-.4 5.5-.4 8.4c0 53 43 96 96 96s96-43 96-96s-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6z"/></svg></span></template>
+        <template id=fa-eye-slash><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M38.8 5.1C28.4-3.1 13.3-1.2 5.1 9.2S-1.2 34.7 9.2 42.9l592 464c10.4 8.2 25.5 6.3 33.7-4.1s6.3-25.5-4.1-33.7L525.6 386.7c39.6-40.6 66.4-86.1 79.9-118.4c3.3-7.9 3.3-16.7 0-24.6c-14.9-35.7-46.2-87.7-93-131.1C465.5 68.8 400.8 32 320 32c-68.2 0-125 26.3-169.3 60.8L38.8 5.1zM223.1 149.5C248.6 126.2 282.7 112 320 112c79.5 0 144 64.5 144 144c0 24.9-6.3 48.3-17.4 68.7L408 294.5c5.2-11.8 8-24.8 8-38.5c0-53-43-96-96-96c-2.8 0-5.6 .1-8.4 .4c5.3 9.3 8.4 20.1 8.4 31.6c0 10.2-2.4 19.8-6.6 28.3l-90.3-70.8zm223.1 298L373 389.9c-16.4 6.5-34.3 10.1-53 10.1c-79.5 0-144-64.5-144-144c0-6.9 .5-13.6 1.4-20.2L83.1 161.5C60.3 191.2 44 220.8 34.5 243.7c-3.3 7.9-3.3 16.7 0 24.6c14.9 35.7 46.2 87.7 93 131.1C174.5 443.2 239.2 480 320 480c47.8 0 89.9-12.9 126.2-32.5z"/></svg></span></template>
+        <template id=fa-copy><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"/></svg></span></template>
+        <template id=fa-play><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M73 39c-14.8-9.1-33.4-9.4-48.5-.9S0 62.6 0 80V432c0 17.4 9.4 33.4 24.5 41.9s33.7 8.1 48.5-.9L361 297c14.3-8.7 23-24.2 23-41s-8.7-32.2-23-41L73 39z"/></svg></span></template>
+        <template id=fa-clock-rotate-left><span class=fa-svg><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M75 75L41 41C25.9 25.9 0 36.6 0 57.9V168c0 13.3 10.7 24 24 24H134.1c21.4 0 32.1-25.9 17-41l-30.8-30.8C155 85.5 203 64 256 64c106 0 192 86 192 192s-86 192-192 192c-40.8 0-78.6-12.7-109.7-34.4c-14.5-10.1-34.4-6.6-44.6 7.9s-6.6 34.4 7.9 44.6C151.2 495 201.7 512 256 512c141.4 0 256-114.6 256-256S397.4 0 256 0C185.3 0 121.3 28.7 75 75zm181 53c-13.3 0-24 10.7-24 24V256c0 6.4 2.5 12.5 7 17l72 72c9.4 9.4 24.6 9.4 33.9 0s9.4-24.6 0-33.9l-65-65V152c0-13.3-10.7-24-24-24z"/></svg></span></template>
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="../../elasticlunr-ef4e11c1.min.js"></script>
+        <script src="../../mark-09e88c2c.min.js"></script>
+        <script src="../../searcher-c2a407aa.js"></script>
+
+        <script src="../../clipboard-1626706a.min.js"></script>
+        <script src="../../highlight-abc7f01d.js"></script>
+        <script src="../../book-a0b12cfe.js"></script>
+
+        <!-- Custom JS scripts -->
+        <script src="../../mermaid-eefea253.min.js"></script>
+        <script src="../../mermaid-init-ccf746f1.js"></script>
+
+
+
+    </div>
+    </body>
+</html>

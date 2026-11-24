@@ -35,10 +35,10 @@
             const path_to_root = "../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../searchindex-afc36ef0.js";
+            window.path_to_searchindex_js = "../searchindex-e976dddc.js";
         </script>
         <!-- Start loading toc.js asap -->
-        <script src="../toc-8a948746.js"></script>
+        <script src="../toc-2384133e.js"></script>
     </head>
     <body>
     <div id="mdbook-help-container">
@@ -473,6 +473,14 @@ definition in the Core-API.</p>
 <li>Default: 4 x 6</li>
 </ul>
 <p>The screen layout grid definition can be retrieved with the Core-API: <code>GET /api/cfg/device/screen_layout</code>.</p>
+<h5 id="page-background"><a class="header" href="#page-background">Page background</a></h5>
+<p>A page can have an optional <code>background</code> image that covers the whole screen behind the page items, see
+<code>UserInterfacePageBackground</code> in the <a href="https://unfoldedcircle.github.io/core-api/integration/">Integration-API</a>. The image
+must be a background image resource that the user uploaded to the Remote. Full-screen images are 480x800 pixels on the
+Remote 3 and 480x854 pixels on the Remote Two; <code>scale</code>, <code>align</code> and <code>dim</code> adapt the image to the screen. An invalid
+background is removed by the Remote with a warning in its log, the rest of the entity is kept.</p>
+<pre><code class="language-json">"background": { "image": "custom:living_room.jpg", "scale": "fill", "align": "center", "dim": 40 }
+</code></pre>
 <h2 id="integration-api"><a class="header" href="#integration-api">Integration API</a></h2>
 <h3 id="commands"><a class="header" href="#commands">Commands</a></h3>
 <p>The integration driver has to implement a handler for the <code>entity_command</code> WebSocket message to process the following
