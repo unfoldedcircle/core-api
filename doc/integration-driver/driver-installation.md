@@ -111,6 +111,9 @@ Icon requirements and restrictions:
 - Supported image formats: PNG and JPG.
 - Maximum size: 16 KB.
 
+See [Supported icon and image formats](../user-guide/icon-and-image-formats.md) for the icon and image formats of
+the Remote.
+
 ### Installation archive example
 
 Example of a Node.js based integration driver archive (contents of bin/node_modules are not shown for a clearer overview):
