@@ -173,8 +173,12 @@ The `auth` object defines the credentials which the web view sends to the origin
 - The credentials are only sent to the origin of the `url` option. Requests to other origins, e.g. a CDN, an embedded
   page of another site or a redirect target on another host, never receive them.
 - `basic`: the user name and password are sent as answer to an HTTP authentication request (status `401`) of the origin.
-  They are not sent preemptively: the first request is sent without credentials. The same credentials answer a Digest
+  They are not sent with the first request: the first request is sent without credentials. After the server has
+  accepted them, the web view keeps them for the session and sends them with the following requests to the same server
+  and authentication realm without waiting for a `401`, like a browser does. The same credentials answer a Digest
   authentication request. The configured credentials never answer a proxy authentication request.
+  - A changed user name or password isn't used while the web view still sends credentials that the server accepted in
+    this session. It is used at the latest after the user interface restarted.
   - `basic` without a user name is refused with error code `400`.
   - If the server rejects the credentials, the fullscreen web view shows its login dialog. The
     [web view widget](#activity-widget) shows no login dialog.
