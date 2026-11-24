@@ -317,8 +317,9 @@ The key is the identifier of the physical button, the same as in the button mapp
 | `STOP`, `RECORD`, `MENU`                                                                                                                 | Remote 3     |
 | `RED`, `GREEN`, `YELLOW`, `BLUE`                                                                                                         | Remote Two   |
 
-- `HOME`, `POWER` and `VOICE` have a fixed function and can't be changed: HOME always closes the web view and shows the
-  home screen, POWER and VOICE keep their normal function.
+- `HOME`, `POWER` and `VOICE` have a fixed function and can't be changed: HOME always closes the web view, together
+  with the activity or other screen it was opened on top of, and returns to the current profile page. POWER and VOICE
+  keep their normal function.
 - Only the buttons of the Remote model can be set, like in the button mapping of an activity. A button which the model
   doesn't have, e.g. `MENU` on a Remote Two, a button with a fixed function or an unknown button is refused with error
   code `400` (`VALIDATION_ERROR`) with the field `options.buttons.<button>` and the code `INVALID`.
@@ -642,7 +643,8 @@ interactive, or from the list of included entities of an activity.
 - With the `show_navigation` option, the web view shows controls to go back, go forward, reload the page and close the
   web view.
 - Button handling, also on top of an activity screen:
-  - HOME closes the web view and shows the home screen.
+  - HOME closes the web view, together with the activity screen or other screen below it, and returns to the current
+    profile page.
   - POWER and VOICE keep their normal function.
   - All other buttons have the action of the [buttons](#buttons) option of the web view and the
     [global button settings](#button-settings). By default, BACK closes the web view, the D-pad sends the arrow keys
