@@ -49,17 +49,18 @@ Each page of an activity or a remote can have its own background image. It cover
 of the page. Use the same image on several pages if the whole activity should have one background. For each page you
 can set:
 
-- **Scale**: the image always keeps its aspect ratio.
-  - *Fill* (default): the image covers the whole screen. Parts outside the screen are cut off.
-  - *Fit*: the whole image is visible. The remaining area is black.
-  - *None*: the image is shown in its original size. Parts outside the screen are cut off, a remaining area is black.
-- **Alignment**: top, center (default) or bottom. Decides which part of the image is kept when it's cut off, or where a
-  black area remains.
-- **Dimming**: from 0 % to 80 %, default 40 %. Darkens the image so that the buttons stay readable. Use a higher value
+- **Scaling**: the image always keeps its aspect ratio.
+  - *Fill the screen* (default): the image covers the whole screen. Parts outside the screen are cut off.
+  - *Fit the whole image*: the whole image is visible. The remaining area is black.
+  - *Original size*: the image is shown in its original size. Parts outside the screen are cut off, a remaining area
+    is black.
+- **Alignment**: *Top*, *Center* (default) or *Bottom*. Decides which part of the image is kept when it's cut off, or
+  where a black area remains.
+- **Darken**: from 0 % to 80 %, default 40 %. Darkens the image so that the buttons stay readable. Use a higher value
   for bright images.
 
-An image made for the other model also works: for example, a 480 x 854 image on a Remote 3 with *Fill* loses 27 pixels
-at the top and at the bottom.
+An image made for the other model also works: for example, a 480 x 854 image on a Remote 3 with *Fill the screen*
+loses 27 pixels at the top and at the bottom.
 
 > 💡 The web-configurator shows the background in its page preview, but the preview is only an approximation. The
 > Remote can show the image a little differently, for example slightly brighter or darker, or with a slightly
