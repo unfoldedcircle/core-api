@@ -8,7 +8,7 @@ asyncapi: 2.2.0
 id: 'urn:com:unfoldedcircle:integration'
 info:
   title: Remote Two/3 WebSocket Integration API
-  version: '0.19.0-beta'
+  version: '0.20.0-beta'
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -3981,6 +3981,13 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserInterfacePage'
+        background:
+          description: |
+            Optional default background of the pages: a page without its own `background` shows this one. Requires a
+            Remote with REST Core-API 0.60.0 or WS Core-API 0.53.0 or newer; an older Remote ignores it. It is validated
+            and removed like an invalid page background.
+          allOf:
+            - $ref: '#/components/schemas/UserInterfacePageBackground'
 
     UserInterfacePage:
       type: object

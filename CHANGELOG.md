@@ -66,6 +66,10 @@ _Changes in the next release_
   `dim`), in the Core APIs and in the remote entity of the Integration-API.
   - Background images can have the profile page header size 480x275 or the full-screen sizes 480x800 (Remote 3) and
     480x854 (Remote Two) pixels. Up to 100 background images can be stored instead of 50.
+- Default background for all pages of an activity or remote user interface (`user_interface.background`), set with
+  the new `PATCH /activities/{entityId}/ui` and `PATCH /remotes/{entityId}/ui` operations and the WS messages
+  `update_activity_ui` and `update_remote_ui`. A page with its own background shows its own. Also in the remote
+  entity of the Integration-API.
 
 ### Changed
 - Core APIs: resetting all settings (`DELETE /cfg`, `reset_configuration`) requires the `admin` scope.

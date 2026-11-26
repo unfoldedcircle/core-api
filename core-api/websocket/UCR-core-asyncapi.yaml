@@ -6,7 +6,7 @@ asyncapi: 2.6.0
 id: urn:com:unfoldedcircle:core
 info:
   title: Remote Two/3 WebSocket Core-API
-  version: 0.52.0
+  version: 0.53.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -329,6 +329,7 @@ channels:
           - $ref: '#/components/messages/delete_remote_button_press_mapping'
           - $ref: '#/components/messages/get_remote_ui'
           - $ref: '#/components/messages/reset_remote_ui'
+          - $ref: '#/components/messages/update_remote_ui'
           - $ref: '#/components/messages/get_remote_ui_pages'
           - $ref: '#/components/messages/create_remote_ui_page'
           - $ref: '#/components/messages/reorder_remote_ui_pages'
@@ -361,6 +362,7 @@ channels:
           - $ref: '#/components/messages/delete_activity_button_press_mapping'
           - $ref: '#/components/messages/get_activity_ui'
           - $ref: '#/components/messages/reset_activity_ui'
+          - $ref: '#/components/messages/update_activity_ui'
           - $ref: '#/components/messages/get_activity_ui_pages'
           - $ref: '#/components/messages/create_activity_ui_page'
           - $ref: '#/components/messages/reorder_activity_ui_pages'
@@ -3919,6 +3921,20 @@ components:
           - name: remote
         payload:
           $ref: '#/components/schemas/RemoteUiMsg'
+    update_remote_ui:
+      summary: 🧪 Update the user interface of a remote entity.
+      description: |
+        Mirrors the REST operation `PATCH /remotes/{entityId}/ui`.
+      tags:
+        - name: remote
+      payload:
+        $ref: '#/components/schemas/UpdateRemoteUiMsg'
+      x-response:
+        summary: 🧪 User interface of a remote entity response.
+        tags:
+          - name: remote
+        payload:
+          $ref: '#/components/schemas/RemoteUiMsg'
     get_remote_ui_pages:
       summary: 🧪 Get the user interface pages of a remote entity.
       description: |
@@ -4520,6 +4536,20 @@ components:
         - name: activity
       payload:
         $ref: '#/components/schemas/ResetActivityUiMsg'
+      x-response:
+        summary: 🧪 User interface of an activity response.
+        tags:
+          - name: activity
+        payload:
+          $ref: '#/components/schemas/ActivityUiMsg'
+    update_activity_ui:
+      summary: 🧪 Update the user interface of an activity.
+      description: |
+        Mirrors the REST operation `PATCH /activities/{entityId}/ui`.
+      tags:
+        - name: activity
+      payload:
+        $ref: '#/components/schemas/UpdateActivityUiMsg'
       x-response:
         summary: 🧪 User interface of an activity response.
         tags:
@@ -12389,6 +12419,26 @@ components:
           required:
             - msg
             - msg_data
+    UpdateRemoteUiMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_remote_ui
+            msg_data:
+              allOf:
+                - $ref: '#/components/schemas/ActivityUserInterfaceUpdate'
+                - type: object
+                  properties:
+                    entity_id:
+                      $ref: '#/components/schemas/EntityId'
+                  required:
+                    - entity_id
+          required:
+            - msg
+            - msg_data
     GetRemoteUiPagesMsg:
       type: object
       allOf:
@@ -13297,6 +13347,26 @@ components:
                   $ref: '#/components/schemas/EntityId'
               required:
                 - entity_id
+          required:
+            - msg
+            - msg_data
+    UpdateActivityUiMsg:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/CommonReq'
+        - properties:
+            msg:
+              type: string
+              const: update_activity_ui
+            msg_data:
+              allOf:
+                - $ref: '#/components/schemas/ActivityUserInterfaceUpdate'
+                - type: object
+                  properties:
+                    entity_id:
+                      $ref: '#/components/schemas/EntityId'
+                  required:
+                    - entity_id
           required:
             - msg
             - msg_data
@@ -18778,6 +18848,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ActivityUserInterfacePage'
+        background:
+          description: |
+            Default background of the pages: a page without its own `background` shows this one. A page with its own
+            background shows its own. Without this property, a page without its own background has no background.
+          allOf:
+            - $ref: '#/components/schemas/UiPageBackground'
+    ActivityUserInterfaceUpdate:
+      type: object
+      properties:
+        background:
+          description: |
+            Default background of the pages. If the property is omitted, the existing default background is not
+            changed. An object replaces the whole default background: properties that are not set get their default
+            value. `null`, or a background with an empty `image`, removes the default background.
+          oneOf:
+            - $ref: '#/components/schemas/UiPageBackground'
+            - type: 'null'
     ActivityUserInterfacePage:
       type: object
       properties:
@@ -18802,7 +18889,11 @@ components:
       description: |
         Background image of an activity or remote-entity user interface page. The image covers the whole screen of the
         Remote, behind the page title, the user interface items and the page indicator. A page without background has
-        no `background` property.
+        no `background` property; it shows the default background of its user interface
+        (`ActivityUserInterface.background`), if one is set.
+
+        The same object is used for the default background of all pages of an activity or remote-entity user
+        interface.
 
         The image must be a `BackgroundImage` resource. A full-screen image has the size of the display: 480x800 pixels
         on the Remote 3 and 480x854 pixels on the Remote Two. A page stores one image for every model, and `scale`
@@ -18813,6 +18904,8 @@ components:
 
         A client must treat an unknown `scale` or `align` value like the default value, so that new values can be
         added later. The Remote rejects unknown values.
+
+        A backup restore removes an invalid background with a warning and keeps the rest of the user interface.
       type: object
       properties:
         image:
@@ -18882,7 +18975,8 @@ components:
           description: |
             Page background. If the property is omitted, the existing background is not changed. An object replaces the
             whole background: properties that are not set get their default value. `null`, or a background with an empty
-            `image`, removes the background. A page that is created without this property has no background.
+            `image`, removes the background of the page; it then shows the default background of its user interface, if
+            one is set. A page that is created without this property has no background of its own.
           oneOf:
             - $ref: '#/components/schemas/UiPageBackground'
             - type: 'null'

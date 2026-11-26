@@ -46,8 +46,8 @@ It applies to images that you upload in the web-configurator (Resources) or that
 > 💡 Background images in activity and remote pages are supported from beta firmware 2.14.0.
 
 Each page of an activity or a remote can have its own background image. It covers the whole screen behind the buttons
-of the page. Use the same image on several pages if the whole activity should have one background. For each page you
-can set:
+of the page. If all pages should have the same background, set it once as the
+[background for all pages](#background-for-all-pages). For each background you can set:
 
 - **Scaling**: the image always keeps its aspect ratio.
   - *Fill the screen* (default): the image covers the whole screen. Parts outside the screen are cut off.
@@ -61,6 +61,20 @@ can set:
 
 An image made for the other model also works: for example, a 480 x 854 image on a Remote 3 with *Fill the screen*
 loses 27 pixels at the top and at the bottom.
+
+When you swipe to another page, its background moves in together with the buttons of the page. If both pages have the
+same image with the same scaling and alignment, the image stays in place and only the buttons move.
+
+### Background for all pages
+
+An activity or a remote can have one background for all of its pages. In the web-configurator, open the user
+interface of the activity or remote and select the image button above the page list. The background has the same
+settings as the background of a page.
+
+- A page without its own background shows the background for all pages.
+- A page with its own background shows its own background instead.
+- If you remove the background of a page, the page shows the background for all pages again.
+- Resetting the whole user interface also removes the background for all pages.
 
 > 💡 The web-configurator shows the background in its page preview, but the preview is only an approximation. The
 > Remote can show the image a little differently, for example slightly brighter or darker, or with a slightly

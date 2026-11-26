@@ -6,7 +6,7 @@ openapi: 3.1.1
 info:
   title: Remote Two/3 REST Core-API
   summary: REST Core-API for Remote Two/3
-  version: 0.59.0
+  version: 0.60.0
   contact:
     name: API Support
     url: https://github.com/unfoldedcircle/core-api/issues
@@ -3846,12 +3846,45 @@ paths:
         - activities
       summary: Get the user interface definition of an activity.
       description: |
-        Returns all the information required to manage an existing activity user interface.
-
-        At the moment a user interface only consists of pages.
+        Returns all the information required to manage an existing activity user interface: the pages and the default
+        background of the pages.
       operationId: getActivityUi
       parameters:
         - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - activities
+      summary: Update the user interface of an activity.
+      operationId: updateActivityUi
+      description: |
+        Update the properties of the user interface that apply to all its pages. The omitted properties are ignored
+        and not changed. The pages are managed with the `/activities/{entityId}/ui/pages` operations.
+
+        At the moment this is the default background of the pages, see `ActivityUserInterface.background`.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Properties to update in the existing user interface.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUserInterfaceUpdate'
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -3872,7 +3905,8 @@ paths:
         - activities
       summary: Reset an activity user interface to its default state.
       description: |
-        ⚠️ The customization of the activity user interface is irrevocably deleted.
+        ⚠️ The customization of the activity user interface is irrevocably deleted, including the default background of
+        the pages.
       operationId: deleteActivityUi
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -3996,7 +4030,8 @@ paths:
       description: |
         The default page(s) is created and the page array returned.
 
-        ⚠️ The customization of the activity user interface is irrevocably deleted.
+        ⚠️ The customization of the activity user interface pages is irrevocably deleted. The default background of the
+        pages is kept: use `DELETE /activities/{entityId}/ui` to reset it too.
       operationId: resetActivityUiPages
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -6615,12 +6650,45 @@ paths:
         - remotes
       summary: Get the user interface definition of a remote-entity.
       description: |
-        Returns all the information required to manage an existing remote user interface.
-
-        At the moment a user interface only consists of pages.
+        Returns all the information required to manage an existing remote user interface: the pages and the default
+        background of the pages.
       operationId: getRemoteUi
       parameters:
         - $ref: '#/components/parameters/entity_id'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActivityUserInterface'
+        '400':
+          $ref: '#/components/responses/Err400BadRequest'
+        '401':
+          $ref: '#/components/responses/Err401Unauthorized'
+        '403':
+          $ref: '#/components/responses/Err403Forbidden'
+        '404':
+          $ref: '#/components/responses/Err404NotFound'
+    patch:
+      tags:
+        - remotes
+      summary: Update the user interface of a remote-entity.
+      operationId: updateRemoteUi
+      description: |
+        Update the properties of the user interface that apply to all its pages. The omitted properties are ignored
+        and not changed. The pages are managed with the `/remotes/{entityId}/ui/pages` operations.
+
+        At the moment this is the default background of the pages, see `ActivityUserInterface.background`.
+      parameters:
+        - $ref: '#/components/parameters/entity_id'
+      requestBody:
+        description: Properties to update in the existing user interface.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActivityUserInterfaceUpdate'
+        required: true
       responses:
         '200':
           description: Successful operation
@@ -6641,7 +6709,8 @@ paths:
         - remotes
       summary: Reset a remote user interface to its default state.
       description: |
-        ⚠️ The customization of the remote user interface is irrevocably deleted.
+        ⚠️ The customization of the remote user interface is irrevocably deleted, including the default background of
+        the pages.
       operationId: deleteRemoteUi
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -6765,7 +6834,8 @@ paths:
       description: |
         The default page(s) is created and the page array returned.
 
-        ⚠️ The customization of the remote user interface is irrevocably deleted.
+        ⚠️ The customization of the remote user interface pages is irrevocably deleted. The default background of the
+        pages is kept: use `DELETE /remotes/{entityId}/ui` to reset it too.
       operationId: resetRemoteUiPages
       parameters:
         - $ref: '#/components/parameters/entity_id'
@@ -15698,6 +15768,23 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/ActivityUserInterfacePage'
+        background:
+          description: |
+            Default background of the pages: a page without its own `background` shows this one. A page with its own
+            background shows its own. Without this property, a page without its own background has no background.
+          allOf:
+            - $ref: '#/components/schemas/UiPageBackground'
+    ActivityUserInterfaceUpdate:
+      type: object
+      properties:
+        background:
+          description: |
+            Default background of the pages. If the property is omitted, the existing default background is not
+            changed. An object replaces the whole default background: properties that are not set get their default
+            value. `null`, or a background with an empty `image`, removes the default background.
+          oneOf:
+            - $ref: '#/components/schemas/UiPageBackground'
+            - type: 'null'
     SequenceState:
       description: |
         State of an Activity or Macro sequence:
@@ -16486,7 +16573,11 @@ components:
       description: |
         Background image of an activity or remote-entity user interface page. The image covers the whole screen of the
         Remote, behind the page title, the user interface items and the page indicator. A page without background has
-        no `background` property.
+        no `background` property; it shows the default background of its user interface
+        (`ActivityUserInterface.background`), if one is set.
+
+        The same object is used for the default background of all pages of an activity or remote-entity user
+        interface.
 
         The image must be a `BackgroundImage` resource. A full-screen image has the size of the display: 480x800 pixels
         on the Remote 3 and 480x854 pixels on the Remote Two. A page stores one image for every model, and `scale`
@@ -16497,6 +16588,8 @@ components:
 
         A client must treat an unknown `scale` or `align` value like the default value, so that new values can be
         added later. The Remote rejects unknown values.
+
+        A backup restore removes an invalid background with a warning and keeps the rest of the user interface.
       type: object
       properties:
         image:
@@ -16566,7 +16659,8 @@ components:
           description: |
             Page background. If the property is omitted, the existing background is not changed. An object replaces the
             whole background: properties that are not set get their default value. `null`, or a background with an empty
-            `image`, removes the background. A page that is created without this property has no background.
+            `image`, removes the background of the page; it then shows the default background of its user interface, if
+            one is set. A page that is created without this property has no background of its own.
           oneOf:
             - $ref: '#/components/schemas/UiPageBackground'
             - type: 'null'
