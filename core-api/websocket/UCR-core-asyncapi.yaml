@@ -18904,6 +18904,8 @@ components:
 
         A client must treat an unknown `scale` or `align` value like the default value, so that new values can be
         added later. The Remote rejects unknown values.
+
+        A backup restore removes an invalid background with a warning and keeps the rest of the user interface.
       type: object
       properties:
         image:
