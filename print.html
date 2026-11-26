@@ -36,7 +36,7 @@
             const path_to_root = "";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "searchindex-9ea69a12.js";
+            window.path_to_searchindex_js = "searchindex-5a181a0e.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="toc-2384133e.js"></script>
@@ -363,8 +363,8 @@ that the 32 KB limit is only enforced for SVG files. For PNG and JPG files, the 
 <p>💡 Background images in activity and remote pages are supported from beta firmware 2.14.0.</p>
 </blockquote>
 <p>Each page of an activity or a remote can have its own background image. It covers the whole screen behind the buttons
-of the page. Use the same image on several pages if the whole activity should have one background. For each page you
-can set:</p>
+of the page. If all pages should have the same background, set it once as the
+<a href="#background-for-all-pages">background for all pages</a>. For each background you can set:</p>
 <ul>
 <li><strong>Scaling</strong>: the image always keeps its aspect ratio.
 <ul>
@@ -381,6 +381,18 @@ for bright images.</li>
 </ul>
 <p>An image made for the other model also works: for example, a 480 x 854 image on a Remote 3 with <em>Fill the screen</em>
 loses 27 pixels at the top and at the bottom.</p>
+<p>When you swipe to another page, its background moves in together with the buttons of the page. If both pages have the
+same image with the same scaling and alignment, the image stays in place and only the buttons move.</p>
+<h3 id="background-for-all-pages"><a class="header" href="#background-for-all-pages">Background for all pages</a></h3>
+<p>An activity or a remote can have one background for all of its pages. In the web-configurator, open the user
+interface of the activity or remote and select the image button above the page list. The background has the same
+settings as the background of a page.</p>
+<ul>
+<li>A page without its own background shows the background for all pages.</li>
+<li>A page with its own background shows its own background instead.</li>
+<li>If you remove the background of a page, the page shows the background for all pages again.</li>
+<li>Resetting the whole user interface also removes the background for all pages.</li>
+</ul>
 <blockquote>
 <p>💡 The web-configurator shows the background in its page preview, but the preview is only an approximation. The
 Remote can show the image a little differently, for example slightly brighter or darker, or with a slightly
